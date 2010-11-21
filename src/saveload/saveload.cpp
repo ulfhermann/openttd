@@ -13,8 +13,8 @@
  * are as follows for saving a game (loading is analogous):
  * <ol>
  * <li>initialize the writer by creating a temporary memory-buffer for it
- * <li>go through all to-be saved elements, each 'chunk' (ChunkHandler) prefixed by a label
- * <li>use their description array (SaveLoad) to know what elements to save and in what version
+ * <li>go through all to-be saved elements, each 'chunk' (#ChunkHandler) prefixed by a label
+ * <li>use their description array (#SaveLoad) to know what elements to save and in what version
  *    of the game it was active (used when loading)
  * <li>write all data byte-by-byte to the temporary buffer so it is endian-safe
  * <li>when the buffer is full; flush it to the output (eg save to file) (_sl.buf, _sl.bufp, _sl.bufe)
@@ -215,6 +215,7 @@
  *  150   20857
  *  151   20918
  *  152   21171
+ *  153   21263
  */
 extern const uint16 SAVEGAME_VERSION = SL_CARGOMAP; ///< Current savegame version of OpenTTD
 
@@ -244,7 +245,7 @@ enum NeedLength {
 	NL_CALCLENGTH = 2, ///< need to calculate the length
 };
 
-/** The saveload struct, containing reader-writer functions, bufffer, version, etc. */
+/** The saveload struct, containing reader-writer functions, buffer, version, etc. */
 struct SaveLoadParams {
 	SaveLoadAction action;               ///< are we doing a save or a load atm.
 	NeedLength need_length;              ///< working in NeedLength (Autolength) mode?
@@ -270,7 +271,7 @@ struct SaveLoadParams {
 	FILE *fh;                            ///< the file from which is read or written to
 
 	void (*excpt_uninit)();              ///< the function to execute on any encountered error
-	StringID error_str;                  ///< the translateable error message to show
+	StringID error_str;                  ///< the translatable error message to show
 	char *extra_msg;                     ///< the error message
 };
 
@@ -304,6 +305,7 @@ extern const ChunkHandler _linkgraph_chunk_handlers[];
 extern const ChunkHandler _airport_chunk_handlers[];
 extern const ChunkHandler _object_chunk_handlers[];
 
+/** Array of all chunks in a savegame, \c NULL terminated. */
 static const ChunkHandler * const _chunk_handlers[] = {
 	_gamelog_chunk_handlers,
 	_map_chunk_handlers,
@@ -686,7 +688,7 @@ static inline byte SlCalcConvFileLen(VarType conv)
 /** Return the size in bytes of a reference (pointer) */
 static inline size_t SlCalcRefLen()
 {
-	return CheckSavegameVersion(69) ? 2 : 4;
+	return IsSavegameVersionBefore(69) ? 2 : 4;
 }
 
 void SlSetArrayIndex(uint index)
@@ -1141,7 +1143,7 @@ static void *IntToReference(size_t index, SLRefType rt)
 
 	/* After version 4.3 REF_VEHICLE_OLD is saved as REF_VEHICLE,
 	 * and should be loaded like that */
-	if (rt == REF_VEHICLE_OLD && !CheckSavegameVersionOldStyle(4, 4)) {
+	if (rt == REF_VEHICLE_OLD && !IsSavegameVersionBefore(4, 4)) {
 		rt = REF_VEHICLE;
 	}
 
@@ -1160,7 +1162,7 @@ static void *IntToReference(size_t index, SLRefType rt)
 		case REF_ORDER:
 			if (Order::IsValidID(index)) return Order::Get(index);
 			/* in old versions, invalid order was used to mark end of order list */
-			if (CheckSavegameVersionOldStyle(5, 2)) return NULL;
+			if (IsSavegameVersionBefore(5, 2)) return NULL;
 			SlErrorCorrupt("Referencing invalid Order");
 
 		case REF_VEHICLE_OLD:
@@ -1200,7 +1202,7 @@ static inline size_t SlCalcListLen(const void *list)
 {
 	std::list<void *> *l = (std::list<void *> *) list;
 
-	int type_size = CheckSavegameVersion(69) ? 2 : 4;
+	int type_size = IsSavegameVersionBefore(69) ? 2 : 4;
 	/* Each entry is saved as type_size bytes, plus type_size bytes are used for the length
 	 * of the list */
 	return l->size() * type_size + type_size;
@@ -1237,11 +1239,11 @@ static void SlList(void *list, SLRefType conv)
 		}
 		case SLA_LOAD_CHECK:
 		case SLA_LOAD: {
-			size_t length = CheckSavegameVersion(69) ? SlReadUint16() : SlReadUint32();
+			size_t length = IsSavegameVersionBefore(69) ? SlReadUint16() : SlReadUint32();
 
 			/* Load each reference and push to the end of the list */
 			for (size_t i = 0; i < length; i++) {
-				size_t data = CheckSavegameVersion(69) ? SlReadUint16() : SlReadUint32();
+				size_t data = IsSavegameVersionBefore(69) ? SlReadUint16() : SlReadUint32();
 				l->push_back((void *)data);
 			}
 			break;
@@ -1359,7 +1361,7 @@ bool SlObjectMember(void *ptr, const SaveLoad *sld)
 							break;
 						case SLA_LOAD_CHECK:
 						case SLA_LOAD:
-							*(size_t *)ptr = CheckSavegameVersion(69) ? SlReadUint16() : SlReadUint32();
+							*(size_t *)ptr = IsSavegameVersionBefore(69) ? SlReadUint16() : SlReadUint32();
 							break;
 						case SLA_PTRS:
 							*(void **)ptr = IntToReference(*(size_t *)ptr, (SLRefType)conv);
@@ -2274,6 +2276,7 @@ static SaveOrLoadResult SaveFileToDisk(bool threaded)
 	}
 }
 
+/** Thread run function for saving the file to disk. */
 static void SaveFileToDiskThread(void *arg)
 {
 	SaveFileToDisk(true);
@@ -2292,10 +2295,10 @@ void WaitTillSaved()
  * Main Save or Load function where the high-level saveload functions are
  * handled. It opens the savegame, selects format and checks versions
  * @param filename The name of the savegame being created/loaded
- * @param mode Save or load. Load can also be a TTD(Patch) game. Use SL_LOAD, SL_OLD_LOAD or SL_SAVE
+ * @param mode Save or load mode. Load can also be a TTD(Patch) game. Use #SL_LOAD, #SL_OLD_LOAD, #SL_LOAD_CHECK, or #SL_SAVE.
  * @param sb The sub directory to save the savegame in
  * @param threaded True when threaded saving is allowed
- * @return Return the results of the action. SL_OK, SL_ERROR or SL_REINIT ("unload" the game)
+ * @return Return the result of the action. #SL_OK, #SL_ERROR, or #SL_REINIT ("unload" the game)
  */
 SaveOrLoadResult SaveOrLoad(const char *filename, int mode, Subdirectory sb, bool threaded)
 {
@@ -2462,7 +2465,7 @@ SaveOrLoadResult SaveOrLoad(const char *filename, int mode, Subdirectory sb, boo
 
 				GamelogReset();
 
-				if (CheckSavegameVersion(4)) {
+				if (IsSavegameVersionBefore(4)) {
 					/*
 					 * NewGRFs were introduced between 0.3,4 and 0.3.5, which both
 					 * shared savegame version 4. Anything before that 'obviously'
