@@ -39,12 +39,12 @@ struct BuildBridgeData {
 	Money cost;
 };
 
-typedef GUIList<BuildBridgeData> GUIBridgeList;
+typedef GUIList<BuildBridgeData> GUIBridgeList; ///< List of bridges, used in #BuildBridgeWindow.
 
 /**
  * Callback executed after a build Bridge CMD has been called
  *
- * @param result Whether the build succeded
+ * @param result Whether the build succeeded
  * @param tile The tile where the command has been executed
  * @param p1 not used
  * @param p2 not used
@@ -54,7 +54,7 @@ void CcBuildBridge(const CommandCost &result, TileIndex tile, uint32 p1, uint32 
 	if (result.Succeeded()) SndPlayTileFx(SND_27_BLACKSMITH_ANVIL, tile);
 }
 
-/* Names of the build bridge selection window */
+/** Names of the widgets of the build-bridge selection window. */
 enum BuildBridgeSelectionWidgets {
 	BBSW_CAPTION,
 	BBSW_DROPDOWN_ORDER,
@@ -63,11 +63,12 @@ enum BuildBridgeSelectionWidgets {
 	BBSW_SCROLLBAR,
 };
 
+/** Window class for handling the bridge-build GUI. */
 class BuildBridgeWindow : public Window {
 private:
 	/* Runtime saved values */
-	static uint16 last_size;
-	static Listing last_sorting;
+	static uint16 last_size;     ///< Last size of the bridge GUI window.
+	static Listing last_sorting; ///< Last setting of the sort.
 
 	/* Constants for sorting the bridges */
 	static const StringID sorter_names[];
@@ -287,19 +288,19 @@ public:
 	}
 };
 
-/* Set the default size of the Build Bridge Window */
+/** Set the default size of the Build Bridge Window. */
 uint16 BuildBridgeWindow::last_size = 4;
-/* Set the default sorting for the bridges */
+/** Set the default sorting for the bridges */
 Listing BuildBridgeWindow::last_sorting = {false, 0};
 
-/* Availible bridge sorting functions */
+/** Available bridge sorting functions. */
 GUIBridgeList::SortFunction * const BuildBridgeWindow::sorter_funcs[] = {
 	&BridgeIndexSorter,
 	&BridgePriceSorter,
 	&BridgeSpeedSorter
 };
 
-/* Names of the sorting functions */
+/** Names of the sorting functions. */
 const StringID BuildBridgeWindow::sorter_names[] = {
 	STR_SORT_BY_NUMBER,
 	STR_SORT_BY_COST,
@@ -307,6 +308,7 @@ const StringID BuildBridgeWindow::sorter_names[] = {
 	INVALID_STRING_ID
 };
 
+/** Widgets of the bridge gui. */
 static const NWidgetPart _nested_build_bridge_widgets[] = {
 	/* Header */
 	NWidget(NWID_HORIZONTAL),
@@ -333,7 +335,7 @@ static const NWidgetPart _nested_build_bridge_widgets[] = {
 	EndContainer(),
 };
 
-/* Window definition for the rail bridge selection window */
+/** Window definition for the rail bridge selection window. */
 static const WindowDesc _build_bridge_desc(
 	WDP_AUTO, 200, 114,
 	WC_BUILD_BRIDGE, WC_BUILD_TOOLBAR,
