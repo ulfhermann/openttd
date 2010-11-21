@@ -453,12 +453,10 @@ static Vehicle *EnumCheckRoadVehCrashTrain(Vehicle *v, void *data)
 {
 	const Vehicle *u = (Vehicle*)data;
 
-	return
-		v->type == VEH_TRAIN &&
-		abs(v->z_pos - u->z_pos) <= 6 &&
-		abs(v->x_pos - u->x_pos) <= 4 &&
-		abs(v->y_pos - u->y_pos) <= 4 ?
-			v : NULL;
+	return (v->type == VEH_TRAIN &&
+			abs(v->z_pos - u->z_pos) <= 6 &&
+			abs(v->x_pos - u->x_pos) <= 4 &&
+			abs(v->y_pos - u->y_pos) <= 4) ? v : NULL;
 }
 
 uint RoadVehicle::Crash(bool flooded)
@@ -728,9 +726,7 @@ static Vehicle *EnumFindVehBlockingOvertake(Vehicle *v, void *data)
 {
 	const OvertakeData *od = (OvertakeData*)data;
 
-	return
-		v->type == VEH_ROAD && v->First() == v && v != od->u && v != od->v ?
-			v : NULL;
+	return (v->type == VEH_ROAD && v->First() == v && v != od->u && v != od->v) ? v : NULL;
 }
 
 /**
@@ -933,13 +929,6 @@ struct RoadDriveEntry {
 };
 
 #include "table/roadveh_movement.h"
-
-static const byte _road_veh_data_1[] = {
-	20, 20, 16, 16, 0, 0, 0, 0,
-	19, 19, 15, 15, 0, 0, 0, 0,
-	16, 16, 12, 12, 0, 0, 0, 0,
-	15, 15, 11, 11
-};
 
 static bool RoadVehLeaveDepot(RoadVehicle *v, bool first)
 {
@@ -1382,7 +1371,7 @@ again:
 	 * (the station test and stop type test ensure that other vehicles, using the road stop as
 	 * a through route, do not stop) */
 	if (v->IsRoadVehFront() && ((IsInsideMM(v->state, RVSB_IN_ROAD_STOP, RVSB_IN_ROAD_STOP_END) &&
-			_road_veh_data_1[v->state - RVSB_IN_ROAD_STOP + (_settings_game.vehicle.road_side << RVS_DRIVE_SIDE)] == v->frame) ||
+			_road_stop_stop_frame[v->state - RVSB_IN_ROAD_STOP + (_settings_game.vehicle.road_side << RVS_DRIVE_SIDE)] == v->frame) ||
 			(IsInsideMM(v->state, RVSB_IN_DT_ROAD_STOP, RVSB_IN_DT_ROAD_STOP_END) &&
 			v->current_order.ShouldStopAtStation(v, GetStationIndex(v->tile)) &&
 			v->owner == GetTileOwner(v->tile) &&
@@ -1395,7 +1384,7 @@ again:
 		/* Vehicle is at the stop position (at a bay) in a road stop.
 		 * Note, if vehicle is loading/unloading it has already been handled,
 		 * so if we get here the vehicle has just arrived or is just ready to leave. */
-		if (!v->current_order.IsType(OT_LEAVESTATION)) {
+		if (!HasBit(v->state, RVS_ENTERED_STOP)) {
 			/* Vehicle has arrived at a bay in a road stop */
 
 			if (IsDriveThroughStopTile(v->tile)) {
@@ -1412,6 +1401,7 @@ again:
 			}
 
 			rs->SetEntranceBusy(false);
+			SetBit(v->state, RVS_ENTERED_STOP);
 
 			if (IsDriveThroughStopTile(v->tile) || (v->current_order.IsType(OT_GOTO_STATION) && v->current_order.GetDestination() == st->index)) {
 				RoadVehArrivesAt(v, st);
@@ -1427,7 +1417,7 @@ again:
 				v->cur_speed = 0;
 				return false;
 			}
-			v->current_order.Free();
+			if (v->current_order.IsType(OT_LEAVESTATION)) v->current_order.Free();
 		}
 
 		if (IsStandardRoadStopTile(v->tile)) rs->SetEntranceBusy(true);
