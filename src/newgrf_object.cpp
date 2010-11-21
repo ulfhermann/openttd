@@ -48,9 +48,7 @@ ObjectSpec _object_specs[NUM_OBJECTS];
 
 bool ObjectSpec::IsAvailable() const
 {
-	return
-			this->enabled &&
-			_date > this->introduction_date &&
+	return this->enabled && _date > this->introduction_date &&
 			(_date < this->end_of_life_date || this->end_of_life_date < this->introduction_date + 365) &&
 			HasBit(this->climate, _settings_game.game_creation.landscape) &&
 			(flags & (_game_mode != GM_EDITOR ? OBJECT_FLAG_ONLY_IN_SCENEDIT : OBJECT_FLAG_ONLY_IN_GAME)) == 0;
@@ -144,16 +142,6 @@ static uint32 GetNearbyObjectTileInformation(byte parameter, TileIndex tile, Obj
 	bool is_same_object = (IsTileType(tile, MP_OBJECT) && GetObjectIndex(tile) == index);
 
 	return GetNearbyTileInformation(tile) | (is_same_object ? 1 : 0) << 8;
-}
-
-/**
- * Get the object's animation counter data.
- * @param tile The tile to query.
- * @return The object's data.
- */
-static uint32 GetObjectAnimationCounter(TileIndex tile)
-{
-	return Object::GetByTile(tile)->colour << 8 | GetAnimationFrame(tile);
 }
 
 /**
@@ -252,6 +240,7 @@ static uint32 ObjectGetVariable(const ResolverObject *object, byte variable, byt
 			 * Disallow the rest:
 			 * 0x40: Relative position is passed as parameter during construction.
 			 * 0x43: Animation counter is only for actual tiles.
+			 * 0x47: Object colour is only valid when its built.
 			 * 0x63: Animation counter of nearby tile, see above.
 			 */
 			default:
@@ -280,7 +269,7 @@ static uint32 ObjectGetVariable(const ResolverObject *object, byte variable, byt
 		case 0x42: return o->build_date;
 
 		/* Animation counter */
-		case 0x43: return GetObjectAnimationCounter(tile);
+		case 0x43: return GetAnimationFrame(tile);
 
 		/* Object founder information */
 		case 0x44: return GetTileOwner(tile);
@@ -290,6 +279,9 @@ static uint32 ObjectGetVariable(const ResolverObject *object, byte variable, byt
 
 		/* Get square of Euclidian distance of closes town */
 		case 0x46: return GetTownRadiusGroup(t, tile) << 16 | min(DistanceSquare(tile, t->xy), 0xFFFF);
+
+		/* Object colour */
+		case 0x47: return o->colour;
 
 		/* Get object ID at offset param */
 		case 0x60: return GetObjectIDAtOffset(GetNearbyTile(parameter, tile), object->grffile->grfid);
@@ -305,7 +297,7 @@ static uint32 ObjectGetVariable(const ResolverObject *object, byte variable, byt
 		/* Animation counter of nearby tile */
 		case 0x63:
 			tile = GetNearbyTile(parameter, tile);
-			return (IsTileType(tile, MP_OBJECT) && Object::GetByTile(tile) == o) ? GetObjectAnimationCounter(tile) : 0;
+			return (IsTileType(tile, MP_OBJECT) && Object::GetByTile(tile) == o) ? GetAnimationFrame(tile) : 0;
 
 		/* Count of object, distance of closest instance */
 		case 0x64: return GetCountAndDistanceOfClosestInstance(parameter, object->grffile->grfid, tile, o);
