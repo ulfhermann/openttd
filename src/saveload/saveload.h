@@ -548,7 +548,7 @@ extern bool _do_autosave;
 enum SaveLoadVersions {
 	SL_TRUNK = 153,
 	SL_CAPACITIES = SL_TRUNK + 20,
-	
+
 	/** Highest possible savegame version. */
 	SL_MAX_VERSION = 255
 };
