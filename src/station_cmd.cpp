@@ -3042,11 +3042,12 @@ static void UpdateStationRating(Station *st)
 			bool skip = false;
 			int rating = 0;
 			uint waiting = ge->cargo.Count();
+			uint num_dests = ge->cargo.Packets()->MapSize();
 
 			/* average amount of cargo per next hop, but prefer solitary stations
 			 * with only one or two next hops. They are allowed to have more
 			 * cargo waiting per next hop. */
-			uint waiting_avg = waiting / (uint)(ge->cargo.Packets()->MapSize() + 1);
+			uint waiting_avg = waiting / (num_dests + 1);
 
 			if (HasBit(cs->callback_mask, CBM_CARGO_STATION_RATING_CALC)) {
 				/* Perform custom station rating. If it succeeds the speed, days in transit and
@@ -3108,7 +3109,7 @@ static void UpdateStationRating(Station *st)
 				if (rating <= 64 && waiting_avg >= 100) {
 					int dec = Random() & 0x1F;
 					if (waiting_avg < 200) dec &= 7;
-					waiting -= dec + 1;
+					waiting -= (dec + 1) * num_dests;
 					waiting_changed = true;
 				}
 
@@ -3117,7 +3118,7 @@ static void UpdateStationRating(Station *st)
 					uint32 r = Random();
 					if (rating <= (int)GB(r, 0, 7)) {
 						/* Need to have int, otherwise it will just overflow etc. */
-						waiting = max((int)waiting - (int)GB(r, 8, 2) - 1, 0);
+						waiting = max((int)waiting - (int)((GB(r, 8, 2) - 1) * num_dests), 0);
 						waiting_changed = true;
 					}
 				}
@@ -3125,11 +3126,11 @@ static void UpdateStationRating(Station *st)
 				/* At some point we really must cap the cargo. Previously this
 				 * was a strict 4095, but now we'll have a less strict, but
 				 * increasingly agressive truncation of the amount of cargo. */
-				static const uint WAITING_CARGO_THRESHOLD  = 1 << 11;
+				static const uint WAITING_CARGO_THRESHOLD  = 1 << 12;
 				static const uint WAITING_CARGO_CUT_FACTOR = 1 <<  6;
 				static const uint MAX_WAITING_CARGO        = 1 << 15;
 
-				if (waiting_avg > WAITING_CARGO_THRESHOLD || waiting > MAX_WAITING_CARGO) {
+				if (waiting > WAITING_CARGO_THRESHOLD) {
 					uint difference = waiting - WAITING_CARGO_THRESHOLD;
 					waiting -= (difference / WAITING_CARGO_CUT_FACTOR);
 
