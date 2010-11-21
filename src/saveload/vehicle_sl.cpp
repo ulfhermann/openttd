@@ -268,14 +268,14 @@ void AfterLoadVehicles(bool part_of_load)
 
 		FOR_ALL_VEHICLES(v) {
 			if (v->orders.old != NULL) {
-				if (CheckSavegameVersion(105)) { // Pre-105 didn't save an OrderList
+				if (IsSavegameVersionBefore(105)) { // Pre-105 didn't save an OrderList
 					if (mapping[v->orders.old] == NULL) {
 						/* This adds the whole shared vehicle chain for case b */
 						v->orders.list = mapping[v->orders.old] = new OrderList(v->orders.old, v);
 					} else {
 						v->orders.list = mapping[v->orders.old];
 						/* For old games (case a) we must create the shared vehicle chain */
-						if (CheckSavegameVersionOldStyle(5, 2)) {
+						if (IsSavegameVersionBefore(5, 2)) {
 							v->AddToShared(v->orders.list->GetFirstSharedVehicle());
 						}
 					}
@@ -297,7 +297,7 @@ void AfterLoadVehicles(bool part_of_load)
 		}
 	}
 
-	if (CheckSavegameVersion(105)) {
+	if (IsSavegameVersionBefore(105)) {
 		/* Before 105 there was no order for shared orders, thus it messed up horribly */
 		FOR_ALL_VEHICLES(v) {
 			if (v->First() != v || v->orders.list != NULL || v->previous_shared != NULL || v->next_shared == NULL) continue;
@@ -344,7 +344,7 @@ void AfterLoadVehicles(bool part_of_load)
 	}
 
 	/* Stop non-front engines */
-	if (CheckSavegameVersion(112)) {
+	if (IsSavegameVersionBefore(112)) {
 		FOR_ALL_VEHICLES(v) {
 			if (v->type == VEH_TRAIN) {
 				Train *t = Train::From(v);
@@ -357,7 +357,7 @@ void AfterLoadVehicles(bool part_of_load)
 			}
 			/* trains weren't stopping gradually in old OTTD versions (and TTO/TTD)
 			 * other vehicle types didn't have zero speed while stopped (even in 'recent' OTTD versions) */
-			if ((v->vehstatus & VS_STOPPED) && (v->type != VEH_TRAIN || CheckSavegameVersionOldStyle(2, 1))) {
+			if ((v->vehstatus & VS_STOPPED) && (v->type != VEH_TRAIN || IsSavegameVersionBefore(2, 1))) {
 				v->cur_speed = 0;
 			}
 		}
@@ -740,15 +740,13 @@ void Load_VEHS()
 		}
 
 		/* Old savegames used 'last_station_visited = 0xFF' */
-		if (CheckSavegameVersion(5) && v->last_station_visited == 0xFF) {
+		if (IsSavegameVersionBefore(5) && v->last_station_visited == 0xFF) {
 			v->last_station_visited = INVALID_STATION;
 		}
 
-		if (CheckSavegameVersion(SL_CAPACITIES)) {
-			v->last_loading_station = INVALID_STATION;
-		}
+		if (IsSavegameVersionBefore(SL_CAPACITIES)) v->last_loading_station = INVALID_STATION;
 
-		if (CheckSavegameVersion(5)) {
+		if (IsSavegameVersionBefore(5)) {
 			/* Convert the current_order.type (which is a mix of type and flags, because
 			 *  in those versions, they both were 4 bits big) to type and flags */
 			v->current_order.flags = GB(v->current_order.type, 4, 4);
@@ -756,7 +754,7 @@ void Load_VEHS()
 		}
 
 		/* Advanced vehicle lists got added */
-		if (CheckSavegameVersion(60)) v->group_id = DEFAULT_GROUP;
+		if (IsSavegameVersionBefore(60)) v->group_id = DEFAULT_GROUP;
 	}
 }
 
