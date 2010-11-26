@@ -1751,13 +1751,6 @@ public:
 		}
 	}
 
-
-
-	virtual void OnPaint()
-	{
-		this->DrawWidgets();
-	}
-
 	/**
 	 * Select and toggle a legend item. When CTRL is pressed, disable all other
 	 * items in the group defined by begin_legend_item and end_legend_item and
