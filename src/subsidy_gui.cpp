@@ -106,11 +106,6 @@ struct SubsidyListWindow : Window {
 		}
 	}
 
-	virtual void OnPaint()
-	{
-		this->DrawWidgets();
-	}
-
 	/**
 	 * Count the number of lines in this window.
 	 * @return the number of lines
@@ -174,7 +169,7 @@ struct SubsidyListWindow : Window {
 			if (!s->IsAwarded()) {
 				if (IsInsideMM(pos, 0, cap)) {
 					/* Displays the two offered towns */
-					SetupSubsidyDecodeParam(s, 1);
+					SetupSubsidyDecodeParam(s, true);
 					SetDParam(7, _date - ymd.day + s->remaining * 32);
 					DrawString(x, right, y + pos * FONT_HEIGHT_NORMAL, STR_SUBSIDIES_OFFERED_FROM_TO);
 				}
@@ -197,7 +192,7 @@ struct SubsidyListWindow : Window {
 		FOR_ALL_SUBSIDIES(s) {
 			if (s->IsAwarded()) {
 				if (IsInsideMM(pos, 0, cap)) {
-					SetupSubsidyDecodeParam(s, 1);
+					SetupSubsidyDecodeParam(s, true);
 					SetDParam(7, s->awarded);
 					SetDParam(8, _date - ymd.day + s->remaining * 32);
 
