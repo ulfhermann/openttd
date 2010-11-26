@@ -142,13 +142,13 @@ char *GetStringWithArgs(char *buffr, uint string, int64 *argv, const char *last)
 			break;
 
 		case 28:
-			return FormatString(buffr, GetGRFStringPtr(index), argv, 0, last);
+			return FormatString(buffr, GetGRFStringPtr(index), argv, GB(string, 24, 8), last);
 
 		case 29:
-			return FormatString(buffr, GetGRFStringPtr(index + 0x0800), argv, 0, last);
+			return FormatString(buffr, GetGRFStringPtr(index + 0x0800), argv, GB(string, 24, 8), last);
 
 		case 30:
-			return FormatString(buffr, GetGRFStringPtr(index + 0x1000), argv, 0, last);
+			return FormatString(buffr, GetGRFStringPtr(index + 0x1000), argv, GB(string, 24, 8), last);
 
 		case 31:
 			NOT_REACHED();
@@ -1568,16 +1568,26 @@ const char *GetCurrentLanguageIsoCode()
  * Check whether there are glyphs missing in the current language.
  * @param Pointer to an address for storing the text pointer.
  * @return If glyphs are missing, return \c true, else return \false.
- * @pre  *str must not be \c NULL.
- * @post If \c true is returned, *str points to a string that is found to contain at least one missing glyph.
+ * @post If \c true is returned and str is not NULL, *str points to a string that is found to contain at least one missing glyph.
  */
 static bool FindMissingGlyphs(const char **str)
 {
-	const Sprite *question_mark = GetGlyph(FS_NORMAL, '?');
+#ifdef WITH_FREETYPE
+	UninitFreeType();
+	InitFreeType();
+#endif
+	const Sprite *question_mark[FS_END];
+	FontSize size;
+
+	for (size = FS_BEGIN; size < FS_END; size++) {
+		question_mark[size] = GetGlyph(size, '?');
+	}
+
 	for (uint i = 0; i != 32; i++) {
 		for (uint j = 0; j < _langtab_num[i]; j++) {
+			size = FS_NORMAL;
 			const char *text = _langpack_offs[_langtab_start[i] + j];
-			*str = text;
+			if (str != NULL) *str = text;
 			for (WChar c = Utf8Consume(&text); c != '\0'; c = Utf8Consume(&text)) {
 				if (c == SCC_SETX) {
 					/* SetX is, together with SetXY as special character that
@@ -1586,7 +1596,11 @@ static bool FindMissingGlyphs(const char **str)
 					text++;
 				} else if (c == SCC_SETXY) {
 					text += 2;
-				} else if (IsPrintable(c) && !IsTextDirectionChar(c) && c != '?' && GetGlyph(FS_NORMAL, c) == question_mark) {
+				} else if (c == SCC_TINYFONT) {
+					size = FS_SMALL;
+				} else if (c == SCC_BIGFONT) {
+					size = FS_LARGE;
+				} else if (IsPrintable(c) && !IsTextDirectionChar(c) && c != '?' && GetGlyph(size, c) == question_mark[size]) {
 					/* The character is printable, but not in the normal font. This is the case we were testing for. */
 					return true;
 				}
@@ -1608,15 +1622,7 @@ static bool FindMissingGlyphs(const char **str)
  */
 void CheckForMissingGlyphsInLoadedLanguagePack()
 {
-#ifdef WITH_FREETYPE
-	/* Reset to the original state; switching languages might cause us to
-	 * automatically choose another font. This resets that choice. */
-	UninitFreeType();
-	InitFreeType();
-#endif
-
-	const char *str;
-	bool bad_font = FindMissingGlyphs(&str);
+	bool bad_font = FindMissingGlyphs(NULL);
 #ifdef WITH_FREETYPE
 	if (bad_font) {
 		/* We found an unprintable character... lets try whether we can find
@@ -1624,23 +1630,16 @@ void CheckForMissingGlyphsInLoadedLanguagePack()
 		FreeTypeSettings backup;
 		memcpy(&backup, &_freetype, sizeof(backup));
 
-		bool success = SetFallbackFont(&_freetype, _langpack->isocode, _langpack->winlangid, str);
-		if (success) {
-			UninitFreeType();
-			InitFreeType();
-		}
+		bad_font = !SetFallbackFont(&_freetype, _langpack->isocode, _langpack->winlangid, &FindMissingGlyphs);
 
 		memcpy(&_freetype, &backup, sizeof(backup));
 
-		if (success) {
-			bad_font = FindMissingGlyphs(&str);
-			if (bad_font) {
-				/* Our fallback font does miss characters too, so keep the
-				 * user chosen font as that is more likely to be any good than
-				 * the wild guess we made */
-				UninitFreeType();
-				InitFreeType();
-			}
+		if (bad_font) {
+			/* Our fallback font does miss characters too, so keep the
+				* user chosen font as that is more likely to be any good than
+				* the wild guess we made */
+			UninitFreeType();
+			InitFreeType();
 		}
 	}
 #endif
