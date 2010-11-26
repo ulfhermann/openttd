@@ -1940,11 +1940,6 @@ struct SelectStationWindow : Window {
 		*size = d;
 	}
 
-	virtual void OnPaint()
-	{
-		this->DrawWidgets();
-	}
-
 	virtual void DrawWidget(const Rect &r, int widget) const
 	{
 		if (widget != JSW_PANEL) return;
