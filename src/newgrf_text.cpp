@@ -324,24 +324,22 @@ struct UnmappedChoiceList : ZeroedMemoryAllocator {
 				char *str = this->strings[idx];
 
 				/* "<CASEn>" */
-				*d++ = i;
+				*d++ = i + 1;
 
 				/* "<LENn>" */
-				size_t len = strlen(str);
+				size_t len = strlen(str) + 1;
 				*d++ = GB(len, 8, 8);
 				*d++ = GB(len, 0, 8);
 
 				/* "<STRINGn>" */
 				memcpy(d, str, len);
 				d += len;
-				*d++ = '\0';
 			}
 
 			/* "<STRINGDEFAULT>" */
-			size_t len = strlen(this->strings[0]);
+			size_t len = strlen(this->strings[0]) + 1;
 			memcpy(d, this->strings[0], len);
 			d += len;
-			*d++ = '\0';
 		} else {
 			if (this->type == SCC_PLURAL_LIST) {
 				*d++ = lm->plural_form;
