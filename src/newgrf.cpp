@@ -8057,6 +8057,9 @@ static void AfterLoadGRFs()
 	/* Create dynamic list of industry legends for smallmap_gui.cpp */
 	BuildIndustriesLegend();
 
+	/* build the routemap legend, based on the available cargos */
+	BuildLinkStatsLegend();
+
 	/* Add all new airports to the airports array. */
 	FinaliseAirportsArray();
 	BindAirportSpecs();

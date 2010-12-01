@@ -12,6 +12,9 @@
 #ifndef SMALLMAP_GUI_H
 #define SMALLMAP_GUI_H
 
+/* set up the cargos to be displayed in the smallmap's route legend */
+void BuildLinkStatsLegend();
+
 void BuildIndustriesLegend();
 void ShowSmallMap();
 void BuildLandLegend();
