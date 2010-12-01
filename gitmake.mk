@@ -41,7 +41,7 @@ gitmake: gitmake-origin
 
 smallmap-zoom-in: gitmake 
 
-cd: station-gui smallmap-stats warning-sign ext-rating
+cd: station-gui smallmap-stats ext-rating
 
 ext-rating: cargomap
 
@@ -73,10 +73,8 @@ reservation: gitmake
 
 multimap: gitmake 
 
-warning-sign: demands
-
 moving-average: gitmake 
 
-push: master gitmake patches cd ext-rating station-gui smallmap-stats flowmapping-core mcf demands components capacities smallmap-zoom-in diaglvl tileiter texteff cargomap multimap reservation warning-sign moving-average selfaware-stationcargo
+push: master gitmake patches cd ext-rating station-gui smallmap-stats flowmapping-core mcf demands components capacities smallmap-zoom-in diaglvl tileiter texteff cargomap multimap reservation moving-average selfaware-stationcargo
 	git push github $(^F)
 
