@@ -35,6 +35,7 @@
 #include "string_func.h"
 #include "company_base.h"
 #include "smallmap_gui.h"
+#include "window_func.h"
 #include "debug.h"
 
 #include "table/strings.h"
@@ -46,6 +47,10 @@ const LanguageMetadata *_current_language = NULL; ///< The currently loaded lang
 
 TextDirection _current_text_dir; ///< Text direction of the currently selected language.
 uint64 _decode_parameters[20];   ///< Global array of string parameters. To access, use #SetDParam.
+
+#ifdef WITH_ICU
+Collator *_current_collator = NULL;               ///< Collator for the language currently in use.
+#endif /* WITH_ICU */
 
 static char *StationGetSpecialString(char *buff, int x, const char *last);
 static char *GetSpecialTownNameString(char *buff, int ind, uint32 seed, const char *last);
@@ -1391,10 +1396,38 @@ bool ReadLanguagePack(const LanguageMetadata *lang)
 	strecpy(_config_language_file, c_file, lastof(_config_language_file));
 	SetCurrentGrfLangID(_current_language->newgrflangid);
 
+#ifdef WITH_ICU
+	/* Delete previous collator. */
+	if (_current_collator != NULL) {
+		delete _current_collator;
+		_current_collator = NULL;
+	}
+
+	/* Create a collator instance for our current locale. */
+	UErrorCode status = U_ZERO_ERROR;
+	_current_collator = Collator::createInstance(Locale(_current_language->isocode), status);
+	/* Sort number substrings by their numerical value. */
+	if (_current_collator != NULL) _current_collator->setAttribute(UCOL_NUMERIC_COLLATION, UCOL_ON, status);
+	/* Avoid using the collator if it is not correctly set. */
+	if (U_FAILURE(status)) {
+		delete _current_collator;
+		_current_collator = NULL;
+	}
+#endif /* WITH_ICU */
+
+	/* Some lists need to be sorted again after a language change. */
 	InitializeSortedCargoSpecs();
 	SortIndustryTypes();
 	BuildIndustriesLegend();
 	SortNetworkLanguages();
+	InvalidateWindowClassesData(WC_BUILD_VEHICLE);      // Build vehicle window.
+	InvalidateWindowClassesData(WC_TRAINS_LIST);        // Train group window.
+	InvalidateWindowClassesData(WC_ROADVEH_LIST);       // Road vehicle group window.
+	InvalidateWindowClassesData(WC_SHIPS_LIST);         // Ship group window.
+	InvalidateWindowClassesData(WC_AIRCRAFT_LIST);      // Aircraft group window.
+	InvalidateWindowClassesData(WC_INDUSTRY_DIRECTORY); // Industry directory window.
+	InvalidateWindowClassesData(WC_STATION_LIST);       // Station list window.
+
 	return true;
 }
 
