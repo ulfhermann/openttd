@@ -3255,8 +3255,7 @@ void RecalcFrozen(Station *st) {
 		const Vehicle *front = *v_it;
 		OrderList *orders = front->orders.list;
 		if (orders != NULL) {
-			StationID next_station_id = orders->GetNextStoppingStation(front->cur_order_index,
-					st->index, front->type == VEH_ROAD || front->type == VEH_TRAIN);
+			StationID next_station_id = orders->GetNextStoppingStation(front->cur_order_index, st->index);
 			if (next_station_id != INVALID_STATION && next_station_id != st->index) {
 				IncreaseStats(st, front, next_station_id, true);
 			}
