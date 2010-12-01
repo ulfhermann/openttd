@@ -1735,8 +1735,7 @@ void Vehicle::BeginLoading(StationID curr_station_id)
 	StationID next_station_id = INVALID_STATION;
 	OrderList *orders = this->orders.list;
 	if (orders != NULL) {
-		next_station_id = orders->GetNextStoppingStation(this->cur_order_index,
-				curr_station_id, this->type == VEH_ROAD || this->type == VEH_TRAIN);
+		next_station_id = orders->GetNextStoppingStation(this->cur_order_index, curr_station_id);
 	}
 
 	if (this->last_loading_station != INVALID_STATION && this->last_loading_station != curr_station_id) {
@@ -1786,8 +1785,7 @@ void Vehicle::LeaveStation()
 
 	OrderList *orders = this->orders.list;
 	if (orders != NULL) {
-		StationID next_station_id = orders->GetNextStoppingStation(this->cur_order_index,
-				this->last_station_visited, this->type == VEH_ROAD || this->type == VEH_TRAIN);
+		StationID next_station_id = orders->GetNextStoppingStation(this->cur_order_index, this->last_station_visited);
 		if (next_station_id != INVALID_STATION && next_station_id != this->last_station_visited) {
 			DecreaseFrozen(st, this, next_station_id);
 		}
