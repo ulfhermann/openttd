@@ -33,6 +33,7 @@
 #include "../roadveh.h"
 #include "../order_backup.h"
 #include "../core/pool_func.hpp"
+#include "../core/random_func.hpp"
 #include "../rev.h"
 
 #include "table/strings.h"
@@ -61,6 +62,7 @@ ServerNetworkGameSocketHandler::ServerNetworkGameSocketHandler(SOCKET s) : Netwo
 {
 	this->status = STATUS_INACTIVE;
 	this->client_id = _network_client_id++;
+	this->receive_limit = _settings_client.network.bytes_per_frame_burst;
 	NetworkClientInfo *ci = new NetworkClientInfo(this->client_id);
 	this->SetInfo(ci);
 	ci->client_playas = COMPANY_INACTIVE_CLIENT;
@@ -76,13 +78,26 @@ ServerNetworkGameSocketHandler::~ServerNetworkGameSocketHandler()
 	OrderBackup::ResetUser(this->client_id);
 }
 
+Packet *ServerNetworkGameSocketHandler::ReceivePacket()
+{
+	/* Only allow receiving when we have some buffer free; this value
+	 * can go negative, but eventually it will become positive again. */
+	if (this->receive_limit <= 0) return NULL;
+
+	/* We can receive a packet, so try that and if needed account for
+	 * the amount of received data. */
+	Packet *p = this->NetworkTCPSocketHandler::ReceivePacket();
+	if (p != NULL) this->receive_limit -= p->size;
+	return p;
+}
+
 NetworkRecvStatus ServerNetworkGameSocketHandler::CloseConnection(NetworkRecvStatus status)
 {
 	assert(status != NETWORK_RECV_STATUS_OKAY);
 	/*
-	 * Sending a message just before leaving the game calls cs->Send_Packets.
+	 * Sending a message just before leaving the game calls cs->SendPackets.
 	 * This might invoke this function, which means that when we close the
-	 * connection after cs->Send_Packets we will close an already closed
+	 * connection after cs->SendPackets we will close an already closed
 	 * connection. This handles that case gracefully without having to make
 	 * that code any more complex or more aware of the validity of the socket.
 	 */
@@ -114,7 +129,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::CloseConnection(NetworkRecvSta
 
 	SetWindowDirty(WC_CLIENT_LIST, 0);
 
-	this->Send_Packets(true);
+	this->SendPackets(true);
 
 	delete this->GetInfo();
 	delete this;
@@ -138,7 +153,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::CloseConnection(NetworkRecvSta
 	NetworkClientSocket *cs;
 	FOR_ALL_CLIENT_SOCKETS(cs) {
 		if (cs->writable) {
-			if (cs->Send_Packets() && cs->status == STATUS_MAP) {
+			if (cs->SendPackets() && cs->status == STATUS_MAP) {
 				/* This client is in the middle of a map-send, call the function for that */
 				cs->SendMap();
 			}
@@ -161,7 +176,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::SendClientInfo(NetworkClientIn
 		p->Send_uint8 (ci->client_playas);
 		p->Send_string(ci->client_name);
 
-		this->Send_Packet(p);
+		this->SendPacket(p);
 	}
 	return NETWORK_RECV_STATUS_OKAY;
 }
@@ -208,7 +223,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::SendCompanyInfo()
 
 		p->Send_uint8 (NETWORK_COMPANY_INFO_VERSION);
 		p->Send_bool  (true);
-		this->Send_CompanyInformation(p, company, &company_stats[company->index]);
+		this->SendCompanyInformation(p, company, &company_stats[company->index]);
 
 		if (StrEmpty(clients[company->index])) {
 			p->Send_string("<none>");
@@ -216,7 +231,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::SendCompanyInfo()
 			p->Send_string(clients[company->index]);
 		}
 
-		this->Send_Packet(p);
+		this->SendPacket(p);
 	}
 
 	p = new Packet(PACKET_SERVER_COMPANY_INFO);
@@ -224,7 +239,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::SendCompanyInfo()
 	p->Send_uint8 (NETWORK_COMPANY_INFO_VERSION);
 	p->Send_bool  (false);
 
-	this->Send_Packet(p);
+	this->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -234,7 +249,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::SendError(NetworkErrorCode err
 	Packet *p = new Packet(PACKET_SERVER_ERROR);
 
 	p->Send_uint8(error);
-	this->Send_Packet(p);
+	this->SendPacket(p);
 
 	StringID strid = GetNetworkErrorMsg(error);
 	GetString(str, strid, lastof(str));
@@ -282,10 +297,10 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::SendNewGRFCheck()
 
 	p->Send_uint8 (grf_count);
 	for (c = _grfconfig; c != NULL; c = c->next) {
-		if (!HasBit(c->flags, GCF_STATIC)) this->Send_GRFIdentifier(p, &c->ident);
+		if (!HasBit(c->flags, GCF_STATIC)) this->SendGRFIdentifier(p, &c->ident);
 	}
 
-	this->Send_Packet(p);
+	this->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -297,7 +312,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::SendNeedGamePassword()
 	this->status = STATUS_AUTH_GAME;
 
 	Packet *p = new Packet(PACKET_SERVER_NEED_GAME_PASSWORD);
-	this->Send_Packet(p);
+	this->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -311,7 +326,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::SendNeedCompanyPassword()
 	Packet *p = new Packet(PACKET_SERVER_NEED_COMPANY_PASSWORD);
 	p->Send_uint32(_settings_game.game_creation.generation_seed);
 	p->Send_string(_settings_client.network.network_id);
-	this->Send_Packet(p);
+	this->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -330,7 +345,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::SendWelcome()
 	p->Send_uint32(this->client_id);
 	p->Send_uint32(_settings_game.game_creation.generation_seed);
 	p->Send_string(_settings_client.network.network_id);
-	this->Send_Packet(p);
+	this->SendPacket(p);
 
 	/* Transmit info about all the active clients */
 	FOR_ALL_CLIENT_SOCKETS(new_cs) {
@@ -355,7 +370,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::SendWait()
 
 	p = new Packet(PACKET_SERVER_WAIT);
 	p->Send_uint8(waiting);
-	this->Send_Packet(p);
+	this->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -371,25 +386,26 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::SendMap()
 	}
 
 	if (this->status == STATUS_AUTHORIZED) {
-		const char *filename = "network_server.tmp";
-		Packet *p;
+		char filename[MAX_PATH];
+		FioGetDirectory(filename, lengthof(filename), AUTOSAVE_DIR);
+		strecat(filename, "network_server.tmp", lastof(filename));
 
 		/* Make a dump of the current game */
-		if (SaveOrLoad(filename, SL_SAVE, AUTOSAVE_DIR) != SL_OK) usererror("network savedump failed");
+		if (SaveOrLoad(filename, SL_SAVE, NO_DIRECTORY) != SL_OK) usererror("network savedump failed");
 
 		if (file_pointer != NULL) fclose(file_pointer);
 
-		file_pointer = FioFOpenFile(filename, "rb", AUTOSAVE_DIR);
+		file_pointer = FioFOpenFile(filename, "rb", NO_DIRECTORY);
 		if (file_pointer == NULL) usererror("network savedump failed - could not open just saved dump");
 
 		fseek(file_pointer, 0, SEEK_END);
 		if (ftell(file_pointer) == 0) usererror("network savedump failed - zero sized savegame?");
 
 		/* Now send the _frame_counter and how many packets are coming */
-		p = new Packet(PACKET_SERVER_MAP_BEGIN);
+		Packet *p = new Packet(PACKET_SERVER_MAP_BEGIN);
 		p->Send_uint32(_frame_counter);
 		p->Send_uint32(ftell(file_pointer));
-		this->Send_Packet(p);
+		this->SendPacket(p);
 
 		fseek(file_pointer, 0, SEEK_SET);
 
@@ -412,11 +428,11 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::SendMap()
 			if (ferror(file_pointer)) usererror("Error reading temporary network savegame!");
 
 			p->size += res;
-			this->Send_Packet(p);
+			this->SendPacket(p);
 			if (feof(file_pointer)) {
 				/* Done reading! */
 				Packet *p = new Packet(PACKET_SERVER_MAP_DONE);
-				this->Send_Packet(p);
+				this->SendPacket(p);
 
 				/* Set the status to DONE_MAP, no we will wait for the client
 				 *  to send it is ready (maybe that happens like never ;)) */
@@ -449,7 +465,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::SendMap()
 		}
 
 		/* Send all packets (forced) and check if we have send it all */
-		if (this->Send_Packets() && this->IsPacketQueueEmpty()) {
+		if (this->SendPackets() && this->IsPacketQueueEmpty()) {
 			/* All are sent, increase the sent_packets */
 			sent_packets *= 2;
 		} else {
@@ -466,7 +482,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::SendJoin(ClientID client_id)
 
 	p->Send_uint32(client_id);
 
-	this->Send_Packet(p);
+	this->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -482,7 +498,14 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::SendFrame()
 	p->Send_uint32(_sync_seed_2);
 #endif
 #endif
-	this->Send_Packet(p);
+
+	/* If token equals 0, we need to make a new token and send that. */
+	if (this->last_token == 0) {
+		this->last_token = InteractiveRandomRange(UINT8_MAX - 1) + 1;
+		p->Send_uint8(this->last_token);
+	}
+
+	this->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -495,7 +518,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::SendSync()
 #ifdef NETWORK_SEND_DOUBLE_SEED
 	p->Send_uint32(_sync_seed_2);
 #endif
-	this->Send_Packet(p);
+	this->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -503,11 +526,11 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::SendCommand(const CommandPacke
 {
 	Packet *p = new Packet(PACKET_SERVER_COMMAND);
 
-	this->Send_Command(p, cp);
+	this->NetworkGameSocketHandler::SendCommand(p, cp);
 	p->Send_uint32(cp->frame);
 	p->Send_bool  (cp->my_cmd);
 
-	this->Send_Packet(p);
+	this->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -521,7 +544,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::SendChat(NetworkAction action,
 	p->Send_string(msg);
 	p->Send_uint64(data);
 
-	this->Send_Packet(p);
+	this->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -532,7 +555,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::SendErrorQuit(ClientID client_
 	p->Send_uint32(client_id);
 	p->Send_uint8 (errorno);
 
-	this->Send_Packet(p);
+	this->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -542,21 +565,21 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::SendQuit(ClientID client_id)
 
 	p->Send_uint32(client_id);
 
-	this->Send_Packet(p);
+	this->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
 NetworkRecvStatus ServerNetworkGameSocketHandler::SendShutdown()
 {
 	Packet *p = new Packet(PACKET_SERVER_SHUTDOWN);
-	this->Send_Packet(p);
+	this->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
 NetworkRecvStatus ServerNetworkGameSocketHandler::SendNewGame()
 {
 	Packet *p = new Packet(PACKET_SERVER_NEWGAME);
-	this->Send_Packet(p);
+	this->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -566,7 +589,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::SendRConResult(uint16 colour, 
 
 	p->Send_uint16(colour);
 	p->Send_string(command);
-	this->Send_Packet(p);
+	this->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -576,7 +599,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::SendMove(ClientID client_id, C
 
 	p->Send_uint32(client_id);
 	p->Send_uint8(company_id);
-	this->Send_Packet(p);
+	this->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -585,7 +608,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::SendCompanyUpdate()
 	Packet *p = new Packet(PACKET_SERVER_COMPANY_UPDATE);
 
 	p->Send_uint16(_network_company_passworded);
-	this->Send_Packet(p);
+	this->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -595,7 +618,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::SendConfigUpdate()
 
 	p->Send_uint8(_settings_client.network.max_companies);
 	p->Send_uint8(_settings_client.network.max_spectators);
-	this->Send_Packet(p);
+	this->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -853,7 +876,7 @@ DEF_GAME_RECEIVE_COMMAND(Server, PACKET_CLIENT_COMMAND)
 	}
 
 	CommandPacket cp;
-	const char *err = this->Recv_Command(p, &cp);
+	const char *err = this->ReceiveCommand(p, &cp);
 
 	if (this->HasClientQuit()) return NETWORK_RECV_STATUS_CONN_LOST;
 
@@ -981,9 +1004,26 @@ DEF_GAME_RECEIVE_COMMAND(Server, PACKET_CLIENT_ACK)
 
 		/* Now he is! Unpause the game */
 		this->status = STATUS_ACTIVE;
+		this->last_token_frame = _frame_counter;
 
 		/* Execute script for, e.g. MOTD */
 		IConsoleCmdExec("exec scripts/on_server_connect.scr 0");
+	}
+
+	/* Get, and validate the token. */
+	uint8 token = p->Recv_uint8();
+	if (token == this->last_token) {
+		/* We differentiate between last_token_frame and last_frame so the lag
+		 * test uses the actual lag of the client instead of the lag for getting
+		 * the token back and forth; after all, the token is only sent every
+		 * time we receive a PACKET_CLIENT_ACK, after which we will send a new
+		 * token to the client. If the lag would be one day, then we would not
+		 * be sending the new token soon enough for the new daily scheduled
+		 * PACKET_CLIENT_ACK. This would then register the lag of the client as
+		 * two days, even when it's only a single day. */
+		this->last_token_frame = _frame_counter;
+		/* Request a new token. */
+		this->last_token = 0;
 	}
 
 	/* The client received the frame, make note of it */
@@ -1001,109 +1041,109 @@ void NetworkServerSendChat(NetworkAction action, DestType desttype, int dest, co
 	const NetworkClientInfo *ci, *ci_own, *ci_to;
 
 	switch (desttype) {
-	case DESTTYPE_CLIENT:
-		/* Are we sending to the server? */
-		if ((ClientID)dest == CLIENT_ID_SERVER) {
-			ci = NetworkFindClientInfoFromClientID(from_id);
-			/* Display the text locally, and that is it */
-			if (ci != NULL) {
-				NetworkTextMessage(action, (ConsoleColour)GetDrawStringCompanyColour(ci->client_playas), false, ci->client_name, msg, data);
-
-				if (_settings_client.network.server_admin_chat) {
-						NetworkAdminChat(action, desttype, from_id, msg, data, from_admin);
-				}
-			}
-		} else {
-			/* Else find the client to send the message to */
-			FOR_ALL_CLIENT_SOCKETS(cs) {
-				if (cs->client_id == (ClientID)dest) {
-					cs->SendChat(action, from_id, false, msg, data);
-					break;
-				}
-			}
-		}
-
-		/* Display the message locally (so you know you have sent it) */
-		if (from_id != (ClientID)dest) {
-			if (from_id == CLIENT_ID_SERVER) {
+		case DESTTYPE_CLIENT:
+			/* Are we sending to the server? */
+			if ((ClientID)dest == CLIENT_ID_SERVER) {
 				ci = NetworkFindClientInfoFromClientID(from_id);
-				ci_to = NetworkFindClientInfoFromClientID((ClientID)dest);
-				if (ci != NULL && ci_to != NULL) {
-					NetworkTextMessage(action, (ConsoleColour)GetDrawStringCompanyColour(ci->client_playas), true, ci_to->client_name, msg, data);
+				/* Display the text locally, and that is it */
+				if (ci != NULL) {
+					NetworkTextMessage(action, (ConsoleColour)GetDrawStringCompanyColour(ci->client_playas), false, ci->client_name, msg, data);
+
+					if (_settings_client.network.server_admin_chat) {
+						NetworkAdminChat(action, desttype, from_id, msg, data, from_admin);
+					}
 				}
 			} else {
+				/* Else find the client to send the message to */
 				FOR_ALL_CLIENT_SOCKETS(cs) {
-					if (cs->client_id == from_id) {
-						cs->SendChat(action, (ClientID)dest, true, msg, data);
+					if (cs->client_id == (ClientID)dest) {
+						cs->SendChat(action, from_id, false, msg, data);
 						break;
 					}
 				}
 			}
-		}
-		break;
-	case DESTTYPE_TEAM: {
-		/* If this is false, the message is already displayed on the client who sent it. */
-		bool show_local = true;
-		/* Find all clients that belong to this company */
-		ci_to = NULL;
-		FOR_ALL_CLIENT_SOCKETS(cs) {
-			ci = cs->GetInfo();
-			if (ci->client_playas == (CompanyID)dest) {
-				cs->SendChat(action, from_id, false, msg, data);
-				if (cs->client_id == from_id) show_local = false;
-				ci_to = ci; // Remember a client that is in the company for company-name
-			}
-		}
 
-		/* if the server can read it, let the admin network read it, too. */
-		if (_local_company == (CompanyID)dest && _settings_client.network.server_admin_chat) {
-			NetworkAdminChat(action, desttype, from_id, msg, data, from_admin);
-		}
-
-		ci = NetworkFindClientInfoFromClientID(from_id);
-		ci_own = NetworkFindClientInfoFromClientID(CLIENT_ID_SERVER);
-		if (ci != NULL && ci_own != NULL && ci_own->client_playas == dest) {
-			NetworkTextMessage(action, (ConsoleColour)GetDrawStringCompanyColour(ci->client_playas), false, ci->client_name, msg, data);
-			if (from_id == CLIENT_ID_SERVER) show_local = false;
-			ci_to = ci_own;
-		}
-
-		/* There is no such client */
-		if (ci_to == NULL) break;
-
-		/* Display the message locally (so you know you have sent it) */
-		if (ci != NULL && show_local) {
-			if (from_id == CLIENT_ID_SERVER) {
-				char name[NETWORK_NAME_LENGTH];
-				StringID str = Company::IsValidID(ci_to->client_playas) ? STR_COMPANY_NAME : STR_NETWORK_SPECTATORS;
-				SetDParam(0, ci_to->client_playas);
-				GetString(name, str, lastof(name));
-				NetworkTextMessage(action, (ConsoleColour)GetDrawStringCompanyColour(ci_own->client_playas), true, name, msg, data);
-			} else {
-				FOR_ALL_CLIENT_SOCKETS(cs) {
-					if (cs->client_id == from_id) {
-						cs->SendChat(action, ci_to->client_id, true, msg, data);
+			/* Display the message locally (so you know you have sent it) */
+			if (from_id != (ClientID)dest) {
+				if (from_id == CLIENT_ID_SERVER) {
+					ci = NetworkFindClientInfoFromClientID(from_id);
+					ci_to = NetworkFindClientInfoFromClientID((ClientID)dest);
+					if (ci != NULL && ci_to != NULL) {
+						NetworkTextMessage(action, (ConsoleColour)GetDrawStringCompanyColour(ci->client_playas), true, ci_to->client_name, msg, data);
+					}
+				} else {
+					FOR_ALL_CLIENT_SOCKETS(cs) {
+						if (cs->client_id == from_id) {
+							cs->SendChat(action, (ClientID)dest, true, msg, data);
+							break;
+						}
 					}
 				}
 			}
-		}
-		break;
-	}
-	default:
-		DEBUG(net, 0, "[server] received unknown chat destination type %d. Doing broadcast instead", desttype);
-		/* FALL THROUGH */
-	case DESTTYPE_BROADCAST:
-		FOR_ALL_CLIENT_SOCKETS(cs) {
-			cs->SendChat(action, from_id, false, msg, data);
-		}
+			break;
+		case DESTTYPE_TEAM: {
+			/* If this is false, the message is already displayed on the client who sent it. */
+			bool show_local = true;
+			/* Find all clients that belong to this company */
+			ci_to = NULL;
+			FOR_ALL_CLIENT_SOCKETS(cs) {
+				ci = cs->GetInfo();
+				if (ci->client_playas == (CompanyID)dest) {
+					cs->SendChat(action, from_id, false, msg, data);
+					if (cs->client_id == from_id) show_local = false;
+					ci_to = ci; // Remember a client that is in the company for company-name
+				}
+			}
 
-		NetworkAdminChat(action, desttype, from_id, msg, data, from_admin);
+			/* if the server can read it, let the admin network read it, too. */
+			if (_local_company == (CompanyID)dest && _settings_client.network.server_admin_chat) {
+				NetworkAdminChat(action, desttype, from_id, msg, data, from_admin);
+			}
 
-		ci = NetworkFindClientInfoFromClientID(from_id);
-		if (ci != NULL) {
-			NetworkTextMessage(action, (ConsoleColour)GetDrawStringCompanyColour(ci->client_playas), false, ci->client_name, msg, data);
+			ci = NetworkFindClientInfoFromClientID(from_id);
+			ci_own = NetworkFindClientInfoFromClientID(CLIENT_ID_SERVER);
+			if (ci != NULL && ci_own != NULL && ci_own->client_playas == dest) {
+				NetworkTextMessage(action, (ConsoleColour)GetDrawStringCompanyColour(ci->client_playas), false, ci->client_name, msg, data);
+				if (from_id == CLIENT_ID_SERVER) show_local = false;
+				ci_to = ci_own;
+			}
+
+			/* There is no such client */
+			if (ci_to == NULL) break;
+
+			/* Display the message locally (so you know you have sent it) */
+			if (ci != NULL && show_local) {
+				if (from_id == CLIENT_ID_SERVER) {
+					char name[NETWORK_NAME_LENGTH];
+					StringID str = Company::IsValidID(ci_to->client_playas) ? STR_COMPANY_NAME : STR_NETWORK_SPECTATORS;
+					SetDParam(0, ci_to->client_playas);
+					GetString(name, str, lastof(name));
+					NetworkTextMessage(action, (ConsoleColour)GetDrawStringCompanyColour(ci_own->client_playas), true, name, msg, data);
+				} else {
+					FOR_ALL_CLIENT_SOCKETS(cs) {
+						if (cs->client_id == from_id) {
+							cs->SendChat(action, ci_to->client_id, true, msg, data);
+						}
+					}
+				}
+			}
+			break;
 		}
-		break;
+		default:
+			DEBUG(net, 0, "[server] received unknown chat destination type %d. Doing broadcast instead", desttype);
+			/* FALL THROUGH */
+		case DESTTYPE_BROADCAST:
+			FOR_ALL_CLIENT_SOCKETS(cs) {
+				cs->SendChat(action, from_id, false, msg, data);
+			}
+
+			NetworkAdminChat(action, desttype, from_id, msg, data, from_admin);
+
+			ci = NetworkFindClientInfoFromClientID(from_id);
+			if (ci != NULL) {
+				NetworkTextMessage(action, (ConsoleColour)GetDrawStringCompanyColour(ci->client_playas), false, ci->client_name, msg, data);
+			}
+			break;
 	}
 }
 
@@ -1238,7 +1278,7 @@ DEF_GAME_RECEIVE_COMMAND(Server, PACKET_CLIENT_MOVE)
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
-void NetworkSocketHandler::Send_CompanyInformation(Packet *p, const Company *c, const NetworkCompanyStats *stats)
+void NetworkSocketHandler::SendCompanyInformation(Packet *p, const Company *c, const NetworkCompanyStats *stats)
 {
 	/* Grab the company name */
 	char company_name[NETWORK_COMPANY_NAME_LENGTH];
@@ -1514,6 +1554,11 @@ void NetworkServer_Tick(bool send_frame)
 	/* Now we are done with the frame, inform the clients that they can
 	 *  do their frame! */
 	FOR_ALL_CLIENT_SOCKETS(cs) {
+		/* We allow a number of bytes per frame, but only to the burst amount
+		 * to be available for packet receiving at any particular time. */
+		cs->receive_limit = min(cs->receive_limit + _settings_client.network.bytes_per_frame,
+				_settings_client.network.bytes_per_frame_burst);
+
 		/* Check if the speed of the client is what we can expect from a client */
 		if (cs->status == NetworkClientSocket::STATUS_ACTIVE) {
 			/* 1 lag-point per day */
@@ -1543,6 +1588,12 @@ void NetworkServer_Tick(bool send_frame)
 				}
 			} else {
 				cs->lag_test = 0;
+			}
+			if (cs->last_frame_server - cs->last_token_frame >= 5 * DAY_TICKS) {
+				/* This is a bad client! It didn't send the right token back. */
+				IConsolePrintF(CC_ERROR, "Client #%d is dropped because it fails to send valid acks", cs->client_id);
+				cs->CloseConnection(NETWORK_RECV_STATUS_SERVER_ERROR);
+				continue;
 			}
 		} else if (cs->status == NetworkClientSocket::STATUS_PRE_ACTIVE) {
 			uint lag = NetworkCalculateLag(cs);

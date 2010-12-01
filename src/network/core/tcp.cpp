@@ -56,12 +56,17 @@ NetworkRecvStatus NetworkTCPSocketHandler::CloseConnection(bool error)
  * if the OS-network-buffer is full)
  * @param packet the packet to send
  */
-void NetworkTCPSocketHandler::Send_Packet(Packet *packet)
+void NetworkTCPSocketHandler::SendPacket(Packet *packet)
 {
 	Packet *p;
 	assert(packet != NULL);
 
 	packet->PrepareToSend();
+
+	/* Reallocate the packet as in 99+% of the times we send at most 25 bytes and
+	 * keeping the other 1400+ bytes wastes memory, especially when someone tries
+	 * to do a denial of service attack! */
+	packet->buffer = ReallocT(packet->buffer, packet->size);
 
 	/* Locate last packet buffered for the client */
 	p = this->packet_queue;
@@ -85,7 +90,7 @@ void NetworkTCPSocketHandler::Send_Packet(Packet *packet)
  * @return \c true if a (part of a) packet could be sent and
  *         the connection is not closed yet.
  */
-bool NetworkTCPSocketHandler::Send_Packets(bool closing_down)
+bool NetworkTCPSocketHandler::SendPackets(bool closing_down)
 {
 	ssize_t res;
 	Packet *p;
@@ -136,7 +141,7 @@ bool NetworkTCPSocketHandler::Send_Packets(bool closing_down)
  * @param status the variable to store the status into
  * @return the received packet (or NULL when it didn't receive one)
  */
-Packet *NetworkTCPSocketHandler::Recv_Packet()
+Packet *NetworkTCPSocketHandler::ReceivePacket()
 {
 	ssize_t res;
 
