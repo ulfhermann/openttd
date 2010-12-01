@@ -56,6 +56,8 @@ static const char *_output_filename = NULL;  ///< The filename of the output, so
 static int _cur_line;                        ///< The current line we're parsing in the input file
 static int _errors, _warnings, _show_todo;
 
+static const ptrdiff_t MAX_COMMAND_PARAM_SIZE = 100; ///< Maximum size of every command block, not counting the name of the command itself
+
 struct LangString {
 	char *name;            // Name of the string
 	char *english;         // English text
@@ -489,7 +491,7 @@ static const CmdStruct *ParseCommandString(const char **str, char *param, int *a
 				strgen_error("Missing } from command '%s'", start);
 				return NULL;
 			}
-			if (s - start == 250) error("param command too long");
+			if (s - start == MAX_COMMAND_PARAM_SIZE) error("param command too long");
 			*param++ = c;
 		}
 	}
@@ -578,7 +580,7 @@ static void HandlePragma(char *str, bool master)
 
 static void ExtractCommandString(ParsedCommandStruct *p, const char *s, bool warnings)
 {
-	char param[100];
+	char param[MAX_COMMAND_PARAM_SIZE];
 	int argno;
 	int argidx = 0;
 	int casei;
@@ -740,21 +742,19 @@ static void HandleString(char *str, bool master)
 			return;
 		}
 
-		if (ent == NULL) {
-			if (_strings[_next_string_id]) {
-				strgen_error("String ID 0x%X for '%s' already in use by '%s'", _next_string_id, str, _strings[_next_string_id]->name);
-				return;
-			}
-
-			/* Allocate a new LangString */
-			ent = CallocT<LangString>(1);
-			_strings[_next_string_id] = ent;
-			ent->index = _next_string_id++;
-			ent->name = strdup(str);
-			ent->line = _cur_line;
-
-			HashAdd(str, ent);
+		if (_strings[_next_string_id]) {
+			strgen_error("String ID 0x%X for '%s' already in use by '%s'", _next_string_id, str, _strings[_next_string_id]->name);
+			return;
 		}
+
+		/* Allocate a new LangString */
+		ent = CallocT<LangString>(1);
+		_strings[_next_string_id] = ent;
+		ent->index = _next_string_id++;
+		ent->name = strdup(str);
+		ent->line = _cur_line;
+
+		HashAdd(str, ent);
 
 		ent->english = strdup(s);
 	} else {
@@ -768,27 +768,22 @@ static void HandleString(char *str, bool master)
 			return;
 		}
 
-		if (s[0] == ':' && s[1] == '\0' && casep == NULL) {
-			/* Special syntax :: means we should just inherit the master string */
-			ent->translated = strdup(ent->english);
+		/* make sure that the commands match */
+		if (!CheckCommandsMatch(s, ent->english, str)) return;
+
+		if (casep != NULL) {
+			Case *c = MallocT<Case>(1);
+
+			c->caseidx = ResolveCaseName(casep, strlen(casep));
+			c->string = strdup(s);
+			c->next = ent->translated_case;
+			ent->translated_case = c;
 		} else {
-			/* make sure that the commands match */
-			if (!CheckCommandsMatch(s, ent->english, str)) return;
-
-			if (casep != NULL) {
-				Case *c = MallocT<Case>(1);
-
-				c->caseidx = ResolveCaseName(casep, strlen(casep));
-				c->string = strdup(s);
-				c->next = ent->translated_case;
-				ent->translated_case = c;
-			} else {
-				ent->translated = strdup(s);
-				/* If the string was translated, use the line from the
-				 * translated language so errors in the translated file
-				 * are properly referenced to. */
-				ent->line = _cur_line;
-			}
+			ent->translated = strdup(s);
+			/* If the string was translated, use the line from the
+			 * translated language so errors in the translated file
+			 * are properly referenced to. */
+			ent->line = _cur_line;
 		}
 	}
 }
@@ -857,7 +852,7 @@ static void MakeHashOfStrings()
 		if (ls != NULL) {
 			const CmdStruct *cs;
 			const char *s;
-			char buf[256];
+			char buf[MAX_COMMAND_PARAM_SIZE];
 			int argno;
 			int casei;
 
@@ -1012,7 +1007,7 @@ static void PutCommandString(const char *str)
 			continue;
 		}
 
-		char param[256];
+		char param[MAX_COMMAND_PARAM_SIZE];
 		int argno;
 		int casei;
 		const CmdStruct *cs = ParseCommandString(&str, param, &argno, &casei);
