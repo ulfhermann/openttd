@@ -30,6 +30,7 @@
 #include "aircraft.h"
 #include "roadveh.h"
 #include "train.h"
+#include "ship.h"
 #include "console_func.h"
 #include "screenshot.h"
 #include "network/network.h"
@@ -1132,6 +1133,7 @@ static void CheckCaches()
 
 	Vehicle *v;
 	FOR_ALL_VEHICLES(v) {
+		extern void FillNewGRFVehicleCache(const Vehicle *v);
 		if (v != v->First() || v->vehstatus & VS_CRASHED || !v->IsPrimaryVehicle()) continue;
 
 		uint length = 0;
@@ -1145,6 +1147,7 @@ static void CheckCaches()
 
 		length = 0;
 		for (const Vehicle *u = v; u != NULL; u = u->Next()) {
+			FillNewGRFVehicleCache(u);
 			grf_cache[length] = u->grf_cache;
 			veh_cache[length] = u->vcache;
 			switch (u->type) {
@@ -1166,11 +1169,13 @@ static void CheckCaches()
 			case VEH_TRAIN:    Train::From(v)->ConsistChanged(true);     break;
 			case VEH_ROAD:     RoadVehUpdateCache(RoadVehicle::From(v)); break;
 			case VEH_AIRCRAFT: UpdateAircraftCache(Aircraft::From(v));   break;
+			case VEH_SHIP:     Ship::From(v)->UpdateCache();             break;
 			default: break;
 		}
 
 		length = 0;
 		for (const Vehicle *u = v; u != NULL; u = u->Next()) {
+			FillNewGRFVehicleCache(u);
 			if (memcmp(&grf_cache[length], &u->grf_cache, sizeof(NewGRFCache)) != 0) {
 				DEBUG(desync, 2, "newgrf cache mismatch: type %i, vehicle %i, company %i, unit number %i, wagon %i", (int)v->type, v->index, (int)v->owner, v->unitnumber, length);
 			}
