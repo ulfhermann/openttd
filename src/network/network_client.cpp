@@ -55,15 +55,16 @@ ClientNetworkGameSocketHandler::~ClientNetworkGameSocketHandler()
 
 	/* If for whatever reason the handle isn't closed, do it now. */
 	if (this->download_file != NULL) fclose(this->download_file);
+	free(this->download_filename);
 }
 
 NetworkRecvStatus ClientNetworkGameSocketHandler::CloseConnection(NetworkRecvStatus status)
 {
 	assert(status != NETWORK_RECV_STATUS_OKAY);
 	/*
-	 * Sending a message just before leaving the game calls cs->Send_Packets.
+	 * Sending a message just before leaving the game calls cs->SendPackets.
 	 * This might invoke this function, which means that when we close the
-	 * connection after cs->Send_Packets we will close an already closed
+	 * connection after cs->SendPackets we will close an already closed
 	 * connection. This handles that case gracefully without having to make
 	 * that code any more complex or more aware of the validity of the socket.
 	 */
@@ -71,7 +72,7 @@ NetworkRecvStatus ClientNetworkGameSocketHandler::CloseConnection(NetworkRecvSta
 
 	DEBUG(net, 1, "Closed client connection %d", this->client_id);
 
-	this->Send_Packets(true);
+	this->SendPackets(true);
 
 	delete this->GetInfo();
 	delete this;
@@ -126,7 +127,7 @@ void ClientNetworkGameSocketHandler::ClientError(NetworkRecvStatus res)
 /*static */ bool ClientNetworkGameSocketHandler::Receive()
 {
 	if (my_client->CanSendReceive()) {
-		NetworkRecvStatus res = my_client->Recv_Packets();
+		NetworkRecvStatus res = my_client->ReceivePackets();
 		if (res != NETWORK_RECV_STATUS_OKAY) {
 			/* The client made an error of which we can not recover
 				*   close the client and drop back to main menu */
@@ -140,7 +141,7 @@ void ClientNetworkGameSocketHandler::ClientError(NetworkRecvStatus res)
 /** Send the packets of this socket handler. */
 /*static */ void ClientNetworkGameSocketHandler::Send()
 {
-	my_client->Send_Packets();
+	my_client->SendPackets();
 	my_client->CheckConnection();
 }
 
@@ -276,7 +277,7 @@ NetworkRecvStatus ClientNetworkGameSocketHandler::SendCompanyInformationQuery()
 	SetWindowDirty(WC_NETWORK_STATUS_WINDOW, 0);
 
 	Packet *p = new Packet(PACKET_CLIENT_COMPANY_INFO);
-	my_client->Send_Packet(p);
+	my_client->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -291,14 +292,14 @@ NetworkRecvStatus ClientNetworkGameSocketHandler::SendJoin()
 	p->Send_string(_settings_client.network.client_name); // Client name
 	p->Send_uint8 (_network_join_as);     // PlayAs
 	p->Send_uint8 (NETLANG_ANY);          // Language
-	my_client->Send_Packet(p);
+	my_client->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
 NetworkRecvStatus ClientNetworkGameSocketHandler::SendNewGRFsOk()
 {
 	Packet *p = new Packet(PACKET_CLIENT_NEWGRFS_CHECKED);
-	my_client->Send_Packet(p);
+	my_client->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -306,7 +307,7 @@ NetworkRecvStatus ClientNetworkGameSocketHandler::SendGamePassword(const char *p
 {
 	Packet *p = new Packet(PACKET_CLIENT_GAME_PASSWORD);
 	p->Send_string(password);
-	my_client->Send_Packet(p);
+	my_client->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -314,7 +315,7 @@ NetworkRecvStatus ClientNetworkGameSocketHandler::SendCompanyPassword(const char
 {
 	Packet *p = new Packet(PACKET_CLIENT_COMPANY_PASSWORD);
 	p->Send_string(GenerateCompanyPasswordHash(password));
-	my_client->Send_Packet(p);
+	my_client->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -330,7 +331,7 @@ NetworkRecvStatus ClientNetworkGameSocketHandler::SendGetMap()
 	 * will have the lower bits set to 0. As such they would become
 	 * incompatible, which we would like to prevent by this. */
 	if (HasBit(_openttd_newgrf_version, 19)) p->Send_uint32(_openttd_newgrf_version);
-	my_client->Send_Packet(p);
+	my_client->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -339,7 +340,7 @@ NetworkRecvStatus ClientNetworkGameSocketHandler::SendMapOk()
 	my_client->status = STATUS_ACTIVE;
 
 	Packet *p = new Packet(PACKET_CLIENT_MAP_OK);
-	my_client->Send_Packet(p);
+	my_client->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -348,7 +349,8 @@ NetworkRecvStatus ClientNetworkGameSocketHandler::SendAck()
 	Packet *p = new Packet(PACKET_CLIENT_ACK);
 
 	p->Send_uint32(_frame_counter);
-	my_client->Send_Packet(p);
+	p->Send_uint8 (my_client->token);
+	my_client->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -356,9 +358,9 @@ NetworkRecvStatus ClientNetworkGameSocketHandler::SendAck()
 NetworkRecvStatus ClientNetworkGameSocketHandler::SendCommand(const CommandPacket *cp)
 {
 	Packet *p = new Packet(PACKET_CLIENT_COMMAND);
-	my_client->Send_Command(p, cp);
+	my_client->NetworkGameSocketHandler::SendCommand(p, cp);
 
-	my_client->Send_Packet(p);
+	my_client->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -373,7 +375,7 @@ NetworkRecvStatus ClientNetworkGameSocketHandler::SendChat(NetworkAction action,
 	p->Send_string(msg);
 	p->Send_uint64(data);
 
-	my_client->Send_Packet(p);
+	my_client->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -383,7 +385,7 @@ NetworkRecvStatus ClientNetworkGameSocketHandler::SendError(NetworkErrorCode err
 	Packet *p = new Packet(PACKET_CLIENT_ERROR);
 
 	p->Send_uint8(errorno);
-	my_client->Send_Packet(p);
+	my_client->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -392,7 +394,7 @@ NetworkRecvStatus ClientNetworkGameSocketHandler::SendSetPassword(const char *pa
 	Packet *p = new Packet(PACKET_CLIENT_SET_PASSWORD);
 
 	p->Send_string(GenerateCompanyPasswordHash(password));
-	my_client->Send_Packet(p);
+	my_client->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -401,7 +403,7 @@ NetworkRecvStatus ClientNetworkGameSocketHandler::SendSetName(const char *name)
 	Packet *p = new Packet(PACKET_CLIENT_SET_NAME);
 
 	p->Send_string(name);
-	my_client->Send_Packet(p);
+	my_client->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -409,7 +411,7 @@ NetworkRecvStatus ClientNetworkGameSocketHandler::SendQuit()
 {
 	Packet *p = new Packet(PACKET_CLIENT_QUIT);
 
-	my_client->Send_Packet(p);
+	my_client->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -418,7 +420,7 @@ NetworkRecvStatus ClientNetworkGameSocketHandler::SendRCon(const char *pass, con
 	Packet *p = new Packet(PACKET_CLIENT_RCON);
 	p->Send_string(pass);
 	p->Send_string(command);
-	my_client->Send_Packet(p);
+	my_client->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -427,7 +429,7 @@ NetworkRecvStatus ClientNetworkGameSocketHandler::SendMove(CompanyID company, co
 	Packet *p = new Packet(PACKET_CLIENT_MOVE);
 	p->Send_uint8(company);
 	p->Send_string(GenerateCompanyPasswordHash(pass));
-	my_client->Send_Packet(p);
+	my_client->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -596,7 +598,7 @@ DEF_GAME_RECEIVE_COMMAND(Client, PACKET_SERVER_CHECK_NEWGRFS)
 	/* Check all GRFs */
 	for (; grf_count > 0; grf_count--) {
 		GRFIdentifier c;
-		this->Recv_GRFIdentifier(p, &c);
+		this->ReceiveGRFIdentifier(p, &c);
 
 		/* Check whether we know this GRF */
 		const GRFConfig *f = FindGRFConfig(c.grfid, FGCM_EXACT, c.md5sum);
@@ -692,11 +694,16 @@ DEF_GAME_RECEIVE_COMMAND(Client, PACKET_SERVER_MAP_BEGIN)
 	if (this->HasClientQuit()) return NETWORK_RECV_STATUS_CONN_LOST;
 	if (this->download_file != NULL) return NETWORK_RECV_STATUS_MALFORMED_PACKET;
 
-	this->download_file = FioFOpenFile("network_client.tmp", "wb", AUTOSAVE_DIR);
+	char filename[MAX_PATH];
+	FioGetDirectory(filename, lengthof(filename), AUTOSAVE_DIR);
+	strecat(filename, "network_client.tmp", lastof(filename));
+
+	this->download_file = FioFOpenFile(filename, "wb", NO_DIRECTORY);
 	if (this->download_file == NULL) {
 		_switch_mode_errorstr = STR_NETWORK_ERROR_SAVEGAMEERROR;
 		return NETWORK_RECV_STATUS_SAVEGAME;
 	}
+	this->download_filename = strdup(filename);
 
 	_frame_counter = _frame_counter_server = _frame_counter_max = p->Recv_uint32();
 
@@ -748,7 +755,11 @@ DEF_GAME_RECEIVE_COMMAND(Client, PACKET_SERVER_MAP_DONE)
 	SetWindowDirty(WC_NETWORK_STATUS_WINDOW, 0);
 
 	/* The map is done downloading, load it */
-	if (!SafeSaveOrLoad("network_client.tmp", SL_LOAD, GM_NORMAL, AUTOSAVE_DIR)) {
+	bool load_success = SafeSaveOrLoad(this->download_filename, SL_LOAD, GM_NORMAL, NO_DIRECTORY);
+	free(this->download_filename);
+	this->download_filename = NULL;
+
+	if (!load_success) {
 		DeleteWindowById(WC_NETWORK_STATUS_WINDOW, 0);
 		_switch_mode_errorstr = STR_NETWORK_ERROR_SAVEGAMEERROR;
 		return NETWORK_RECV_STATUS_SAVEGAME;
@@ -769,7 +780,7 @@ DEF_GAME_RECEIVE_COMMAND(Client, PACKET_SERVER_MAP_DONE)
 			 * the server will give us a client-id and let us in */
 			_network_join_status = NETWORK_JOIN_STATUS_REGISTERING;
 			ShowJoinStatusWindow();
-			NetworkSend_Command(0, 0, 0, CMD_COMPANY_CTRL, NULL, NULL, _local_company);
+			NetworkSendCommand(0, 0, 0, CMD_COMPANY_CTRL, NULL, NULL, _local_company);
 		}
 	} else {
 		/* take control over an existing company */
@@ -788,7 +799,7 @@ DEF_GAME_RECEIVE_COMMAND(Client, PACKET_SERVER_FRAME)
 #ifdef ENABLE_NETWORK_SYNC_EVERY_FRAME
 	/* Test if the server supports this option
 	 *  and if we are at the frame the server is */
-	if (p->pos < p->size) {
+	if (p->pos + 1 < p->size) {
 		_sync_frame = _frame_counter_server;
 		_sync_seed_1 = p->Recv_uint32();
 #ifdef NETWORK_SEND_DOUBLE_SEED
@@ -796,6 +807,9 @@ DEF_GAME_RECEIVE_COMMAND(Client, PACKET_SERVER_FRAME)
 #endif
 	}
 #endif
+	/* Receive the token. */
+	if (p->pos != p->size) this->token = p->Recv_uint8();
+
 	DEBUG(net, 5, "Received FRAME %d", _frame_counter_server);
 
 	/* Let the server know that we received this frame correctly
@@ -827,7 +841,7 @@ DEF_GAME_RECEIVE_COMMAND(Client, PACKET_SERVER_COMMAND)
 	if (this->status != STATUS_ACTIVE) return NETWORK_RECV_STATUS_MALFORMED_PACKET;
 
 	CommandPacket cp;
-	const char *err = this->Recv_Command(p, &cp);
+	const char *err = this->ReceiveCommand(p, &cp);
 	cp.frame    = p->Recv_uint32();
 	cp.my_cmd   = p->Recv_bool();
 
