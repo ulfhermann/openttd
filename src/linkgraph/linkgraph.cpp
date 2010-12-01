@@ -16,6 +16,8 @@
 #include "../map_func.h"
 #include "../core/bitmath_func.hpp"
 #include "../debug.h"
+#include "../window_func.h"
+#include "../window_gui.h"
 #include "../moving_average.h"
 #include <queue>
 
@@ -387,6 +389,10 @@ void LinkGraph::Join()
 		Node &node = this->GetNode(node_id);
 		if (Station::IsValidID(node.station)) {
 			node.ExportFlows(this->cargo);
+			Window *station_gui = FindWindowById(WC_STATION_VIEW, node.station);
+			if (station_gui != NULL) {
+				station_gui->OnInvalidateData(this->GetCargo());
+			}
 		}
 	}
 

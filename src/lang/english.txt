@@ -221,6 +221,7 @@ STR_UNITS_HEIGHT_SI                                             :{COMMA} m
 STR_LIST_FILTER_OSKTITLE                                        :{BLACK}Enter filter string
 STR_LIST_FILTER_TOOLTIP                                         :{BLACK}Enter a keyword to filter the list for
 
+STR_TOOLTIP_GROUP_ORDER                                         :{BLACK}Select grouping order
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}Select sorting order (descending/ascending)
 STR_TOOLTIP_SORT_CRITERIA                                       :{BLACK}Select sorting criteria
 STR_TOOLTIP_FILTER_CRITERIA                                     :{BLACK}Select filtering criteria
@@ -281,6 +282,8 @@ STR_SORT_BY_FACILITY                                            :Station type
 STR_SORT_BY_WAITING                                             :Waiting cargo value
 STR_SORT_BY_RATING_MAX                                          :Highest cargo rating
 STR_SORT_BY_RATING_MIN                                          :Lowest cargo rating
+STR_SORT_BY_AMOUNT                                              :{BLACK}Amount
+STR_SORT_BY_STATION                                             :{BLACK}Station
 STR_SORT_BY_ENGINE_ID                                           :EngineID (classic sort)
 STR_SORT_BY_COST                                                :Cost
 STR_SORT_BY_POWER                                               :Power
@@ -2659,8 +2662,31 @@ STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Accepts:
 
 STR_STATION_VIEW_RATINGS_BUTTON                                 :{BLACK}Ratings
 STR_STATION_VIEW_RATINGS_TOOLTIP                                :{BLACK}Show station ratings
-STR_STATION_VIEW_CARGO_RATINGS_TITLE                            :{BLACK}Local rating of transport service:
+STR_STATION_VIEW_CARGO_RATINGS_TITLE                            :{BLACK}Monthly supply and local rating:
 STR_STATION_VIEW_CARGO_RATING                                   :{WHITE}{STRING}: {YELLOW}{STRING} ({COMMA}%)
+STR_STATION_VIEW_CARGO_SUPPLY_RATING                            :{WHITE}{STRING}: {YELLOW}{COMMA} / {STRING} ({COMMA}%)
+
+STR_STATION_VIEW_WAITING                                        :Waiting
+STR_STATION_VIEW_PLANNED                                        :Planned
+STR_STATION_VIEW_SENT                                           :Sent
+STR_STATION_VIEW_TOGGLE_CARGO_VIEW                              :{BLACK}Toggle between waiting, planned and sent cargo
+STR_STATION_VIEW_FROM                                           :{YELLOW}{SHORTCARGO} from {STATION}
+STR_STATION_VIEW_VIA                                            :{YELLOW}{SHORTCARGO} via {STATION}
+STR_STATION_VIEW_TO                                             :{YELLOW}{SHORTCARGO} to {STATION}
+STR_STATION_VIEW_FROM_ANY                                       :{RED}{SHORTCARGO} from unknown station
+STR_STATION_VIEW_TO_ANY                                         :{RED}{SHORTCARGO} to any station
+STR_STATION_VIEW_VIA_ANY                                        :{RED}{SHORTCARGO} via any station
+STR_STATION_VIEW_FROM_HERE                                      :{GREEN}{SHORTCARGO} from this station
+STR_STATION_VIEW_VIA_HERE                                       :{GREEN}{SHORTCARGO} stopping at this station
+STR_STATION_VIEW_TO_HERE                                        :{GREEN}{SHORTCARGO} to this station
+STR_STATION_VIEW_NONSTOP                                        :{YELLOW}{SHORTCARGO} non-stop
+
+STR_STATION_VIEW_GROUP_S_V_D                                    :Source-Via-Destination
+STR_STATION_VIEW_GROUP_S_D_V                                    :Source-Destination-Via
+STR_STATION_VIEW_GROUP_V_S_D                                    :Via-Source-Destination
+STR_STATION_VIEW_GROUP_V_D_S                                    :Via-Destination-Source
+STR_STATION_VIEW_GROUP_D_S_V                                    :Destination-Source-Via
+STR_STATION_VIEW_GROUP_D_V_S                                    :Destination-Via-Source
 
 ############ range for rating starts
 STR_CARGO_RATING_APPALLING                                      :Appalling

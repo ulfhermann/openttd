@@ -13,21 +13,28 @@
 #define STATION_GUI_H
 
 #include "command_type.h"
+#include "station_type.h"
 #include "tilearea_type.h"
 #include "window_type.h"
+#include "cargo_type.h"
+#include <set>
 
 /** Enum for StationView, referring to _station_view_widgets and _station_view_expanded_widgets */
 enum StationViewWidgets {
 	SVW_CAPTION    =  0, ///< Caption of the window
-	SVW_WAITING    =  1, ///< List of waiting cargo
-	SVW_SCROLLBAR  =  2, ///< Scrollbar
-	SVW_ACCEPTLIST =  3, ///< List of accepted cargos
-	SVW_RATINGLIST =  3, ///< Ratings of cargos
-	SVW_LOCATION   =  4, ///< 'Location' button
-	SVW_RATINGS    =  5, ///< 'Ratings' button
-	SVW_ACCEPTS    =  5, ///< 'Accepts' button
-	SVW_RENAME     =  6, ///< 'Rename' button
-	SVW_TRAINS     =  7, ///< List of scheduled trains button
+	SVW_SORT_ORDER =  1, ///< 'Sort order' button
+	SVW_SORT_BY    =  2, ///< 'Sort by' button
+	SVW_MODE       =  3, ///< button for toggling planned and real flows
+	SVW_GROUP_BY   =  4, ///< 'Group by' button
+	SVW_WAITING    =  5, ///< List of waiting cargo
+	SVW_SCROLLBAR  =  6, ///< Scrollbar
+	SVW_ACCEPTLIST =  7, ///< List of accepted cargos
+	SVW_RATINGLIST =  7, ///< Ratings of cargos
+	SVW_LOCATION   =  8, ///< 'Location' button
+	SVW_RATINGS    =  9, ///< 'Ratings' button
+	SVW_ACCEPTS    =  9, ///< 'Accepts' button
+	SVW_RENAME     = 10, ///< 'Rename' button
+	SVW_TRAINS     = 11, ///< List of scheduled trains button
 	SVW_ROADVEHS,        ///< List of scheduled road vehs button
 	SVW_SHIPS,           ///< List of scheduled ships button
 	SVW_PLANES,          ///< List of scheduled planes button
@@ -45,5 +52,86 @@ void CheckRedrawStationCoverage(const Window *w);
 
 void ShowSelectStationIfNeeded(CommandContainer cmd, TileArea ta);
 void ShowSelectWaypointIfNeeded(CommandContainer cmd, TileArea ta);
+
+enum SortOrder {
+	SO_DESCENDING,
+	SO_ASCENDING
+};
+
+class CargoDataEntry;
+
+enum CargoSortType {
+	ST_AS_GROUPING,    ///< by the same principle the entries are being grouped
+	ST_COUNT,          ///< by amount of cargo
+	ST_STATION_STRING, ///< by station name
+	ST_STATION_ID,     ///< by station id
+	ST_CARGO_ID,       ///< by cargo id
+};
+
+class CargoSorter {
+public:
+	CargoSorter(CargoSortType t = ST_STATION_ID, SortOrder o = SO_ASCENDING) : type(t), order(o) {}
+	CargoSortType GetSortType() {return type;}
+	bool operator()(const CargoDataEntry * cd1, const CargoDataEntry * cd2) const;
+
+private:
+	CargoSortType type;
+	SortOrder order;
+
+	template<class ID>
+	bool SortId(ID st1, ID st2) const;
+	bool SortCount(const CargoDataEntry *cd1, const CargoDataEntry *cd2) const;
+	bool SortStation (StationID st1, StationID st2) const;
+};
+
+typedef std::set<CargoDataEntry *, CargoSorter> CargoDataSet;
+
+class CargoDataEntry {
+public:
+	CargoDataEntry();
+	~CargoDataEntry();
+
+	CargoDataEntry * InsertOrRetrieve(StationID s) {return InsertOrRetrieve<StationID>(s);}
+	CargoDataEntry * InsertOrRetrieve(CargoID car) {return InsertOrRetrieve<CargoID>(car);}
+	void Update(uint count);
+
+	void Remove(StationID s) {CargoDataEntry t(s); Remove(&t);}
+	void Remove(CargoID c) {CargoDataEntry t(c); Remove(&t);}
+
+	CargoDataEntry * Retrieve(StationID s) const {CargoDataEntry t(s); return Retrieve(subentries->find(&t));}
+	CargoDataEntry * Retrieve(CargoID c) const {CargoDataEntry t(c);return Retrieve(subentries->find(&t));}
+
+	void Resort(CargoSortType type, SortOrder order);
+
+	StationID GetStation() const {return station;}
+	CargoID GetCargo() const {return cargo;}
+	uint GetCount() const {return count;}
+	CargoDataEntry * GetParent() const {return parent;}
+	uint Size() const {return size;}
+
+	CargoDataSet::iterator Begin() const {return subentries->begin();}
+	CargoDataSet::iterator End() const {return subentries->end();}
+
+	void Clear();
+private:
+
+	CargoDataEntry(StationID st, uint c, CargoDataEntry * p);
+	CargoDataEntry(CargoID car, uint c, CargoDataEntry * p);
+	CargoDataEntry(StationID s);
+	CargoDataEntry(CargoID c);
+	CargoDataEntry * Retrieve(CargoDataSet::iterator i) const;
+	template<class ID>
+	CargoDataEntry * InsertOrRetrieve(ID s);
+	void Remove(CargoDataEntry * comp);
+	void IncrementSize();
+	CargoDataEntry * parent;
+	const union {
+		StationID station;
+		CargoID cargo;
+	};
+	uint size;
+	uint count;
+	CargoDataSet * subentries;
+};
 
 #endif /* STATION_GUI_H */
