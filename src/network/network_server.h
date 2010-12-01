@@ -66,12 +66,16 @@ public:
 	};
 
 	byte lag_test;               ///< Byte used for lag-testing the client
+	byte last_token;             ///< The last random token we did send to verify the client is listening
+	uint32 last_token_frame;     ///< The last frame we received the right token
 	ClientStatus status;         ///< Status of this client
 	CommandQueue outgoing_queue; ///< The command-queue awaiting delivery
+	int receive_limit;           ///< Amount of bytes that we can receive at this moment
 
 	ServerNetworkGameSocketHandler(SOCKET s);
 	~ServerNetworkGameSocketHandler();
 
+	virtual Packet *ReceivePacket();
 	NetworkRecvStatus CloseConnection(NetworkRecvStatus status);
 	void GetClientName(char *client_name, size_t size) const;
 
