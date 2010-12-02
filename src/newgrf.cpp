@@ -6697,7 +6697,7 @@ static bool HandleParameterInfo(ByteReader *buf)
 		uint32 id = buf->ReadDWord();
 		if (type != 'C' || id >= _cur_grfconfig->num_valid_params) {
 			grfmsg(2, "StaticGRFInfo: all child nodes of 'INFO'->'PARA' should have type 'C' and their parameter number as id");
-			if (!SkipUnknownInfo(buf, type)) return false;
+			return SkipUnknownInfo(buf, type);
 		}
 
 		if (id >= _cur_grfconfig->param_info.Length()) {
@@ -7642,7 +7642,7 @@ static void FinaliseObjectsArray()
 		ObjectSpec **&objectspec = (*file)->objectspec;
 		if (objectspec != NULL) {
 			for (int i = 0; i < NUM_OBJECTS; i++) {
-				if (objectspec[i] != NULL && objectspec[i]->enabled) {
+				if (objectspec[i] != NULL && objectspec[i]->grf_prop.grffile != NULL && objectspec[i]->enabled) {
 					_object_mngr.SetEntitySpec(objectspec[i]);
 				}
 			}
