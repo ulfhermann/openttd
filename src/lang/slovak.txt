@@ -229,7 +229,7 @@ STR_ABBREV_NONE                                                 :{TINYFONT}NIC
 STR_ABBREV_ALL                                                  :{TINYFONT}VS.
 
 # 'Mode' of transport for cargoes
-STR_PASSENGERS                                                  :{COMMA} cestujucich
+STR_PASSENGERS                                                  :{COMMA} cestujuci{P "" "" ch}
 STR_BAGS                                                        :{COMMA} vriec
 STR_TONS                                                        :{COMMA} ton
 STR_LITERS                                                      :{COMMA} litrov
@@ -1418,7 +1418,6 @@ STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_OPF                     :pôvodný {BLUE
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_NPF                     :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_YAPF                    :YAPF {RED}(neodporúča sa)
 
-
 STR_CONFIG_SETTING_QUERY_CAPTION                                :{WHITE}Zmeniť hodnotu nastavenia
 
 # Intro window
@@ -1761,7 +1760,7 @@ STR_NETWORK_CONNECTING_SPECIAL_1                                :{BLACK}Prijíma
 STR_NETWORK_CONNECTING_SPECIAL_2                                :{BLACK}Prijímam informácie o spoločnosti..
 ############ End of leave-in-this-order
 STR_NETWORK_CONNECTING_WAITING                                  :{BLACK}{NUM} klient{P "" i i} pred nami
-STR_NETWORK_CONNECTING_DOWNLOADING                              :{BLACK}{BYTES} / {BYTES} stiahnuté
+STR_NETWORK_CONNECTING_DOWNLOADING_2                            :{BLACK}{BYTES} / {BYTES} stiahnuté
 
 STR_NETWORK_CONNECTION_DISCONNECT                               :{BLACK}Odpojiť sa
 

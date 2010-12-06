@@ -15,6 +15,7 @@
 #define NETWORK_CORE_H
 
 #include "../../newgrf_config.h"
+#include "config.h"
 
 #ifdef ENABLE_NETWORK
 
@@ -76,7 +77,7 @@ public:
 
 	void SendGRFIdentifier(Packet *p, const GRFIdentifier *grf);
 	void ReceiveGRFIdentifier(Packet *p, GRFIdentifier *grf);
-	void SendCompanyInformation(Packet *p, const struct Company *c, const struct NetworkCompanyStats *stats);
+	void SendCompanyInformation(Packet *p, const struct Company *c, const struct NetworkCompanyStats *stats, uint max_len = NETWORK_COMPANY_NAME_LENGTH);
 };
 
 #endif /* ENABLE_NETWORK */
