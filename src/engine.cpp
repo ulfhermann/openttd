@@ -601,6 +601,9 @@ void StartupEngines()
 		c->avail_railtypes = GetCompanyRailtypes(c->index);
 		c->avail_roadtypes = GetCompanyRoadtypes(c->index);
 	}
+
+	/* Invalidate any open purchase lists */
+	InvalidateWindowClassesData(WC_BUILD_VEHICLE);
 }
 
 static void AcceptEnginePreview(EngineID eid, CompanyID company)
@@ -829,7 +832,7 @@ CommandCost CmdRenameEngine(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 	bool reset = StrEmpty(text);
 
 	if (!reset) {
-		if (strlen(text) >= MAX_LENGTH_ENGINE_NAME_BYTES) return CMD_ERROR;
+		if (Utf8StringLength(text) >= MAX_LENGTH_ENGINE_NAME_CHARS) return CMD_ERROR;
 		if (!IsUniqueEngineName(text)) return_cmd_error(STR_ERROR_NAME_MUST_BE_UNIQUE);
 	}
 
