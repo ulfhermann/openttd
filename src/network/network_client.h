@@ -19,9 +19,8 @@
 /** Class for handling the client side of the game connection. */
 class ClientNetworkGameSocketHandler : public ZeroedMemoryAllocator, public NetworkGameSocketHandler {
 private:
-	FILE *download_file;     ///< Handle used for downloading the savegame.
-	char *download_filename; ///< File name of the downloading savegame, so we open the right one.
-	byte token;              ///< The token we need to send back to the server to prove we're the right client.
+	struct PacketReader *savegame; ///< Packet reader for reading the savegame.
+	byte token;                    ///< The token we need to send back to the server to prove we're the right client.
 
 	/** Status of the connection with the server. */
 	enum ServerStatus {
@@ -55,6 +54,7 @@ protected:
 	DECLARE_GAME_RECEIVE_COMMAND(PACKET_SERVER_WELCOME);
 	DECLARE_GAME_RECEIVE_COMMAND(PACKET_SERVER_WAIT);
 	DECLARE_GAME_RECEIVE_COMMAND(PACKET_SERVER_MAP_BEGIN);
+	DECLARE_GAME_RECEIVE_COMMAND(PACKET_SERVER_MAP_SIZE);
 	DECLARE_GAME_RECEIVE_COMMAND(PACKET_SERVER_MAP_DATA);
 	DECLARE_GAME_RECEIVE_COMMAND(PACKET_SERVER_MAP_DONE);
 	DECLARE_GAME_RECEIVE_COMMAND(PACKET_SERVER_JOIN);

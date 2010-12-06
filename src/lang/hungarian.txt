@@ -1494,6 +1494,7 @@ STR_CHEAT_SWITCH_CLIMATE_SUB_ARCTIC_LANDSCAPE                   :Szubarktikus t�
 STR_CHEAT_SWITCH_CLIMATE_SUB_TROPICAL_LANDSCAPE                 :Szubtrópusi táj
 STR_CHEAT_SWITCH_CLIMATE_TOYLAND_LANDSCAPE                      :Játékvilág táj
 STR_CHEAT_CHANGE_DATE                                           :{LTBLUE}Dátum módosítás: {ORANGE} {DATE_SHORT}
+STR_CHEAT_CHANGE_DATE_QUERY_CAPT                                :{WHITE}Aktuális év megváltoztatása
 STR_CHEAT_SETUP_PROD                                            :{LTBLUE}A nyersanyagüzemek termelése változtatható: {ORANGE}{STRING}
 
 # Livery window
@@ -1757,7 +1758,7 @@ STR_NETWORK_CONNECTING_SPECIAL_1                                :{BLACK}Játéki
 STR_NETWORK_CONNECTING_SPECIAL_2                                :{BLACK}Vállalat infó lekérése..
 ############ End of leave-in-this-order
 STR_NETWORK_CONNECTING_WAITING                                  :{BLACK}{NUM} kliensre várunk, hogy befejezze
-STR_NETWORK_CONNECTING_DOWNLOADING                              :{BLACK}{BYTES} / {BYTES} lett eddig letöltve
+STR_NETWORK_CONNECTING_DOWNLOADING_2                            :{BLACK}{BYTES} / {BYTES} lett eddig letöltve
 
 STR_NETWORK_CONNECTION_DISCONNECT                               :{BLACK}Megszakít
 
