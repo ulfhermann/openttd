@@ -1479,6 +1479,7 @@ STR_CHEAT_SWITCH_CLIMATE_SUB_ARCTIC_LANDSCAPE                   :Sub-arctic land
 STR_CHEAT_SWITCH_CLIMATE_SUB_TROPICAL_LANDSCAPE                 :Sub-tropical landscape
 STR_CHEAT_SWITCH_CLIMATE_TOYLAND_LANDSCAPE                      :Toyland landscape
 STR_CHEAT_CHANGE_DATE                                           :{LTBLUE}Change date: {ORANGE}{DATE_SHORT}
+STR_CHEAT_CHANGE_DATE_QUERY_CAPT                                :{WHITE}Change current year
 STR_CHEAT_SETUP_PROD                                            :{LTBLUE}Enable modifying production values: {ORANGE}{STRING1}
 
 # Livery window
@@ -1742,7 +1743,8 @@ STR_NETWORK_CONNECTING_SPECIAL_1                                :{BLACK}Fetching
 STR_NETWORK_CONNECTING_SPECIAL_2                                :{BLACK}Fetching company info..
 ############ End of leave-in-this-order
 STR_NETWORK_CONNECTING_WAITING                                  :{BLACK}{NUM} client{P "" s} in front of you
-STR_NETWORK_CONNECTING_DOWNLOADING                              :{BLACK}{BYTES} / {BYTES} downloaded so far
+STR_NETWORK_CONNECTING_DOWNLOADING_1                            :{BLACK}{BYTES} downloaded so far
+STR_NETWORK_CONNECTING_DOWNLOADING_2                            :{BLACK}{BYTES} / {BYTES} downloaded so far
 
 STR_NETWORK_CONNECTION_DISCONNECT                               :{BLACK}Disconnect
 
