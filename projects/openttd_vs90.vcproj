@@ -2232,6 +2232,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\saveload\saveload_filter.h"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\saveload\saveload_internal.h"
 				>
 			</File>
