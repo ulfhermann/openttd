@@ -282,8 +282,6 @@ STR_SORT_BY_FACILITY                                            :Station type
 STR_SORT_BY_WAITING                                             :Waiting cargo value
 STR_SORT_BY_RATING_MAX                                          :Highest cargo rating
 STR_SORT_BY_RATING_MIN                                          :Lowest cargo rating
-STR_SORT_BY_AMOUNT                                              :{BLACK}Amount
-STR_SORT_BY_STATION                                             :{BLACK}Station
 STR_SORT_BY_ENGINE_ID                                           :EngineID (classic sort)
 STR_SORT_BY_COST                                                :Cost
 STR_SORT_BY_POWER                                               :Power
@@ -2668,10 +2666,11 @@ STR_STATION_VIEW_CARGO_RATINGS_TITLE                            :{BLACK}Monthly 
 STR_STATION_VIEW_CARGO_RATING                                   :{WHITE}{STRING}: {YELLOW}{STRING} ({COMMA}%)
 STR_STATION_VIEW_CARGO_SUPPLY_RATING                            :{WHITE}{STRING}: {YELLOW}{COMMA} / {STRING} ({COMMA}%)
 
-STR_STATION_VIEW_WAITING                                        :Waiting
-STR_STATION_VIEW_PLANNED                                        :Planned
-STR_STATION_VIEW_SENT                                           :Sent
-STR_STATION_VIEW_TOGGLE_CARGO_VIEW                              :{BLACK}Toggle between waiting, planned and sent cargo
+STR_STATION_VIEW_GROUP                                          :{BLACK}Group by
+STR_STATION_VIEW_WAITING_STATION                                :Station: Waiting
+STR_STATION_VIEW_WAITING_AMOUNT                                 :Amount: Waiting
+STR_STATION_VIEW_PLANNED_STATION                                :Station: Planned
+STR_STATION_VIEW_PLANNED_AMOUNT                                 :Amount: Planned
 STR_STATION_VIEW_FROM                                           :{YELLOW}{SHORTCARGO} from {STATION}
 STR_STATION_VIEW_VIA                                            :{YELLOW}{SHORTCARGO} via {STATION}
 STR_STATION_VIEW_TO                                             :{YELLOW}{SHORTCARGO} to {STATION}
