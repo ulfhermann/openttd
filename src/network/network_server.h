@@ -16,6 +16,7 @@
 
 #include "network_internal.h"
 #include "core/tcp_listen.h"
+#include "../thread/thread.h"
 
 class ServerNetworkGameSocketHandler;
 typedef ServerNetworkGameSocketHandler NetworkClientSocket;
@@ -72,10 +73,15 @@ public:
 	CommandQueue outgoing_queue; ///< The command-queue awaiting delivery
 	int receive_limit;           ///< Amount of bytes that we can receive at this moment
 
+	Packet *savegame_packets;      ///< Packet queue of the savegame; send these "slowly" to the client.
+	struct PacketWriter *savegame; ///< Writer used to write the savegame.
+	ThreadMutex *savegame_mutex;   ///< Mutex for making threaded saving safe.
+
 	ServerNetworkGameSocketHandler(SOCKET s);
 	~ServerNetworkGameSocketHandler();
 
 	virtual Packet *ReceivePacket();
+	virtual void SendPacket(Packet *packet);
 	NetworkRecvStatus CloseConnection(NetworkRecvStatus status);
 	void GetClientName(char *client_name, size_t size) const;
 
