@@ -71,8 +71,8 @@ enum CargoSortType {
 class CargoSorter {
 public:
 	CargoSorter(CargoSortType t = ST_STATION_ID, SortOrder o = SO_ASCENDING) : type(t), order(o) {}
-	CargoSortType GetSortType() {return type;}
-	bool operator()(const CargoDataEntry * cd1, const CargoDataEntry * cd2) const;
+	CargoSortType GetSortType() {return this->type;}
+	bool operator()(const CargoDataEntry *cd1, const CargoDataEntry *cd2) const;
 
 private:
 	CargoSortType type;
@@ -91,47 +91,51 @@ public:
 	CargoDataEntry();
 	~CargoDataEntry();
 
-	CargoDataEntry * InsertOrRetrieve(StationID s) {return InsertOrRetrieve<StationID>(s);}
-	CargoDataEntry * InsertOrRetrieve(CargoID car) {return InsertOrRetrieve<CargoID>(car);}
+	CargoDataEntry *InsertOrRetrieve(StationID s) {return this->InsertOrRetrieve<StationID>(s);}
+	CargoDataEntry *InsertOrRetrieve(CargoID car) {return this->InsertOrRetrieve<CargoID>(car);}
 	void Update(uint count);
 
-	void Remove(StationID s) {CargoDataEntry t(s); Remove(&t);}
-	void Remove(CargoID c) {CargoDataEntry t(c); Remove(&t);}
+	void Remove(StationID s) {CargoDataEntry t(s); this->Remove(&t);}
+	void Remove(CargoID c) {CargoDataEntry t(c); this->Remove(&t);}
 
-	CargoDataEntry * Retrieve(StationID s) const {CargoDataEntry t(s); return Retrieve(subentries->find(&t));}
-	CargoDataEntry * Retrieve(CargoID c) const {CargoDataEntry t(c);return Retrieve(subentries->find(&t));}
+	CargoDataEntry *Retrieve(StationID s) const {CargoDataEntry t(s); return this->Retrieve(this->subentries->find(&t));}
+	CargoDataEntry *Retrieve(CargoID c) const {CargoDataEntry t(c);return this->Retrieve(this->subentries->find(&t));}
 
 	void Resort(CargoSortType type, SortOrder order);
 
-	StationID GetStation() const {return station;}
-	CargoID GetCargo() const {return cargo;}
-	uint GetCount() const {return count;}
-	CargoDataEntry * GetParent() const {return parent;}
-	uint Size() const {return size;}
+	StationID GetStation() const {return this->station;}
+	CargoID GetCargo() const {return this->cargo;}
+	uint GetCount() const {return this->count;}
+	CargoDataEntry *GetParent() const {return this->parent;}
+	uint Size() const {return this->size;}
 
-	CargoDataSet::iterator Begin() const {return subentries->begin();}
-	CargoDataSet::iterator End() const {return subentries->end();}
+	CargoDataSet::iterator Begin() const {return this->subentries->begin();}
+	CargoDataSet::iterator End() const {return this->subentries->end();}
 
 	void Clear();
 private:
 
-	CargoDataEntry(StationID st, uint c, CargoDataEntry * p);
-	CargoDataEntry(CargoID car, uint c, CargoDataEntry * p);
-	CargoDataEntry(StationID s);
-	CargoDataEntry(CargoID c);
-	CargoDataEntry * Retrieve(CargoDataSet::iterator i) const;
+	CargoDataEntry(StationID st, uint c, CargoDataEntry *p);
+	CargoDataEntry(CargoID car, uint c, CargoDataEntry *p);
+	CargoDataEntry(StationID st);
+	CargoDataEntry(CargoID car);
+
+	CargoDataEntry *Retrieve(CargoDataSet::iterator i) const;
+
 	template<class ID>
-	CargoDataEntry * InsertOrRetrieve(ID s);
-	void Remove(CargoDataEntry * comp);
+	CargoDataEntry *InsertOrRetrieve(ID s);
+
+	void Remove(CargoDataEntry *comp);
 	void IncrementSize();
-	CargoDataEntry * parent;
+
+	CargoDataEntry *parent;
 	const union {
 		StationID station;
 		CargoID cargo;
 	};
 	uint size;
 	uint count;
-	CargoDataSet * subentries;
+	CargoDataSet *subentries;
 };
 
 #endif /* STATION_GUI_H */
