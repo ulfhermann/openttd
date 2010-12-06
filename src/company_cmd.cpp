@@ -325,7 +325,7 @@ static void GenerateCompanyName(Company *c)
 {
 	/* Reserve space for extra unicode character. We need to do this to be able
 	 * to detect too long company name. */
-	char buffer[MAX_LENGTH_COMPANY_NAME_BYTES + MAX_CHAR_LENGTH];
+	char buffer[(MAX_LENGTH_COMPANY_NAME_CHARS + 1) * MAX_CHAR_LENGTH];
 
 	if (c->name_1 != STR_SV_UNNAMED) return;
 	if (c->last_build_coordinate == 0) return;
@@ -346,7 +346,7 @@ verify_name:;
 		}
 
 		GetString(buffer, str, lastof(buffer));
-		if (strlen(buffer) >= MAX_LENGTH_COMPANY_NAME_BYTES) goto bad_town_name;
+		if (Utf8StringLength(buffer) >= MAX_LENGTH_COMPANY_NAME_CHARS) goto bad_town_name;
 
 set_name:;
 		c->name_1 = str;
@@ -468,16 +468,16 @@ restart:;
 
 		/* Reserve space for extra unicode character. We need to do this to be able
 		 * to detect too long president name. */
-		char buffer[MAX_LENGTH_PRESIDENT_NAME_BYTES + MAX_CHAR_LENGTH];
+		char buffer[(MAX_LENGTH_PRESIDENT_NAME_CHARS + 1) * MAX_CHAR_LENGTH];
 		SetDParam(0, c->index);
 		GetString(buffer, STR_PRESIDENT_NAME, lastof(buffer));
-		if (strlen(buffer) >= MAX_LENGTH_PRESIDENT_NAME_BYTES) continue;
+		if (Utf8StringLength(buffer) >= MAX_LENGTH_PRESIDENT_NAME_CHARS) continue;
 
 		Company *cc;
 		FOR_ALL_COMPANIES(cc) {
 			if (c != cc) {
 				/* Reserve extra space so even overlength president names can be compared. */
-				char buffer2[MAX_LENGTH_PRESIDENT_NAME_BYTES + MAX_CHAR_LENGTH];
+				char buffer2[(MAX_LENGTH_PRESIDENT_NAME_CHARS + 1) * MAX_CHAR_LENGTH];
 				SetDParam(0, cc->index);
 				GetString(buffer2, STR_PRESIDENT_NAME, lastof(buffer2));
 				if (strcmp(buffer2, buffer) == 0) goto restart;
@@ -1049,7 +1049,7 @@ CommandCost CmdRenameCompany(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 	bool reset = StrEmpty(text);
 
 	if (!reset) {
-		if (strlen(text) >= MAX_LENGTH_COMPANY_NAME_BYTES) return CMD_ERROR;
+		if (Utf8StringLength(text) >= MAX_LENGTH_COMPANY_NAME_CHARS) return CMD_ERROR;
 		if (!IsUniqueCompanyName(text)) return_cmd_error(STR_ERROR_NAME_MUST_BE_UNIQUE);
 	}
 
@@ -1094,7 +1094,7 @@ CommandCost CmdRenamePresident(TileIndex tile, DoCommandFlag flags, uint32 p1, u
 	bool reset = StrEmpty(text);
 
 	if (!reset) {
-		if (strlen(text) >= MAX_LENGTH_PRESIDENT_NAME_BYTES) return CMD_ERROR;
+		if (Utf8StringLength(text) >= MAX_LENGTH_PRESIDENT_NAME_CHARS) return CMD_ERROR;
 		if (!IsUniquePresidentName(text)) return_cmd_error(STR_ERROR_NAME_MUST_BE_UNIQUE);
 	}
 
