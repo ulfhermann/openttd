@@ -24,7 +24,7 @@ enum StationViewWidgets {
 	SVW_CAPTION    =  0, ///< Caption of the window
 	SVW_SORT_ORDER =  1, ///< 'Sort order' button
 	SVW_SORT_BY    =  2, ///< 'Sort by' button
-	SVW_MODE       =  3, ///< button for toggling planned and real flows
+	SVW_GROUP      =  3, ///< label for "group by"
 	SVW_GROUP_BY   =  4, ///< 'Group by' button
 	SVW_WAITING    =  5, ///< List of waiting cargo
 	SVW_SCROLLBAR  =  6, ///< Scrollbar

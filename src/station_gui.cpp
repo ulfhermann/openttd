@@ -817,10 +817,10 @@ static const NWidgetPart _nested_station_view_widgets[] = {
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_SORT_ORDER), SetMinimalSize(81, 12), SetFill(1, 1), SetDataTip(STR_BUTTON_SORT_BY, STR_TOOLTIP_SORT_ORDER),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_SORT_BY), SetMinimalSize(168, 12), SetResize(1, 0), SetFill(0, 1), SetDataTip(0x0, STR_TOOLTIP_SORT_CRITERIA),
+		NWidget(WWT_DROPDOWN, COLOUR_GREY, SVW_SORT_BY), SetMinimalSize(168, 12), SetResize(1, 0), SetFill(0, 1), SetDataTip(0x0, STR_TOOLTIP_SORT_CRITERIA),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_DROPDOWN, COLOUR_GREY, SVW_MODE), SetMinimalSize(81, 12), SetFill(1, 1), SetDataTip(STR_STATION_VIEW_WAITING, STR_STATION_VIEW_TOGGLE_CARGO_VIEW),
+		NWidget(WWT_TEXTBTN, COLOUR_GREY, SVW_GROUP), SetMinimalSize(81, 12), SetFill(1, 1), SetDataTip(STR_STATION_VIEW_GROUP, 0x0),
 		NWidget(WWT_DROPDOWN, COLOUR_GREY, SVW_GROUP_BY), SetMinimalSize(168, 12), SetResize(1, 0), SetFill(0, 1), SetDataTip(0x0, STR_TOOLTIP_GROUP_ORDER),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
@@ -1074,8 +1074,8 @@ struct StationViewWindow : public Window {
 	};
 
 	enum Mode {
-		WAITING,
-		PLANNED
+		MODE_WAITING,
+		MODE_PLANNED
 	};
 	
 	uint expand_shrink_width;     ///< The width allocated to the expand/shrink 'button'
@@ -1091,7 +1091,6 @@ struct StationViewWindow : public Window {
 
 	static const StringID _sort_names[];
 	static const StringID _group_names[];
-	static const StringID _mode_names[];
 
 	CargoSortType sortings[_num_columns];
 	SortOrder sort_orders[_num_columns];
@@ -1119,10 +1118,9 @@ struct StationViewWindow : public Window {
 		this->groupings[0] = GR_CARGO;
 		this->sortings[0] = ST_AS_GROUPING;
 		this->SelectGroupBy(_settings_client.gui.station_gui_group_order);
-		this->SelectSortBy((CargoSortType)_settings_client.gui.station_gui_sort_by);
+		this->SelectSortBy(_settings_client.gui.station_gui_sort_by);
 		this->sort_orders[0] = SO_ASCENDING;
 		this->SelectSortOrder((SortOrder)_settings_client.gui.station_gui_sort_order);
-		this->SelectMode(WAITING);
 		Owner owner = Station::Get(window_number)->owner;
 		if (owner != OWNER_NONE) this->owner = owner;
 	}
@@ -1369,7 +1367,7 @@ struct StationViewWindow : public Window {
 				this->RecalcDestinations(i);
 			}
 
-			if (this->current_mode == WAITING) {
+			if (this->current_mode == MODE_WAITING) {
 				BuildCargoList(i, st->goods[i].cargo, cargo);
 			} else {
 				BuildFlowList(i, st->goods[i].flows, cargo);
@@ -1626,15 +1624,8 @@ struct StationViewWindow : public Window {
 				ShowVehicleListWindow(this->owner, (VehicleType)(widget - SVW_TRAINS), (StationID)this->window_number);
 				break;
 
-			case SVW_MODE: {
-				ShowDropDownMenu(this, _mode_names, this->current_mode, SVW_MODE, 0, 0);
-				break;
-			}
-
 			case SVW_SORT_BY: {
-				this->SelectSortBy(this->sortings[1] == ST_AS_GROUPING ? ST_COUNT : ST_AS_GROUPING);
-				this->flags4 |= WF_TIMEOUT_BEGIN;
-				this->LowerWidget(SVW_SORT_BY);
+				ShowDropDownMenu(this, _sort_names, this->current_mode, SVW_SORT_BY, 0, 0);
 				break;
 			}
 
@@ -1652,15 +1643,6 @@ struct StationViewWindow : public Window {
 		}
 	}
 
-	void SelectSortBy(CargoSortType sorting)
-	{
-		_settings_client.gui.station_gui_sort_by = sorting;
-		this->sortings[1] = this->sortings[2] = this->sortings[3] = sorting;
-		/* Display the current sort variant */
-		this->GetWidget<NWidgetCore>(SVW_SORT_BY)->widget_data = _sort_names[sorting];
-		this->SetDirty();
-	}
-
 	void SelectSortOrder(SortOrder order)
 	{
 		this->sort_orders[1] = this->sort_orders[2] = this->sort_orders[3] = order;
@@ -1668,10 +1650,31 @@ struct StationViewWindow : public Window {
 		this->SetDirty();
 	}
 
-	void SelectMode(int index)
+	void SelectSortBy(int index)
 	{
-		this->current_mode = (Mode)index;
-		this->GetWidget<NWidgetCore>(SVW_MODE)->widget_data = _mode_names[index];
+		_settings_client.gui.station_gui_sort_by = index;
+		switch(_sort_names[index]) {
+		case STR_STATION_VIEW_WAITING_STATION:
+			this->current_mode = MODE_WAITING;
+			this->sortings[1] = this->sortings[2] = this->sortings[3] = ST_AS_GROUPING;
+			break;
+		case STR_STATION_VIEW_WAITING_AMOUNT:
+			this->current_mode = MODE_WAITING;
+			this->sortings[1] = this->sortings[2] = this->sortings[3] = ST_COUNT;
+			break;
+		case STR_STATION_VIEW_PLANNED_STATION:
+			this->current_mode = MODE_PLANNED;
+			this->sortings[1] = this->sortings[2] = this->sortings[3] = ST_AS_GROUPING;
+			break;
+		case STR_STATION_VIEW_PLANNED_AMOUNT:
+			this->current_mode = MODE_PLANNED;
+			this->sortings[1] = this->sortings[2] = this->sortings[3] = ST_COUNT;
+			break;
+		default:
+			NOT_REACHED();
+		}
+		/* Display the current sort variant */
+		this->GetWidget<NWidgetCore>(SVW_SORT_BY)->widget_data = _sort_names[index];
 		this->SetDirty();
 	}
 
@@ -1717,8 +1720,8 @@ struct StationViewWindow : public Window {
 
 	virtual void OnDropdownSelect(int widget, int index)
 	{
-		if (widget == SVW_MODE) {
-			this->SelectMode(index);
+		if (widget == SVW_SORT_BY) {
+			this->SelectSortBy(index);
 		} else {
 			this->SelectGroupBy(index);
 		}
@@ -1737,17 +1740,11 @@ struct StationViewWindow : public Window {
 	}
 };
 
-
 const StringID StationViewWindow::_sort_names[] = {
-	STR_SORT_BY_STATION,
-	STR_SORT_BY_AMOUNT,
-	INVALID_STRING_ID
-};
-
-const StringID StationViewWindow::_mode_names[] = {
-	STR_STATION_VIEW_WAITING,
-	STR_STATION_VIEW_PLANNED,
-	STR_STATION_VIEW_SENT,
+	STR_STATION_VIEW_WAITING_STATION,
+	STR_STATION_VIEW_WAITING_AMOUNT,
+	STR_STATION_VIEW_PLANNED_STATION,
+	STR_STATION_VIEW_PLANNED_AMOUNT,
 	INVALID_STRING_ID
 };
 
