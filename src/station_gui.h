@@ -86,31 +86,94 @@ private:
 
 typedef std::set<CargoDataEntry *, CargoSorter> CargoDataSet;
 
+/**
+ * A cargo data entry representing one possible row in the station view window's
+ * top part. Cargo data entries form a tree where each entry can have several
+ * children. Parents keep track of the sums of their childrens' cargo counts.
+ */
 class CargoDataEntry {
 public:
 	CargoDataEntry();
 	~CargoDataEntry();
 
-	CargoDataEntry *InsertOrRetrieve(StationID s) {return this->InsertOrRetrieve<StationID>(s);}
-	CargoDataEntry *InsertOrRetrieve(CargoID car) {return this->InsertOrRetrieve<CargoID>(car);}
+	/**
+	 * Insert a new child or retrieve an existing child using a station ID as ID.
+	 * @param station ID of the station for which an entry shall be created or retrieved
+	 * @return a child entry associated with the given station.
+	 */
+	CargoDataEntry *InsertOrRetrieve(StationID station) {return this->InsertOrRetrieve<StationID>(station);}
+
+	/**
+	 * Insert a new child or retrieve an existing child using a cargo ID as ID.
+	 * @param cargo ID of the cargo for which an entry shall be created or retrieved
+	 * @return a child entry associated with the given cargo.
+	 */
+	CargoDataEntry *InsertOrRetrieve(CargoID cargo) {return this->InsertOrRetrieve<CargoID>(cargo);}
+
 	void Update(uint count);
 
-	void Remove(StationID s) {CargoDataEntry t(s); this->Remove(&t);}
-	void Remove(CargoID c) {CargoDataEntry t(c); this->Remove(&t);}
+	/**
+	 * Remove a child associated with the given station.
+	 * @param station ID of the station for which the child should be removed.
+	 */
+	void Remove(StationID station) {CargoDataEntry t(station); this->Remove(&t);}
 
-	CargoDataEntry *Retrieve(StationID s) const {CargoDataEntry t(s); return this->Retrieve(this->subentries->find(&t));}
-	CargoDataEntry *Retrieve(CargoID c) const {CargoDataEntry t(c);return this->Retrieve(this->subentries->find(&t));}
+	/**
+	 * Remove a child associated with the given cargo.
+	 * @param cargo ID of the cargo for which the child should be removed.
+	 */
+	void Remove(CargoID cargo) {CargoDataEntry t(cargo); this->Remove(&t);}
+
+	/**
+	 * Retrieve a child for the given station. Return NULL if it doesn't exist.
+	 * @param station ID of the station the child we're looking for is associated with.
+	 * @return a child entry for the given station or NULL.
+	 */
+	CargoDataEntry *Retrieve(StationID station) const {CargoDataEntry t(station); return this->Retrieve(this->children->find(&t));}
+
+	/**
+	 * Retrieve a child for the given cargo. Return NULL if it doesn't exist.
+	 * @param cargo ID of the cargo the child we're looking for is associated with.
+	 * @return a child entry for the given cargo or NULL.
+	 */
+	CargoDataEntry *Retrieve(CargoID cargo) const {CargoDataEntry t(cargo);return this->Retrieve(this->children->find(&t));}
 
 	void Resort(CargoSortType type, SortOrder order);
 
+	/**
+	 * Get the station ID for this entry.
+	 */
 	StationID GetStation() const {return this->station;}
-	CargoID GetCargo() const {return this->cargo;}
-	uint GetCount() const {return this->count;}
-	CargoDataEntry *GetParent() const {return this->parent;}
-	uint Size() const {return this->size;}
 
-	CargoDataSet::iterator Begin() const {return this->subentries->begin();}
-	CargoDataSet::iterator End() const {return this->subentries->end();}
+	/**
+	 * Get the cargo ID for this entry.
+	 */
+	CargoID GetCargo() const {return this->cargo;}
+
+	/**
+	 * Get the cargo count for this entry.
+	 */
+	uint GetCount() const {return this->count;}
+
+	/**
+	 * Get the parent entry for this entry.
+	 */
+	CargoDataEntry *GetParent() const {return this->parent;}
+
+	/**
+	 * Get the number of children for this entry.
+	 */
+	uint GetNumChildren() const {return this->num_children;}
+
+	/**
+	 * Get an iterator pointing to the begin of the set of children.
+	 */
+	CargoDataSet::iterator Begin() const {return this->children->begin();}
+
+	/**
+	 * Get an iterator pointing to the end of the set of children.
+	 */
+	CargoDataSet::iterator End() const {return this->children->end();}
 
 	void Clear();
 private:
@@ -128,14 +191,14 @@ private:
 	void Remove(CargoDataEntry *comp);
 	void IncrementSize();
 
-	CargoDataEntry *parent;
+	CargoDataEntry *parent;   ///< the parent of this entry
 	const union {
-		StationID station;
-		CargoID cargo;
+		StationID station;    ///< ID of the station this entry is associated with
+		CargoID cargo;        ///< ID of the cargo this entry is associated with
 	};
-	uint size;
-	uint count;
-	CargoDataSet *subentries;
+	uint num_children;        ///< the number of subentries belonging to this entry
+	uint count;               ///< sum of counts of all children or amount of cargo for this entry
+	CargoDataSet *children;   ///< the children of this entry
 };
 
 #endif /* STATION_GUI_H */

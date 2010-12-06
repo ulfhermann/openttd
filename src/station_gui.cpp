@@ -870,112 +870,135 @@ static void DrawCargoIcons(CargoID i, uint waiting, int left, int right, int y)
 CargoDataEntry::CargoDataEntry() :
 	parent(NULL),
 	station(INVALID_STATION),
-	size(0),
+	num_children(0),
 	count(0),
-	subentries(new CargoDataSet(CargoSorter(ST_CARGO_ID)))
+	children(new CargoDataSet(CargoSorter(ST_CARGO_ID)))
 {}
 
-CargoDataEntry::CargoDataEntry(CargoID car, uint c, CargoDataEntry *p) :
-	parent(p),
-	cargo(car),
-	size(0),
-	count(c),
-	subentries(new CargoDataSet)
+CargoDataEntry::CargoDataEntry(CargoID cargo, uint count, CargoDataEntry *parent) :
+	parent(parent),
+	cargo(cargo),
+	num_children(0),
+	count(count),
+	children(new CargoDataSet)
 {}
 
-CargoDataEntry::CargoDataEntry(StationID st, uint c, CargoDataEntry *p) :
-	parent(p),
-	station(st),
-	size(0),
-	count(c),
-	subentries(new CargoDataSet)
+CargoDataEntry::CargoDataEntry(StationID station, uint count, CargoDataEntry *parent) :
+	parent(parent),
+	station(station),
+	num_children(0),
+	count(count),
+	children(new CargoDataSet)
 {}
 
-CargoDataEntry::CargoDataEntry(StationID st) :
+CargoDataEntry::CargoDataEntry(StationID station) :
 	parent(NULL),
-	station(st),
-	size(0),
+	station(station),
+	num_children(0),
 	count(0),
-	subentries(NULL)
+	children(NULL)
 {}
 
-CargoDataEntry::CargoDataEntry(CargoID ca) :
+CargoDataEntry::CargoDataEntry(CargoID cargo) :
 	parent(NULL),
-	cargo(ca),
-	size(0),
+	cargo(cargo),
+	num_children(0),
 	count(0),
-	subentries(NULL)
+	children(NULL)
 {}
 
 CargoDataEntry::~CargoDataEntry()
 {
 	this->Clear();
-	delete this->subentries;
+	delete this->children;
 }
 
+/**
+ * Delete all subentries, reset count and num_children and adapt parent's count.
+ */
 void CargoDataEntry::Clear()
 {
-	if (this->subentries != NULL) {
-		for (CargoDataSet::iterator i = this->subentries->begin(); i != this->subentries->end(); ++i) {
+	if (this->children != NULL) {
+		for (CargoDataSet::iterator i = this->children->begin(); i != this->children->end(); ++i) {
 			assert(*i != this);
 			delete *i;
 		}
-		this->subentries->clear();
+		this->children->clear();
 	}
 	if (this->parent != NULL) this->parent->count -= this->count;
 	this->count = 0;
-	this->size = 0;
+	this->num_children = 0;
 }
 
-void CargoDataEntry::Remove(CargoDataEntry *comp)
+/**
+ * Remove a subentry from this one and delete it.
+ * @param child the entry to be removed. This may also be a synthetic entry
+ * which only contains the ID of the entry to be removed. In this case child is
+ * not deleted.
+ */
+void CargoDataEntry::Remove(CargoDataEntry *child)
 {
-	CargoDataSet::iterator i = this->subentries->find(comp);
-	if (i != this->subentries->end()) {
+	CargoDataSet::iterator i = this->children->find(child);
+	if (i != this->children->end()) {
 		delete(*i);
-		this->subentries->erase(i);
+		this->children->erase(i);
 	}
 }
 
+/**
+ * Retrieve a subentry or insert it if it doesn't exist, yet.
+ * @tparam ID type of ID: either StationID or CargoID
+ * @param child_id ID of the child to be inserted or retrieved.
+ * @return the new or retrieved subentry
+ */
 template<class ID>
-CargoDataEntry *CargoDataEntry::InsertOrRetrieve(ID s)
+CargoDataEntry *CargoDataEntry::InsertOrRetrieve(ID child_id)
 {
-	CargoDataEntry tmp(s);
-	CargoDataSet::iterator i = this->subentries->find(&tmp);
-	if (i == this->subentries->end()) {
+	CargoDataEntry tmp(child_id);
+	CargoDataSet::iterator i = this->children->find(&tmp);
+	if (i == this->children->end()) {
 		IncrementSize();
-		return *(this->subentries->insert(new CargoDataEntry(s, 0, this)).first);
+		return *(this->children->insert(new CargoDataEntry(child_id, 0, this)).first);
 	} else {
 		CargoDataEntry *ret = *i;
-		assert(this->subentries->value_comp().GetSortType() != ST_COUNT);
+		assert(this->children->value_comp().GetSortType() != ST_COUNT);
 		return ret;
 	}
 }
 
+/**
+ * Update the count for this entry and propagate the change to the parent entry
+ * if there is one.
+ * @param count the amount to be added to this entry
+ */
 void CargoDataEntry::Update(uint count)
 {
 	this->count += count;
 	if (this->parent != NULL) this->parent->Update(count);
 }
 
+/**
+ * Increment
+ */
 void CargoDataEntry::IncrementSize()
 {
-	 ++this->size;
+	 ++this->num_children;
 	 if (this->parent != NULL) this->parent->IncrementSize();
 }
 
 void CargoDataEntry::Resort(CargoSortType type, SortOrder order)
 {
-	CargoDataSet *new_subs = new CargoDataSet(this->subentries->begin(), this->subentries->end(), CargoSorter(type, order));
-	delete this->subentries;
-	this->subentries = new_subs;
+	CargoDataSet *new_subs = new CargoDataSet(this->children->begin(), this->children->end(), CargoSorter(type, order));
+	delete this->children;
+	this->children = new_subs;
 }
 
 CargoDataEntry *CargoDataEntry::Retrieve(CargoDataSet::iterator i) const
 {
-	if (i == this->subentries->end()) {
+	if (i == this->children->end()) {
 		return NULL;
 	} else {
-		assert(this->subentries->value_comp().GetSortType() != ST_COUNT);
+		assert(this->children->value_comp().GetSortType() != ST_COUNT);
 		return *i;
 	}
 }
@@ -1185,7 +1208,7 @@ struct StationViewWindow : public Window {
 		CargoDataEntry cargo;
 		BuildCargoList(&cargo, st);
 
-		this->vscroll->SetCount(cargo.Size()); // update scrollbar
+		this->vscroll->SetCount(cargo.GetNumChildren()); // update scrollbar
 
 		/* disable some buttons */
 		this->SetWidgetDisabledState(SVW_RENAME,   st->owner != _local_company);
@@ -1493,7 +1516,7 @@ struct StationViewWindow : public Window {
 				DrawString(text_left, text_right, y, str, TC_FROMSTRING);
 
 				if (column < _num_columns - 1) {
-					const char *sym = cd->Size() > 0 ? "-" : "+";
+					const char *sym = cd->GetNumChildren() > 0 ? "-" : "+";
 					DrawString(shrink_left, shrink_right, y, sym, TC_YELLOW);
 				}
 				SetDisplayedRow(cd);
