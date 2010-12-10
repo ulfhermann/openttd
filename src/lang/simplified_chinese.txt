@@ -171,7 +171,6 @@ STR_TONS                                                        :{COMMA} 英吨
 STR_LITERS                                                      :{COMMA} 升
 STR_ITEMS                                                       :{COMMA} 件
 STR_CRATES                                                      :{COMMA} 件
-STR_GAME_OPTIONS_RESOLUTION_OTHER                               :其他
 
 # Colours, do not shuffle
 STR_COLOUR_DARK_BLUE                                            :深蓝色
@@ -940,6 +939,7 @@ STR_GAME_OPTIONS_FULLSCREEN_TOOLTIP                             :{BLACK}选择�
 
 STR_GAME_OPTIONS_RESOLUTION                                     :{BLACK}屏幕分辨率
 STR_GAME_OPTIONS_RESOLUTION_TOOLTIP                             :{BLACK}选择要使用的屏幕分辨率
+STR_GAME_OPTIONS_RESOLUTION_OTHER                               :其他
 
 STR_GAME_OPTIONS_SCREENSHOT_FORMAT                              :{BLACK}屏幕截图类型
 STR_GAME_OPTIONS_SCREENSHOT_FORMAT_TOOLTIP                      :{BLACK}选择屏幕截图类型
@@ -1344,7 +1344,6 @@ STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_OPF                     :原始 {BLUE}(�
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_NPF                     :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_YAPF                    :YAPF {RED}(不推荐)
 
-
 STR_CONFIG_SETTING_QUERY_CAPTION                                :{WHITE}改变设置值
 
 # Intro window
@@ -1416,7 +1415,6 @@ STR_CHEAT_MONEY                                                 :{LTBLUE}增加 
 STR_CHEAT_CHANGE_COMPANY                                        :{LTBLUE}作为{ORANGE}{COMMA}进行游戏
 STR_CHEAT_EXTRA_DYNAMITE                                        :{LTBLUE}神奇推土机 (清除工业设施和其他不可移除物)： {ORANGE}{STRING}
 STR_CHEAT_CROSSINGTUNNELS                                       :{LTBLUE}隧道可以相交：{ORANGE}{STRING}
-STR_CHEAT_BUILD_IN_PAUSE                                        :{LTBLUE}可以在暂停模式进行建设：{ORANGE}{STRING}
 STR_CHEAT_NO_JETCRASH                                           :{LTBLUE}喷气式飞机不会(经常)在小机场坠毁：{ORANGE}{STRING}
 STR_CHEAT_SWITCH_CLIMATE                                        :{LTBLUE}改变气候：{ORANGE}{STRING}
 STR_CHEAT_SWITCH_CLIMATE_TEMPERATE_LANDSCAPE                    :温带景观
@@ -1776,6 +1774,7 @@ STR_NETWORK_ERROR_CLIENT_KICKED                                 :被服务器踢
 STR_NETWORK_ERROR_CLIENT_CHEATER                                :正在尝试作弊
 STR_NETWORK_ERROR_CLIENT_SERVER_FULL                            :服务器满员
 ############ End of leave-in-this-order
+
 
 # Network related errors
 STR_NETWORK_SERVER_MESSAGE                                      :*** {1:STRING}
