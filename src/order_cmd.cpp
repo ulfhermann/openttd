@@ -254,24 +254,26 @@ Order *OrderList::GetOrderAt(int index) const
 /**
  * Recursively determine the next deterministic station to stop at.
  * @param next the first order to check
+ * @param curr_station the station the vehicle is just visiting or INVALID_STATION
  * @param hops the number of orders we have already checked.
  * @return the next stoppping station or INVALID_STATION
  */
-StationID OrderList::GetNextStoppingStation(const Order *next, uint hops) const
+StationID OrderList::GetNextStoppingStation(const Order *next, StationID curr_station, uint hops) const
 {
 	if (next == NULL || hops > this->GetNumOrders()) {
 		return INVALID_STATION;
 	}
 
 	if (next->GetType() == OT_CONDITIONAL) {
-		StationID skip_to = this->GetNextStoppingStation(this->GetOrderAt(next->GetConditionSkipToOrder()), hops + 1);
-		StationID advance = this->GetNextStoppingStation(this->GetNext(next), hops + 1);
+		StationID skip_to = this->GetNextStoppingStation(this->GetOrderAt(next->GetConditionSkipToOrder()), curr_station, hops + 1);
+		StationID advance = this->GetNextStoppingStation(this->GetNext(next), curr_station, hops + 1);
 		return (skip_to == advance) ? skip_to : INVALID_STATION;
 	}
 
 	if (next->GetType() != OT_GOTO_STATION ||
-			(next->GetNonStopType() & ONSF_NO_STOP_AT_DESTINATION_STATION) != 0) {
-		return GetNextStoppingStation(this->GetNext(next), hops + 1);
+			(next->GetNonStopType() & ONSF_NO_STOP_AT_DESTINATION_STATION) != 0 ||
+			next->GetDestination() == curr_station) {
+		return GetNextStoppingStation(this->GetNext(next), curr_station, hops + 1);
 	}
 
 	return next->GetDestination();
@@ -297,9 +299,9 @@ StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_order, StationID
 	 */
 	if (curr_station == INVALID_STATION || curr->GetType() != OT_GOTO_STATION ||
 			curr_station != curr->GetDestination()) {
-		return this->GetNextStoppingStation(curr, 0);
+		return this->GetNextStoppingStation(curr, curr_station, 0);
 	} else {
-		return this->GetNextStoppingStation(this->GetNext(curr), 1);
+		return this->GetNextStoppingStation(this->GetNext(curr), curr_station, 1);
 	}
 }
 
