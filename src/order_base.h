@@ -322,7 +322,7 @@ public:
 	 */
 	inline Order *GetLastOrder() const { return this->GetOrderAt(this->num_orders - 1); }
 
-	StationID GetNextStoppingStation(VehicleOrderID curr_order, StationID curr_station) const;
+	StationID GetNextStoppingStation(VehicleOrderID curr_order, StationID curr_station, bool ignore_more_stops = true) const;
 
 	/**
 	 * Get number of orders in the order list.
