@@ -572,10 +572,11 @@ void VehicleCargoList::SwapReserved()
  * @param max_unload   the maximum amount of cargo entities to move
  * @param flags        how to handle the moving (side effects)
  * @param next         the next unloading station in the vehicle's order list
+ * @param more_stops   the vehicle will stop at this station again, so don't update the flow stats for kept cargo
  * @param payment      the payment object to be updated when delivering/transferring
  * @return the number of cargo entities actually moved
  */
-uint StationCargoList::TakeFrom(VehicleCargoList *source, uint max_unload, OrderUnloadFlags order_flags, StationID next, CargoPayment *payment)
+uint StationCargoList::TakeFrom(VehicleCargoList *source, uint max_unload, OrderUnloadFlags order_flags, StationID next, bool more_stops, CargoPayment *payment)
 {
 	uint remaining_unload = max_unload;
 	uint unloaded;
@@ -621,7 +622,7 @@ uint StationCargoList::TakeFrom(VehicleCargoList *source, uint max_unload, Order
 				break;
 			case UL_KEEP:
 				unloaded = source->KeepPacket(c);
-				if (via != INVALID_STATION && next != INVALID_STATION) {
+				if (via != INVALID_STATION && next != INVALID_STATION && !more_stops) {
 					if (via == next) {
 						dest->UpdateFlowStats(flows, begin, unloaded);
 					} else {
