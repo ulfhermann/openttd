@@ -172,7 +172,6 @@ STR_TONS                                                        :{COMMA} tons
 STR_LITERS                                                      :{COMMA} litros
 STR_ITEMS                                                       :{COMMA} ítems
 STR_CRATES                                                      :{COMMA} caixóns
-STR_GAME_OPTIONS_RESOLUTION_OTHER                               :outro
 
 # Colours, do not shuffle
 STR_COLOUR_DARK_BLUE                                            :Azul Escuro
@@ -929,6 +928,7 @@ STR_GAME_OPTIONS_FULLSCREEN_TOOLTIP                             :{BLACK}Marca ne
 
 STR_GAME_OPTIONS_RESOLUTION                                     :{BLACK}Resolución da pantalla
 STR_GAME_OPTIONS_RESOLUTION_TOOLTIP                             :{BLACK}Selecciona a resolución de pantalla a utilizar
+STR_GAME_OPTIONS_RESOLUTION_OTHER                               :outro
 
 STR_GAME_OPTIONS_SCREENSHOT_FORMAT                              :{BLACK}Formato capturas de pantalla
 STR_GAME_OPTIONS_SCREENSHOT_FORMAT_TOOLTIP                      :{BLACK}Selecciona o formato a utilizar nas capturas de pantalla
@@ -1304,7 +1304,6 @@ STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_OPF                     :Orixinal {BLUE}
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_NPF                     :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_YAPF                    :YAPF {RED}(Non recomendado)
 
-
 STR_CONFIG_SETTING_QUERY_CAPTION                                :{WHITE}Cambia-lo valor
 
 # Intro window
@@ -1376,7 +1375,6 @@ STR_CHEAT_MONEY                                                 :{LTBLUE}Increme
 STR_CHEAT_CHANGE_COMPANY                                        :{LTBLUE}Xogando coma compañía: {ORANGE}{COMMA}
 STR_CHEAT_EXTRA_DYNAMITE                                        :{LTBLUE}Escavadora máxica (elimina industrias, obx. non eliminables): {ORANGE}{STRING}
 STR_CHEAT_CROSSINGTUNNELS                                       :{LTBLUE}Os tuneis poden cruzarse entre eles: {ORANGE}{STRING}
-STR_CHEAT_BUILD_IN_PAUSE                                        :{LTBLUE}Permitir a construción en modo pausa: {ORANGE}{STRING}
 STR_CHEAT_NO_JETCRASH                                           :{LTBLUE}Os avións jet non se estrelarán (frecuentemente) nos aeroportos pequenos: {ORANGE} {STRING}
 STR_CHEAT_SWITCH_CLIMATE                                        :{LTBLUE}Cambiar clima: {ORANGE}{STRING}
 STR_CHEAT_SWITCH_CLIMATE_TEMPERATE_LANDSCAPE                    :Escenario temperado
@@ -1736,6 +1734,7 @@ STR_NETWORK_ERROR_CLIENT_KICKED                                 :pateado polo se
 STR_NETWORK_ERROR_CLIENT_CHEATER                                :intentaba usar unha trampa
 STR_NETWORK_ERROR_CLIENT_SERVER_FULL                            :servidor cheo
 ############ End of leave-in-this-order
+
 
 # Network related errors
 STR_NETWORK_SERVER_MESSAGE                                      :*** {1:STRING}
