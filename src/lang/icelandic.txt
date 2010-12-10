@@ -172,7 +172,6 @@ STR_TONS                                                        :{COMMA} tonn
 STR_LITERS                                                      :{COMMA} lítrar
 STR_ITEMS                                                       :{COMMA} hlutir
 STR_CRATES                                                      :{COMMA} kassar
-STR_GAME_OPTIONS_RESOLUTION_OTHER                               :annað
 
 # Colours, do not shuffle
 STR_COLOUR_DARK_BLUE                                            :Dökkblár
@@ -942,6 +941,7 @@ STR_GAME_OPTIONS_FULLSCREEN_TOOLTIP                             :{BLACK}Smelltu 
 
 STR_GAME_OPTIONS_RESOLUTION                                     :{BLACK}Skjáupplausn
 STR_GAME_OPTIONS_RESOLUTION_TOOLTIP                             :{BLACK}Stilla skjáupplausn
+STR_GAME_OPTIONS_RESOLUTION_OTHER                               :annað
 
 STR_GAME_OPTIONS_SCREENSHOT_FORMAT                              :{BLACK}Snið skjámynda
 STR_GAME_OPTIONS_SCREENSHOT_FORMAT_TOOLTIP                      :{BLACK}Snið á skjámyndaskrám
@@ -1344,7 +1344,6 @@ STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_OPF                     :Original {BLUE}
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_NPF                     :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_YAPF                    :YAPF {RED}(Óráðlegt)
 
-
 STR_CONFIG_SETTING_QUERY_CAPTION                                :{WHITE}Breyta gildi stillingar
 
 # Intro window
@@ -1416,7 +1415,6 @@ STR_CHEAT_MONEY                                                 :{LTBLUE}Auka pe
 STR_CHEAT_CHANGE_COMPANY                                        :{LTBLUE}Spila sem fyrirtæki: {ORANGE}{COMMA}
 STR_CHEAT_EXTRA_DYNAMITE                                        :{LTBLUE}Töfrajarðýta (eyðir iðnaði, óeyðanlegum hlutum): {ORANGE}{STRING}
 STR_CHEAT_CROSSINGTUNNELS                                       :{LTBLUE}Göng mega skerast: {ORANGE}{STRING}
-STR_CHEAT_BUILD_IN_PAUSE                                        :{LTBLUE}Byggja í bið: {ORANGE}{STRING}
 STR_CHEAT_NO_JETCRASH                                           :{LTBLUE}Þotur brotlenda ekki (oft) á litlum flugvöllum: {ORANGE} {STRING}
 STR_CHEAT_SWITCH_CLIMATE                                        :{LTBLUE}Skipta um loftslag: {ORANGE} {STRING}
 STR_CHEAT_SWITCH_CLIMATE_TEMPERATE_LANDSCAPE                    :Temprað landslag
@@ -1778,6 +1776,7 @@ STR_NETWORK_ERROR_CLIENT_CHEATER                                :reyndi að svin
 STR_NETWORK_ERROR_CLIENT_SERVER_FULL                            :vefþjónn fullur
 STR_NETWORK_ERROR_CLIENT_TOO_MANY_COMMANDS                      :var að senda of margar skipanir
 ############ End of leave-in-this-order
+
 
 # Network related errors
 STR_NETWORK_SERVER_MESSAGE                                      :*** {1:STRING}
