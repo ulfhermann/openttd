@@ -1326,7 +1326,6 @@ STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_OPF                     :Originale {BLUE
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_NPF                     :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_YAPF                    :YAPF {RED}(Nerekomendite)
 
-
 STR_CONFIG_SETTING_QUERY_CAPTION                                :{WHITE}Ŝanĝu agord-valoron
 
 # Intro window
@@ -1398,7 +1397,6 @@ STR_CHEAT_MONEY                                                 :{LTBLUE}Altigu 
 STR_CHEAT_CHANGE_COMPANY                                        :{LTBLUE}Ludanta kiel kompanio: {ORANGE}{COMMA}
 STR_CHEAT_EXTRA_DYNAMITE                                        :{LTBLUE}Magia forigilo (forviŝu industriojn, nemovebla objektoj): {ORANGE}{STRING}
 STR_CHEAT_CROSSINGTUNNELS                                       :{LTBLUE}Tuneloj rajtas kruciĝi unu kun la alia: {ORANGE}{STRING}
-STR_CHEAT_BUILD_IN_PAUSE                                        :{LTBLUE}Konstruado eblas dum paŭzo: {ORANGE}{STRING}
 STR_CHEAT_NO_JETCRASH                                           :{LTBLUE}Jetoj ne kraŝos (ofte) sur malgrandaj flughavenoj: {ORANGE} {STRING}
 STR_CHEAT_SWITCH_CLIMATE                                        :{LTBLUE}Ŝanĝi klimaton: {ORANGE}{STRING}
 STR_CHEAT_SWITCH_CLIMATE_TEMPERATE_LANDSCAPE                    :Modera landaspekto
