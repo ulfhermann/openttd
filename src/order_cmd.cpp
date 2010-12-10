@@ -283,9 +283,10 @@ StationID OrderList::GetNextStoppingStation(const Order *next, StationID curr_st
  * Get the next station the vehicle will stop at, if that is deterministic.
  * @param curr_order the ID of the current order
  * @param curr_station the station the vehicle is just visiting or INVALID_STATION
+ * @param ignore_more_stops if set and the next stop is the same as curr_station return the one after it
  * @return The ID of the next station the vehicle will stop at or INVALID_STATION
  */
-StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_order, StationID curr_station) const
+StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_order, StationID curr_station, bool ignore_more_stops) const
 {
 	const Order *curr = this->GetOrderAt(curr_order);
 	if (curr == NULL) {
@@ -299,9 +300,9 @@ StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_order, StationID
 	 */
 	if (curr_station == INVALID_STATION || curr->GetType() != OT_GOTO_STATION ||
 			curr_station != curr->GetDestination()) {
-		return this->GetNextStoppingStation(curr, curr_station, 0);
+		return this->GetNextStoppingStation(curr, ignore_more_stops ? curr_station : INVALID_STATION, 0);
 	} else {
-		return this->GetNextStoppingStation(this->GetNext(curr), curr_station, 1);
+		return this->GetNextStoppingStation(this->GetNext(curr), ignore_more_stops ? curr_station : INVALID_STATION, 1);
 	}
 }
 
