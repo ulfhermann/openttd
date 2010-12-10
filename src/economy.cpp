@@ -1180,9 +1180,11 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 	Station *st = Station::Get(last_visited);
 
 	StationID next_station = INVALID_STATION;
+	StationID next_order_station = INVALID_STATION;
 	OrderList *orders = v->orders.list;
 	if (orders != NULL) {
 		next_station = orders->GetNextStoppingStation(v->cur_order_index, last_visited);
+		next_order_station = orders->GetNextStoppingStation(v->cur_order_index, INVALID_STATION);
 	}
 
 	/* We have not waited enough time till the next round of loading/unloading */
@@ -1240,7 +1242,8 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 
 			uint prev_count = ge->cargo.Count();
 			payment->SetCargo(v->cargo_type);
-			uint delivered = ge->cargo.TakeFrom(&v->cargo, amount_unloaded, unload_flags, next_station, payment);
+			uint delivered = ge->cargo.TakeFrom(&v->cargo, amount_unloaded, unload_flags, 
+					next_station, next_order_station == last_visited, payment);
 
 			st->time_since_unload = 0;
 			unloading_time += delivered;
