@@ -1180,11 +1180,9 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 	Station *st = Station::Get(last_visited);
 
 	StationID next_station = INVALID_STATION;
-	StationID next_order_station = INVALID_STATION;
 	OrderList *orders = v->orders.list;
 	if (orders != NULL) {
 		next_station = orders->GetNextStoppingStation(v->cur_order_index, last_visited);
-		next_order_station = orders->GetNextStoppingStation(v->cur_order_index, last_visited, false);
 	}
 
 	/* We have not waited enough time till the next round of loading/unloading */
@@ -1243,7 +1241,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 			uint prev_count = ge->cargo.Count();
 			payment->SetCargo(v->cargo_type);
 			uint delivered = ge->cargo.TakeFrom(&v->cargo, amount_unloaded, unload_flags, 
-					next_station, next_order_station == last_visited, payment);
+					next_station, u->last_loading_station == last_visited, payment);
 
 			st->time_since_unload = 0;
 			unloading_time += delivered;
@@ -1455,12 +1453,10 @@ void LoadUnloadStation(Station *st)
 	/* No vehicle is here... */
 	if (st->loading_vehicles.empty()) return;
 
-	uint32 cargos_reserved = 0;
-
 	Vehicle *last_loading = NULL;
 	std::list<Vehicle *>::iterator iter;
 
-	/* Check if anything will be loaded at all. Otherwise we don't need to reserve either */
+	/* Check if anything will be loaded at all. Otherwise we don't need to reserve either. */
 	for (iter = st->loading_vehicles.begin(); iter != st->loading_vehicles.end(); ++iter) {
 		Vehicle *v = *iter;
 
@@ -1471,9 +1467,15 @@ void LoadUnloadStation(Station *st)
 	}
 
 	/* We only need to reserve and load/unload up to the last loading vehicle.
-	 * Further vehicles shouldn't take preference over earlier ones anyway.
+	 * Anything else will be forgotten anyway after returning from this function.
+	 *
+	 * Especially this means we do _not_ need to reserve cargo for a single
+	 * consist in a station which is not allowed to load yet because its
+	 * load_unload_ticks is still not 0.
 	 */
 	if (last_loading == NULL) return;
+
+	uint cargos_reserved = 0;
 
 	for (iter = st->loading_vehicles.begin(); iter != st->loading_vehicles.end(); ++iter) {
 		Vehicle *v = *iter;
