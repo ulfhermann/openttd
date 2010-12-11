@@ -403,7 +403,7 @@ public:
 				cp1->source_id       == cp2->source_id;
 	}
 
-	uint TakeFrom(VehicleCargoList *source, uint max_unload, OrderUnloadFlags flags, StationID next_station, bool more_stops, CargoPayment *payment);
+	uint TakeFrom(VehicleCargoList *source, uint max_unload, OrderUnloadFlags flags, StationID next_station, bool has_stopped, CargoPayment *payment);
 
 	uint MoveTo(VehicleCargoList *dest, uint cap, StationID next_station, bool reserve = false);
 
