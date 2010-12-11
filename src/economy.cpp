@@ -1453,12 +1453,10 @@ void LoadUnloadStation(Station *st)
 	/* No vehicle is here... */
 	if (st->loading_vehicles.empty()) return;
 
-	uint32 cargos_reserved = 0;
-
 	Vehicle *last_loading = NULL;
 	std::list<Vehicle *>::iterator iter;
 
-	/* Check if anything will be loaded at all. Otherwise we don't need to reserve either */
+	/* Check if anything will be loaded at all. Otherwise we don't need to reserve either. */
 	for (iter = st->loading_vehicles.begin(); iter != st->loading_vehicles.end(); ++iter) {
 		Vehicle *v = *iter;
 
@@ -1469,9 +1467,15 @@ void LoadUnloadStation(Station *st)
 	}
 
 	/* We only need to reserve and load/unload up to the last loading vehicle.
-	 * Further vehicles shouldn't take preference over earlier ones anyway.
+	 * Anything else will be forgotten anyway after returning from this function.
+	 *
+	 * Especially this means we do _not_ need to reserve cargo for a single
+	 * consist in a station which is not allowed to load yet because its
+	 * load_unload_ticks is still not 0.
 	 */
 	if (last_loading == NULL) return;
+
+	uint cargos_reserved = 0;
 
 	for (iter = st->loading_vehicles.begin(); iter != st->loading_vehicles.end(); ++iter) {
 		Vehicle *v = *iter;
