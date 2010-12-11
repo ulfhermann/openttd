@@ -1745,7 +1745,8 @@ void Vehicle::BeginLoading()
  * return all reserved cargo packets to the station
  * @param st the station where the reserved packets should go.
  */
-void Vehicle::CancelReservation(Station *st) {
+void Vehicle::CancelReservation(Station *st)
+{
 	for(Vehicle *v = this; v != NULL; v = v->next) {
 		VehicleCargoList &cargo = v->cargo;
 		if (cargo.ReservedCount() > 0) {
