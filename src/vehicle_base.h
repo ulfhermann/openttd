@@ -44,6 +44,7 @@ enum VehicleFlags {
 	VF_AUTOFILL_TIMETABLE,      ///< Whether the vehicle should fill in the timetable automatically.
 	VF_AUTOFILL_PRES_WAIT_TIME, ///< Whether non-destructive auto-fill should preserve waiting times
 	VF_STOP_LOADING,            ///< Don't load anymore during the next load cycle.
+	VF_PATHFINDER_LOST,         ///< Vehicle's pathfinder is lost.
 };
 
 /** Bit numbers used to indicate which of the #NewGRFCache values are valid. */
@@ -662,6 +663,7 @@ public:
 
 	bool IsEngineCountable() const;
 	bool HasDepotOrder() const;
+	void HandlePathfindingResult(bool path_found);
 };
 
 #define FOR_ALL_VEHICLES_FROM(var, start) FOR_ALL_ITEMS_FROM(Vehicle, vehicle_index, var, start)
