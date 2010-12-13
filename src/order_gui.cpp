@@ -198,8 +198,15 @@ void DrawOrderString(const Vehicle *v, const Order *order, int order_index, int 
 		DrawSprite(sprite, PAL_NONE, rtl ? right - sprite_size.width : left, y + ((int)FONT_HEIGHT_NORMAL - (int)sprite_size.height) / 2);
 	}
 
+	TextColour colour = TC_BLACK;
+	if (order->IsType(OT_AUTOMATIC)) {
+		colour =  selected ? TC_SILVER : TC_GREY;
+	} else if (selected) {
+		colour = TC_WHITE;
+	}
+
 	SetDParam(0, order_index + 1);
-	DrawString(left, rtl ? right - sprite_size.width - 3 : middle, y, STR_ORDER_INDEX, selected ? TC_WHITE : TC_BLACK, SA_RIGHT | SA_FORCE);
+	DrawString(left, rtl ? right - sprite_size.width - 3 : middle, y, STR_ORDER_INDEX, colour, SA_RIGHT | SA_FORCE);
 
 	SetDParam(5, STR_EMPTY);
 
@@ -209,6 +216,7 @@ void DrawOrderString(const Vehicle *v, const Order *order, int order_index, int 
 			SetDParam(1, order->GetDestination());
 			break;
 
+		case OT_AUTOMATIC:
 		case OT_GOTO_STATION: {
 			OrderLoadFlags load = order->GetLoadType();
 			OrderUnloadFlags unload = order->GetUnloadType();
@@ -296,7 +304,7 @@ void DrawOrderString(const Vehicle *v, const Order *order, int order_index, int 
 		default: NOT_REACHED();
 	}
 
-	DrawString(rtl ? left : middle, rtl ? middle : right, y, STR_ORDER_TEXT, selected ? TC_WHITE : TC_BLACK);
+	DrawString(rtl ? left : middle, rtl ? middle : right, y, STR_ORDER_TEXT, colour);
 }
 
 

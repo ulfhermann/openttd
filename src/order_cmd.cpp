@@ -268,7 +268,8 @@ VehicleOrderID OrderList::TranslateIndex(VehicleOrderID index, IndexType target)
 	OrderID result = 0;
 	const Order *skip_to_order = this->first;
 	bool is_auto = false;
-	while(index > 0 || (skip_to_order != NULL && (is_auto = skip_to_order->IsType(OT_AUTOMATIC)))) {
+	index = index + 1; // count from 1, to avoid overflow
+	while(skip_to_order != NULL && (index > 0 || (is_auto = skip_to_order->IsType(OT_AUTOMATIC)))) {
 		if (target == IT_SKIP || !is_auto) --index;
 		if (target == IT_FLAT || !is_auto) ++result;
 		skip_to_order = skip_to_order->next;
@@ -326,18 +327,18 @@ void OrderList::DeleteOrder(Order *order)
 
 void OrderList::DeleteAutoOrders(int start_index)
 {
-	if (index >= this->num_orders) return;
+	if (start_index >= this->num_orders) return;
 
 	Order *to_remove;
 
-	if (index == 0) {
+	if (start_index == 0) {
 		while(this->first != NULL && this->first->IsType(OT_AUTOMATIC)) {
 			to_remove = this->first;
 			this->first = to_remove->next;
 			this->DeleteOrder(to_remove);
 		}
 	} else {
-		Order *prev = GetOrderAt(index - 1);
+		Order *prev = GetOrderAt(start_index - 1);
 		while(prev->next != NULL && prev->next->IsType(OT_AUTOMATIC)) {
 			to_remove = prev->next;
 			prev->next = to_remove->next;

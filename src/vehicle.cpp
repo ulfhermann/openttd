@@ -1788,7 +1788,7 @@ void Vehicle::HandleLoading(bool mode)
 			this->LeaveStation();
 
 			/* If this was not the final order, don't remove it from the list. */
-			if (!at_destination_station) return;
+			if (!at_destination_station) break;
 			break;
 		}
 
