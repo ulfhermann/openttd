@@ -279,8 +279,9 @@ private:
 	/**
 	 * Update the counters and delete the order. Doesn't update order->next or this->first
 	 * @param order the order to be deleted.
+	 * @param index index of the order to be deleted, used to update conditional orders
 	 */
-	void DeleteOrder(Order *order);
+	void DeleteOrder(Order *order, int index);
 
 public:
 	/** Default constructor producing an invalid order list. */
@@ -433,14 +434,6 @@ public:
 	 * @note do not use on "current_order" vehicle orders!
 	 */
 	void FreeChain(bool keep_orderlist = false);
-
-	/**
-	 * Translate an order index into the other type of index
-	 * @param index index of an order, either flat or "skip", ie without counting automatic order
-	 * @param target the type of index we want to translate to
-	 * @return index of an order in "target" format
-	 */
-	VehicleOrderID TranslateIndex(VehicleOrderID index, IndexType target) const;
 
 	/**
 	 * Checks for internal consistency of order list. Triggers assertion if something is wrong.

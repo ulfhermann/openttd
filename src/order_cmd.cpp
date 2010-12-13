@@ -263,20 +263,6 @@ Order *OrderList::GetOrderAt(int index, bool no_auto) const
 	return order;
 }
 
-VehicleOrderID OrderList::TranslateIndex(VehicleOrderID index, IndexType target) const
-{
-	OrderID result = 0;
-	const Order *skip_to_order = this->first;
-	bool is_auto = false;
-	index = index + 1; // count from 1, to avoid overflow
-	while(skip_to_order != NULL && (index > 0 || (is_auto = skip_to_order->IsType(OT_AUTOMATIC)))) {
-		if (target == IT_SKIP || !is_auto) --index;
-		if (target == IT_FLAT || !is_auto) ++result;
-		skip_to_order = skip_to_order->next;
-	}
-	return skip_to_order == NULL ? INVALID_VEH_ORDER_ID : result;
-}
-
 void OrderList::InsertOrderAt(Order *new_order, int index)
 {
 	if (this->first == NULL) {
@@ -298,6 +284,26 @@ void OrderList::InsertOrderAt(Order *new_order, int index)
 	}
 	++this->num_orders;
 	this->timetable_duration += new_order->wait_time + new_order->travel_time;
+
+	int next_non_auto = index;
+	while(new_order->IsType(OT_AUTOMATIC) && new_order->next != NULL) {
+		++next_non_auto;
+		new_order = new_order->next;
+	}
+	/* As we insert an order, the order to skip to will be 'wrong'. */
+	VehicleOrderID cur_order_id = 0;
+	for(Order *order = this->first; order != NULL; order = order->next) {
+		if (order->IsType(OT_CONDITIONAL)) {
+			VehicleOrderID order_id = order->GetConditionSkipToOrder();
+			if (order_id >= next_non_auto) {
+				order->SetConditionSkipToOrder(order_id + 1);
+			}
+			if (order_id == cur_order_id) {
+				order->SetConditionSkipToOrder((order_id + 1) % this->num_orders);
+			}
+		}
+		cur_order_id++;
+	}
 }
 
 
@@ -315,14 +321,29 @@ void OrderList::DeleteOrderAt(int index)
 		to_remove = prev->next;
 		prev->next = to_remove->next;
 	}
-	this->DeleteOrder(to_remove);
+	this->DeleteOrder(to_remove, index);
 }
 
-void OrderList::DeleteOrder(Order *order)
+void OrderList::DeleteOrder(Order *order, int index)
 {
 	this->timetable_duration -= (order->wait_time + order->travel_time);
 	--this->num_orders;
 	delete order;
+
+	/* As we delete an order, the order to skip to will be 'wrong'. */
+	VehicleOrderID cur_order_id = 0;
+	for(Order *order = this->first; order != NULL; order = order->next) {
+		if (order->IsType(OT_CONDITIONAL)) {
+			VehicleOrderID order_id = order->GetConditionSkipToOrder();
+			if (order_id > index || (order_id == index && !order->IsType(OT_AUTOMATIC)) || order_id == this->num_orders) {
+				order->SetConditionSkipToOrder(max(order_id - 1, 0));
+			}
+			if (order_id == cur_order_id) {
+				order->SetConditionSkipToOrder((order_id + 1) % this->num_orders);
+			}
+		}
+		cur_order_id++;
+	}
 }
 
 void OrderList::DeleteAutoOrders(int start_index)
@@ -335,14 +356,14 @@ void OrderList::DeleteAutoOrders(int start_index)
 		while(this->first != NULL && this->first->IsType(OT_AUTOMATIC)) {
 			to_remove = this->first;
 			this->first = to_remove->next;
-			this->DeleteOrder(to_remove);
+			this->DeleteOrder(to_remove, 0);
 		}
 	} else {
 		Order *prev = GetOrderAt(start_index - 1);
 		while(prev->next != NULL && prev->next->IsType(OT_AUTOMATIC)) {
 			to_remove = prev->next;
 			prev->next = to_remove->next;
-			this->DeleteOrder(to_remove);
+			this->DeleteOrder(to_remove, start_index);
 		}
 	}
 }
@@ -371,6 +392,21 @@ void OrderList::MoveOrder(int from, int to)
 		Order *one_before = GetOrderAt(to - 1);
 		moving_one->next = one_before->next;
 		one_before->next = moving_one;
+	}
+
+	/* As we move an order, the order to skip to will be 'wrong'. */
+	for(Order *order = this->first; order != NULL; order = order->next) {
+		if (order->IsType(OT_CONDITIONAL)) {
+			VehicleOrderID order_id = order->GetConditionSkipToOrder();
+			if (order_id == from) {
+				order_id = to;
+			} else if (order_id > from && order_id <= to) {
+				order_id--;
+			} else if (order_id < from && order_id >= to) {
+				order_id++;
+			}
+			order->SetConditionSkipToOrder(order_id);
+		}
 	}
 }
 
@@ -485,7 +521,7 @@ static uint GetOrderDistance(const Order *prev, const Order *cur, const Vehicle 
 
 		conditional_depth++;
 
-		int dist1 = GetOrderDistance(prev, v->GetOrder(v->orders.list->TranslateIndex(cur->GetConditionSkipToOrder(), IT_FLAT)), v, conditional_depth);
+		int dist1 = GetOrderDistance(prev, v->GetOrder(cur->GetConditionSkipToOrder()), v, conditional_depth);
 		int dist2 = GetOrderDistance(prev, cur->next == NULL ? v->orders.list->GetFirstOrder() : cur->next, v, conditional_depth);
 		return max(dist1, dist2);
 	}
@@ -648,7 +684,7 @@ CommandCost CmdInsertOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 		}
 
 		case OT_CONDITIONAL: {
-			VehicleOrderID skip_to = v->orders.list->TranslateIndex(new_order.GetConditionSkipToOrder(), IT_FLAT);
+			VehicleOrderID skip_to = new_order.GetConditionSkipToOrder();
 			if (skip_to != 0 && skip_to >= v->GetNumOrders()) return CMD_ERROR; // Always allow jumping to the first (even when there is no order).
 			if (new_order.GetConditionVariable() > OCV_END) return CMD_ERROR;
 
@@ -742,25 +778,6 @@ CommandCost CmdInsertOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 			InvalidateVehicleOrder(u, INVALID_VEH_ORDER_ID | (sel_ord << 8));
 		}
 
-		if (!new_order.IsType(OT_AUTOMATIC)) {
-			/* As we insert an order, the order to skip to will be 'wrong'. */
-			VehicleOrderID cur_order_id = 0;
-			Order *order;
-			VehicleOrderID num_real_orders = v->orders.list->TranslateIndex(v->GetNumOrders() - 1, IT_SKIP) + 1;
-			FOR_VEHICLE_ORDERS(v, order) {
-				if (order->IsType(OT_CONDITIONAL)) {
-					VehicleOrderID order_id = order->GetConditionSkipToOrder();
-					if (order_id >= sel_ord) {
-						order->SetConditionSkipToOrder(order_id + 1);
-					}
-					if (order_id == cur_order_id) {
-						order->SetConditionSkipToOrder((order_id + 1) % num_real_orders);
-					}
-				}
-				cur_order_id++;
-			}
-		}
-
 		/* Make sure to rebuild the whole list */
 		InvalidateWindowClassesData(GetWindowClassForVehicleType(v->type), 0);
 	}
@@ -832,21 +849,6 @@ CommandCost CmdDeleteOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 
 			/* Update any possible open window of the vehicle */
 			InvalidateVehicleOrder(u, sel_ord | (INVALID_VEH_ORDER_ID << 8));
-		}
-
-		/* As we delete an order, the order to skip to will be 'wrong'. */
-		VehicleOrderID cur_order_id = 0;
-		FOR_VEHICLE_ORDERS(v, order) {
-			if (order->IsType(OT_CONDITIONAL)) {
-				VehicleOrderID order_id = v->orders.list->TranslateIndex(order->GetConditionSkipToOrder(), IT_FLAT);
-				if (order_id >= sel_ord) {
-					order->SetConditionSkipToOrder(v->orders.list->TranslateIndex(max(order_id - 1, 0), IT_SKIP));
-				}
-				if (order_id == cur_order_id) {
-					order->SetConditionSkipToOrder(v->orders.list->TranslateIndex((order_id + 1) % v->GetNumOrders(), IT_SKIP));
-				}
-			}
-			cur_order_id++;
 		}
 
 		InvalidateWindowClassesData(GetWindowClassForVehicleType(v->type), 0);
@@ -945,22 +947,6 @@ CommandCost CmdMoveOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 			assert(v->orders.list == u->orders.list);
 			/* Update any possible open window of the vehicle */
 			InvalidateVehicleOrder(u, moving_order | (target_order << 8));
-		}
-
-		/* As we move an order, the order to skip to will be 'wrong'. */
-		Order *order;
-		FOR_VEHICLE_ORDERS(v, order) {
-			if (order->IsType(OT_CONDITIONAL)) {
-				VehicleOrderID order_id = v->orders.list->TranslateIndex(order->GetConditionSkipToOrder(), IT_FLAT);
-				if (order_id == moving_order) {
-					order_id = target_order;
-				} else if (order_id > moving_order && order_id <= target_order) {
-					order_id--;
-				} else if (order_id < moving_order && order_id >= target_order) {
-					order_id++;
-				}
-				order->SetConditionSkipToOrder(v->orders.list->TranslateIndex(order_id, IT_SKIP));
-			}
 		}
 
 		/* Make sure to rebuild the whole list */
@@ -1609,11 +1595,7 @@ VehicleOrderID ProcessConditionalOrder(const Order *order, const Vehicle *v)
 		default: NOT_REACHED();
 	}
 
-	if (skip_order) {
-		return v->orders.list->TranslateIndex(order->GetConditionSkipToOrder(), IT_FLAT);
-	} else {
-		return (VehicleOrderID)INVALID_VEH_ORDER_ID;
-	}
+	return skip_order ? order->GetConditionSkipToOrder() : (VehicleOrderID)INVALID_VEH_ORDER_ID;
 }
 
 /**

@@ -42,12 +42,6 @@ enum OrderType {
 	OT_END
 };
 
-/** Index types for order lists */
-enum IndexType {
-	IT_FLAT = 0,
-	IT_SKIP = 1
-};
-
 /** It needs to be 8bits, because we save and load it as such */
 typedef SimpleTinyEnumT<OrderType, byte> OrderTypeByte;
 
