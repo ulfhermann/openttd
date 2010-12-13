@@ -2134,16 +2134,16 @@ static const byte _initial_tile_subcoord[6][4][3] = {
  * @param tile The tile the train is about to enter
  * @param enterdir Diagonal direction the train is coming from
  * @param tracks Usable tracks on the new tile
- * @param path_not_found [out] Set to false if the pathfinder couldn't find a way to the destination
+ * @param path_found [out] Whether a path has been found or not.
  * @param do_track_reservation Path reservation is requested
  * @param dest [out] State and destination of the requested path
  * @return The best track the train should follow
  */
-static Track DoTrainPathfind(const Train *v, TileIndex tile, DiagDirection enterdir, TrackBits tracks, bool *path_not_found, bool do_track_reservation, PBSTileInfo *dest)
+static Track DoTrainPathfind(const Train *v, TileIndex tile, DiagDirection enterdir, TrackBits tracks, bool &path_found, bool do_track_reservation, PBSTileInfo *dest)
 {
 	switch (_settings_game.pf.pathfinder_for_trains) {
-		case VPF_NPF: return NPFTrainChooseTrack(v, tile, enterdir, tracks, path_not_found, do_track_reservation, dest);
-		case VPF_YAPF: return YapfTrainChooseTrack(v, tile, enterdir, tracks, path_not_found, do_track_reservation, dest);
+		case VPF_NPF: return NPFTrainChooseTrack(v, tile, enterdir, tracks, path_found, do_track_reservation, dest);
+		case VPF_YAPF: return YapfTrainChooseTrack(v, tile, enterdir, tracks, path_found, do_track_reservation, dest);
 
 		default: NOT_REACHED();
 	}
@@ -2403,37 +2403,12 @@ static Track ChooseTrainTrack(Train *v, TileIndex tile, DiagDirection enterdir, 
 
 	if (res_dest.tile != INVALID_TILE && !res_dest.okay) {
 		/* Pathfinders are able to tell that route was only 'guessed'. */
-		bool      path_not_found = false;
+		bool      path_found = true;
 		TileIndex new_tile = res_dest.tile;
 
-		Track next_track = DoTrainPathfind(v, new_tile, dest_enterdir, tracks, &path_not_found, do_track_reservation, &res_dest);
+		Track next_track = DoTrainPathfind(v, new_tile, dest_enterdir, tracks, path_found, do_track_reservation, &res_dest);
 		if (new_tile == tile) best_track = next_track;
-
-		/* handle "path not found" state */
-		if (path_not_found) {
-			/* PF didn't find the route */
-			if (!HasBit(v->flags, VRF_NO_PATH_TO_DESTINATION)) {
-				/* it is first time the problem occurred, set the "path not found" flag */
-				SetBit(v->flags, VRF_NO_PATH_TO_DESTINATION);
-				/* and notify user about the event */
-				AI::NewEvent(v->owner, new AIEventVehicleLost(v->index));
-				if (_settings_client.gui.lost_train_warn && v->owner == _local_company) {
-					SetDParam(0, v->index);
-					AddVehicleNewsItem(
-						STR_NEWS_TRAIN_IS_LOST,
-						NS_ADVICE,
-						v->index
-					);
-				}
-			}
-		} else {
-			/* route found, is the train marked with "path not found" flag? */
-			if (HasBit(v->flags, VRF_NO_PATH_TO_DESTINATION)) {
-				/* clear the flag as the PF's problem was solved */
-				ClrBit(v->flags, VRF_NO_PATH_TO_DESTINATION);
-				/* can we also delete the "News" item somehow? */
-			}
-		}
+		v->HandlePathfindingResult(path_found);
 	}
 
 	/* No track reservation requested -> finished. */
@@ -2478,7 +2453,8 @@ static Track ChooseTrainTrack(Train *v, TileIndex tile, DiagDirection enterdir, 
 		/* Get next order with destination. */
 		if (orders.SwitchToNextOrder(true)) {
 			PBSTileInfo cur_dest;
-			DoTrainPathfind(v, next_tile, exitdir, reachable, NULL, true, &cur_dest);
+			bool path_found;
+			DoTrainPathfind(v, next_tile, exitdir, reachable, path_found, true, &cur_dest);
 			if (cur_dest.tile != INVALID_TILE) {
 				res_dest = cur_dest;
 				if (res_dest.okay) continue;
@@ -2773,7 +2749,7 @@ uint Train::Crash(bool flooded)
 {
 	uint pass = 0;
 	if (this->IsFrontEngine()) {
-		pass += 4; // driver
+		pass += 2; // driver
 
 		/* Remove the reserved path in front of the train if it is not stuck.
 		 * Also clear all reserved tracks the train is currently on. */
@@ -3609,7 +3585,7 @@ static bool TrainLocoHandler(Train *v, bool mode)
 
 			if (HasBit(v->flags, VRF_TRAIN_STUCK) && v->wait_counter > 2 * _settings_game.pf.wait_for_pbs_path * DAY_TICKS) {
 				/* Show message to player. */
-				if (_settings_client.gui.lost_train_warn && v->owner == _local_company) {
+				if (_settings_client.gui.lost_vehicle_warn && v->owner == _local_company) {
 					SetDParam(0, v->index);
 					AddVehicleNewsItem(
 						STR_NEWS_TRAIN_IS_STUCK,
