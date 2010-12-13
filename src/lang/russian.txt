@@ -959,7 +959,7 @@ STR_NEWS_VEHICLE_IS_GETTING_OLD                                 :{WHITE}Тран
 STR_NEWS_VEHICLE_IS_GETTING_VERY_OLD                            :{WHITE}Транспортное средство «{VEHICLE}» сильно устарело
 STR_NEWS_VEHICLE_IS_GETTING_VERY_OLD_AND                        :{WHITE}Транспортное средство «{VEHICLE}» очень сильно устарело и требует срочной замены
 STR_NEWS_TRAIN_IS_STUCK                                         :{WHITE}{VEHICLE} не может найти путь для продолжения движения.
-STR_NEWS_TRAIN_IS_LOST                                          :{WHITE}Транспортное средство «{VEHICLE}» заблудилось.
+STR_NEWS_VEHICLE_IS_LOST                                        :{WHITE}Транспортное средство «{VEHICLE}» заблудилось.
 STR_NEWS_VEHICLE_IS_UNPROFITABLE                                :{WHITE}Доход ТС «{VEHICLE}» в прошлом году составил {CURRENCY}
 
 STR_NEWS_ORDER_REFIT_FAILED                                     :{WHITE}Не удалось переоборудовать {VEHICLE}
@@ -1299,7 +1299,6 @@ STR_CONFIG_SETTING_DYNAMIC_ENGINES_EXISTING_VEHICLES            :{WHITE}Изме
 
 STR_CONFIG_SETTING_NEVER_EXPIRE_AIRPORTS                        :{LTBLUE}Аэропорты не устаревают: {ORANGE}{STRING}
 
-STR_CONFIG_SETTING_WARN_LOST_TRAIN                              :{LTBLUE}Предупреждать, если поезд заблудился: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ORDER_REVIEW                                 :{LTBLUE}Проверять маршруты на правильность: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ORDER_REVIEW_OFF                             :не проверять
 STR_CONFIG_SETTING_ORDER_REVIEW_EXDEPOT                         :у всех запущенных
@@ -3336,7 +3335,7 @@ STR_ORDERS_CAPTION                                              :{WHITE}{VEHICLE
 STR_ORDERS_TIMETABLE_VIEW                                       :{BLACK}Расписание
 STR_ORDERS_TIMETABLE_VIEW_TOOLTIP                               :{BLACK}Просмотр расписания
 
-STR_ORDERS_LIST_TOOLTIP                                         :{BLACK}Показ списка заданий - щёлкните для выделения. Если зажать Ctrl - обзор станции.
+STR_ORDERS_LIST_TOOLTIP                                         :{BLACK}Список заданий - щёлкните задание для выделения. Ctrl+щелчок - обзор станции назначения.
 STR_ORDER_INDEX                                                 :{COMMA}:{NBSP}
 STR_ORDER_TEXT                                                  :{STRING} {STRING}
 
@@ -3400,6 +3399,7 @@ STR_ORDERS_SKIP_TOOLTIP                                         :{BLACK}Пере
 
 STR_ORDERS_DELETE_BUTTON                                        :{BLACK}Удалить
 STR_ORDERS_DELETE_TOOLTIP                                       :{BLACK}Удалить выделенное задание
+STR_ORDERS_DELETE_ALL_TOOLTIP                                   :{BLACK}Удалить все задания
 STR_ORDERS_STOP_SHARING_BUTTON                                  :{BLACK}Индивидуальный список
 STR_ORDERS_STOP_SHARING_TOOLTIP                                 :{BLACK}Сделать общий список заданий индивидуальным. Ctrl+щелчок очистит список заданий.
 
