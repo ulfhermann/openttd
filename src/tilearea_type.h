@@ -60,22 +60,23 @@ struct TileArea {
 	}
 };
 
-/** Iterator to iterate over a tile area (rectangle) of the map. */
+/** Base class for tile iterators. */
 class TileIterator {
-private:
+protected:
 	TileIndex tile; ///< The current tile we are at.
-	int w;          ///< The width of the iterated area.
-	int x;          ///< The current 'x' position in the rectangle.
-	int y;          ///< The current 'y' position in the rectangle.
+
+	/**
+	 * Initialise the iterator starting at this tile.
+	 * @param tile The tile we start iterating from.
+	 */
+	TileIterator(TileIndex tile) : tile(tile)
+	{
+	}
 
 public:
-	/**
-	 * Construct the iterator.
-	 * @param ta Area, i.e. begin point and width/height of to-be-iterated area.
-	 */
-	TileIterator(const TileArea &ta) : tile(ta.tile), w(ta.w), x(ta.w), y(ta.h)
+	/** Some compilers really like this. */
+	virtual ~TileIterator()
 	{
-		if (ta.w == 0 || ta.h == 0) this->tile = INVALID_TILE;
 	}
 
 	/**
@@ -85,6 +86,28 @@ public:
 	FORCEINLINE operator TileIndex () const
 	{
 		return this->tile;
+	}
+
+	/**
+	 * Move ourselves to the next tile in the rectange on the map.
+	 */
+	virtual TileIterator& operator ++() = 0;
+};
+
+/** Iterator to iterate over a tile area (rectangle) of the map. */
+class OrthogonalTileIterator : public TileIterator {
+private:
+	int w;          ///< The width of the iterated area.
+	int x;          ///< The current 'x' position in the rectangle.
+	int y;          ///< The current 'y' position in the rectangle.
+
+public:
+	/**
+	 * Construct the iterator.
+	 * @param ta Area, i.e. begin point and width/height of to-be-iterated area.
+	 */
+	OrthogonalTileIterator(const TileArea &ta) : TileIterator(ta.w == 0 || ta.h == 0 ? INVALID_TILE : ta.tile), w(ta.w), x(ta.w), y(ta.h)
+	{
 	}
 
 	/**
@@ -106,12 +129,33 @@ public:
 	}
 };
 
+/** Iterator to iterate over a diagonal area of the map. */
+class DiagonalTileIterator : public TileIterator {
+private:
+	uint base_x, base_y; ///< The base tile x and y coordinates from where the iterating happens.
+	int a_cur, b_cur;    ///< The current (rotated) x and y coordinates of the iteration.
+	int a_max, b_max;    ///< The (rotated) x and y coordinates of the end of the iteration.
+
+public:
+	/**
+	 * Construct the iterator.
+	 * @param begin Tile from where to begin iterating.
+	 * @param end   Tile where to end the iterating.
+	 */
+	DiagonalTileIterator(TileIndex begin, TileIndex end);
+
+	/**
+	 * Move ourselves to the next tile in the rectange on the map.
+	 */
+	TileIterator& operator ++();
+};
+
 /**
  * A loop which iterates over the tiles of a TileArea.
  * @param var The name of the variable which contains the current tile.
  *            This variable will be allocated in this \c for of this loop.
  * @param ta  The tile area to search over.
  */
-#define TILE_AREA_LOOP(var, ta) for (TileIterator var(ta); var != INVALID_TILE; ++var)
+#define TILE_AREA_LOOP(var, ta) for (OrthogonalTileIterator var(ta); var != INVALID_TILE; ++var)
 
 #endif /* TILEAREA_TYPE_H */
