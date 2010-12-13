@@ -271,7 +271,7 @@ void DrawOrderString(const Vehicle *v, const Order *order, int order_index, int 
 			break;
 
 		case OT_CONDITIONAL:
-			SetDParam(1, order->GetConditionSkipToOrder() + 1);
+			SetDParam(1, v->orders.list->TranslateIndex(order->GetConditionSkipToOrder(), IT_FLAT) + 1);
 			if (order->GetConditionVariable() == OCV_UNCONDITIONALLY) {
 				SetDParam(0, STR_ORDER_CONDITIONAL_UNCONDITIONAL);
 			} else {
@@ -1324,8 +1324,8 @@ public:
 			this->goto_type = OPOS_GOTO;
 			NWidgetBase *nwid = this->GetWidget<NWidgetBase>(ORDER_WIDGET_ORDER_LIST);
 			if (IsInsideBS(_cursor.pos.x, this->left + nwid->pos_x, nwid->current_x) && IsInsideBS(_cursor.pos.y, this->top + nwid->pos_y, nwid->current_y)) {
-				int order_id = this->GetOrderFromPt(_cursor.pos.y - this->top);
-				if (order_id != INVALID_ORDER) {
+				VehicleOrderID order_id = this->vehicle->orders.list->TranslateIndex(this->GetOrderFromPt(_cursor.pos.y - this->top), IT_SKIP);
+				if (order_id != INVALID_VEH_ORDER_ID) {
 					Order order;
 					order.next = NULL;
 					order.index = 0;

@@ -1197,7 +1197,7 @@ void VehicleEnterDepot(Vehicle *v)
 	if (v->current_order.IsType(OT_GOTO_DEPOT)) {
 		SetWindowDirty(WC_VEHICLE_VIEW, v->index);
 
-		const Order *real_order = v->GetOrder(v->cur_order_index);
+		const Order *real_order = v->GetOrder(v->cur_order_index, true);
 		Order t = v->current_order;
 		v->current_order.MakeDummy();
 
@@ -1721,8 +1721,16 @@ void Vehicle::BeginLoading()
 		 * whether the train is lost or not; not marking a train lost
 		 * that arrives at random stations is bad. */
 		this->current_order.SetNonStopType(ONSF_NO_STOP_AT_ANY_STATION);
-
+		this->orders.list->DeleteAutoOrders(this->cur_order_index);
 	} else {
+		Order *in_list = this->GetOrder(this->cur_order_index);
+		if (in_list->IsType(OT_AUTOMATIC)) {
+			in_list->MakeAutomatic(this->last_station_visited);
+		} else {
+			Order *auto_order = new Order();
+			auto_order->MakeAutomatic(this->last_station_visited);
+			this->orders.list->InsertOrderAt(auto_order, this->cur_order_index);
+		}
 		current_order.MakeLoading(false);
 	}
 

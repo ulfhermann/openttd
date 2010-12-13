@@ -38,7 +38,14 @@ enum OrderType {
 	OT_DUMMY         = 5,
 	OT_GOTO_WAYPOINT = 6,
 	OT_CONDITIONAL   = 7,
+	OT_AUTOMATIC     = 8,
 	OT_END
+};
+
+/** Index types for order lists */
+enum IndexType {
+	IT_FLAT = 0,
+	IT_SKIP = 1
 };
 
 /** It needs to be 8bits, because we save and load it as such */

@@ -430,7 +430,7 @@ static const Order *ResolveOrder(VehicleID vehicle_id, AIOrder::OrderPosition or
 	EnforcePrecondition(false, IsValidVehicleOrder(vehicle_id, jump_to));
 
 	Order order;
-	order.MakeConditional(jump_to);
+	order.MakeConditional(::Vehicle::Get(vehicle_id)->orders.list->TranslateIndex(jump_to, IT_SKIP));
 
 	return AIObject::DoCommand(0, vehicle_id | (order_position << 20), order.Pack(), CMD_INSERT_ORDER);
 }

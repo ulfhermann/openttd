@@ -124,6 +124,12 @@ public:
 	void MakeConditional(VehicleOrderID order);
 
 	/**
+	 * Makes this order an automatic order.
+	 * @param destination the station to go to.
+	 */
+	void MakeAutomatic(StationID destination);
+
+	/**
 	 * Gets the destination of this order.
 	 * @pre IsType(OT_GOTO_WAYPOINT) || IsType(OT_GOTO_DEPOT) || IsType(OT_GOTO_STATION).
 	 * @return the destination of the order.
@@ -270,6 +276,12 @@ private:
 
 	Ticks timetable_duration;       ///< NOSAVE: Total duration of the order list
 
+	/**
+	 * Update the counters and delete the order. Doesn't update order->next or this->first
+	 * @param order the order to be deleted.
+	 */
+	void DeleteOrder(Order *order);
+
 public:
 	/** Default constructor producing an invalid order list. */
 	OrderList(VehicleOrderID num_orders = INVALID_VEH_ORDER_ID)
@@ -302,9 +314,10 @@ public:
 	/**
 	 * Get a certain order of the order chain.
 	 * @param index zero-based index of the order within the chain.
+	 * @param no_auto if set the next non-automatic order after the order at index is returned
 	 * @return the order at position index.
 	 */
-	Order *GetOrderAt(int index) const;
+	Order *GetOrderAt(int index, bool no_auto = false) const;
 
 	/**
 	 * Get the last order of the order chain.
@@ -330,6 +343,12 @@ public:
 	 * @param index is the position of the order which is to be deleted.
 	 */
 	void DeleteOrderAt(int index);
+
+	/**
+	 * Delete all automatic orders between start_index and the next non-automatic one
+	 * @param start_index the first index to look at
+	 */
+	void DeleteAutoOrders(int start_index);
 
 	/**
 	 * Move an order to another position within the order list.
@@ -414,6 +433,14 @@ public:
 	 * @note do not use on "current_order" vehicle orders!
 	 */
 	void FreeChain(bool keep_orderlist = false);
+
+	/**
+	 * Translate an order index into the other type of index
+	 * @param index index of an order, either flat or "skip", ie without counting automatic order
+	 * @param target the type of index we want to translate to
+	 * @return index of an order in "target" format
+	 */
+	VehicleOrderID TranslateIndex(VehicleOrderID index, IndexType target) const;
 
 	/**
 	 * Checks for internal consistency of order list. Triggers assertion if something is wrong.

@@ -99,6 +99,12 @@ void Order::MakeConditional(VehicleOrderID order)
 	this->dest = 0;
 }
 
+void Order::MakeAutomatic(StationID destination)
+{
+	this->type = OT_AUTOMATIC;
+	this->dest = destination;
+}
+
 void Order::SetRefit(CargoID cargo, byte subtype)
 {
 	this->refit_cargo = cargo;
@@ -239,7 +245,7 @@ void OrderList::FreeChain(bool keep_orderlist)
 	}
 }
 
-Order *OrderList::GetOrderAt(int index) const
+Order *OrderList::GetOrderAt(int index, bool no_auto) const
 {
 	if (index < 0) return NULL;
 
@@ -248,7 +254,26 @@ Order *OrderList::GetOrderAt(int index) const
 	while (order != NULL && index-- > 0) {
 		order = order->next;
 	}
+	if (no_auto) {
+		while(order != NULL && order->IsType(OT_AUTOMATIC)) {
+			order = order->next;
+		}
+	}
+
 	return order;
+}
+
+VehicleOrderID OrderList::TranslateIndex(VehicleOrderID index, IndexType target) const
+{
+	OrderID result = 0;
+	const Order *skip_to_order = this->first;
+	bool is_auto = false;
+	while(index > 0 || (skip_to_order != NULL && (is_auto = skip_to_order->IsType(OT_AUTOMATIC)))) {
+		if (target == IT_SKIP || !is_auto) --index;
+		if (target == IT_FLAT || !is_auto) ++result;
+		skip_to_order = skip_to_order->next;
+	}
+	return skip_to_order == NULL ? INVALID_VEH_ORDER_ID : result;
 }
 
 void OrderList::InsertOrderAt(Order *new_order, int index)
@@ -289,9 +314,36 @@ void OrderList::DeleteOrderAt(int index)
 		to_remove = prev->next;
 		prev->next = to_remove->next;
 	}
+	this->DeleteOrder(to_remove);
+}
+
+void OrderList::DeleteOrder(Order *order)
+{
+	this->timetable_duration -= (order->wait_time + order->travel_time);
 	--this->num_orders;
-	this->timetable_duration -= (to_remove->wait_time + to_remove->travel_time);
-	delete to_remove;
+	delete order;
+}
+
+void OrderList::DeleteAutoOrders(int start_index)
+{
+	if (index >= this->num_orders) return;
+
+	Order *to_remove;
+
+	if (index == 0) {
+		while(this->first != NULL && this->first->IsType(OT_AUTOMATIC)) {
+			to_remove = this->first;
+			this->first = to_remove->next;
+			this->DeleteOrder(to_remove);
+		}
+	} else {
+		Order *prev = GetOrderAt(index - 1);
+		while(prev->next != NULL && prev->next->IsType(OT_AUTOMATIC)) {
+			to_remove = prev->next;
+			prev->next = to_remove->next;
+			this->DeleteOrder(to_remove);
+		}
+	}
 }
 
 void OrderList::MoveOrder(int from, int to)
@@ -432,7 +484,7 @@ static uint GetOrderDistance(const Order *prev, const Order *cur, const Vehicle 
 
 		conditional_depth++;
 
-		int dist1 = GetOrderDistance(prev, v->GetOrder(cur->GetConditionSkipToOrder()), v, conditional_depth);
+		int dist1 = GetOrderDistance(prev, v->GetOrder(v->orders.list->TranslateIndex(cur->GetConditionSkipToOrder(), IT_FLAT)), v, conditional_depth);
 		int dist2 = GetOrderDistance(prev, cur->next == NULL ? v->orders.list->GetFirstOrder() : cur->next, v, conditional_depth);
 		return max(dist1, dist2);
 	}
@@ -595,7 +647,7 @@ CommandCost CmdInsertOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 		}
 
 		case OT_CONDITIONAL: {
-			VehicleOrderID skip_to = new_order.GetConditionSkipToOrder();
+			VehicleOrderID skip_to = v->orders.list->TranslateIndex(new_order.GetConditionSkipToOrder(), IT_FLAT);
 			if (skip_to != 0 && skip_to >= v->GetNumOrders()) return CMD_ERROR; // Always allow jumping to the first (even when there is no order).
 			if (new_order.GetConditionVariable() > OCV_END) return CMD_ERROR;
 
@@ -689,20 +741,23 @@ CommandCost CmdInsertOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 			InvalidateVehicleOrder(u, INVALID_VEH_ORDER_ID | (sel_ord << 8));
 		}
 
-		/* As we insert an order, the order to skip to will be 'wrong'. */
-		VehicleOrderID cur_order_id = 0;
-		Order *order;
-		FOR_VEHICLE_ORDERS(v, order) {
-			if (order->IsType(OT_CONDITIONAL)) {
-				VehicleOrderID order_id = order->GetConditionSkipToOrder();
-				if (order_id >= sel_ord) {
-					order->SetConditionSkipToOrder(order_id + 1);
+		if (!new_order.IsType(OT_AUTOMATIC)) {
+			/* As we insert an order, the order to skip to will be 'wrong'. */
+			VehicleOrderID cur_order_id = 0;
+			Order *order;
+			VehicleOrderID num_real_orders = v->orders.list->TranslateIndex(v->GetNumOrders() - 1, IT_SKIP) + 1;
+			FOR_VEHICLE_ORDERS(v, order) {
+				if (order->IsType(OT_CONDITIONAL)) {
+					VehicleOrderID order_id = order->GetConditionSkipToOrder();
+					if (order_id >= sel_ord) {
+						order->SetConditionSkipToOrder(order_id + 1);
+					}
+					if (order_id == cur_order_id) {
+						order->SetConditionSkipToOrder((order_id + 1) % num_real_orders);
+					}
 				}
-				if (order_id == cur_order_id) {
-					order->SetConditionSkipToOrder((order_id + 1) % v->GetNumOrders());
-				}
+				cur_order_id++;
 			}
-			cur_order_id++;
 		}
 
 		/* Make sure to rebuild the whole list */
@@ -782,12 +837,12 @@ CommandCost CmdDeleteOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 		VehicleOrderID cur_order_id = 0;
 		FOR_VEHICLE_ORDERS(v, order) {
 			if (order->IsType(OT_CONDITIONAL)) {
-				VehicleOrderID order_id = order->GetConditionSkipToOrder();
+				VehicleOrderID order_id = v->orders.list->TranslateIndex(order->GetConditionSkipToOrder(), IT_FLAT);
 				if (order_id >= sel_ord) {
-					order->SetConditionSkipToOrder(max(order_id - 1, 0));
+					order->SetConditionSkipToOrder(v->orders.list->TranslateIndex(max(order_id - 1, 0), IT_SKIP));
 				}
 				if (order_id == cur_order_id) {
-					order->SetConditionSkipToOrder((order_id + 1) % v->GetNumOrders());
+					order->SetConditionSkipToOrder(v->orders.list->TranslateIndex((order_id + 1) % v->GetNumOrders(), IT_SKIP));
 				}
 			}
 			cur_order_id++;
@@ -895,7 +950,7 @@ CommandCost CmdMoveOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 		Order *order;
 		FOR_VEHICLE_ORDERS(v, order) {
 			if (order->IsType(OT_CONDITIONAL)) {
-				VehicleOrderID order_id = order->GetConditionSkipToOrder();
+				VehicleOrderID order_id = v->orders.list->TranslateIndex(order->GetConditionSkipToOrder(), IT_FLAT);
 				if (order_id == moving_order) {
 					order_id = target_order;
 				} else if (order_id > moving_order && order_id <= target_order) {
@@ -903,7 +958,7 @@ CommandCost CmdMoveOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 				} else if (order_id < moving_order && order_id >= target_order) {
 					order_id++;
 				}
-				order->SetConditionSkipToOrder(order_id);
+				order->SetConditionSkipToOrder(v->orders.list->TranslateIndex(order_id, IT_SKIP));
 			}
 		}
 
@@ -1556,7 +1611,11 @@ VehicleOrderID ProcessConditionalOrder(const Order *order, const Vehicle *v)
 		default: NOT_REACHED();
 	}
 
-	return skip_order ? order->GetConditionSkipToOrder() : (VehicleOrderID)INVALID_VEH_ORDER_ID;
+	if (skip_order) {
+		return v->orders.list->TranslateIndex(order->GetConditionSkipToOrder(), IT_FLAT);
+	} else {
+		return (VehicleOrderID)INVALID_VEH_ORDER_ID;
+	}
 }
 
 /**
@@ -1640,7 +1699,7 @@ bool UpdateOrderDest(Vehicle *v, const Order *order, int conditional_depth)
 	assert(v->cur_order_index < v->GetNumOrders());
 
 	/* Get the current order */
-	order = v->GetOrder(v->cur_order_index);
+	order = v->GetOrder(v->cur_order_index, true);
 	v->current_order = *order;
 	return UpdateOrderDest(v, order, conditional_depth + 1);
 }
@@ -1695,7 +1754,7 @@ bool ProcessOrders(Vehicle *v)
 	/* Get the current order */
 	if (v->cur_order_index >= v->GetNumOrders()) v->cur_order_index = 0;
 
-	const Order *order = v->GetOrder(v->cur_order_index);
+	const Order *order = v->GetOrder(v->cur_order_index, true);
 
 	/* If no order, do nothing. */
 	if (order == NULL || (v->type == VEH_AIRCRAFT && !CheckForValidOrders(v))) {
