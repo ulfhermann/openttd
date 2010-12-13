@@ -331,30 +331,7 @@ uint DistanceSquare(TileIndex, TileIndex); ///< euclidian- or L2-Norm squared
 uint DistanceMax(TileIndex, TileIndex); ///< also known as L-Infinity-Norm
 uint DistanceMaxPlusManhattan(TileIndex, TileIndex); ///< Max + Manhattan
 uint DistanceFromEdge(TileIndex); ///< shortest distance from any edge of the map
-
-/**
- * A loop which iterates to a square of tiles
- *
- * This macro starts 2 nested loops which iterates over a square of tiles.
- *
- * @param var The name of the variable which contains the current tile
- * @param w The width (x-width) of the square
- * @param h The heigth (y-width) of the square
- * @param tile The start tile of the square
- */
-#define TILE_LOOP(var, w, h, tile)                                                      \
-	for (uint var = tile, cur_h = (h); cur_h > 0; --cur_h, var += TileDiffXY(0, 1) - (w)) \
-		for (uint cur_w = (w); cur_w > 0; --cur_w, var++)
-
-/**
- * A loop which iterates over the tiles of a TileArea
- *
- * This macro starts 2 nested loops which iterates over a square of tiles.
- *
- * @param var The name of the variable which contains the current tile
- * @param ta  The tile area to search over
- */
-#define TILE_AREA_LOOP(var, ta) TILE_LOOP(var, ta.w, ta.h, ta.tile)
+uint DistanceFromEdgeDir(TileIndex, DiagDirection); ///< distance from the map edge in given direction
 
 /**
  * Convert a DiagDirection to a TileIndexDiff
