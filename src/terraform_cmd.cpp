@@ -378,7 +378,9 @@ CommandCost CmdTerraformLand(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
  * @param tile end tile of area-drag
  * @param flags for this command type
  * @param p1 start tile of area drag
- * @param p2 height difference; eg raise (+1), lower (-1) or level (0)
+ * @param p2 various bitstuffed data.
+ *  bit      0: Whether to use the Orthogonal (0) or Diagonal (1) iterator.
+ *  bits 1 - 2: Mode of leveling \c LevelMode.
  * @param text unused
  * @return the cost of this operation or an error
  */
@@ -392,21 +394,30 @@ CommandCost CmdLevelLand(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 	uint oldh = TileHeight(p1);
 
 	/* compute new height */
-	uint h = oldh + (int8)p2;
+	uint h = oldh;
+	LevelMode lm = (LevelMode)GB(p2, 1, 2);
+	switch (lm) {
+		case LM_LEVEL: break;
+		case LM_RAISE: h++; break;
+		case LM_LOWER: h--; break;
+		default: return CMD_ERROR;
+	}
 
 	/* Check range of destination height */
 	if (h > MAX_TILE_HEIGHT) return_cmd_error((oldh == 0) ? STR_ERROR_ALREADY_AT_SEA_LEVEL : STR_ERROR_TOO_HIGH);
 
 	Money money = GetAvailableMoneyForCommand();
 	CommandCost cost(EXPENSES_CONSTRUCTION);
-	CommandCost last_error((p2 == 0) ? STR_ERROR_ALREADY_LEVELLED : INVALID_STRING_ID);
+	CommandCost last_error(lm == LM_LEVEL ? STR_ERROR_ALREADY_LEVELLED : INVALID_STRING_ID);
 	bool had_success = false;
 
 	TileArea ta(tile, p1);
-	TILE_AREA_LOOP(tile, ta) {
-		uint curh = TileHeight(tile);
+	TileIterator *iter = HasBit(p2, 0) ? (TileIterator *)new DiagonalTileIterator(tile, p1) : new OrthogonalTileIterator(ta);
+	for (; *iter != INVALID_TILE; ++(*iter)) {
+		TileIndex t = *iter;
+		uint curh = TileHeight(t);
 		while (curh != h) {
-			CommandCost ret = DoCommand(tile, SLOPE_N, (curh > h) ? 0 : 1, flags & ~DC_EXEC, CMD_TERRAFORM_LAND);
+			CommandCost ret = DoCommand(t, SLOPE_N, (curh > h) ? 0 : 1, flags & ~DC_EXEC, CMD_TERRAFORM_LAND);
 			if (ret.Failed()) {
 				last_error = ret;
 				break;
@@ -416,9 +427,10 @@ CommandCost CmdLevelLand(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 				money -= ret.GetCost();
 				if (money < 0) {
 					_additional_cash_required = ret.GetCost();
+					delete iter;
 					return cost;
 				}
-				DoCommand(tile, SLOPE_N, (curh > h) ? 0 : 1, flags, CMD_TERRAFORM_LAND);
+				DoCommand(t, SLOPE_N, (curh > h) ? 0 : 1, flags, CMD_TERRAFORM_LAND);
 			}
 
 			cost.AddCost(ret);
@@ -427,5 +439,6 @@ CommandCost CmdLevelLand(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 		}
 	}
 
+	delete iter;
 	return had_success ? cost : last_error;
 }
