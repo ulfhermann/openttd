@@ -315,10 +315,9 @@ public:
 	/**
 	 * Get a certain order of the order chain.
 	 * @param index zero-based index of the order within the chain.
-	 * @param no_auto if set the next non-automatic order after the order at index is returned
 	 * @return the order at position index.
 	 */
-	Order *GetOrderAt(int index, bool no_auto = false) const;
+	Order *GetOrderAt(int index) const;
 
 	/**
 	 * Get the last order of the order chain.

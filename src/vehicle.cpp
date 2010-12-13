@@ -1197,7 +1197,7 @@ void VehicleEnterDepot(Vehicle *v)
 	if (v->current_order.IsType(OT_GOTO_DEPOT)) {
 		SetWindowDirty(WC_VEHICLE_VIEW, v->index);
 
-		const Order *real_order = v->GetOrder(v->cur_order_index, true);
+		const Order *real_order = v->GetNextManualOrder(v->cur_order_index);
 		Order t = v->current_order;
 		v->current_order.MakeDummy();
 
@@ -2112,6 +2112,20 @@ void Vehicle::RemoveFromShared()
 
 	this->next_shared     = NULL;
 	this->previous_shared = NULL;
+}
+
+/**
+ * Get the next manual (not OT_AUTOMATIC) order after the one at the given index.
+ * @param index the index to start searching at
+ * @return the next manual order at or after index or NULL if there is none.
+ */
+Order *Vehicle::GetNextManualOrder(int index) const
+{
+	Order *order = this->GetOrder(index);
+	while(order != NULL && order->IsType(OT_AUTOMATIC)) {
+		order = order->next;
+	}
+	return order;
 }
 
 void StopAllVehicles()

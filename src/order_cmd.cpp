@@ -245,7 +245,7 @@ void OrderList::FreeChain(bool keep_orderlist)
 	}
 }
 
-Order *OrderList::GetOrderAt(int index, bool no_auto) const
+Order *OrderList::GetOrderAt(int index) const
 {
 	if (index < 0) return NULL;
 
@@ -254,12 +254,6 @@ Order *OrderList::GetOrderAt(int index, bool no_auto) const
 	while (order != NULL && index-- > 0) {
 		order = order->next;
 	}
-	if (no_auto) {
-		while(order != NULL && order->IsType(OT_AUTOMATIC)) {
-			order = order->next;
-		}
-	}
-
 	return order;
 }
 
@@ -1679,7 +1673,15 @@ bool UpdateOrderDest(Vehicle *v, const Order *order, int conditional_depth)
 	assert(v->cur_order_index < v->GetNumOrders());
 
 	/* Get the current order */
-	order = v->GetOrder(v->cur_order_index, true);
+	order = v->GetNextManualOrder(v->cur_order_index);
+	if (order == NULL) {
+		order = v->GetNextManualOrder(0);
+		if (order == NULL) {
+			v->current_order.Free();
+			v->dest_tile = 0;
+			return false;
+		}
+	}
 	v->current_order = *order;
 	return UpdateOrderDest(v, order, conditional_depth + 1);
 }
@@ -1734,7 +1736,7 @@ bool ProcessOrders(Vehicle *v)
 	/* Get the current order */
 	if (v->cur_order_index >= v->GetNumOrders()) v->cur_order_index = 0;
 
-	const Order *order = v->GetOrder(v->cur_order_index, true);
+	const Order *order = v->GetNextManualOrder(v->cur_order_index);
 
 	/* If no order, do nothing. */
 	if (order == NULL || (v->type == VEH_AIRCRAFT && !CheckForValidOrders(v))) {

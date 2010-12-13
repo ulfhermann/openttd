@@ -641,13 +641,14 @@ public:
 	/**
 	 * Returns order 'index' of a vehicle or NULL when it doesn't exists
 	 * @param index the order to fetch
-	 * @param no_auto  if set the next non-automatic order after the order at index is returned
 	 * @return the found (or not) order
 	 */
-	inline Order *GetOrder(int index, bool no_auto = false) const
+	inline Order *GetOrder(int index) const
 	{
-		return (this->orders.list == NULL) ? NULL : this->orders.list->GetOrderAt(index, no_auto);
+		return (this->orders.list == NULL) ? NULL : this->orders.list->GetOrderAt(index);
 	}
+
+	Order *GetNextManualOrder(int index) const;
 
 	/**
 	 * Returns the last order of a vehicle, or NULL if it doesn't exists
