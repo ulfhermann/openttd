@@ -52,6 +52,7 @@
 #include "vehiclelist.h"
 #include "tunnel_map.h"
 #include "depot_map.h"
+#include "ground_vehicle.hpp"
 
 #include "table/strings.h"
 
@@ -1665,10 +1666,8 @@ PaletteID GetEnginePalette(EngineID engine_type, CompanyID company)
 
 PaletteID GetVehiclePalette(const Vehicle *v)
 {
-	if (v->type == VEH_TRAIN) {
-		return GetEngineColourMap(v->engine_type, v->owner, Train::From(v)->tcache.first_engine, v);
-	} else if (v->type == VEH_ROAD) {
-		return GetEngineColourMap(v->engine_type, v->owner, RoadVehicle::From(v)->rcache.first_engine, v);
+	if (v->IsGroundVehicle()) {
+		return GetEngineColourMap(v->engine_type, v->owner, v->GetGroundVehicleCache()->first_engine, v);
 	}
 
 	return GetEngineColourMap(v->engine_type, v->owner, INVALID_ENGINE, v);
@@ -2104,7 +2103,7 @@ void Vehicle::ShowVisualEffect() const
 				 * - in Chance16 - the last value is 512 / 2^smoke_amount (max. smoke when 128 = smoke_amount of 2). */
 				int power_weight_effect = 0;
 				if (v->type == VEH_TRAIN) {
-					power_weight_effect = (32 >> (Train::From(this)->acc_cache.cached_power >> 10)) - (32 >> (Train::From(this)->acc_cache.cached_weight >> 9));
+					power_weight_effect = (32 >> (Train::From(this)->gcache.cached_power >> 10)) - (32 >> (Train::From(this)->gcache.cached_weight >> 9));
 				}
 				if (this->cur_speed < (this->vcache.cached_max_speed >> (2 >> _settings_game.vehicle.smoke_amount)) &&
 						Chance16((64 - ((this->cur_speed << 5) / this->vcache.cached_max_speed) + power_weight_effect), (512 >> _settings_game.vehicle.smoke_amount))) {
@@ -2299,4 +2298,34 @@ bool CanVehicleUseStation(const Vehicle *v, const Station *st)
 	if (v->type == VEH_ROAD) return st->GetPrimaryRoadStop(RoadVehicle::From(v)) != NULL;
 
 	return CanVehicleUseStation(v->engine_type, st);
+}
+
+/**
+ * Access the ground vehicle cache of the vehicle.
+ * @pre The vehicle is a #GroundVehicle.
+ * @return #GroundVehicleCache of the vehicle.
+ */
+GroundVehicleCache *Vehicle::GetGroundVehicleCache()
+{
+	assert(this->IsGroundVehicle());
+	if (this->type == VEH_TRAIN) {
+		return &Train::From(this)->gcache;
+	} else {
+		return &RoadVehicle::From(this)->gcache;
+	}
+}
+
+/**
+ * Access the ground vehicle cache of the vehicle.
+ * @pre The vehicle is a #GroundVehicle.
+ * @return #GroundVehicleCache of the vehicle.
+ */
+const GroundVehicleCache *Vehicle::GetGroundVehicleCache() const
+{
+	assert(this->IsGroundVehicle());
+	if (this->type == VEH_TRAIN) {
+		return &Train::From(this)->gcache;
+	} else {
+		return &RoadVehicle::From(this)->gcache;
+	}
 }

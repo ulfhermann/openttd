@@ -1373,7 +1373,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 
 	if (v->type == VEH_TRAIN) {
 		/* Each platform tile is worth 2 rail vehicles. */
-		int overhang = Train::From(v)->tcache.cached_total_length - st->GetPlatformLength(v->tile) * TILE_SIZE;
+		int overhang = v->GetGroundVehicleCache()->cached_total_length - st->GetPlatformLength(v->tile) * TILE_SIZE;
 		if (overhang > 0) {
 			unloading_time <<= 1;
 			unloading_time += (overhang * unloading_time) / 8;
