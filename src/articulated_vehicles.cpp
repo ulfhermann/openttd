@@ -108,7 +108,7 @@ CargoArray GetCapacityOfArticulatedParts(EngineID engine)
 	uint16 cargo_capacity = GetVehicleDefaultCapacity(engine, &cargo_type);
 	if (cargo_type < NUM_CARGO) capacity[cargo_type] = cargo_capacity;
 
-	if (e->type != VEH_TRAIN && e->type != VEH_ROAD) return capacity;
+	if (!e->IsGroundVehicle()) return capacity;
 
 	if (!HasBit(e->info.callback_mask, CBM_VEHICLE_ARTIC_ENGINE)) return capacity;
 
@@ -133,7 +133,7 @@ bool IsArticulatedVehicleRefittable(EngineID engine)
 	if (IsEngineRefittable(engine)) return true;
 
 	const Engine *e = Engine::Get(engine);
-	if (e->type != VEH_TRAIN && e->type != VEH_ROAD) return false;
+	if (!e->IsGroundVehicle()) return false;
 
 	if (!HasBit(e->info.callback_mask, CBM_VEHICLE_ARTIC_ENGINE)) return false;
 
@@ -161,7 +161,7 @@ void GetArticulatedRefitMasks(EngineID engine, bool include_initial_cargo_type, 
 	*union_mask = veh_cargos;
 	*intersection_mask = (veh_cargos != 0) ? veh_cargos : UINT32_MAX;
 
-	if (e->type != VEH_TRAIN && e->type != VEH_ROAD) return;
+	if (!e->IsGroundVehicle()) return;
 	if (!HasBit(e->info.callback_mask, CBM_VEHICLE_ARTIC_ENGINE)) return;
 
 	for (uint i = 1; i < MAX_ARTICULATED_PARTS; i++) {
@@ -313,6 +313,9 @@ void AddArticulatedParts(Vehicle *first)
 		 * and we run out of available vehicles, bail out. */
 		if (!Vehicle::CanAllocateItem()) return;
 
+		GroundVehicleCache *gcache = v->GetGroundVehicleCache();
+		gcache->first_engine = v->engine_type; // Needs to be set before first callback
+
 		const Engine *e_artic = Engine::Get(engine_type);
 		switch (type) {
 			default: NOT_REACHED();
@@ -326,7 +329,6 @@ void AddArticulatedParts(Vehicle *first)
 				t->subtype = 0;
 				t->track = front->track;
 				t->railtype = front->railtype;
-				t->tcache.first_engine = front->engine_type; // needs to be set before first callback
 
 				t->spritenum = e_artic->u.rail.image_index;
 				if (e_artic->CanCarryCargo()) {
@@ -348,8 +350,7 @@ void AddArticulatedParts(Vehicle *first)
 				v = rv;
 
 				rv->subtype = 0;
-				rv->rcache.first_engine = front->engine_type; // needs to be set before first callback
-				rv->rcache.cached_veh_length = 8; // Callback is called when the consist is finished
+				gcache->cached_veh_length = 8; // Callback is called when the consist is finished
 				rv->state = RVSB_IN_DEPOT;
 
 				rv->roadtype = front->roadtype;

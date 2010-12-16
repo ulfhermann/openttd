@@ -435,7 +435,7 @@ struct RefitWindow : public Window {
 				}
 				current_index++;
 			}
-		} while ((v->type == VEH_TRAIN || v->type == VEH_ROAD) && (v = v->Next()) != NULL);
+		} while (v->IsGroundVehicle() && (v = v->Next()) != NULL);
 
 		int scroll_size = 0;
 		for (uint i = 0; i < NUM_CARGO; i++) {
@@ -847,21 +847,7 @@ static int CDECL VehicleValueSorter(const Vehicle * const *a, const Vehicle * co
 /** Sort vehicles by their length */
 static int CDECL VehicleLengthSorter(const Vehicle * const *a, const Vehicle * const *b)
 {
-	int r = 0;
-	switch ((*a)->type) {
-		case VEH_TRAIN:
-			r = Train::From(*a)->tcache.cached_total_length - Train::From(*b)->tcache.cached_total_length;
-			break;
-
-		case VEH_ROAD: {
-			const RoadVehicle *u;
-			for (u = RoadVehicle::From(*a); u != NULL; u = u->Next()) r += u->rcache.cached_veh_length;
-			for (u = RoadVehicle::From(*b); u != NULL; u = u->Next()) r -= u->rcache.cached_veh_length;
-			break;
-		}
-
-		default: NOT_REACHED();
-	}
+	int r = (*a)->GetGroundVehicleCache()->cached_total_length - (*b)->GetGroundVehicleCache()->cached_total_length;
 	return (r != 0) ? r : VehicleNumberSorter(a, b);
 }
 
@@ -1703,34 +1689,25 @@ struct VehicleDetailsWindow : Window {
 				y += FONT_HEIGHT_NORMAL;
 
 				/* Draw max speed */
-				switch (v->type) {
-					case VEH_TRAIN:
-						SetDParam(2, v->GetDisplayMaxSpeed());
-						SetDParam(1, Train::From(v)->acc_cache.cached_power);
-						SetDParam(0, Train::From(v)->acc_cache.cached_weight);
-						SetDParam(3, Train::From(v)->acc_cache.cached_max_te / 1000);
-						DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y, (_settings_game.vehicle.train_acceleration_model != AM_ORIGINAL && GetRailTypeInfo(Train::From(v)->railtype)->acceleration_type != 2) ?
-								STR_VEHICLE_INFO_WEIGHT_POWER_MAX_SPEED_MAX_TE : STR_VEHICLE_INFO_WEIGHT_POWER_MAX_SPEED);
-						break;
-
-					case VEH_ROAD:
-						if (_settings_game.vehicle.roadveh_acceleration_model != AM_ORIGINAL) {
-							SetDParam(2, v->GetDisplayMaxSpeed());
-							SetDParam(1, RoadVehicle::From(v)->acc_cache.cached_power);
-							SetDParam(0, RoadVehicle::From(v)->acc_cache.cached_weight);
-							SetDParam(3, RoadVehicle::From(v)->acc_cache.cached_max_te / 1000);
-							DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y, STR_VEHICLE_INFO_WEIGHT_POWER_MAX_SPEED_MAX_TE);
-							break;
-						}
-						/* FALL THROUGH */
-					case VEH_SHIP:
-					case VEH_AIRCRAFT:
-						SetDParam(0, v->GetDisplayMaxSpeed());
-						DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y, STR_VEHICLE_INFO_MAX_SPEED);
-						break;
-
-					default: NOT_REACHED();
+				StringID string;
+				if (v->type == VEH_TRAIN ||
+						(v->type == VEH_ROAD && _settings_game.vehicle.roadveh_acceleration_model != AM_ORIGINAL)) {
+					const GroundVehicleCache *gcache = v->GetGroundVehicleCache();
+					SetDParam(2, v->GetDisplayMaxSpeed());
+					SetDParam(1, gcache->cached_power);
+					SetDParam(0, gcache->cached_weight);
+					SetDParam(3, gcache->cached_max_te / 1000);
+					if (v->type == VEH_TRAIN && (_settings_game.vehicle.train_acceleration_model == AM_ORIGINAL ||
+							GetRailTypeInfo(Train::From(v)->railtype)->acceleration_type == 2)) {
+						string = STR_VEHICLE_INFO_WEIGHT_POWER_MAX_SPEED;
+					} else {
+						string = STR_VEHICLE_INFO_WEIGHT_POWER_MAX_SPEED_MAX_TE;
+					}
+				} else {
+					SetDParam(0, v->GetDisplayMaxSpeed());
+					string = STR_VEHICLE_INFO_MAX_SPEED;
 				}
+				DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y, string);
 				y += FONT_HEIGHT_NORMAL;
 
 				/* Draw profit */
@@ -2035,7 +2012,7 @@ static bool IsVehicleRefitable(const Vehicle *v)
 
 	do {
 		if (IsEngineRefittable(v->engine_type)) return true;
-	} while ((v->type == VEH_TRAIN || v->type == VEH_ROAD) && (v = v->Next()) != NULL);
+	} while (v->IsGroundVehicle() && (v = v->Next()) != NULL);
 
 	return false;
 }
@@ -2195,7 +2172,7 @@ public:
 		} else if (v->vehstatus & VS_STOPPED) {
 			if (v->type == VEH_TRAIN) {
 				if (v->cur_speed == 0) {
-					if (Train::From(v)->acc_cache.cached_power == 0) {
+					if (Train::From(v)->gcache.cached_power == 0) {
 						str = STR_VEHICLE_STATUS_TRAIN_NO_POWER;
 					} else {
 						str = STR_VEHICLE_STATUS_STOPPED;
@@ -2313,7 +2290,7 @@ public:
 										CcCloneVehicle);
 				break;
 			case VVW_WIDGET_TURN_AROUND: // turn around
-				assert(v->type == VEH_TRAIN || v->type == VEH_ROAD);
+				assert(v->IsGroundVehicle());
 				DoCommandP(v->tile, v->index, 0,
 										_vehicle_command_translation_table[VCT_CMD_TURN_AROUND][v->type]);
 				break;
@@ -2347,7 +2324,7 @@ public:
 			this->SetWidgetDirty(VVW_WIDGET_SELECT_DEPOT_CLONE);
 		}
 		/* The same system applies to widget VVW_WIDGET_REFIT_VEH and VVW_WIDGET_TURN_AROUND.*/
-		if (v->type == VEH_ROAD || v->type == VEH_TRAIN) {
+		if (v->IsGroundVehicle()) {
 			PlaneSelections plane = veh_stopped ? SEL_RT_REFIT : SEL_RT_TURN_AROUND;
 			NWidgetStacked *nwi = this->GetWidget<NWidgetStacked>(VVW_WIDGET_SELECT_REFIT_TURN);
 			if (nwi->shown_plane + SEL_RT_BASEPLANE != plane) {

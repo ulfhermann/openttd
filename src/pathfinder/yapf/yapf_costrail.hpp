@@ -258,8 +258,8 @@ public:
 		const Train *v = Yapf().GetVehicle();
 		assert(v != NULL);
 		assert(v->type == VEH_TRAIN);
-		assert(v->tcache.cached_total_length != 0);
-		int missing_platform_length = CeilDiv(v->tcache.cached_total_length, TILE_SIZE) - platform_length;
+		assert(v->gcache.cached_total_length != 0);
+		int missing_platform_length = CeilDiv(v->gcache.cached_total_length, TILE_SIZE) - platform_length;
 		if (missing_platform_length < 0) {
 			/* apply penalty for longer platform than needed */
 			cost += Yapf().PfGetSettings().rail_longer_platform_penalty + Yapf().PfGetSettings().rail_longer_platform_per_tile_penalty * -missing_platform_length;
@@ -587,8 +587,8 @@ no_entry_cost: // jump here at the beginning if the node has no parent (it is th
 				if (n.m_last_red_signal_type == SIGTYPE_EXIT) {
 					/* last signal was red pre-signal-exit */
 					extra_cost += Yapf().PfGetSettings().rail_lastred_exit_penalty;
-				} else {
-					/* last signal was red, but not exit */
+				} else if (!IsPbsSignal(n.m_last_red_signal_type)) {
+					/* Last signal was red, but not exit or path signal. */
 					extra_cost += Yapf().PfGetSettings().rail_lastred_penalty;
 				}
 			}
