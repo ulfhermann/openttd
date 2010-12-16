@@ -219,6 +219,12 @@ void DrawOrderString(const Vehicle *v, const Order *order, int order_index, int 
 			break;
 
 		case OT_AUTOMATIC:
+			SetDParam(0, STR_ORDER_GO_TO_STATION);
+			SetDParam(1, STR_ORDER_GO_TO);
+			SetDParam(2, order->GetDestination());
+			SetDParam(3, STR_EMPTY);
+			break;
+
 		case OT_GOTO_STATION: {
 			OrderLoadFlags load = order->GetLoadType();
 			OrderUnloadFlags unload = order->GetUnloadType();

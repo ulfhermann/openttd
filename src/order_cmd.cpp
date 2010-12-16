@@ -340,10 +340,11 @@ void OrderList::DeleteOrder(Order *order, int index)
 	}
 }
 
-void OrderList::DeleteAutoOrders(int start_index)
+int OrderList::DeleteAutoOrders(int start_index)
 {
-	if (start_index >= this->num_orders) return;
+	if (start_index >= this->num_orders) return 0;
 
+	int deleted = 0;
 	Order *to_remove;
 
 	if (start_index == 0) {
@@ -351,6 +352,7 @@ void OrderList::DeleteAutoOrders(int start_index)
 			to_remove = this->first;
 			this->first = to_remove->next;
 			this->DeleteOrder(to_remove, 0);
+			++deleted;
 		}
 	} else {
 		Order *prev = GetOrderAt(start_index - 1);
@@ -358,8 +360,10 @@ void OrderList::DeleteAutoOrders(int start_index)
 			to_remove = prev->next;
 			prev->next = to_remove->next;
 			this->DeleteOrder(to_remove, start_index);
+			++deleted;
 		}
 	}
+	return deleted;
 }
 
 void OrderList::MoveOrder(int from, int to)

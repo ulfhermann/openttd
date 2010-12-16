@@ -1742,6 +1742,8 @@ void Vehicle::BeginLoading()
 {
 	assert(IsTileType(tile, MP_STATION) || type == VEH_SHIP);
 
+	int from = 0;
+	int to = 0;
 	if (this->current_order.IsType(OT_GOTO_STATION) &&
 			this->current_order.GetDestination() == this->last_station_visited) {
 		current_order.MakeLoading(true);
@@ -1753,17 +1755,31 @@ void Vehicle::BeginLoading()
 		 * whether the train is lost or not; not marking a train lost
 		 * that arrives at random stations is bad. */
 		this->current_order.SetNonStopType(ONSF_NO_STOP_AT_ANY_STATION);
-		this->orders.list->DeleteAutoOrders(this->cur_order_index);
+		if (this->orders.list->DeleteAutoOrders(this->cur_order_index) > 0) {
+			from = this->cur_order_index;
+			to = INVALID_VEH_ORDER_ID;
+		}
 	} else {
 		Order *in_list = this->GetOrder(this->cur_order_index);
-		if (in_list->IsType(OT_AUTOMATIC)) {
-			in_list->MakeAutomatic(this->last_station_visited);
+		if (in_list && in_list->IsType(OT_AUTOMATIC)) {
+			if (in_list->GetDestination() != this->last_station_visited) {
+				in_list->MakeAutomatic(this->last_station_visited);
+				from = -2;
+			}
 		} else {
 			Order *auto_order = new Order();
 			auto_order->MakeAutomatic(this->last_station_visited);
 			this->orders.list->InsertOrderAt(auto_order, this->cur_order_index);
+			from = INVALID_VEH_ORDER_ID;
+			to = this->cur_order_index;
 		}
 		current_order.MakeLoading(false);
+	}
+
+	if (from != 0 || to != 0) {
+		for (Vehicle *u = this->FirstShared(); u != NULL; u = u->NextShared()) {
+			InvalidateVehicleOrder(this, from | (to << 8));
+		}
 	}
 
 	Station::Get(this->last_station_visited)->loading_vehicles.push_back(this);

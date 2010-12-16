@@ -347,8 +347,9 @@ public:
 	/**
 	 * Delete all automatic orders between start_index and the next non-automatic one
 	 * @param start_index the first index to look at
+	 * @return the number of orders deleted
 	 */
-	void DeleteAutoOrders(int start_index);
+	int DeleteAutoOrders(int start_index);
 
 	/**
 	 * Move an order to another position within the order list.
