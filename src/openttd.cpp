@@ -1141,11 +1141,10 @@ static void CheckCaches()
 		uint length = 0;
 		for (const Vehicle *u = v; u != NULL; u = u->Next()) length++;
 
-		NewGRFCache       *grf_cache = CallocT<NewGRFCache>(length);
-		VehicleCache      *veh_cache = CallocT<VehicleCache>(length);
-		AccelerationCache *acc_cache = CallocT<AccelerationCache>(length);
-		TrainCache        *tra_cache = CallocT<TrainCache>(length);
-		RoadVehicleCache  *roa_cache = CallocT<RoadVehicleCache>(length);
+		NewGRFCache        *grf_cache = CallocT<NewGRFCache>(length);
+		VehicleCache       *veh_cache = CallocT<VehicleCache>(length);
+		GroundVehicleCache *gro_cache = CallocT<GroundVehicleCache>(length);
+		TrainCache         *tra_cache = CallocT<TrainCache>(length);
 
 		length = 0;
 		for (const Vehicle *u = v; u != NULL; u = u->Next()) {
@@ -1154,12 +1153,11 @@ static void CheckCaches()
 			veh_cache[length] = u->vcache;
 			switch (u->type) {
 				case VEH_TRAIN:
-					acc_cache[length] = Train::From(u)->acc_cache;
+					gro_cache[length] = Train::From(u)->gcache;
 					tra_cache[length] = Train::From(u)->tcache;
 					break;
 				case VEH_ROAD:
-					acc_cache[length] = RoadVehicle::From(u)->acc_cache;
-					roa_cache[length] = RoadVehicle::From(u)->rcache;
+					gro_cache[length] = RoadVehicle::From(u)->gcache;
 					break;
 				default:
 					break;
@@ -1186,19 +1184,16 @@ static void CheckCaches()
 			}
 			switch (u->type) {
 				case VEH_TRAIN:
-					if (memcmp(&acc_cache[length], &Train::From(u)->acc_cache, sizeof(AccelerationCache)) != 0) {
-						DEBUG(desync, 2, "train acceleration cache mismatch: vehicle %i, company %i, unit number %i, wagon %i", v->index, (int)v->owner, v->unitnumber, length);
+					if (memcmp(&gro_cache[length], &Train::From(u)->gcache, sizeof(GroundVehicleCache)) != 0) {
+						DEBUG(desync, 2, "train ground vehicle cache mismatch: vehicle %i, company %i, unit number %i, wagon %i", v->index, (int)v->owner, v->unitnumber, length);
 					}
 					if (memcmp(&tra_cache[length], &Train::From(u)->tcache, sizeof(TrainCache)) != 0) {
 						DEBUG(desync, 2, "train cache mismatch: vehicle %i, company %i, unit number %i, wagon %i", v->index, (int)v->owner, v->unitnumber, length);
 					}
 					break;
 				case VEH_ROAD:
-					if (memcmp(&acc_cache[length], &RoadVehicle::From(u)->acc_cache, sizeof(AccelerationCache)) != 0) {
-						DEBUG(desync, 2, "road vehicle acceleration cache mismatch: vehicle %i, company %i, unit number %i, wagon %i", v->index, (int)v->owner, v->unitnumber, length);
-					}
-					if (memcmp(&roa_cache[length], &RoadVehicle::From(u)->rcache, sizeof(RoadVehicleCache)) != 0) {
-						DEBUG(desync, 2, "road vehicle cache mismatch: vehicle %i, company %i, unit number %i, wagon %i", v->index, (int)v->owner, v->unitnumber, length);
+					if (memcmp(&gro_cache[length], &RoadVehicle::From(u)->gcache, sizeof(GroundVehicleCache)) != 0) {
+						DEBUG(desync, 2, "road vehicle ground vehicle cache mismatch: vehicle %i, company %i, unit number %i, wagon %i", v->index, (int)v->owner, v->unitnumber, length);
 					}
 					break;
 				default:
@@ -1209,9 +1204,8 @@ static void CheckCaches()
 
 		free(grf_cache);
 		free(veh_cache);
-		free(acc_cache);
+		free(gro_cache);
 		free(tra_cache);
-		free(roa_cache);
 	}
 
 	/* Check whether the caches are still valid */
@@ -1358,6 +1352,13 @@ void GameLoop()
 		}
 		/* Singleplayer */
 		StateGameLoop();
+	}
+
+	/* Check chat messages roughly once a second. */
+	static uint check_message = 0;
+	if (++check_message > 1000 / MILLISECONDS_PER_TICK) {
+		check_message = 0;
+		NetworkChatMessageLoop();
 	}
 #else
 	StateGameLoop();
