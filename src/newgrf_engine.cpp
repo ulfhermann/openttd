@@ -439,10 +439,8 @@ static uint8 LiveryHelper(EngineID engine, const Vehicle *v)
 	if (v == NULL) {
 		if (!Company::IsValidID(_current_company)) return 0;
 		l = GetEngineLivery(engine, _current_company, INVALID_ENGINE, NULL, LIT_ALL);
-	} else if (v->type == VEH_TRAIN) {
-		l = GetEngineLivery(v->engine_type, v->owner, Train::From(v)->tcache.first_engine, v, LIT_ALL);
-	} else if (v->type == VEH_ROAD) {
-		l = GetEngineLivery(v->engine_type, v->owner, RoadVehicle::From(v)->rcache.first_engine, v, LIT_ALL);
+	} else if (v->IsGroundVehicle()) {
+		l = GetEngineLivery(v->engine_type, v->owner, v->GetGroundVehicleCache()->first_engine, v, LIT_ALL);
 	} else {
 		l = GetEngineLivery(v->engine_type, v->owner, INVALID_ENGINE, v, LIT_ALL);
 	}
@@ -611,7 +609,7 @@ static uint32 VehicleGetVariable(const ResolverObject *object, byte variable, by
 			 * B - current wagon to next wagon, 0 if wagon is last
 			 * T - previous wagon to next wagon, 0 in an S-bend
 			 */
-			if (v->type != VEH_TRAIN && v->type != VEH_ROAD) return 0;
+			if (!v->IsGroundVehicle()) return 0;
 
 			const Vehicle *u_p = v->Previous();
 			const Vehicle *u_n = v->Next();
@@ -794,11 +792,11 @@ static uint32 VehicleGetVariable(const ResolverObject *object, byte variable, by
 			switch (variable - 0x80) {
 				case 0x62: return t->track;
 				case 0x66: return t->railtype;
-				case 0x73: return t->tcache.cached_veh_length;
-				case 0x74: return t->acc_cache.cached_power;
-				case 0x75: return GB(t->acc_cache.cached_power,  8, 24);
-				case 0x76: return GB(t->acc_cache.cached_power, 16, 16);
-				case 0x77: return GB(t->acc_cache.cached_power, 24,  8);
+				case 0x73: return t->gcache.cached_veh_length;
+				case 0x74: return t->gcache.cached_power;
+				case 0x75: return GB(t->gcache.cached_power,  8, 24);
+				case 0x76: return GB(t->gcache.cached_power, 16, 16);
+				case 0x77: return GB(t->gcache.cached_power, 24,  8);
 				case 0x7C: return t->First()->index;
 				case 0x7D: return GB(t->First()->index, 8, 8);
 				case 0x7F: return 0; // Used for vehicle reversing hack in TTDP
@@ -909,14 +907,15 @@ static const SpriteGroup *GetVehicleSpriteGroup(EngineID engine, const Vehicle *
 	} else {
 		cargo = v->cargo_type;
 
-		if (v->type == VEH_TRAIN) {
-			/* We always use cached value, except for callbacks because the override spriteset
+		if (v->IsGroundVehicle()) {
+			/* For trains we always use cached value, except for callbacks because the override spriteset
 			 * to use may be different than the one cached. It happens for callback 0x15 (refit engine),
 			 * as v->cargo_type is temporary changed to the new type */
-			group = use_cache ? Train::From(v)->tcache.cached_override : GetWagonOverrideSpriteSet(v->engine_type, v->cargo_type, Train::From(v)->tcache.first_engine);
-			if (group != NULL) return group;
-		} else if (v->type == VEH_ROAD) {
-			group = GetWagonOverrideSpriteSet(v->engine_type, v->cargo_type, RoadVehicle::From(v)->rcache.first_engine);
+			if (use_cache && v->type == VEH_TRAIN) {
+				group = Train::From(v)->tcache.cached_override;
+			} else {
+				group = GetWagonOverrideSpriteSet(v->engine_type, v->cargo_type, v->GetGroundVehicleCache()->first_engine);
+			}
 			if (group != NULL) return group;
 		}
 	}
