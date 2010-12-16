@@ -98,6 +98,7 @@ extern VehiclePool _vehicle_pool;
 
 /* Some declarations of functions, so we can make them friendly */
 struct SaveLoad;
+struct GroundVehicleCache;
 extern const SaveLoad *GetVehicleDescription(VehicleType vt);
 struct LoadgameState;
 extern bool LoadOldVehicle(LoadgameState *ls, int num);
@@ -239,6 +240,9 @@ public:
 	void BeginLoading();
 	void LeaveStation();
 
+	GroundVehicleCache *GetGroundVehicleCache();
+	const GroundVehicleCache *GetGroundVehicleCache() const;
+
 	/**
 	 * Handle the loading of the vehicle; when not it skips through dummy
 	 * orders and does nothing in all other cases.
@@ -357,6 +361,15 @@ public:
 		for (Vehicle *u = this; u != NULL; u = u->Next()) {
 			u->InvalidateNewGRFCache();
 		}
+	}
+
+	/**
+	 * Check if the vehicle is a ground vehicle.
+	 * @return True iff the vehicle is a train or a road vehicle.
+	 */
+	FORCEINLINE bool IsGroundVehicle() const
+	{
+		return this->type == VEH_TRAIN || this->type == VEH_ROAD;
 	}
 
 	/**

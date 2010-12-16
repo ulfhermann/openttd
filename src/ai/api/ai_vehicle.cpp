@@ -48,17 +48,7 @@
 	if (!IsValidVehicle(vehicle_id)) return -1;
 
 	const Vehicle *v = ::Vehicle::Get(vehicle_id);
-	switch (v->type) {
-		case VEH_ROAD: {
-			uint total_length = 0;
-			for (const Vehicle *u = v; u != NULL; u = u->Next()) {
-				total_length += ::RoadVehicle::From(u)->rcache.cached_veh_length;
-			}
-			return total_length;
-		}
-		case VEH_TRAIN: return ::Train::From(v)->tcache.cached_total_length;
-		default: return -1;
-	}
+	return v->IsGroundVehicle() ? v->GetGroundVehicleCache()->cached_total_length : -1;
 }
 
 /* static */ VehicleID AIVehicle::BuildVehicle(TileIndex depot, EngineID engine_id)
