@@ -270,13 +270,13 @@ StationID OrderList::GetNextStoppingStation(const Order *next, StationID curr_st
 		return INVALID_STATION;
 	}
 
-	if (next->GetType() == OT_CONDITIONAL) {
+	if (next->IsType(OT_CONDITIONAL)) {
 		StationID skip_to = this->GetNextStoppingStation(this->GetOrderAt(next->GetConditionSkipToOrder()), curr_station, hops + 1);
 		StationID advance = this->GetNextStoppingStation(this->GetNext(next), curr_station, hops + 1);
 		return (skip_to == advance) ? skip_to : INVALID_STATION;
 	}
 
-	if (next->GetType() != OT_GOTO_STATION ||
+	if (!(next->IsType(OT_GOTO_STATION) || next->IsType(OT_AUTOMATIC)) ||
 			(next->GetNonStopType() & ONSF_NO_STOP_AT_DESTINATION_STATION) != 0 ||
 			next->GetDestination() == curr_station) {
 		return GetNextStoppingStation(this->GetNext(next), curr_station, hops + 1);
@@ -303,7 +303,8 @@ StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_order, StationID
 	 * we're at, we have to check the current order; otherwise we have to check
 	 * the next one.
 	 */
-	if (curr_station == INVALID_STATION || curr->GetType() != OT_GOTO_STATION ||
+	if (curr_station == INVALID_STATION || 
+			!(curr->IsType(OT_GOTO_STATION) || curr->IsType(OT_AUTOMATIC)) ||
 			curr_station != curr->GetDestination()) {
 		return this->GetNextStoppingStation(curr, curr_station, 0);
 	} else {
