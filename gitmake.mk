@@ -2,7 +2,7 @@
 
 VPATH=.:./.git/refs/heads/
 
-gitmake-all: cd auto_orders
+gitmake-all: cd
 	touch gitmake-all
 	git checkout patches
 	mv patches/current/* current/
@@ -59,7 +59,7 @@ demands: components
 
 components: capacities
 
-capacities: moving-average
+capacities: moving-average auto-orders
 
 selfaware-stationcargo: gitmake 
 
