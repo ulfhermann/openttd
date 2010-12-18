@@ -71,8 +71,8 @@ multimap: gitmake
 
 moving-average: gitmake 
 
-auto_orders: gitmake
+auto-orders: gitmake
 
-push: master gitmake patches cd ext-rating station-gui smallmap-stats flowmapping-core mcf demands components capacities smallmap-zoom-in texteff cargomap multimap reservation moving-average selfaware-stationcargo auto_orders
+push: master gitmake patches cd ext-rating station-gui smallmap-stats flowmapping-core mcf demands components capacities smallmap-zoom-in texteff cargomap multimap reservation moving-average selfaware-stationcargo auto-orders
 	git push github $(^F)
 
