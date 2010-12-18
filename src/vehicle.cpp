@@ -1232,7 +1232,7 @@ void VehicleEnterDepot(Vehicle *v)
 	if (v->current_order.IsType(OT_GOTO_DEPOT)) {
 		SetWindowDirty(WC_VEHICLE_VIEW, v->index);
 
-		const Order *real_order = v->GetOrder(v->cur_order_index);
+		const Order *real_order = v->GetNextManualOrder(v->cur_order_index);
 		Order t = v->current_order;
 		v->current_order.MakeDummy();
 
@@ -1751,6 +1751,12 @@ void Vehicle::BeginLoading(StationID curr_station_id)
 		current_order.MakeLoading(true);
 		UpdateVehicleTimetable(this, true);
 
+		for (Order *order = this->GetOrder(this->cur_order_index);
+				order != NULL && order->IsType(OT_AUTOMATIC);
+				order = order->next) {
+			DeleteOrder(this, this->cur_order_index);
+		}
+
 		/* Furthermore add the Non Stop flag to mark that this station
 		 * is the actual destination of the vehicle, which is (for example)
 		 * necessary to be known for HandleTrainLoading to determine
@@ -1759,6 +1765,15 @@ void Vehicle::BeginLoading(StationID curr_station_id)
 		this->current_order.SetNonStopType(ONSF_NO_STOP_AT_ANY_STATION);
 
 	} else {
+		Order *in_list = this->GetOrder(this->cur_order_index);
+		if ((in_list == NULL && this->cur_order_index == 0) || 
+				(in_list != NULL && (!in_list->IsType(OT_AUTOMATIC) || 
+				in_list->GetDestination() != this->last_station_visited))) {
+			Order *auto_order = new Order();
+			auto_order->MakeAutomatic(this->last_station_visited);
+			InsertOrder(this, auto_order, this->cur_order_index);
+			if (this->cur_order_index > 0) --this->cur_order_index;
+		}
 		current_order.MakeLoading(false);
 	}
 
@@ -1884,7 +1899,7 @@ void Vehicle::HandleLoading(bool mode)
 			this->LeaveStation();
 
 			/* If this was not the final order, don't remove it from the list. */
-			if (!at_destination_station) return;
+			if (!at_destination_station) break;
 			break;
 		}
 
@@ -2208,6 +2223,20 @@ void Vehicle::RemoveFromShared()
 
 	this->next_shared     = NULL;
 	this->previous_shared = NULL;
+}
+
+/**
+ * Get the next manual (not OT_AUTOMATIC) order after the one at the given index.
+ * @param index the index to start searching at
+ * @return the next manual order at or after index or NULL if there is none.
+ */
+Order *Vehicle::GetNextManualOrder(int index) const
+{
+	Order *order = this->GetOrder(index);
+	while(order != NULL && order->IsType(OT_AUTOMATIC)) {
+		order = order->next;
+	}
+	return order;
 }
 
 void StopAllVehicles()
