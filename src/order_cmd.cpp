@@ -681,8 +681,8 @@ CommandCost CmdInsertOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
  * @param new_o the new order
  * @param sel_ord the position the order should be inserted at
  */
-void InsertOrder(Vehicle *v, Order *new_o, VehicleOrderID sel_ord) {
-
+void InsertOrder(Vehicle *v, Order *new_o, VehicleOrderID sel_ord)
+{
 	/* Create new order and link in list */
 	if (v->orders.list == NULL) {
 		v->orders.list = new OrderList(new_o, v);
@@ -806,7 +806,7 @@ void DeleteOrder(Vehicle *v, VehicleOrderID sel_ord)
 
 	/* As we delete an order, the order to skip to will be 'wrong'. */
 	VehicleOrderID cur_order_id = 0;
-	Order *order;
+	Order *order = NULL;
 	FOR_VEHICLE_ORDERS(v, order) {
 		if (order->IsType(OT_CONDITIONAL)) {
 			VehicleOrderID order_id = order->GetConditionSkipToOrder();
