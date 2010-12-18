@@ -1366,8 +1366,8 @@ public:
 			this->goto_type = OPOS_GOTO;
 			NWidgetBase *nwid = this->GetWidget<NWidgetBase>(ORDER_WIDGET_ORDER_LIST);
 			if (IsInsideBS(_cursor.pos.x, this->left + nwid->pos_x, nwid->current_x) && IsInsideBS(_cursor.pos.y, this->top + nwid->pos_y, nwid->current_y)) {
-				VehicleOrderID order_id = this->GetOrderFromPt(_cursor.pos.y - this->top);
-				if (order_id != INVALID_VEH_ORDER_ID) {
+				int order_id = this->GetOrderFromPt(_cursor.pos.y - this->top);
+				if (order_id != INVALID_ORDER) {
 					Order order;
 					order.next = NULL;
 					order.index = 0;

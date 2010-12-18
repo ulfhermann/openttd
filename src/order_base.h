@@ -260,6 +260,9 @@ public:
 	void ConvertFromOldSavegame();
 };
 
+void InsertOrder(Vehicle *v, Order *new_o, VehicleOrderID sel_ord);
+void DeleteOrder(Vehicle *v, VehicleOrderID sel_ord);
+
 /**
  * Shared order list linking together the linked list of orders and the list
  *  of vehicles sharing this order list.
@@ -275,13 +278,6 @@ private:
 	Vehicle *first_shared;          ///< NOSAVE: pointer to the first vehicle in the shared order chain
 
 	Ticks timetable_duration;       ///< NOSAVE: Total duration of the order list
-
-	/**
-	 * Update the counters and delete the order. Doesn't update order->next or this->first
-	 * @param order the order to be deleted.
-	 * @param index index of the order to be deleted, used to update conditional orders
-	 */
-	void DeleteOrder(Order *order, int index);
 
 public:
 	/** Default constructor producing an invalid order list. */
@@ -343,13 +339,6 @@ public:
 	 * @param index is the position of the order which is to be deleted.
 	 */
 	void DeleteOrderAt(int index);
-
-	/**
-	 * Delete all automatic orders between start_index and the next non-automatic one
-	 * @param start_index the first index to look at
-	 * @return the number of orders deleted
-	 */
-	int DeleteAutoOrders(int start_index);
 
 	/**
 	 * Move an order to another position within the order list.

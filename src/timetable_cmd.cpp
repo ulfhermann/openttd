@@ -238,11 +238,12 @@ void UpdateVehicleTimetable(Vehicle *v, bool travelling)
 	v->current_order_time = 0;
 
 	if (!_settings_game.order.timetabling) return;
+	if (v->current_order.IsType(OT_AUTOMATIC)) return; // no timetabling of auto orders
 
 	bool just_started = false;
 
 	/* This vehicle is arriving at the first destination in the timetable. */
-	if (!v->current_order.IsType(OT_AUTOMATIC) && v->cur_order_index == 0 && travelling) {
+	if (v->cur_order_index == 0 && travelling) {
 		/* If the start date hasn't been set, or it was set automatically when
 		 * the vehicle last arrived at the first destination, update it to the
 		 * current time. Otherwise set the late counter appropriately to when
@@ -270,7 +271,7 @@ void UpdateVehicleTimetable(Vehicle *v, bool travelling)
 
 		/* Modify station waiting time only if our new value is larger (this is
 		 * always the case when we cleared the timetable). */
-		if (!v->current_order.IsType(OT_AUTOMATIC) && !v->current_order.IsType(OT_CONDITIONAL) && (travelling || time_taken > v->current_order.wait_time)) {
+		if (!v->current_order.IsType(OT_CONDITIONAL) && (travelling || time_taken > v->current_order.wait_time)) {
 			/* Round the time taken up to the nearest day, as this will avoid
 			 * confusion for people who are timetabling in days, and can be
 			 * adjusted later by people who aren't. */
@@ -279,7 +280,7 @@ void UpdateVehicleTimetable(Vehicle *v, bool travelling)
 			ChangeTimetable(v, v->cur_order_index, time_taken, travelling);
 		}
 
-		if (!v->current_order.IsType(OT_AUTOMATIC) && v->cur_order_index == 0 && travelling) {
+		if (v->cur_order_index == 0 && travelling) {
 			/* If we just started we would have returned earlier and have not reached
 			 * this code. So obviously, we have completed our round: So turn autofill
 			 * off again. */
