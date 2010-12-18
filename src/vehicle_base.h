@@ -114,6 +114,8 @@ private:
 
 	Vehicle *next_shared;               ///< pointer to the next vehicle that shares the order
 	Vehicle *previous_shared;           ///< NOSAVE: pointer to the previous vehicle in the shared order chain
+
+	bool CanLeaveWithCargo();
 public:
 	friend const SaveLoad *GetVehicleDescription(VehicleType vt); ///< So we can use private/protected variables in the saveload code
 	friend bool AfterLoadGame();
@@ -198,6 +200,7 @@ public:
 	byte waiting_triggers;              ///< triggers to be yet matched
 
 	StationID last_station_visited;
+	StationID last_loading_station;
 
 	CargoID cargo_type;                 ///< type of cargo this vehicle is carrying
 	byte cargo_subtype;                 ///< Used for livery refits (NewGRF variations)
@@ -237,7 +240,8 @@ public:
 	/** We want to 'destruct' the right class. */
 	virtual ~Vehicle();
 
-	void BeginLoading();
+	void BeginLoading(StationID curr_station_id);
+	void CancelReservation(StationID next, Station *st);
 	void LeaveStation();
 
 	GroundVehicleCache *GetGroundVehicleCache();

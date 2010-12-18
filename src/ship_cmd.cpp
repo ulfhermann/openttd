@@ -493,14 +493,14 @@ static void ShipController(Ship *v)
 									return;
 								}
 							} else if (v->current_order.IsType(OT_GOTO_STATION)) {
-								v->last_station_visited = v->current_order.GetDestination();
 
 								/* Process station in the orderlist. */
 								Station *st = Station::Get(v->current_order.GetDestination());
 								if (st->facilities & FACIL_DOCK) { // ugly, ugly workaround for problem with ships able to drop off cargo at wrong stations
 									ShipArrivesAt(v, st);
-									v->BeginLoading();
+									v->BeginLoading(v->current_order.GetDestination());
 								} else { // leave stations without docks right aways
+									v->last_station_visited = v->current_order.GetDestination();
 									v->current_order.MakeLeaveStation();
 									v->IncrementOrderIndex();
 								}
@@ -614,6 +614,7 @@ CommandCost CmdBuildShip(TileIndex tile, DoCommandFlag flags, const Engine *e, u
 		v->cargo_cap = svi->capacity;
 
 		v->last_station_visited = INVALID_STATION;
+		v->last_loading_station = INVALID_STATION;
 		v->engine_type = e->index;
 
 		v->reliability = e->reliability;

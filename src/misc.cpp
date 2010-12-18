@@ -56,6 +56,7 @@ void InitializeCompanies();
 void InitializeCheats();
 void InitializeNPF();
 void InitializeOldNames();
+void InitializeLinkGraphs();
 
 void InitializeGame(uint size_x, uint size_y, bool reset_date, bool reset_settings)
 {
@@ -119,6 +120,7 @@ void InitializeGame(uint size_x, uint size_y, bool reset_date, bool reset_settin
 #endif /* ENABLE_NETWORK */
 	InitializeAnimatedTiles();
 
+	InitializeLinkGraphs();
 	InitializeEconomy();
 
 	ResetObjectToPlace();

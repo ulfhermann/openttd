@@ -695,6 +695,7 @@ CommandCost CmdBuildRailVehicle(TileIndex tile, DoCommandFlag flags, const Engin
 		v->cargo_type = e->GetDefaultCargoType();
 		v->cargo_cap = rvi->capacity;
 		v->last_station_visited = INVALID_STATION;
+		v->last_loading_station = INVALID_STATION;
 
 		v->engine_type = e->index;
 		v->gcache.first_engine = INVALID_ENGINE; // needs to be set before first callback
@@ -2652,8 +2653,6 @@ int Train::UpdateSpeed()
  */
 static void TrainEnterStation(Train *v, StationID station)
 {
-	v->last_station_visited = station;
-
 	/* check if a train ever visited this station before */
 	Station *st = Station::Get(station);
 	if (!(st->had_vehicle_of_type & HVOT_TRAIN)) {
@@ -2671,7 +2670,7 @@ static void TrainEnterStation(Train *v, StationID station)
 	v->force_proceed = TFP_NONE;
 	SetWindowDirty(WC_VEHICLE_VIEW, v->index);
 
-	v->BeginLoading();
+	v->BeginLoading(station);
 
 	TriggerStationAnimation(st, v->tile, SAT_TRAIN_ARRIVES);
 }

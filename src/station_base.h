@@ -16,12 +16,235 @@
 #include "newgrf_airport.h"
 #include "cargopacket.h"
 #include "industry_type.h"
+#include "linkgraph/linkgraph_type.h"
 #include "newgrf_storage.h"
+#include "moving_average.h"
+#include <map>
+#include <set>
 
 typedef Pool<BaseStation, StationID, 32, 64000> StationPool;
 extern StationPool _station_pool;
 
 static const byte INITIAL_STATION_RATING = 175;
+
+/**
+ * Link statistics. They include figures for capacity and usage of a link. Both
+ * are moving averages which are increased for every vehicle arriving at the
+ * destination station and decreased in regular intervals. Additionally while a
+ * vehicle is loading at the source station part of the capacity is frozen and
+ * prevented from being decreased. This is done so that the link won't break
+ * down all the time when the typical "full load" order is used.
+ */
+class LinkStat : private MovingAverage<uint> {
+private:
+	/**
+	 * capacity of the link.
+	 * This is a moving average. Use MovingAverage::Monthly() to get a meaningful value
+	 */
+	uint capacity;
+	
+	/**
+	 * capacity of currently loading vehicles
+	 */
+	uint frozen;
+	
+	/**
+	 * usage of the link.
+	 * This is a moving average. Use MovingAverage::Monthly() to get a meaningful value
+	 */
+	uint usage;
+
+public:
+	/**
+	 * minimum length of moving averages for capacity and usage
+	 */
+	static const uint MIN_AVERAGE_LENGTH = 96;
+
+	friend const SaveLoad *GetLinkStatDesc();
+
+	FORCEINLINE LinkStat(uint distance = 1, uint capacity = 0, uint frozen = 0, uint usage = 0) :
+		MovingAverage<uint>(distance), capacity(capacity), frozen(frozen), usage(usage) {}
+
+	/**
+	 * reset everything to 0
+	 */
+	FORCEINLINE void Clear()
+	{
+		this->capacity = 0;
+		this->usage = 0;
+		this->frozen = 0;
+	}
+
+	/**
+	 * apply the moving averages to usage and capacity
+	 */
+	FORCEINLINE void Decrease()
+	{
+		this->MovingAverage<uint>::Decrease(this->usage);
+		this->capacity = max(this->MovingAverage<uint>::Decrease(this->capacity), this->frozen);
+	}
+
+	/**
+	 * get an estimate of the current the capacity
+	 * @return the capacity
+	 */
+	FORCEINLINE uint Capacity() const
+	{
+		return this->MovingAverage<uint>::Monthly(this->capacity);
+	}
+
+	/**
+	 * get an estimage of the current usage
+	 * @return the usage
+	 */
+	FORCEINLINE uint Usage() const
+	{
+		return this->MovingAverage<uint>::Monthly(this->usage);
+	}
+
+	/**
+	 * get the amount of frozen capacity
+	 */
+	FORCEINLINE uint Frozen() const
+	{
+		return this->frozen;
+	}
+
+	/**
+	 * add some capacity and usage
+	 * @param capacity the additional capacity
+	 * @param usage the additional usage
+	 */
+	FORCEINLINE void Increase(uint capacity, uint usage)
+	{
+		this->capacity += capacity;
+		this->usage += usage;
+	}
+
+	/**
+	 * freeze some of the capacity and prevent it from being decreased by the
+	 * moving average
+	 * @param capacity the amount of capacity to be frozen
+	 */
+	FORCEINLINE void Freeze(uint capacity)
+	{
+		this->frozen += capacity;
+		this->capacity = max(this->frozen, this->capacity);
+	}
+
+	/**
+	 * thaw some of the frozen capacity and make it available for Decrease()
+	 * @oaram capacity the capacity to be thawed
+	 */
+	FORCEINLINE void Unfreeze(uint capacity)
+	{
+		this->frozen -= capacity;
+	}
+
+	/**
+	 * thaw all frozen capacity
+	 */
+	FORCEINLINE void Unfreeze()
+	{
+		this->frozen = 0;
+	}
+
+	/**
+	 * check if the capacity is 0. This is necessary as Capacity() might return
+	 * 0 even if there is a miniscule amount of capacity left
+	 * @return if capacity is 0
+	 */
+	FORCEINLINE bool IsNull() const
+	{
+		return this->capacity == 0;
+	}
+};
+
+class FlowStat : private MovingAverage<uint> {
+private:
+	uint planned;
+	uint sent;
+	StationID via;
+
+public:
+	friend const SaveLoad *GetFlowStatDesc();
+
+	FORCEINLINE FlowStat(uint distance = 1, StationID st = INVALID_STATION, uint p = 0, uint s = 0) :
+		MovingAverage<uint>(distance), planned(p), sent(s), via(st) {}
+
+	FORCEINLINE FlowStat(const FlowStat &prev, uint new_plan) :
+		MovingAverage<uint>(prev.length), planned(new_plan), sent(prev.sent), via(prev.via) {}
+
+	/**
+	 * prevents one copy operation when moving a flowstat from one set to another and decreasing it at the same time
+	 */
+	FORCEINLINE FlowStat GetDecreasedCopy() const
+	{
+		FlowStat ret(this->length, this->via, this->planned, this->sent);
+		this->MovingAverage<uint>::Decrease(ret.sent);
+		return ret;
+	}
+
+	FORCEINLINE void Increase(int sent)
+	{
+		this->sent += sent;
+	}
+
+	FORCEINLINE uint Sent() const
+	{
+		return this->MovingAverage<uint>::Monthly(sent);
+	}
+
+	FORCEINLINE uint Planned() const
+	{
+		return this->planned;
+	}
+
+	FORCEINLINE StationID Via() const
+	{
+		return this->via;
+	}
+
+	struct comp {
+		bool operator()(const FlowStat & x, const FlowStat & y) const {
+			int diff_x = (int)x.Planned() - (int)x.Sent();
+			int diff_y = (int)y.Planned() - (int)y.Sent();
+			if (diff_x != diff_y) {
+				return diff_x > diff_y;
+			} else {
+				return x.Via() > y.Via();
+			}
+		}
+	};
+
+	FORCEINLINE FlowStat &operator+=(const FlowStat &other)
+	{
+		assert(this->via == INVALID_STATION || other.via == INVALID_STATION || this->via == other.via);
+		if (other.via != INVALID_STATION) this->via = other.via;
+		this->planned += other.planned;
+		uint sent = this->sent + other.sent;
+		if (sent > 0) {
+			this->length = (this->length * this->sent + other.length * other.sent) / sent;
+			assert(this->length > 0);
+		}
+		this->sent = sent;
+		return *this;
+	}
+
+	FORCEINLINE void Clear()
+	{
+		this->planned = 0;
+		this->sent = 0;
+		this->via = INVALID_STATION;
+	}
+};
+
+typedef std::set<FlowStat, FlowStat::comp> FlowStatSet; ///< percentage of flow to be sent via specified station (or consumed locally)
+
+typedef std::map<StationID, LinkStat> LinkStatMap;
+typedef std::map<StationID, FlowStatSet> FlowStatMap; ///< flow descriptions by origin stations
+
+uint GetMovingAverageLength(const Station *from, const Station *to);
 
 struct GoodsEntry {
 	enum AcceptancePickup {
@@ -34,7 +257,10 @@ struct GoodsEntry {
 		days_since_pickup(255),
 		rating(INITIAL_STATION_RATING),
 		last_speed(0),
-		last_age(255)
+		last_age(255),
+		supply(0),
+		supply_new(0),
+		last_component(INVALID_LINKGRAPH_COMPONENT)
 	{}
 
 	byte acceptance_pickup;
@@ -42,8 +268,20 @@ struct GoodsEntry {
 	byte rating;
 	byte last_speed;
 	byte last_age;
-	byte amount_fract;      ///< Fractional part of the amount in the cargo list
-	StationCargoList cargo; ///< The cargo packets of cargo waiting in this station
+	byte amount_fract;                   ///< Fractional part of the amount in the cargo list
+	StationCargoList cargo;              ///< The cargo packets of cargo waiting in this station
+	uint supply;                         ///< Cargo supplied last month
+	uint supply_new;                     ///< Cargo supplied so far this month
+	FlowStatMap flows;                   ///< The planned flows through this station
+	LinkStatMap link_stats;              ///< capacities and usage statistics for outgoing links
+	LinkGraphComponentID last_component; ///< the component this station was last part of in this cargo's link graph
+	FlowStat GetSumFlowVia(StationID via) const;
+
+	void UpdateFlowStats(StationID source, uint count, StationID next);
+	void UpdateFlowStats(FlowStatSet &flow_stats, uint count, StationID next);
+	void UpdateFlowStats(FlowStatSet &flow_stats, FlowStatSet::iterator flow_it, uint count);
+
+	StationID UpdateFlowStatsTransfer(StationID source, uint count, StationID curr);
 };
 
 /** All airport-related information. Only valid if tile != INVALID_TILE. */
@@ -229,6 +467,8 @@ public:
 	/* virtual */ uint32 GetNewGRFVariable(const ResolverObject *object, byte variable, byte parameter, bool *available) const;
 
 	/* virtual */ void GetTileArea(TileArea *ta, StationType type) const;
+
+	void RunAverages();
 };
 
 #define FOR_ALL_STATIONS(var) FOR_ALL_BASE_STATIONS_OF_TYPE(Station, var)

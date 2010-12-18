@@ -663,10 +663,11 @@ void Vehicle::PreDestructor()
 	if (CleaningPool()) return;
 
 	if (Station::IsValidID(this->last_station_visited)) {
-		Station::Get(this->last_station_visited)->loading_vehicles.remove(this);
+		Station *st = Station::Get(this->last_station_visited);
+		st->loading_vehicles.remove(this);
 
 		HideFillingPercent(&this->fill_percent_te_id);
-
+		this->CancelReservation(INVALID_STATION, st);
 		delete this->cargo_payment;
 	}
 
@@ -1737,13 +1738,16 @@ uint GetVehicleCapacity(const Vehicle *v, uint16 *mail_capacity)
 	return capacity;
 }
 
-
-void Vehicle::BeginLoading()
+/**
+ * Start loading the vehicle and set last_station_visited in the process.
+ * @param curr_station_id ID of the station the vehicle has arrived at
+ */
+void Vehicle::BeginLoading(StationID curr_station_id)
 {
 	assert(IsTileType(tile, MP_STATION) || type == VEH_SHIP);
 
 	if (this->current_order.IsType(OT_GOTO_STATION) &&
-			this->current_order.GetDestination() == this->last_station_visited) {
+			this->current_order.GetDestination() == curr_station_id) {
 		current_order.MakeLoading(true);
 		UpdateVehicleTimetable(this, true);
 
@@ -1758,9 +1762,27 @@ void Vehicle::BeginLoading()
 		current_order.MakeLoading(false);
 	}
 
-	Station::Get(this->last_station_visited)->loading_vehicles.push_back(this);
+	Station *curr_station = Station::Get(curr_station_id);
+	curr_station->loading_vehicles.push_back(this);
 
-	PrepareUnload(this);
+	StationID next_station_id = INVALID_STATION;
+	OrderList *orders = this->orders.list;
+	if (orders != NULL) {
+		next_station_id = orders->GetNextStoppingStation(this->cur_order_index, curr_station_id);
+	}
+
+	if (this->last_loading_station != INVALID_STATION && this->last_loading_station != curr_station_id) {
+		IncreaseStats(Station::Get(this->last_loading_station), this, curr_station_id, false);
+	}
+
+	this->last_station_visited = curr_station_id;
+	if (this->CanLeaveWithCargo() && next_station_id != INVALID_STATION) {
+		assert(next_station_id != curr_station_id);
+		/* freeze stats for the next link */
+		IncreaseStats(curr_station, this, next_station_id, true);
+	}
+
+	PrepareUnload(curr_station, this, next_station_id); // refers to this->last_station_visited for the distance
 
 	SetWindowDirty(GetWindowClassForVehicleType(this->type), this->owner);
 	SetWindowWidgetDirty(WC_VEHICLE_VIEW, this->index, VVW_WIDGET_START_STOP_VEH);
@@ -1772,18 +1794,70 @@ void Vehicle::BeginLoading()
 	this->MarkDirty();
 }
 
+/**
+ * return all reserved cargo packets to the station
+ * @param st the station where the reserved packets should go.
+ */
+void Vehicle::CancelReservation(StationID next, Station *st)
+{
+	for(Vehicle *v = this; v != NULL; v = v->next) {
+		VehicleCargoList &cargo = v->cargo;
+		if (cargo.ReservedCount() > 0) {
+			DEBUG(misc, 1, "cancelling cargo reservation");
+			GoodsEntry &ge = st->goods[v->cargo_type];
+			cargo.Unreserve(next, &ge.cargo);
+			SetBit(ge.acceptance_pickup, GoodsEntry::PICKUP);
+		}
+	}
+}
+
+/*
+ * A vehicle can leave the current station with cargo if:
+ * - it can load cargo here OR (
+ * - it could leave the last station with cargo AND
+ * - it doesn't have to unload all cargo here)
+ */
+bool Vehicle::CanLeaveWithCargo()
+{
+	return ((this->current_order.GetLoadType() & OLFB_NO_LOAD) == 0 ||
+			((this->current_order.GetUnloadType() & (OUFB_UNLOAD | OUFB_TRANSFER)) == 0 &&
+			this->last_loading_station != INVALID_STATION));
+}
+
 void Vehicle::LeaveStation()
 {
 	assert(current_order.IsType(OT_LOADING));
-
+	Station *st = Station::Get(this->last_station_visited);
 	delete this->cargo_payment;
 
 	/* Only update the timetable if the vehicle was supposed to stop here. */
 	if (current_order.GetNonStopType() != ONSF_STOP_EVERYWHERE) UpdateVehicleTimetable(this, false);
 
 	current_order.MakeLeaveStation();
-	Station *st = Station::Get(this->last_station_visited);
 	st->loading_vehicles.remove(this);
+
+	OrderList *orders = this->orders.list;
+	if (orders != NULL) {
+		StationID next_station_id = orders->GetNextStoppingStation(this->cur_order_index, this->last_station_visited);
+		this->CancelReservation(next_station_id, st);
+		if (next_station_id != INVALID_STATION && next_station_id != this->last_station_visited) {
+			DecreaseFrozen(st, this, next_station_id);
+		}
+	} else {
+		this->CancelReservation(INVALID_STATION, st);
+		DEBUG(misc, 1, "orders are NULL");
+		RecalcFrozen(st);
+	}
+
+	if (this->CanLeaveWithCargo()) {
+		/* if the vehicle could load here or could stop with cargo loaded set the last loading station */
+		this->last_loading_station = this->last_station_visited;
+	} else {
+		/* if the vehicle couldn't load and had to unload or transfer everything
+		 * set the last loading station to invalid as it will leave empty.
+		 */
+		this->last_loading_station = INVALID_STATION;
+	}
 
 	HideFillingPercent(&this->fill_percent_te_id);
 

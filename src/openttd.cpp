@@ -66,6 +66,8 @@
 #include "town.h"
 #include "industry.h"
 
+#include "linkgraph/linkgraph.h"
+
 #include <stdarg.h>
 
 #include "table/strings.h"
@@ -334,6 +336,13 @@ static void ShutdownGame()
 
 	/* Uninitialize variables that are allocated dynamically */
 	GamelogReset();
+
+	/* Reinitialize the link graphs to forcibly stop the threads.
+	 * If a link graph thread is running while the link graph handlers are
+	 * deleted we get a crash.
+	 */
+	InitializeLinkGraphs();
+
 	_town_pool.CleanPool();
 	_industry_pool.CleanPool();
 	_station_pool.CleanPool();

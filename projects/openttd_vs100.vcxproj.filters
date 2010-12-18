@@ -198,6 +198,18 @@
     <ClCompile Include="..\src\landscape.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\linkgraph\demands.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\linkgraph\flowmapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\linkgraph\linkgraph.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\linkgraph\mcf.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\map.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -582,6 +594,21 @@
     <ClInclude Include="..\src\language.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\linkgraph\demands.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\linkgraph\flowmapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\linkgraph\linkgraph.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\linkgraph\linkgraph_type.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\linkgraph\mcf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="..\src\livery.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -594,6 +621,12 @@
     <ClInclude Include="..\src\mixer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\moving_average.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClCompile Include="..\src\moving_average.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
     <ClInclude Include="..\src\network\network.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1074,6 +1107,9 @@
     <ClInclude Include="..\src\core\mem_func.hpp">
       <Filter>Core Source Code</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\core\multimap.hpp">
+      <Filter>Core Source Code</Filter>
+    </ClInclude>
     <ClInclude Include="..\src\core\overflowsafe_type.hpp">
       <Filter>Core Source Code</Filter>
     </ClInclude>
@@ -1387,6 +1423,9 @@
       <Filter>Save/Load handlers</Filter>
     </ClCompile>
     <ClCompile Include="..\src\saveload\labelmaps_sl.cpp">
+      <Filter>Save/Load handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\saveload\linkgraph_sl.cpp">
       <Filter>Save/Load handlers</Filter>
     </ClCompile>
     <ClCompile Include="..\src\saveload\map_sl.cpp">

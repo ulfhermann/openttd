@@ -88,9 +88,6 @@ enum SLRefType {
 	REF_ORDERLIST     = 8, ///< Load/save a reference to an orderlist.
 };
 
-/** Highest possible savegame version. */
-#define SL_MAX_VERSION 255
-
 /** Flags of a chunk. */
 enum ChunkType {
 	CH_RIFF         =  0,
@@ -545,5 +542,23 @@ bool SaveloadCrashWithMissingNewGRFs();
 
 extern char _savegame_format[8];
 extern bool _do_autosave;
+
+/**
+ * save/load versions used for the various branches
+ * SL_TRUNK is always the current trunk version.
+ */
+enum SaveLoadVersions {
+	SL_TRUNK = 155,
+	SL_RESERVATION = SL_TRUNK + 10,
+	SL_CAPACITIES = SL_TRUNK + 20,
+	SL_COMPONENTS,
+	SL_DEMANDS = SL_COMPONENTS + 20,
+	SL_MCF,
+	SL_FLOWMAP,
+	SL_CARGOMAP,
+
+	/** Highest possible savegame version. */
+	SL_MAX_VERSION = 255
+};
 
 #endif /* SAVELOAD_H */

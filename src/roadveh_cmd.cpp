@@ -235,6 +235,7 @@ CommandCost CmdBuildRoadVehicle(TileIndex tile, DoCommandFlag flags, const Engin
 		v->cargo_cap = rvi->capacity;
 
 		v->last_station_visited = INVALID_STATION;
+		v->last_loading_station = INVALID_STATION;
 		v->engine_type = e->index;
 		v->gcache.first_engine = INVALID_ENGINE; // needs to be set before first callback
 
@@ -1345,9 +1346,8 @@ again:
 					v->owner == GetTileOwner(v->tile) && !v->current_order.IsType(OT_LEAVESTATION) &&
 					GetRoadStopType(v->tile) == (v->IsBus() ? ROADSTOP_BUS : ROADSTOP_TRUCK)) {
 				Station *st = Station::GetByTile(v->tile);
-				v->last_station_visited = st->index;
 				RoadVehArrivesAt(v, st);
-				v->BeginLoading();
+				v->BeginLoading(st->index);
 			}
 			return false;
 		}
@@ -1405,12 +1405,12 @@ again:
 			rs->SetEntranceBusy(false);
 			SetBit(v->state, RVS_ENTERED_STOP);
 
-			v->last_station_visited = st->index;
-
 			if (IsDriveThroughStopTile(v->tile) || (v->current_order.IsType(OT_GOTO_STATION) && v->current_order.GetDestination() == st->index)) {
 				RoadVehArrivesAt(v, st);
-				v->BeginLoading();
+				v->BeginLoading(st->index);
 				return false;
+			} else {
+				v->last_station_visited = st->index;
 			}
 		} else {
 			/* Vehicle is ready to leave a bay in a road stop */
