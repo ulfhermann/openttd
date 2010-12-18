@@ -1795,19 +1795,6 @@ void Vehicle::BeginLoading(StationID curr_station_id)
 }
 
 /**
- * A vehicle can leave the current station with cargo if:
- * - it can load cargo here OR (
- * - it could leave the last station with cargo AND
- * - it doesn't have to unload all cargo here)
- */
-bool Vehicle::CanLeaveWithCargo()
-{
-	return ((this->current_order.GetLoadType() & OLFB_NO_LOAD) == 0 ||
-			((this->current_order.GetUnloadType() & (OUFB_UNLOAD | OUFB_TRANSFER)) == 0 &&
-			this->last_loading_station != INVALID_STATION));
-}
-
-/**
  * return all reserved cargo packets to the station
  * @param st the station where the reserved packets should go.
  */
@@ -1820,6 +1807,19 @@ void Vehicle::CancelReservation(Station *st)
 			cargo.Unreserve(&st->goods[v->cargo_type].cargo);
 		}
 	}
+}
+
+/**
+ * A vehicle can leave the current station with cargo if:
+ * - it can load cargo here OR (
+ * - it could leave the last station with cargo AND
+ * - it doesn't have to unload all cargo here)
+ */
+bool Vehicle::CanLeaveWithCargo()
+{
+	return ((this->current_order.GetLoadType() & OLFB_NO_LOAD) == 0 ||
+			((this->current_order.GetUnloadType() & (OUFB_UNLOAD | OUFB_TRANSFER)) == 0 &&
+			this->last_loading_station != INVALID_STATION));
 }
 
 void Vehicle::LeaveStation()
