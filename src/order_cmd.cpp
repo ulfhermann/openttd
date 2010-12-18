@@ -735,8 +735,8 @@ CommandCost CmdInsertOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
  * @param new_o the new order
  * @param sel_ord the position the order should be inserted at
  */
-void InsertOrder(Vehicle *v, Order *new_o, VehicleOrderID sel_ord) {
-
+void InsertOrder(Vehicle *v, Order *new_o, VehicleOrderID sel_ord)
+{
 	/* Create new order and link in list */
 	if (v->orders.list == NULL) {
 		v->orders.list = new OrderList(new_o, v);
