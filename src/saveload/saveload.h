@@ -549,6 +549,7 @@ extern bool _do_autosave;
  */
 enum SaveLoadVersions {
 	SL_TRUNK = 155,
+	SL_RESERVATION = SL_TRUNK + 10,
 	SL_CAPACITIES = SL_TRUNK + 20,
 	SL_COMPONENTS,
 	SL_DEMANDS = SL_COMPONENTS + 20,

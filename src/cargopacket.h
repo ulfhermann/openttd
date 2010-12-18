@@ -29,6 +29,7 @@ typedef Pool<CargoPacket, CargoPacketID, 1024, 0xFFF000, true, false> CargoPacke
 extern CargoPacketPool _cargopacket_pool;
 
 template <class Tinst> class CargoList;
+class StationCargoList; // forward-declare, so we can use it in VehicleCargoList::Unreserve
 extern const struct SaveLoad *GetCargoPacketDesc();
 
 /**
@@ -55,34 +56,10 @@ public:
 	/** Maximum number of items in a single cargo packet. */
 	static const uint16 MAX_COUNT = UINT16_MAX;
 
-	/**
-	 * Create a new packet for savegame loading.
-	 */
 	CargoPacket();
 
-	/**
-	 * Creates a new cargo packet
-	 * @param source      the source station of the packet
-	 * @param source_xy   the source location of the packet
-	 * @param count       the number of cargo entities to put in this packet
-	 * @param source_type the 'type' of source the packet comes from (for subsidies)
-	 * @param source_id   the actual source of the packet (for subsidies)
-	 * @pre count != 0
-	 */
 	CargoPacket(StationID source, TileIndex source_xy, uint16 count, SourceType source_type, SourceID source_id);
 
-	/**
-	 * Creates a new cargo packet. Initializes the fields that cannot be changed later.
-	 * Used when loading or splitting packets.
-	 * @param count           the number of cargo entities to put in this packet
-	 * @param days_in_transit number of days the cargo has been in transit
-	 * @param source          the station the cargo was initially loaded
-	 * @param source_xy       the station location the cargo was initially loaded
-	 * @param loaded_at_xy    the location the cargo was loaded last
-	 * @param feeder_share    feeder share the packet has already accumulated
-	 * @param source_type     the 'type' of source the packet comes from (for subsidies)
-	 * @param source_id       the actual source of the packet (for subsidies)
-	 */
 	CargoPacket(uint16 count, byte days_in_transit, StationID source, TileIndex source_xy, TileIndex loaded_at_xy, Money feeder_share = 0, SourceType source_type = ST_INDUSTRY, SourceID source_id = INVALID_SOURCE);
 
 	/** Destroy the packet */
@@ -201,6 +178,7 @@ public:
 	enum MoveToAction {
 		MTA_FINAL_DELIVERY, ///< "Deliver" the packet to the final destination, i.e. destroy the packet
 		MTA_CARGO_LOAD,     ///< Load the packet onto a vehicle, i.e. set the last loaded station ID
+		MTA_RESERVE,        ///< Reserve cargo for later loading
 		MTA_TRANSFER,       ///< The cargo is moved as part of a transfer
 		MTA_UNLOAD,         ///< The cargo is moved as part of a forced unload
 	};
@@ -211,24 +189,14 @@ protected:
 
 	List packets;               ///< The cargo packets in this list
 
-	/**
-	 * Update the cache to reflect adding of this packet.
-	 * Increases count and days_in_transit
-	 * @param cp a new packet to be inserted
-	 */
 	void AddToCache(const CargoPacket *cp);
 
-	/**
-	 * Update the cached values to reflect the removal of this packet.
-	 * Decreases count and days_in_transit
-	 * @param cp Packet to be removed from cache
-	 */
 	void RemoveFromCache(const CargoPacket *cp);
 
 public:
 	/** Create the cargo list */
 	CargoList() {}
-	/** And destroy it ("frees" all cargo packets) */
+
 	~CargoList();
 
 	/**
@@ -259,15 +227,6 @@ public:
 	}
 
 	/**
-	 * Returns source of the first cargo packet in this list
-	 * @return the before mentioned source
-	 */
-	FORCEINLINE StationID Source() const
-	{
-		return this->Empty() ? INVALID_STATION : this->packets.front()->source;
-	}
-
-	/**
 	 * Returns average number of days in transit for a cargo entity
 	 * @return the before mentioned number
 	 */
@@ -276,48 +235,13 @@ public:
 		return this->count == 0 ? 0 : this->cargo_days_in_transit / this->count;
 	}
 
+	void Append(CargoPacket *cp, bool update_cache = true);
 
-	/**
-	 * Appends the given cargo packet
-	 * @warning After appending this packet may not exist anymore!
-	 * @note Do not use the cargo packet anymore after it has been appended to this CargoList!
-	 * @param cp the cargo packet to add
-	 * @pre cp != NULL
-	 */
-	void Append(CargoPacket *cp);
-
-	/**
-	 * Truncates the cargo in this list to the given amount. It leaves the
-	 * first count cargo entities and removes the rest.
-	 * @param max_remaining the maximum amount of entities to be in the list after the command
-	 */
 	void Truncate(uint max_remaining);
 
-	/**
-	 * Moves the given amount of cargo to another list.
-	 * Depending on the value of mta the side effects of this function differ:
-	 *  - MTA_FINAL_DELIVERY: destroys the packets that do not originate from a specific station
-	 *  - MTA_CARGO_LOAD:     sets the loaded_at_xy value of the moved packets
-	 *  - MTA_TRANSFER:       just move without side effects
-	 *  - MTA_UNLOAD:         just move without side effects
-	 * @param dest  the destination to move the cargo to
-	 * @param count the amount of cargo entities to move
-	 * @param mta   how to handle the moving (side effects)
-	 * @param data  Depending on mta the data of this variable differs:
-	 *              - MTA_FINAL_DELIVERY - station ID of packet's origin not to remove
-	 *              - MTA_CARGO_LOAD     - station's tile index of load
-	 *              - MTA_TRANSFER       - unused
-	 *              - MTA_UNLOAD         - unused
-	 * @param payment The payment helper
-	 *
-	 * @pre mta == MTA_FINAL_DELIVERY || dest != NULL
-	 * @pre mta == MTA_UNLOAD || mta == MTA_CARGO_LOAD || payment != NULL
-	 * @return true if there are still packets that might be moved from this cargo list
-	 */
 	template <class Tother_inst>
 	bool MoveTo(Tother_inst *dest, uint count, MoveToAction mta, CargoPayment *payment, uint data = 0);
 
-	/** Invalidates the cached data and rebuild it */
 	void InvalidateCache();
 };
 
@@ -329,20 +253,12 @@ protected:
 	/** The (direct) parent of this class */
 	typedef CargoList<VehicleCargoList> Parent;
 
-	Money feeder_share; ///< Cache for the feeder share
+	List reserved;       ///< The packets reserved for unloading in this list
+	Money feeder_share;  ///< Cache for the feeder share
+	uint reserved_count; ///< Cache for the number of reserved cargo entities
 
-	/**
-	 * Update the cache to reflect adding of this packet.
-	 * Increases count, feeder share and days_in_transit
-	 * @param cp a new packet to be inserted
-	 */
 	void AddToCache(const CargoPacket *cp);
 
-	/**
-	 * Update the cached values to reflect the removal of this packet.
-	 * Decreases count, feeder share and days_in_transit
-	 * @param cp Packet to be removed from cache
-	 */
 	void RemoveFromCache(const CargoPacket *cp);
 
 public:
@@ -361,11 +277,59 @@ public:
 	}
 
 	/**
-	 * Ages the all cargo in this list
+	 * Returns sum of cargo on board the vehicle (ie not only
+	 * reserved).
+	 * @return cargo on board the vehicle.
 	 */
+	FORCEINLINE uint OnboardCount() const
+	{
+		return this->count - this->reserved_count;
+	}
+
+	/**
+	 * Returns sum of cargo reserved for the vehicle.
+	 * @return cargo reserved for the vehicle.
+	 */
+	FORCEINLINE uint ReservedCount() const
+	{
+		return this->reserved_count;
+	}
+
+	/**
+	 * Returns a pointer to the reserved cargo list.
+	 * @return pointer to the reserved list.
+	 */
+	FORCEINLINE const List *Reserved() const
+	{
+		return &this->reserved;
+	}
+
+	/**
+	 * Returns source of the first cargo packet in this list
+	 * If the regular packets list is empty but there are packets
+	 * in the reservation list it returns the source of the first
+	 * reserved packet.
+	 * @return the before mentioned source
+	 */
+	FORCEINLINE StationID Source() const
+	{
+		if (this->Empty()) {
+			return INVALID_STATION;
+		} else if (this->packets.empty()) {
+			return this->reserved.front()->source;
+		} else {
+			return this->packets.front()->source;
+		}
+	}
+
+	void Reserve(CargoPacket *cp);
+
+	void Unreserve(StationCargoList *dest);
+
+	bool LoadReserved(uint count);
+
 	void AgeCargo();
 
-	/** Invalidates the cached data and rebuild it */
 	void InvalidateCache();
 
 	/**
@@ -408,6 +372,15 @@ public:
 				cp1->days_in_transit == cp2->days_in_transit &&
 				cp1->source_type     == cp2->source_type &&
 				cp1->source_id       == cp2->source_id;
+	}
+
+	/**
+	 * Returns source of the first cargo packet in this list
+	 * @return the before mentioned source
+	 */
+	FORCEINLINE StationID Source() const
+	{
+		return this->Empty() ? INVALID_STATION : this->packets.front()->source;
 	}
 };
 

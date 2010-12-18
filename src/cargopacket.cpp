@@ -25,14 +25,26 @@ void InitializeCargoPackets()
 	_cargopacket_pool.CleanPool();
 }
 
+/**
+ * Create a new packet for savegame loading.
+ */
 CargoPacket::CargoPacket()
 {
 	this->source_type = ST_INDUSTRY;
 	this->source_id   = INVALID_SOURCE;
 }
 
-/* NOTE: We have to zero memory ourselves here because we are using a 'new'
- * that, in contrary to all other pools, does not memset to 0. */
+/**
+ * Creates a new cargo packet
+ * @param source      the source station of the packet
+ * @param source_xy   the source location of the packet
+ * @param count       the number of cargo entities to put in this packet
+ * @param source_type the 'type' of source the packet comes from (for subsidies)
+ * @param source_id   the actual source of the packet (for subsidies)
+ * @pre count != 0
+ * @note We have to zero memory ourselves here because we are using a 'new'
+ * that, in contrary to all other pools, does not memset to 0.
+ */
 CargoPacket::CargoPacket(StationID source, TileIndex source_xy, uint16 count, SourceType source_type, SourceID source_id) :
 	feeder_share(0),
 	count(count),
@@ -46,6 +58,20 @@ CargoPacket::CargoPacket(StationID source, TileIndex source_xy, uint16 count, So
 	this->source_type  = source_type;
 }
 
+/**
+ * Creates a new cargo packet. Initializes the fields that cannot be changed later.
+ * Used when loading or splitting packets.
+ * @param count           the number of cargo entities to put in this packet
+ * @param days_in_transit number of days the cargo has been in transit
+ * @param source          the station the cargo was initially loaded
+ * @param source_xy       the station location the cargo was initially loaded
+ * @param loaded_at_xy    the location the cargo was loaded last
+ * @param feeder_share    feeder share the packet has already accumulated
+ * @param source_type     the 'type' of source the packet comes from (for subsidies)
+ * @param source_id       the actual source of the packet (for subsidies)
+ * @note We have to zero memory ourselves here because we are using a 'new'
+ * that, in contrary to all other pools, does not memset to 0.
+ */
 CargoPacket::CargoPacket(uint16 count, byte days_in_transit, StationID source, TileIndex source_xy, TileIndex loaded_at_xy, Money feeder_share, SourceType source_type, SourceID source_id) :
 		feeder_share(feeder_share),
 		count(count),
@@ -90,6 +116,9 @@ CargoPacket::CargoPacket(uint16 count, byte days_in_transit, StationID source, T
  *
  */
 
+/**
+ * destroy the cargolist ("frees" all cargo packets)
+ */
 template <class Tinst>
 CargoList<Tinst>::~CargoList()
 {
@@ -98,6 +127,11 @@ CargoList<Tinst>::~CargoList()
 	}
 }
 
+/**
+ * Update the cached values to reflect the removal of this packet.
+ * Decreases count and days_in_transit
+ * @param cp Packet to be removed from cache
+ */
 template <class Tinst>
 void CargoList<Tinst>::RemoveFromCache(const CargoPacket *cp)
 {
@@ -105,6 +139,11 @@ void CargoList<Tinst>::RemoveFromCache(const CargoPacket *cp)
 	this->cargo_days_in_transit -= cp->days_in_transit * cp->count;
 }
 
+/**
+ * Update the cache to reflect adding of this packet.
+ * Increases count and days_in_transit
+ * @param cp a new packet to be inserted
+ */
 template <class Tinst>
 void CargoList<Tinst>::AddToCache(const CargoPacket *cp)
 {
@@ -112,12 +151,21 @@ void CargoList<Tinst>::AddToCache(const CargoPacket *cp)
 	this->cargo_days_in_transit += cp->days_in_transit * cp->count;
 }
 
+/**
+ * Appends the given cargo packet. Tries to merge it with another one in the
+ * packets list. if no fitting packet is found, appends it.
+ * @warning After appending this packet may not exist anymore!
+ * @note Do not use the cargo packet anymore after it has been appended to this CargoList!
+ * @param cp the cargo packet to add
+ * @param update_cache if false, the cache is not updated; used when loading from
+ *        the reservation list
+ * @pre cp != NULL
+ */
 template <class Tinst>
-void CargoList<Tinst>::Append(CargoPacket *cp)
+void CargoList<Tinst>::Append(CargoPacket *cp, bool update_cache)
 {
 	assert(cp != NULL);
-	static_cast<Tinst *>(this)->AddToCache(cp);
-
+	if (update_cache) static_cast<Tinst *>(this)->AddToCache(cp);
 	for (List::reverse_iterator it(this->packets.rbegin()); it != this->packets.rend(); it++) {
 		CargoPacket *icp = *it;
 		if (Tinst::AreMergable(icp, cp) && icp->count + cp->count <= CargoPacket::MAX_COUNT) {
@@ -133,7 +181,11 @@ void CargoList<Tinst>::Append(CargoPacket *cp)
 	this->packets.push_back(cp);
 }
 
-
+/**
+ * Truncates the cargo in this list to the given amount. It leaves the
+ * first count cargo entities and removes the rest.
+ * @param max_remaining the maximum amount of entities to be in the list after the command
+ */
 template <class Tinst>
 void CargoList<Tinst>::Truncate(uint max_remaining)
 {
@@ -161,12 +213,88 @@ void CargoList<Tinst>::Truncate(uint max_remaining)
 	}
 }
 
+/**
+ * Reserves a packet for later loading and adds it to the cache.
+ * @param cp the packet to be reserved
+ */
+void VehicleCargoList::Reserve(CargoPacket *cp)
+{
+	assert(cp != NULL);
+	this->AddToCache(cp);
+	this->reserved_count += cp->count;
+	this->reserved.push_back(cp);
+}
+
+/**
+ * Returns all reserved cargo to the station and removes it from the cache.
+ * @param dest the station the cargo is returned to
+ */
+void VehicleCargoList::Unreserve(StationCargoList *dest)
+{
+	Iterator it(this->reserved.begin());
+	while (it != this->reserved.end()) {
+		CargoPacket *cp = *it;
+		this->RemoveFromCache(cp);
+		this->reserved_count -= cp->count;
+		dest->Append(cp);
+		this->reserved.erase(it++);
+	}
+}
+
+/**
+ * Load packets from the reservation list.
+ * @params count the number of cargo to load
+ * @return true if there are still packets that might be loaded from the reservation list
+ */
+bool VehicleCargoList::LoadReserved(uint max_move)
+{
+	Iterator it(this->reserved.begin());
+	while (it != this->reserved.end() && max_move > 0) {
+		CargoPacket *cp = *it;
+		if (cp->count <= max_move) {
+			/* Can move the complete packet */
+			max_move -= cp->count;
+			this->reserved.erase(it++);
+			this->reserved_count -= cp->count;
+			this->Append(cp, false);
+		} else {
+			cp->count -= max_move;
+			CargoPacket *cp_new = new CargoPacket(max_move, cp->days_in_transit, cp->source, cp->source_xy, cp->loaded_at_xy, 0, cp->source_type, cp->source_id);
+			this->Append(cp_new, false);
+			this->reserved_count -= max_move;
+			max_move = 0;
+		}
+	}
+	return it != packets.end();
+}
+
+/**
+ * Moves the given amount of cargo to another list.
+ * Depending on the value of mta the side effects of this function differ:
+ *  - MTA_FINAL_DELIVERY: destroys the packets that do not originate from a specific station
+ *  - MTA_CARGO_LOAD:     sets the loaded_at_xy value of the moved packets
+ *  - MTA_TRANSFER:       just move without side effects
+ *  - MTA_UNLOAD:         just move without side effects
+ * @param dest  the destination to move the cargo to
+ * @param count the amount of cargo entities to move
+ * @param mta   how to handle the moving (side effects)
+ * @param data  Depending on mta the data of this variable differs:
+ *              - MTA_FINAL_DELIVERY - station ID of packet's origin not to remove
+ *              - MTA_CARGO_LOAD     - station's tile index of load
+ *              - MTA_TRANSFER       - unused
+ *              - MTA_UNLOAD         - unused
+ * @param payment The payment helper
+ *
+ * @pre mta == MTA_FINAL_DELIVERY || dest != NULL
+ * @pre mta == MTA_UNLOAD || mta == MTA_CARGO_LOAD || payment != NULL
+ * @return true if there are still packets that might be moved from this cargo list
+ */
 template <class Tinst>
 template <class Tother_inst>
 bool CargoList<Tinst>::MoveTo(Tother_inst *dest, uint max_move, MoveToAction mta, CargoPayment *payment, uint data)
 {
 	assert(mta == MTA_FINAL_DELIVERY || dest != NULL);
-	assert(mta == MTA_UNLOAD || mta == MTA_CARGO_LOAD || payment != NULL);
+	assert(mta == MTA_UNLOAD || mta == MTA_CARGO_LOAD || mta == MTA_RESERVE || payment != NULL);
 
 	Iterator it(this->packets.begin());
 	while (it != this->packets.end() && max_move > 0) {
@@ -187,6 +315,20 @@ bool CargoList<Tinst>::MoveTo(Tother_inst *dest, uint max_move, MoveToAction mta
 					payment->PayFinalDelivery(cp, cp->count);
 					delete cp;
 					continue; // of the loop
+
+				case MTA_RESERVE:
+					cp->loaded_at_xy = data;
+					/* this reinterpret cast is nasty. The method should be
+					 * refactored to get rid of it. However, as this is only
+					 * a step on the way to cargodist and the whole method is
+					 * rearranged in a later step we can tolerate it to make the
+					 * patches smaller.
+					 * MTA_RESERVE can only happen if dest is a vehicle, so we
+					 * cannot crash here. I don't know a way to assert that,
+					 * though.
+					 */
+					reinterpret_cast<VehicleCargoList *>(dest)->Reserve(cp);
+					continue;
 
 				case MTA_CARGO_LOAD:
 					cp->loaded_at_xy = data;
@@ -231,7 +373,12 @@ bool CargoList<Tinst>::MoveTo(Tother_inst *dest, uint max_move, MoveToAction mta
 				cp_new->feeder_share += payment->PayTransfer(cp_new, max_move);
 			}
 
-			dest->Append(cp_new);
+			if (mta == MTA_RESERVE) {
+				/* nasty reinterpret cast, see above */
+				reinterpret_cast<VehicleCargoList *>(dest)->Reserve(cp_new);
+			} else {
+				dest->Append(cp_new);
+			}
 		}
 
 		max_move = 0;
@@ -240,6 +387,9 @@ bool CargoList<Tinst>::MoveTo(Tother_inst *dest, uint max_move, MoveToAction mta
 	return it != packets.end();
 }
 
+/**
+ * Invalidates the cached data and rebuilds it.
+ */
 template <class Tinst>
 void CargoList<Tinst>::InvalidateCache()
 {
@@ -251,19 +401,31 @@ void CargoList<Tinst>::InvalidateCache()
 	}
 }
 
-
+/**
+ * Update the cached values to reflect the removal of this packet.
+ * Decreases count, feeder share and days_in_transit
+ * @param cp Packet to be removed from cache
+ */
 void VehicleCargoList::RemoveFromCache(const CargoPacket *cp)
 {
 	this->feeder_share -= cp->feeder_share;
 	this->Parent::RemoveFromCache(cp);
 }
 
+/**
+ * Update the cache to reflect adding of this packet.
+ * Increases count, feeder share and days_in_transit
+ * @param cp a new packet to be inserted
+ */
 void VehicleCargoList::AddToCache(const CargoPacket *cp)
 {
 	this->feeder_share += cp->feeder_share;
 	this->Parent::AddToCache(cp);
 }
 
+/**
+ * Ages the all cargo in this list.
+ */
 void VehicleCargoList::AgeCargo()
 {
 	for (ConstIterator it(this->packets.begin()); it != this->packets.end(); it++) {
@@ -276,10 +438,18 @@ void VehicleCargoList::AgeCargo()
 	}
 }
 
+/**
+ * Invalidates the cached data and rebuilds it.
+ */
 void VehicleCargoList::InvalidateCache()
 {
 	this->feeder_share = 0;
+	this->reserved_count = 0;
 	this->Parent::InvalidateCache();
+	for (ConstIterator it(this->reserved.begin()); it != this->reserved.end(); it++) {
+		this->AddToCache(*it);
+		this->reserved_count += (*it)->count;
+	}
 }
 
 /*
