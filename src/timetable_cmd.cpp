@@ -238,6 +238,7 @@ void UpdateVehicleTimetable(Vehicle *v, bool travelling)
 	v->current_order_time = 0;
 
 	if (!_settings_game.order.timetabling) return;
+	if (v->current_order.IsType(OT_AUTOMATIC)) return; // no timetabling of auto orders
 
 	bool just_started = false;
 
