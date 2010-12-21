@@ -257,6 +257,7 @@ static void InitializeWindowsAndCaches()
 
 	Station::RecomputeIndustriesNearForAll();
 	RebuildSubsidisedSourceAndDestinationCache();
+	RebuildCargoLinkCounts();
 
 	/* Towns have a noise controlled number of airports system
 	 * So each airport's noise value must be added to the town->noise_reached value

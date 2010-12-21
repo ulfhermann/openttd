@@ -1165,6 +1165,9 @@ static bool CargodestModeChanged(int32 p1)
 		}
 	}
 
+	/* Recount incoming cargo links. */
+	RebuildCargoLinkCounts();
+
 	/* Update remaining links. */
 	UpdateCargoLinks();
 
