@@ -44,6 +44,9 @@ struct CargoSourceSink {
 	/** NOSAVE: Desired link count for each cargo. */
 	uint16 num_links_expected[NUM_CARGO];
 
+	/** NOSAVE: Incoming link count for each cargo. */
+	uint num_incoming_links[NUM_CARGO];
+
 	virtual ~CargoSourceSink();
 
 	/** Get the type of this entity. */

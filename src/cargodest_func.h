@@ -16,6 +16,7 @@
 
 bool CargoHasDestinations(CargoID cid);
 
+void RebuildCargoLinkCounts();
 void UpdateCargoLinks();
 
 #endif /* CARGODEST_FUNC_H */
