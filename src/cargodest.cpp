@@ -180,8 +180,10 @@ static void RemoveLowestLink(CargoSourceSink *source, CargoID cid)
 	if (lowest_link != NULL) {
 		/* If this is a symmetric cargo, also remove the reverse link. */
 		if (IsSymmetricCargo(cid) && lowest_link->dest->HasLinkTo(cid, source)) {
+			source->num_incoming_links[cid]--;
 			lowest_link->dest->cargo_links[cid].Erase(lowest_link->dest->cargo_links[cid].Find(CargoLink(source, LWM_ANYWHERE)));
 		}
+		lowest_link->dest->num_incoming_links[cid]--;
 		source->cargo_links[cid].Erase(lowest_link);
 	}
 }
@@ -219,9 +221,11 @@ static void CreateNewLinks(CargoSourceSink *source, CargoID cid, uint chance_a, 
 		/* If this is a symmetric cargo and we accept it as well, create a back link. */
 		if (IsSymmetricCargo(cid) && dest->SuppliesCargo(cid) && source->AcceptsCargo(cid)) {
 			*dest->cargo_links[cid].Append() = CargoLink(source, LWM_ANYWHERE);
+			source->num_incoming_links[cid]++;
 		}
 
 		*source->cargo_links[cid].Append() = CargoLink(dest, LWM_ANYWHERE);
+		dest->num_incoming_links[cid]++;
 	}
 }
 
@@ -328,6 +332,38 @@ void UpdateLinkWeights(CargoSourceSink *css)
 			if (ind->HasLinkTo(cid, this)) {
 				ind->cargo_links[cid].Erase(ind->cargo_links[cid].Find(CargoLink(this, LWM_ANYWHERE)));
 				InvalidateWindowData(WC_INDUSTRY_VIEW, ind->index, 1);
+			}
+		}
+	}
+
+	/* Decrement incoming link count for all link destinations. */
+	for (CargoID cid = 0; cid < NUM_CARGO; cid++) {
+		for (CargoLink *l = this->cargo_links[cid].Begin(); l != this->cargo_links[cid].End(); l++) {
+			if (l->dest != NULL) l->dest->num_incoming_links[cid]--;
+		}
+	}
+}
+
+/** Rebuild the cached count of incoming cargo links. */
+void RebuildCargoLinkCounts()
+{
+	/* Clear incoming link count of all towns and industries. */
+	CargoSourceSink *source;
+	FOR_ALL_TOWNS(source) MemSetT(source->num_incoming_links, 0, lengthof(source->num_incoming_links));
+	FOR_ALL_INDUSTRIES(source) MemSetT(source->num_incoming_links, 0, lengthof(source->num_incoming_links));
+
+	/* Count all incoming links. */
+	FOR_ALL_TOWNS(source) {
+		for (CargoID cid = 0; cid < NUM_CARGO; cid++) {
+			for (CargoLink *l = source->cargo_links[cid].Begin(); l != source->cargo_links[cid].End(); l++) {
+				if (l->dest != NULL && l->dest != source) l->dest->num_incoming_links[cid]++;
+			}
+		}
+	}
+	FOR_ALL_INDUSTRIES(source) {
+		for (CargoID cid = 0; cid < NUM_CARGO; cid++) {
+			for (CargoLink *l = source->cargo_links[cid].Begin(); l != source->cargo_links[cid].End(); l++) {
+				if (l->dest != NULL && l->dest != source) l->dest->num_incoming_links[cid]++;
 			}
 		}
 	}
