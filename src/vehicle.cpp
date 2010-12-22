@@ -1232,7 +1232,7 @@ void VehicleEnterDepot(Vehicle *v)
 	if (v->current_order.IsType(OT_GOTO_DEPOT)) {
 		SetWindowDirty(WC_VEHICLE_VIEW, v->index);
 
-		const Order *real_order = v->GetOrder(v->cur_order_index);
+		const Order *real_order = v->GetNextManualOrder(v->cur_order_index);
 		Order t = v->current_order;
 		v->current_order.MakeDummy();
 
@@ -1738,18 +1738,21 @@ uint GetVehicleCapacity(const Vehicle *v, uint16 *mail_capacity)
 	return capacity;
 }
 
-/**
- * Start loading the vehicle and set last_station_visited in the process.
- * @param curr_station_id ID of the station the vehicle has arrived at
- */
-void Vehicle::BeginLoading(StationID curr_station_id)
+
+void Vehicle::BeginLoading()
 {
 	assert(IsTileType(tile, MP_STATION) || type == VEH_SHIP);
 
 	if (this->current_order.IsType(OT_GOTO_STATION) &&
-			this->current_order.GetDestination() == curr_station_id) {
+			this->current_order.GetDestination() == this->last_station_visited) {
 		current_order.MakeLoading(true);
 		UpdateVehicleTimetable(this, true);
+
+		for (Order *order = this->GetOrder(this->cur_order_index);
+				order != NULL && order->IsType(OT_AUTOMATIC);
+				order = order->next) {
+			DeleteOrder(this, this->cur_order_index);
+		}
 
 		/* Furthermore add the Non Stop flag to mark that this station
 		 * is the actual destination of the vehicle, which is (for example)
@@ -1759,30 +1762,38 @@ void Vehicle::BeginLoading(StationID curr_station_id)
 		this->current_order.SetNonStopType(ONSF_NO_STOP_AT_ANY_STATION);
 
 	} else {
+		Order *in_list = this->GetOrder(this->cur_order_index);
+		if ((in_list == NULL && this->cur_order_index == 0) || 
+				(in_list != NULL && (!in_list->IsType(OT_AUTOMATIC) || 
+				in_list->GetDestination() != this->last_station_visited))) {
+			Order *auto_order = new Order();
+			auto_order->MakeAutomatic(this->last_station_visited);
+			InsertOrder(this, auto_order, this->cur_order_index);
+			if (this->cur_order_index > 0) --this->cur_order_index;
+		}
 		current_order.MakeLoading(false);
 	}
 
-	Station *curr_station = Station::Get(curr_station_id);
+	Station *curr_station = Station::Get(this->last_station_visited);
 	curr_station->loading_vehicles.push_back(this);
 
 	StationID next_station_id = INVALID_STATION;
 	OrderList *orders = this->orders.list;
 	if (orders != NULL) {
-		next_station_id = orders->GetNextStoppingStation(this->cur_order_index, curr_station_id);
+		next_station_id = orders->GetNextStoppingStation(this->cur_order_index, this->last_station_visited);
 	}
 
-	if (this->last_loading_station != INVALID_STATION && this->last_loading_station != curr_station_id) {
-		IncreaseStats(Station::Get(this->last_loading_station), this, curr_station_id, false);
+	if (this->last_loading_station != INVALID_STATION && this->last_loading_station != this->last_station_visited) {
+		IncreaseStats(Station::Get(this->last_loading_station), this, this->last_station_visited, false);
 	}
 
-	this->last_station_visited = curr_station_id;
 	if (this->CanLeaveWithCargo() && next_station_id != INVALID_STATION) {
-		assert(next_station_id != curr_station_id);
+		assert(next_station_id != this->last_station_visited);
 		/* freeze stats for the next link */
 		IncreaseStats(curr_station, this, next_station_id, true);
 	}
 
-	PrepareUnload(this); // refers to this->last_station_visited for the distance
+	PrepareUnload(this);
 
 	SetWindowDirty(GetWindowClassForVehicleType(this->type), this->owner);
 	SetWindowWidgetDirty(WC_VEHICLE_VIEW, this->index, VVW_WIDGET_START_STOP_VEH);
@@ -1884,7 +1895,7 @@ void Vehicle::HandleLoading(bool mode)
 			this->LeaveStation();
 
 			/* If this was not the final order, don't remove it from the list. */
-			if (!at_destination_station) return;
+			if (!at_destination_station) break;
 			break;
 		}
 
@@ -1964,39 +1975,54 @@ CommandCost Vehicle::SendToDepot(DoCommandFlag flags, DepotCommand command)
 void Vehicle::UpdateVisualEffect(bool allow_power_change)
 {
 	bool powered_before = HasBit(this->vcache.cached_vis_effect, VE_DISABLE_WAGON_POWER);
-	this->vcache.cached_vis_effect = 0;
-
 	const Engine *e = Engine::Get(this->engine_type);
-	byte default_effect = VE_DEFAULT;
-	switch (this->type) {
-		case VEH_TRAIN:    default_effect = e->u.rail.visual_effect; break;
-		case VEH_ROAD:     default_effect = e->u.road.visual_effect; break;
-		case VEH_SHIP:     default_effect = e->u.ship.visual_effect; break;
-		default: break;
-	}
-	if (default_effect == VE_DEFAULT) {
-		if (this->type == VEH_TRAIN && !(Train::From(this)->IsWagon() || Train::From(this)->IsArticulatedPart())) {
-			if (e->u.rail.engclass == 0) {
-				/* Steam is offset by -4 units */
-				SB(this->vcache.cached_vis_effect, VE_OFFSET_START, VE_OFFSET_COUNT, VE_OFFSET_CENTRE - 4);
-			} else {
-				/* Diesel fumes and sparks come from the centre */
-				SB(this->vcache.cached_vis_effect, VE_OFFSET_START, VE_OFFSET_COUNT, VE_OFFSET_CENTRE);
-			}
-		} else {
-			/* Non-train engines do not have a visual effect by default. */
-			SetBit(this->vcache.cached_vis_effect, VE_DISABLE_EFFECT);
-		}
-	} else {
-		this->vcache.cached_vis_effect = default_effect;
+
+	/* Evaluate properties */
+	byte visual_effect;
+	switch (e->type) {
+		case VEH_TRAIN: visual_effect = e->u.rail.visual_effect; break;
+		case VEH_ROAD:  visual_effect = e->u.road.visual_effect; break;
+		case VEH_SHIP:  visual_effect = e->u.ship.visual_effect; break;
+		default:        visual_effect = 1 << VE_DISABLE_EFFECT;  break;
 	}
 
 	/* Check powered wagon / visual effect callback */
 	if (HasBit(e->info.callback_mask, CBM_VEHICLE_VISUAL_EFFECT)) {
 		uint16 callback = GetVehicleCallback(CBID_VEHICLE_VISUAL_EFFECT, 0, 0, this->engine_type, this);
 
-		if (callback != CALLBACK_FAILED) this->vcache.cached_vis_effect = GB(callback, 0, 8);
+		if (callback != CALLBACK_FAILED) {
+			callback = GB(callback, 0, 8);
+			/* Avoid accidentally setting 'visual_effect' to the default value
+			 * Since bit 6 (disable effects) is set anyways, we can safely erase some bits. */
+			if (callback == VE_DEFAULT) {
+				assert(HasBit(callback, VE_DISABLE_EFFECT));
+				SB(callback, VE_TYPE_START, VE_TYPE_COUNT, 0);
+			}
+			visual_effect = callback;
+		}
 	}
+
+	/* Apply default values */
+	if (visual_effect == VE_DEFAULT ||
+			(!HasBit(visual_effect, VE_DISABLE_EFFECT) && GB(visual_effect, VE_TYPE_START, VE_TYPE_COUNT) == VE_TYPE_DEFAULT)) {
+		/* Only train engines have default effects.
+		 * Note: This is independent of whether the engine is a front engine or articulated part or whatever. */
+		if (e->type != VEH_TRAIN || e->u.rail.railveh_type == RAILVEH_WAGON || !IsInsideMM(e->u.rail.engclass, EC_STEAM, EC_MONORAIL)) {
+			if (visual_effect == VE_DEFAULT) {
+				visual_effect = 1 << VE_DISABLE_EFFECT;
+			} else {
+				SetBit(visual_effect, VE_DISABLE_EFFECT);
+			}
+		} else {
+			if (visual_effect == VE_DEFAULT) {
+				/* Also set the offset */
+				visual_effect = (VE_OFFSET_CENTRE - (e->u.rail.engclass == EC_STEAM ? 4 : 0)) << VE_OFFSET_START;
+			}
+			SB(visual_effect, VE_TYPE_START, VE_TYPE_COUNT, e->u.rail.engclass - EC_STEAM + VE_TYPE_STEAM);
+		}
+	}
+
+	this->vcache.cached_vis_effect = visual_effect;
 
 	if (!allow_power_change && powered_before != HasBit(this->vcache.cached_vis_effect, VE_DISABLE_WAGON_POWER)) {
 		ToggleBit(this->vcache.cached_vis_effect, VE_DISABLE_WAGON_POWER);
@@ -2056,16 +2082,6 @@ void Vehicle::ShowVisualEffect() const
 				(v->type == VEH_TRAIN &&
 				!HasPowerOnRail(Train::From(v)->railtype, GetTileRailType(v->tile)))) {
 			continue;
-		}
-
-		if (effect_type == VE_TYPE_DEFAULT) {
-			if (v->type == VEH_TRAIN) {
-				/* Use default effect type for engine class. */
-				effect_type = RailVehInfo(v->engine_type)->engclass + 1;
-			} else {
-				/* No default effect exists, so continue */
-				continue;
-			}
 		}
 
 		int x = _vehicle_smoke_pos[v->direction] * effect_offset;
@@ -2210,6 +2226,20 @@ void Vehicle::RemoveFromShared()
 	this->previous_shared = NULL;
 }
 
+/**
+ * Get the next manual (not OT_AUTOMATIC) order after the one at the given index.
+ * @param index the index to start searching at
+ * @return the next manual order at or after index or NULL if there is none.
+ */
+Order *Vehicle::GetNextManualOrder(int index) const
+{
+	Order *order = this->GetOrder(index);
+	while(order != NULL && order->IsType(OT_AUTOMATIC)) {
+		order = order->next;
+	}
+	return order;
+}
+
 void StopAllVehicles()
 {
 	Vehicle *v;
@@ -2327,5 +2357,42 @@ const GroundVehicleCache *Vehicle::GetGroundVehicleCache() const
 		return &Train::From(this)->gcache;
 	} else {
 		return &RoadVehicle::From(this)->gcache;
+	}
+}
+
+/**
+ * Calculates the set of vehicles that will be affected by a given selection.
+ * @param set Set of affected vehicles.
+ * @param v First vehicle of the selection.
+ * @param num_vehicles Number of vehicles in the selection.
+ * @pre \c set must be empty.
+ * @post \c set will contain the vehicles that will be refitted.
+ */
+void GetVehicleSet(VehicleSet &set, Vehicle *v, uint8 num_vehicles)
+{
+	if (v->type == VEH_TRAIN) {
+		Train *u = Train::From(v);
+		/* If the first vehicle in the selection is part of an articulated vehicle, add the previous parts of the vehicle. */
+		if (u->IsArticulatedPart()) {
+			u = u->GetFirstEnginePart();
+			while (u->index != v->index) {
+				set.Include(u->index);
+				u = u->GetNextArticPart();
+			}
+		}
+
+		for (;u != NULL && num_vehicles > 0; num_vehicles--, u = u->Next()) {
+			/* Include current vehicle in the selection. */
+			set.Include(u->index);
+
+			/* If the vehicle is multiheaded, add the other part too. */
+			if (u->IsMultiheaded()) set.Include(u->other_multiheaded_part->index);
+		}
+
+		/* If the last vehicle is part of an articulated vehicle, add the following parts of the vehicle. */
+		while (u != NULL && u->IsArticulatedPart()) {
+			set.Include(u->index);
+			u = u->Next();
+		}
 	}
 }
