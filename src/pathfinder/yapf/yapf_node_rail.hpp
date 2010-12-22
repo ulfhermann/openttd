@@ -190,9 +190,9 @@ struct CYapfRailSegment
 /** Yapf Node for rail YAPF */
 template <class Tkey_>
 struct CYapfRailNodeT
-	: CYapfNodeT<Tkey_, CYapfRailNodeT<Tkey_> >
+	: CYapfNodeTrackT<Tkey_, CYapfRailNodeT<Tkey_> >
 {
-	typedef CYapfNodeT<Tkey_, CYapfRailNodeT<Tkey_> > base;
+	typedef CYapfNodeTrackT<Tkey_, CYapfRailNodeT<Tkey_> > base;
 	typedef CYapfRailSegment CachedData;
 
 	CYapfRailSegment *m_segment;

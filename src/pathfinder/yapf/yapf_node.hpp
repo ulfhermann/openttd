@@ -54,9 +54,8 @@ struct CYapfNodeT {
 	int         m_cost;
 	int         m_estimate;
 
-	FORCEINLINE void Set(Node *parent, TileIndex tile, Trackdir td, bool is_choice)
+	FORCEINLINE void Set(Node *parent, bool is_choice)
 	{
-		m_key.Set(tile, td);
 		m_hash_next = NULL;
 		m_parent = parent;
 		m_cost = 0;
@@ -65,8 +64,6 @@ struct CYapfNodeT {
 
 	FORCEINLINE Node *GetHashNext() {return m_hash_next;}
 	FORCEINLINE void SetHashNext(Node *pNext) {m_hash_next = pNext;}
-	FORCEINLINE TileIndex GetTile() const {return m_key.m_tile;}
-	FORCEINLINE Trackdir GetTrackdir() const {return m_key.m_td;}
 	FORCEINLINE const Tkey_& GetKey() const {return m_key;}
 	FORCEINLINE int GetCost() const {return m_cost;}
 	FORCEINLINE int GetCostEstimate() const {return m_estimate;}
@@ -79,6 +76,23 @@ struct CYapfNodeT {
 		dmp.WriteLine("m_cost = %d", m_cost);
 		dmp.WriteLine("m_estimate = %d", m_estimate);
 	}
+};
+
+/** Yapf Node base for trackdir based specialisation. */
+template <class Tkey_, class Tnode>
+struct CYapfNodeTrackT : public CYapfNodeT<Tkey_, Tnode>
+{
+	typedef CYapfNodeT<Tkey_, Tnode> Base;
+	typedef Tnode                    Node;
+
+	FORCEINLINE void Set(Node *parent, TileIndex tile, Trackdir td, bool is_choice)
+	{
+		Base::Set(parent, is_choice);
+		this->m_key.Set(tile, td);
+	}
+
+	FORCEINLINE TileIndex GetTile() const { return this->m_key.m_tile; }
+	FORCEINLINE Trackdir GetTrackdir() const { return this->m_key.m_td; }
 };
 
 #endif /* YAPF_NODE_HPP */
