@@ -1767,9 +1767,9 @@ void Vehicle::BeginLoading(StationID curr_station_id)
 		Order *in_list = this->GetOrder(this->cur_order_index);
 		if ((in_list == NULL && this->cur_order_index == 0) || 
 				(in_list != NULL && (!in_list->IsType(OT_AUTOMATIC) || 
-				in_list->GetDestination() != this->last_station_visited))) {
+				in_list->GetDestination() != curr_station_id))) {
 			Order *auto_order = new Order();
-			auto_order->MakeAutomatic(this->last_station_visited);
+			auto_order->MakeAutomatic(curr_station_id);
 			InsertOrder(this, auto_order, this->cur_order_index);
 			if (this->cur_order_index > 0) --this->cur_order_index;
 		}
