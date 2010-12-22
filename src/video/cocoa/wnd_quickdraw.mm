@@ -46,66 +46,8 @@
 class WindowQuickdrawSubdriver;
 
 
-/* Subclass of NSWindow to fix genie effect and support resize events  */
-@interface OTTD_QuickdrawWindow : NSWindow {
-	WindowQuickdrawSubdriver *driver;
-}
-
-- (void)setDriver:(WindowQuickdrawSubdriver*)drv;
-
-- (void)miniaturize:(id)sender;
-- (void)display;
-- (void)setFrame:(NSRect)frameRect display:(BOOL)flag;
-- (void)appDidHide:(NSNotification*)note;
-- (void)appWillUnhide:(NSNotification*)note;
-- (void)appDidUnhide:(NSNotification*)note;
-- (id)initWithContentRect:(NSRect)contentRect styleMask:(unsigned int)styleMask backing:(NSBackingStoreType)backingType defer:(BOOL)flag;
-@end
-
-/* Delegate for our NSWindow to send ask for quit on close */
-@interface OTTD_QuickdrawWindowDelegate : NSObject {
-	WindowQuickdrawSubdriver *driver;
-}
-
-- (void)setDriver:(WindowQuickdrawSubdriver*)drv;
-
-- (BOOL)windowShouldClose:(id)sender;
-@end
-
 class WindowQuickdrawSubdriver: public CocoaSubdriver {
-	int device_width;
-	int device_height;
-	int device_depth;
-
-	int window_width;
-	int window_height;
-	int window_pitch;
-
-	int buffer_depth;
-
-	void *pixel_buffer;
-	void *window_buffer;
-
-	OTTD_QuickdrawWindow *window;
-
-	#define MAX_DIRTY_RECTS 100
-	Rect dirty_rects[MAX_DIRTY_RECTS];
-	int num_dirty_rects;
-
-	uint16 palette16[256];
-	uint32 palette32[256];
-
-public:
-	bool active;
-	bool setup;
-
-	NSQuickDrawView *qdview;
-
 private:
-	void GetDeviceInfo();
-
-	bool SetVideoMode(int width, int height);
-
 	/**
 	 * This function copies 32bpp pixels from the screen buffer in 16bpp windowed mode.
 	 *
@@ -139,6 +81,8 @@ private:
 	inline void BlitToView(int left, int top, int right, int bottom);
 	void DrawResizeIcon();
 
+	virtual void GetDeviceInfo();
+	virtual bool SetVideoMode(int width, int height);
 
 public:
 	WindowQuickdrawSubdriver(int bpp);
@@ -166,142 +110,9 @@ public:
 
 	virtual bool IsActive() { return active; }
 
-
 	void SetPortAlphaOpaque();
 	bool WindowResized();
 };
-
-
-@implementation OTTD_QuickdrawWindow
-
-- (void)setDriver:(WindowQuickdrawSubdriver*)drv
-{
-	driver = drv;
-}
-
-
-/* we override these methods to fix the miniaturize animation/dock icon bug */
-- (void)miniaturize:(id)sender
-{
-	/* make the alpha channel opaque so anim won't have holes in it */
-	driver->SetPortAlphaOpaque ();
-
-	/* window is hidden now */
-	driver->active = false;
-
-	QZ_ShowMouse();
-
-	[ super miniaturize:sender ];
-}
-
-- (void)display
-{
-	/* This method fires just before the window deminaturizes from the Dock.
-	 * We'll save the current visible surface, let the window manager redraw any
-	 * UI elements, and restore the surface. This way, no expose event
-	 * is required, and the deminiaturize works perfectly.
-	 */
-
-	driver->SetPortAlphaOpaque();
-
-	/* save current visible surface */
-	[ self cacheImageInRect:[ driver->qdview frame ] ];
-
-	/* let the window manager redraw controls, border, etc */
-	[ super display ];
-
-	/* restore visible surface */
-	[ self restoreCachedImage ];
-
-	/* window is visible again */
-	driver->active = true;
-}
-
-- (void)setFrame:(NSRect)frameRect display:(BOOL)flag
-{
-	[ super setFrame:frameRect display:flag ];
-
-	/* Don't do anything if the window is currently being created */
-	if (driver->setup) return;
-
-	if (!driver->WindowResized()) error("Cocoa: Failed to resize window.");
-}
-
-- (void)appDidHide:(NSNotification*)note
-{
-	driver->active = false;
-}
-
-
-- (void)appWillUnhide:(NSNotification*)note
-{
-	driver->SetPortAlphaOpaque ();
-
-	/* save current visible surface */
-	[ self cacheImageInRect:[ driver->qdview frame ] ];
-}
-
-- (void)appDidUnhide:(NSNotification*)note
-{
-	/* restore cached image, since it may not be current, post expose event too */
-	[ self restoreCachedImage ];
-
-	driver->active = true;
-}
-
-
-- (id)initWithContentRect:(NSRect)contentRect styleMask:(unsigned int)styleMask backing:(NSBackingStoreType)backingType defer:(BOOL)flag
-{
-	/* Make our window subclass receive these application notifications */
-	[ [ NSNotificationCenter defaultCenter ] addObserver:self
-		selector:@selector(appDidHide:) name:NSApplicationDidHideNotification object:NSApp ];
-
-	[ [ NSNotificationCenter defaultCenter ] addObserver:self
-		selector:@selector(appDidUnhide:) name:NSApplicationDidUnhideNotification object:NSApp ];
-
-	[ [ NSNotificationCenter defaultCenter ] addObserver:self
-		selector:@selector(appWillUnhide:) name:NSApplicationWillUnhideNotification object:NSApp ];
-
-	return [ super initWithContentRect:contentRect styleMask:styleMask backing:backingType defer:flag ];
-}
-
-@end
-
-@implementation OTTD_QuickdrawWindowDelegate
-- (void)setDriver:(WindowQuickdrawSubdriver*)drv
-{
-	driver = drv;
-}
-
-- (BOOL)windowShouldClose:(id)sender
-{
-	HandleExitGameRequest();
-
-	return NO;
-}
-
-- (void)windowDidBecomeKey:(NSNotification*)aNotification
-{
-	driver->active = true;
-}
-
-- (void)windowDidResignKey:(NSNotification*)aNotification
-{
-	driver->active = false;
-}
-
-- (void)windowDidBecomeMain:(NSNotification*)aNotification
-{
-	driver->active = true;
-}
-
-- (void)windowDidResignMain:(NSNotification*)aNotification
-{
-	driver->active = false;
-}
-
-@end
-
 
 static const int _resize_icon_width  = 16;
 static const int _resize_icon_height = 16;
@@ -360,7 +171,7 @@ bool WindowQuickdrawSubdriver::SetVideoMode(int width, int height)
 
 	/* Check if we should recreate the window */
 	if (this->window == nil) {
-		OTTD_QuickdrawWindowDelegate *delegate;
+		OTTD_CocoaWindowDelegate *delegate;
 
 		/* Set the window style */
 		unsigned int style = NSTitledWindowMask;
@@ -368,7 +179,7 @@ bool WindowQuickdrawSubdriver::SetVideoMode(int width, int height)
 		style |= NSResizableWindowMask;
 
 		/* Manually create a window, avoids having a nib file resource */
-		this->window = [ [ OTTD_QuickdrawWindow alloc ] initWithContentRect:contentRect
+		this->window = [ [ OTTD_CocoaWindow alloc ] initWithContentRect:contentRect
 						styleMask:style	backing:NSBackingStoreBuffered defer:NO ];
 
 		if (this->window == nil) {
@@ -391,36 +202,37 @@ bool WindowQuickdrawSubdriver::SetVideoMode(int width, int height)
 		[ this->window setAcceptsMouseMovedEvents:YES ];
 		[ this->window setViewsNeedDisplay:NO ];
 
-		delegate = [ [ OTTD_QuickdrawWindowDelegate alloc ] init ];
+		delegate = [ [ OTTD_CocoaWindowDelegate alloc ] init ];
 		[ delegate setDriver:this ];
 		[ this->window setDelegate: [ delegate autorelease ] ];
 	} else {
 		/* We already have a window, just change its size */
 		[ this->window setContentSize:contentRect.size ];
-		/* Ensure frame height - title bar height >= view height */
-		contentRect.size.height = Clamp(height, 0, [ this->window frame ].size.height - 22); // 22 is the height of title bar of window
+		/* Ensure frame height - title bar height >= view height
+		 * The height of title bar of the window is 22 pixels */
+		contentRect.size.height = Clamp(height, 0, [ this->window frame ].size.height - 22);
 		height = contentRect.size.height;
-		[ this->qdview setFrameSize:contentRect.size ];
+		[ this->cocoaview setFrameSize:contentRect.size ];
 	}
 
-	// Update again
+	/* Update again */
 	this->window_width = width;
 	this->window_height = height;
 
 	[ this->window center ];
 
 	/* Only recreate the view if it doesn't already exist */
-	if (this->qdview == nil) {
-		this->qdview = [ [ NSQuickDrawView alloc ] initWithFrame:contentRect ];
-		if (this->qdview == nil) {
+	if (this->cocoaview == nil) {
+		this->cocoaview = [ [ NSQuickDrawView alloc ] initWithFrame:contentRect ];
+		if (this->cocoaview == nil) {
 			DEBUG(driver, 0, "Could not create the Quickdraw view.");
 			this->setup = false;
 			return false;
 		}
 
-		[ this->qdview setAutoresizingMask: NSViewWidthSizable | NSViewHeightSizable ];
-		[ [ this->window contentView ] addSubview:this->qdview ];
-		[ this->qdview release ];
+		[ this->cocoaview setAutoresizingMask: NSViewWidthSizable | NSViewHeightSizable ];
+		[ [ this->window contentView ] addSubview:this->cocoaview ];
+		[ this->cocoaview release ];
 		[ this->window makeKeyAndOrderFront:nil ];
 	}
 
@@ -448,7 +260,7 @@ void WindowQuickdrawSubdriver::Blit32ToView32(int left, int top, int right, int 
 
 void WindowQuickdrawSubdriver::BlitIndexedToView32(int left, int top, int right, int bottom)
 {
-	const uint32 *pal   = this->palette32;
+	const uint32 *pal   = this->palette;
 	const uint8  *src   = (uint8*)this->pixel_buffer;
 	uint32       *dst   = (uint32*)this->window_buffer;
 	uint          width = this->window_width;
@@ -463,7 +275,7 @@ void WindowQuickdrawSubdriver::BlitIndexedToView32(int left, int top, int right,
 
 void WindowQuickdrawSubdriver::BlitIndexedToView16(int left, int top, int right, int bottom)
 {
-	const uint16 *pal   = this->palette16;
+	const uint32 *pal   = this->palette;
 	const uint8  *src   = (uint8*)this->pixel_buffer;
 	uint16       *dst   = (uint16*)this->window_buffer;
 	uint          width = this->window_width;
@@ -534,15 +346,13 @@ WindowQuickdrawSubdriver::WindowQuickdrawSubdriver(int bpp)
 	this->setup         = false;
 
 	this->window = nil;
-	this->qdview = nil;
+	this->cocoaview = nil;
 
 	this->num_dirty_rects = MAX_DIRTY_RECTS;
 }
 
 WindowQuickdrawSubdriver::~WindowQuickdrawSubdriver()
 {
-	QZ_ShowMouse();
-
 	/* Release window mode resources */
 	if (this->window != nil) [ this->window close ];
 
@@ -580,7 +390,7 @@ void WindowQuickdrawSubdriver::Draw(bool force_update)
 	this->DrawResizeIcon();
 
 	/* Flush the dirty region */
-	QDFlushPortBuffer( (OpaqueGrafPtr*) [ this->qdview qdPort ], dirty);
+	QDFlushPortBuffer( (OpaqueGrafPtr*) [ this->cocoaview qdPort ], dirty);
 	DisposeRgn(dirty);
 	DisposeRgn(temp);
 
@@ -609,7 +419,7 @@ void WindowQuickdrawSubdriver::UpdatePalette(uint first_color, uint num_colors)
 				clr32 |= (uint32)_cur_palette[i].r << 16;
 				clr32 |= (uint32)_cur_palette[i].g << 8;
 				clr32 |= (uint32)_cur_palette[i].b;
-				this->palette32[i] = clr32;
+				this->palette[i] = clr32;
 			}
 			break;
 		case 16:
@@ -618,7 +428,7 @@ void WindowQuickdrawSubdriver::UpdatePalette(uint first_color, uint num_colors)
 				clr16 |= (uint16)((_cur_palette[i].r >> 3) & 0x1f) << 10;
 				clr16 |= (uint16)((_cur_palette[i].g >> 3) & 0x1f) << 5;
 				clr16 |= (uint16)((_cur_palette[i].b >> 3) & 0x1f);
-				this->palette16[i] = clr16;
+				this->palette[i] = clr16;
 			}
 			break;
 	}
@@ -646,7 +456,7 @@ bool WindowQuickdrawSubdriver::ChangeResolution(int w, int h)
 /* Convert local coordinate to window server (CoreGraphics) coordinate */
 CGPoint WindowQuickdrawSubdriver::PrivateLocalToCG(NSPoint *p)
 {
-	*p = [ this->qdview convertPoint:*p toView: nil ];
+	*p = [ this->cocoaview convertPoint:*p toView: nil ];
 	*p = [ this->window convertBaseToScreen:*p ];
 	p->y = this->device_height - p->y;
 
@@ -656,14 +466,14 @@ CGPoint WindowQuickdrawSubdriver::PrivateLocalToCG(NSPoint *p)
 NSPoint WindowQuickdrawSubdriver::GetMouseLocation(NSEvent *event)
 {
 	NSPoint pt = [ event locationInWindow ];
-	pt = [ this->qdview convertPoint:pt fromView:nil ];
+	pt = [ this->cocoaview convertPoint:pt fromView:nil ];
 
 	return pt;
 }
 
 bool WindowQuickdrawSubdriver::MouseIsInsideView(NSPoint *pt)
 {
-	return [ this->qdview mouse:*pt inRect:[ this->qdview bounds ] ];
+	return [ this->cocoaview mouse:*pt inRect:[ this->cocoaview bounds ] ];
 }
 
 
@@ -686,10 +496,10 @@ void WindowQuickdrawSubdriver::SetPortAlphaOpaque()
 
 bool WindowQuickdrawSubdriver::WindowResized()
 {
-	if (this->window == nil || this->qdview == nil) return true;
+	if (this->window == nil || this->cocoaview == nil) return true;
 
-	NSRect   newframe = [ this->qdview frame ];
-	CGrafPtr thePort  = (OpaqueGrafPtr*) [ this->qdview qdPort ];
+	NSRect   newframe = [ this->cocoaview frame ];
+	CGrafPtr thePort  = (OpaqueGrafPtr*) [ this->cocoaview qdPort ];
 
 	LockPortBits(thePort);
 	this->window_buffer = GetPixBaseAddr(GetPortPixMap(thePort));
@@ -700,7 +510,7 @@ bool WindowQuickdrawSubdriver::WindowResized()
 	 * We want it to point to the *view's* pixels
 	 */
 	int voff = [ this->window frame ].size.height - newframe.size.height - newframe.origin.y;
-	int hoff = [ this->qdview frame ].origin.x;
+	int hoff = [ this->cocoaview frame ].origin.x;
 	this->window_buffer = (uint8*)this->window_buffer + (voff * this->window_pitch) + hoff * (this->device_depth / 8);
 
 	this->window_width = newframe.size.width;
