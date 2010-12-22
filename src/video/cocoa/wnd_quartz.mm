@@ -45,76 +45,14 @@
 
 class WindowQuartzSubdriver;
 
-
-/* Subclass of NSWindow to fix genie effect and support resize events  */
-@interface OTTD_QuartzWindow : NSWindow {
-	WindowQuartzSubdriver *driver;
-}
-
+/* Subclass of OTTD_CocoaView to fix Quartz rendering */
+@interface OTTD_QuartzView : OTTD_CocoaView
 - (void)setDriver:(WindowQuartzSubdriver*)drv;
-
-- (void)miniaturize:(id)sender;
-- (void)display;
-- (void)setFrame:(NSRect)frameRect display:(BOOL)flag;
-- (void)appDidHide:(NSNotification*)note;
-- (void)appWillUnhide:(NSNotification*)note;
-- (void)appDidUnhide:(NSNotification*)note;
-- (id)initWithContentRect:(NSRect)contentRect styleMask:(NSUInteger)styleMask backing:(NSBackingStoreType)backingType defer:(BOOL)flag;
-@end
-
-/* Delegate for our NSWindow to send ask for quit on close */
-@interface OTTD_QuartzWindowDelegate : NSObject {
-	WindowQuartzSubdriver *driver;
-}
-
-- (void)setDriver:(WindowQuartzSubdriver*)drv;
-
-- (BOOL)windowShouldClose:(id)sender;
-@end
-
-/* Subclass of NSView to fix Quartz rendering */
-@interface OTTD_QuartzView : NSView {
-	WindowQuartzSubdriver *driver;
-}
-
-- (void)setDriver:(WindowQuartzSubdriver*)drv;
-
-- (void)drawRect:(NSRect)rect;
-- (BOOL)isOpaque;
+- (void)drawRect:(NSRect)invalidRect;
 @end
 
 class WindowQuartzSubdriver: public CocoaSubdriver {
-	int device_width;
-	int device_height;
-
-	int window_width;
-	int window_height;
-
-	int buffer_depth;
-
-	void *pixel_buffer;
-	void *image_buffer;
-
-	OTTD_QuartzWindow *window;
-
-	#define MAX_DIRTY_RECTS 100
-	Rect dirty_rects[MAX_DIRTY_RECTS];
-	int num_dirty_rects;
-
-	uint32 palette[256];
-
-public:
-	bool active;
-	bool setup;
-
-	OTTD_QuartzView *qzview;
-	CGContextRef cgcontext;
-
 private:
-	void GetDeviceInfo();
-
-	bool SetVideoMode(int width, int height);
-
 	/**
 	 * This function copies 8bpp pixels from the screen buffer in 32bpp windowed mode.
 	 *
@@ -124,6 +62,9 @@ private:
 	 * @param bottom The y coord for the bottom edge of the box to blit.
 	 */
 	void BlitIndexedToView32(int left, int top, int right, int bottom);
+
+	virtual void GetDeviceInfo();
+	virtual bool SetVideoMode(int width, int height);
 
 public:
 	WindowQuartzSubdriver(int bpp);
@@ -141,7 +82,7 @@ public:
 
 	virtual int GetWidth() { return window_width; }
 	virtual int GetHeight() { return window_height; }
-	virtual void *GetPixelBuffer() { return buffer_depth == 8 ? pixel_buffer : image_buffer; }
+	virtual void *GetPixelBuffer() { return buffer_depth == 8 ? pixel_buffer : window_buffer; }
 
 	/* Convert local coordinate to window server (CoreGraphics) coordinate */
 	virtual CGPoint PrivateLocalToCG(NSPoint *p);
@@ -178,147 +119,12 @@ static CGColorSpaceRef QZ_GetCorrectColorSpace()
 }
 
 
-@implementation OTTD_QuartzWindow
-
-- (void)setDriver:(WindowQuartzSubdriver*)drv
-{
-	driver = drv;
-}
-
-
-/* we override these methods to fix the miniaturize animation/dock icon bug */
-- (void)miniaturize:(id)sender
-{
-	/* make the alpha channel opaque so anim won't have holes in it */
-	driver->SetPortAlphaOpaque ();
-
-	/* window is hidden now */
-	driver->active = false;
-
-	QZ_ShowMouse();
-
-	[ super miniaturize:sender ];
-}
-
-- (void)display
-{
-	/* This method fires just before the window deminaturizes from the Dock.
-	 * We'll save the current visible surface, let the window manager redraw any
-	 * UI elements, and restore the surface. This way, no expose event
-	 * is required, and the deminiaturize works perfectly.
-	 */
-
-	driver->SetPortAlphaOpaque();
-
-	/* save current visible surface */
-	[ self cacheImageInRect:[ driver->qzview frame ] ];
-
-	/* let the window manager redraw controls, border, etc */
-	[ super display ];
-
-	/* restore visible surface */
-	[ self restoreCachedImage ];
-
-	/* window is visible again */
-	driver->active = true;
-}
-
-- (void)setFrame:(NSRect)frameRect display:(BOOL)flag
-{
-	[ super setFrame:frameRect display:flag ];
-
-	/* Don't do anything if the window is currently being created */
-	if (driver->setup) return;
-
-	if (!driver->WindowResized()) error("Cocoa: Failed to resize window.");
-}
-
-- (void)appDidHide:(NSNotification*)note
-{
-	driver->active = false;
-}
-
-
-- (void)appWillUnhide:(NSNotification*)note
-{
-	driver->SetPortAlphaOpaque ();
-
-	/* save current visible surface */
-	[ self cacheImageInRect:[ driver->qzview frame ] ];
-}
-
-- (void)appDidUnhide:(NSNotification*)note
-{
-	/* restore cached image, since it may not be current, post expose event too */
-	[ self restoreCachedImage ];
-
-	driver->active = true;
-}
-
-
-- (id)initWithContentRect:(NSRect)contentRect styleMask:(NSUInteger)styleMask backing:(NSBackingStoreType)backingType defer:(BOOL)flag
-{
-	/* Make our window subclass receive these application notifications */
-	[ [ NSNotificationCenter defaultCenter ] addObserver:self selector:@selector(appDidHide:) name:NSApplicationDidHideNotification object:NSApp ];
-
-	[ [ NSNotificationCenter defaultCenter ] addObserver:self selector:@selector(appDidUnhide:) name:NSApplicationDidUnhideNotification object:NSApp ];
-
-	[ [ NSNotificationCenter defaultCenter ] addObserver:self selector:@selector(appWillUnhide:) name:NSApplicationWillUnhideNotification object:NSApp ];
-
-	return [ super initWithContentRect:contentRect styleMask:styleMask backing:backingType defer:flag ];
-}
-
-@end
-
-@implementation OTTD_QuartzWindowDelegate
-
-- (void)setDriver:(WindowQuartzSubdriver*)drv
-{
-	driver = drv;
-}
-
-- (BOOL)windowShouldClose:(id)sender
-{
-	HandleExitGameRequest();
-
-	return NO;
-}
-
-- (void)windowDidBecomeKey:(NSNotification*)aNotification
-{
-	driver->active = true;
-}
-
-- (void)windowDidResignKey:(NSNotification*)aNotification
-{
-	driver->active = false;
-}
-
-- (void)windowDidBecomeMain:(NSNotification*)aNotification
-{
-	driver->active = true;
-}
-
-- (void)windowDidResignMain:(NSNotification*)aNotification
-{
-	driver->active = false;
-}
-
-@end
-
 @implementation OTTD_QuartzView
 
 - (void)setDriver:(WindowQuartzSubdriver*)drv
 {
 	driver = drv;
 }
-
-
-- (BOOL)isOpaque
-{
-	return YES;
-}
-
 - (void)drawRect:(NSRect)invalidRect
 {
 	if (driver->cgcontext == NULL) return;
@@ -427,7 +233,7 @@ bool WindowQuartzSubdriver::SetVideoMode(int width, int height)
 
 	/* Check if we should recreate the window */
 	if (this->window == nil) {
-		OTTD_QuartzWindowDelegate *delegate;
+		OTTD_CocoaWindowDelegate *delegate;
 
 		/* Set the window style */
 		unsigned int style = NSTitledWindowMask;
@@ -435,7 +241,7 @@ bool WindowQuartzSubdriver::SetVideoMode(int width, int height)
 		style |= NSResizableWindowMask;
 
 		/* Manually create a window, avoids having a nib file resource */
-		this->window = [ [ OTTD_QuartzWindow alloc ]
+		this->window = [ [ OTTD_CocoaWindow alloc ]
 							initWithContentRect:contentRect
 							styleMask:style
 							backing:NSBackingStoreBuffered
@@ -463,19 +269,19 @@ bool WindowQuartzSubdriver::SetVideoMode(int width, int height)
 
 		[ this->window useOptimizedDrawing:YES ];
 
-		delegate = [ [ OTTD_QuartzWindowDelegate alloc ] init ];
+		delegate = [ [ OTTD_CocoaWindowDelegate alloc ] init ];
 		[ delegate setDriver:this ];
 		[ this->window setDelegate:[ delegate autorelease ] ];
 	} else {
 		/* We already have a window, just change its size */
 		[ this->window setContentSize:contentRect.size ];
 
-		// Ensure frame height - title bar height >= view height
+		/* Ensure frame height - title bar height >= view height */
 		contentRect.size.height = Clamp(height, 0, [ this->window frame ].size.height - 22 /* 22 is the height of title bar of window*/);
 
-		if (this->qzview != nil) {
+		if (this->cocoaview != nil) {
 			height = contentRect.size.height;
-			[ this->qzview setFrameSize:contentRect.size ];
+			[ this->cocoaview setFrameSize:contentRect.size ];
 		}
 	}
 
@@ -485,19 +291,19 @@ bool WindowQuartzSubdriver::SetVideoMode(int width, int height)
 	[ this->window center ];
 
 	/* Only recreate the view if it doesn't already exist */
-	if (this->qzview == nil) {
-		this->qzview = [ [ OTTD_QuartzView alloc ] initWithFrame:contentRect ];
-		if (this->qzview == nil) {
+	if (this->cocoaview == nil) {
+		this->cocoaview = [ [ OTTD_QuartzView alloc ] initWithFrame:contentRect ];
+		if (this->cocoaview == nil) {
 			DEBUG(driver, 0, "Could not create the Quickdraw view.");
 			this->setup = false;
 			return false;
 		}
 
-		[ this->qzview setDriver:this ];
+		[ this->cocoaview setDriver:this ];
 
-		[ this->qzview setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable ];
-		[ this->window setContentView:qzview ];
-		[ this->qzview release ];
+		[ this->cocoaview setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable ];
+		[ this->window setContentView:cocoaview ];
+		[ this->cocoaview release ];
 		[ this->window makeKeyAndOrderFront:nil ];
 	}
 
@@ -513,7 +319,7 @@ void WindowQuartzSubdriver::BlitIndexedToView32(int left, int top, int right, in
 {
 	const uint32 *pal   = this->palette;
 	const uint8  *src   = (uint8*)this->pixel_buffer;
-	uint32       *dst   = (uint32*)this->image_buffer;
+	uint32       *dst   = (uint32*)this->window_buffer;
 	uint          width = this->window_width;
 	uint          pitch = this->window_width;
 
@@ -530,13 +336,13 @@ WindowQuartzSubdriver::WindowQuartzSubdriver(int bpp)
 	this->window_width  = 0;
 	this->window_height = 0;
 	this->buffer_depth  = bpp;
-	this->image_buffer  = NULL;
+	this->window_buffer  = NULL;
 	this->pixel_buffer  = NULL;
 	this->active        = false;
 	this->setup         = false;
 
 	this->window = nil;
-	this->qzview = nil;
+	this->cocoaview = nil;
 
 	this->cgcontext = NULL;
 
@@ -545,14 +351,12 @@ WindowQuartzSubdriver::WindowQuartzSubdriver(int bpp)
 
 WindowQuartzSubdriver::~WindowQuartzSubdriver()
 {
-	QZ_ShowMouse();
-
 	/* Release window mode resources */
 	if (this->window != nil) [ this->window close ];
 
 	CGContextRelease(this->cgcontext);
 
-	free(this->image_buffer);
+	free(this->window_buffer);
 	free(this->pixel_buffer);
 }
 
@@ -589,11 +393,9 @@ void WindowQuartzSubdriver::Draw(bool force_update)
 
 		/* Normally drawRect will be automatically called by Mac OS X during next update cycle,
 		 * and then blitting will occur. If force_update is true, it will be done right now. */
-		[ this->qzview setNeedsDisplayInRect:dirtyrect ];
-		if (force_update) [ this->qzview displayIfNeeded ];
+		[ this->cocoaview setNeedsDisplayInRect:dirtyrect ];
+		if (force_update) [ this->cocoaview displayIfNeeded ];
 	}
-
-	//DrawResizeIcon();
 
 	this->num_dirty_rects = 0;
 }
@@ -645,7 +447,7 @@ CGPoint WindowQuartzSubdriver::PrivateLocalToCG(NSPoint *p)
 {
 
 	p->y = this->window_height - p->y;
-	*p = [ this->qzview convertPoint:*p toView:nil ];
+	*p = [ this->cocoaview convertPoint:*p toView:nil ];
 
 	*p = [ this->window convertBaseToScreen:*p ];
 	p->y = this->device_height - p->y;
@@ -660,7 +462,7 @@ CGPoint WindowQuartzSubdriver::PrivateLocalToCG(NSPoint *p)
 NSPoint WindowQuartzSubdriver::GetMouseLocation(NSEvent *event)
 {
 	NSPoint pt = [ event locationInWindow ];
-	pt = [ this->qzview convertPoint:pt fromView:nil ];
+	pt = [ this->cocoaview convertPoint:pt fromView:nil ];
 
 	pt.y = this->window_height - pt.y;
 
@@ -669,7 +471,7 @@ NSPoint WindowQuartzSubdriver::GetMouseLocation(NSEvent *event)
 
 bool WindowQuartzSubdriver::MouseIsInsideView(NSPoint *pt)
 {
-	return [ qzview mouse:*pt inRect:[ this->qzview bounds ] ];
+	return [ cocoaview mouse:*pt inRect:[ this->cocoaview bounds ] ];
 }
 
 
@@ -679,7 +481,7 @@ bool WindowQuartzSubdriver::MouseIsInsideView(NSPoint *pt)
  */
 void WindowQuartzSubdriver::SetPortAlphaOpaque()
 {
-	uint32 *pixels = (uint32*)this->image_buffer;
+	uint32 *pixels = (uint32*)this->window_buffer;
 	uint32  pitch  = this->window_width;
 
 	for (int y = 0; y < this->window_height; y++)
@@ -690,20 +492,20 @@ void WindowQuartzSubdriver::SetPortAlphaOpaque()
 
 bool WindowQuartzSubdriver::WindowResized()
 {
-	if (this->window == nil || this->qzview == nil) return true;
+	if (this->window == nil || this->cocoaview == nil) return true;
 
-	NSRect newframe = [ this->qzview frame ];
+	NSRect newframe = [ this->cocoaview frame ];
 
 	this->window_width = newframe.size.width;
 	this->window_height = newframe.size.height;
 
 	/* Create Core Graphics Context */
-	free(this->image_buffer);
-	this->image_buffer = (uint32*)malloc(this->window_width * this->window_height * 4);
+	free(this->window_buffer);
+	this->window_buffer = (uint32*)malloc(this->window_width * this->window_height * 4);
 
 	CGContextRelease(this->cgcontext);
 	this->cgcontext = CGBitmapContextCreate(
-		this->image_buffer,        // data
+		this->window_buffer,        // data
 		this->window_width,        // width
 		this->window_height,       // height
 		8,                         // bits per component
