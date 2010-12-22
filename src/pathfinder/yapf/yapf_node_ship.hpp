@@ -15,7 +15,7 @@
 /** Yapf Node for ships */
 template <class Tkey_>
 struct CYapfShipNodeT
-	: CYapfNodeT<Tkey_, CYapfShipNodeT<Tkey_> >
+	: CYapfNodeTrackT<Tkey_, CYapfShipNodeT<Tkey_> >
 {
 
 };
