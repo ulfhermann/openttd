@@ -677,9 +677,9 @@ CommandCost CmdInsertOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 
 /**
  * Insert a new order but skip the validation.
- * @param v the vehicle to insert the order to
- * @param new_o the new order
- * @param sel_ord the position the order should be inserted at
+ * @param v       The vehicle to insert the order to.
+ * @param new_o   The new order.
+ * @param sel_ord The position the order should be inserted at.
  */
 void InsertOrder(Vehicle *v, Order *new_o, VehicleOrderID sel_ord)
 {
@@ -696,7 +696,7 @@ void InsertOrder(Vehicle *v, Order *new_o, VehicleOrderID sel_ord)
 		assert(v->orders.list == u->orders.list);
 
 		/* If there is added an order before the current one, we need
-		to update the selected order */
+		 * to update the selected order */
 		if (sel_ord <= u->cur_order_index) {
 			uint cur = u->cur_order_index + 1;
 			/* Check if we don't go out of bound */
@@ -756,7 +756,6 @@ CommandCost CmdDeleteOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 {
 	VehicleID veh_id = GB(p1, 0, 20);
 	VehicleOrderID sel_ord = GB(p2, 0, 8);
-	Order *order;
 
 	Vehicle *v = Vehicle::GetIfValid(veh_id);
 
@@ -768,17 +767,16 @@ CommandCost CmdDeleteOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 	/* If we did not select an order, we maybe want to de-clone the orders */
 	if (sel_ord >= v->GetNumOrders()) return DecloneOrder(v, flags);
 
-	order = v->GetOrder(sel_ord);
-	if (order == NULL) return CMD_ERROR;
+	if (v->GetOrder(sel_ord) == NULL) return CMD_ERROR;
 
 	if (flags & DC_EXEC) DeleteOrder(v, sel_ord);
 	return CommandCost();
 }
 
 /**
- * Delete an order but skip the parameter validation
- * @param v the vehicle to delete the order from
- * @param sel_ord the id of the order to be deleted
+ * Delete an order but skip the parameter validation.
+ * @param v       The vehicle to delete the order from.
+ * @param sel_ord The id of the order to be deleted.
  */
 void DeleteOrder(Vehicle *v, VehicleOrderID sel_ord)
 {
