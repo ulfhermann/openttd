@@ -46,6 +46,10 @@ void CcBuildAirport(const CommandCost &result, TileIndex tile, uint32 p1, uint32
 	if (!_settings_client.gui.persistent_buildingtools) ResetObjectToPlace();
 }
 
+/**
+ * Place an airport.
+ * @param tile Position to put the new airport.
+ */
 static void PlaceAirport(TileIndex tile)
 {
 	if (_selected_airport_index == -1) return;
@@ -65,28 +69,15 @@ enum AirportToolbarWidgets {
 };
 
 
-static void BuildAirClick_Airport(Window *w)
-{
-	if (HandlePlacePushButton(w, ATW_AIRPORT, SPR_CURSOR_AIRPORT, HT_RECT, PlaceAirport)) ShowBuildAirportPicker(w);
-}
-
-static void BuildAirClick_Demolish(Window *w)
-{
-	HandlePlacePushButton(w, ATW_DEMOLISH, ANIMCURSOR_DEMOLISH, HT_RECT, PlaceProc_DemolishArea);
-}
-
-
-typedef void OnButtonClick(Window *w);
-static OnButtonClick * const _build_air_button_proc[] = {
-	BuildAirClick_Airport,
-	BuildAirClick_Demolish,
-};
-
+/** Airport build toolbar window handler. */
 struct BuildAirToolbarWindow : Window {
+	int last_user_action; // Last started user action.
+
 	BuildAirToolbarWindow(const WindowDesc *desc, WindowNumber window_number) : Window()
 	{
 		this->InitNested(desc, window_number);
 		if (_settings_client.gui.link_terraform_toolbar) ShowTerraformToolbar(this);
+		this->last_user_action = WIDGET_LIST_END;
 	}
 
 	~BuildAirToolbarWindow()
@@ -96,9 +87,21 @@ struct BuildAirToolbarWindow : Window {
 
 	virtual void OnClick(Point pt, int widget, int click_count)
 	{
-		if (!IsInsideBS(widget, ATW_AIRPORT, lengthof(_build_air_button_proc))) return;
+		switch (widget) {
+			case ATW_AIRPORT:
+				if (HandlePlacePushButton(this, ATW_AIRPORT, SPR_CURSOR_AIRPORT, HT_RECT, NULL)) {
+					ShowBuildAirportPicker(this);
+					this->last_user_action = widget;
+				}
+				break;
 
-		_build_air_button_proc[widget - ATW_AIRPORT](this);
+			case ATW_DEMOLISH:
+				HandlePlacePushButton(this, ATW_DEMOLISH, ANIMCURSOR_DEMOLISH, HT_RECT, NULL);
+				this->last_user_action = widget;
+				break;
+
+			default: break;
+		}
 	}
 
 
@@ -112,7 +115,17 @@ struct BuildAirToolbarWindow : Window {
 
 	virtual void OnPlaceObject(Point pt, TileIndex tile)
 	{
-		_place_proc(tile);
+		switch (this->last_user_action) {
+			case ATW_AIRPORT:
+				PlaceAirport(tile);
+				break;
+
+			case ATW_DEMOLISH:
+				PlaceProc_DemolishArea(tile);
+				break;
+
+			default: NOT_REACHED();
+		}
 	}
 
 	virtual void OnPlaceDrag(ViewportPlaceMethod select_method, ViewportDragDropSelectionProcess select_proc, Point pt)
