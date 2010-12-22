@@ -1910,39 +1910,54 @@ CommandCost Vehicle::SendToDepot(DoCommandFlag flags, DepotCommand command)
 void Vehicle::UpdateVisualEffect(bool allow_power_change)
 {
 	bool powered_before = HasBit(this->vcache.cached_vis_effect, VE_DISABLE_WAGON_POWER);
-	this->vcache.cached_vis_effect = 0;
-
 	const Engine *e = Engine::Get(this->engine_type);
-	byte default_effect = VE_DEFAULT;
-	switch (this->type) {
-		case VEH_TRAIN:    default_effect = e->u.rail.visual_effect; break;
-		case VEH_ROAD:     default_effect = e->u.road.visual_effect; break;
-		case VEH_SHIP:     default_effect = e->u.ship.visual_effect; break;
-		default: break;
-	}
-	if (default_effect == VE_DEFAULT) {
-		if (this->type == VEH_TRAIN && !(Train::From(this)->IsWagon() || Train::From(this)->IsArticulatedPart())) {
-			if (e->u.rail.engclass == 0) {
-				/* Steam is offset by -4 units */
-				SB(this->vcache.cached_vis_effect, VE_OFFSET_START, VE_OFFSET_COUNT, VE_OFFSET_CENTRE - 4);
-			} else {
-				/* Diesel fumes and sparks come from the centre */
-				SB(this->vcache.cached_vis_effect, VE_OFFSET_START, VE_OFFSET_COUNT, VE_OFFSET_CENTRE);
-			}
-		} else {
-			/* Non-train engines do not have a visual effect by default. */
-			SetBit(this->vcache.cached_vis_effect, VE_DISABLE_EFFECT);
-		}
-	} else {
-		this->vcache.cached_vis_effect = default_effect;
+
+	/* Evaluate properties */
+	byte visual_effect;
+	switch (e->type) {
+		case VEH_TRAIN: visual_effect = e->u.rail.visual_effect; break;
+		case VEH_ROAD:  visual_effect = e->u.road.visual_effect; break;
+		case VEH_SHIP:  visual_effect = e->u.ship.visual_effect; break;
+		default:        visual_effect = 1 << VE_DISABLE_EFFECT;  break;
 	}
 
 	/* Check powered wagon / visual effect callback */
 	if (HasBit(e->info.callback_mask, CBM_VEHICLE_VISUAL_EFFECT)) {
 		uint16 callback = GetVehicleCallback(CBID_VEHICLE_VISUAL_EFFECT, 0, 0, this->engine_type, this);
 
-		if (callback != CALLBACK_FAILED) this->vcache.cached_vis_effect = GB(callback, 0, 8);
+		if (callback != CALLBACK_FAILED) {
+			callback = GB(callback, 0, 8);
+			/* Avoid accidentally setting 'visual_effect' to the default value
+			 * Since bit 6 (disable effects) is set anyways, we can safely erase some bits. */
+			if (callback == VE_DEFAULT) {
+				assert(HasBit(callback, VE_DISABLE_EFFECT));
+				SB(callback, VE_TYPE_START, VE_TYPE_COUNT, 0);
+			}
+			visual_effect = callback;
+		}
 	}
+
+	/* Apply default values */
+	if (visual_effect == VE_DEFAULT ||
+			(!HasBit(visual_effect, VE_DISABLE_EFFECT) && GB(visual_effect, VE_TYPE_START, VE_TYPE_COUNT) == VE_TYPE_DEFAULT)) {
+		/* Only train engines have default effects.
+		 * Note: This is independent of whether the engine is a front engine or articulated part or whatever. */
+		if (e->type != VEH_TRAIN || e->u.rail.railveh_type == RAILVEH_WAGON || !IsInsideMM(e->u.rail.engclass, EC_STEAM, EC_MONORAIL)) {
+			if (visual_effect == VE_DEFAULT) {
+				visual_effect = 1 << VE_DISABLE_EFFECT;
+			} else {
+				SetBit(visual_effect, VE_DISABLE_EFFECT);
+			}
+		} else {
+			if (visual_effect == VE_DEFAULT) {
+				/* Also set the offset */
+				visual_effect = (VE_OFFSET_CENTRE - (e->u.rail.engclass == EC_STEAM ? 4 : 0)) << VE_OFFSET_START;
+			}
+			SB(visual_effect, VE_TYPE_START, VE_TYPE_COUNT, e->u.rail.engclass - EC_STEAM + VE_TYPE_STEAM);
+		}
+	}
+
+	this->vcache.cached_vis_effect = visual_effect;
 
 	if (!allow_power_change && powered_before != HasBit(this->vcache.cached_vis_effect, VE_DISABLE_WAGON_POWER)) {
 		ToggleBit(this->vcache.cached_vis_effect, VE_DISABLE_WAGON_POWER);
@@ -2002,16 +2017,6 @@ void Vehicle::ShowVisualEffect() const
 				(v->type == VEH_TRAIN &&
 				!HasPowerOnRail(Train::From(v)->railtype, GetTileRailType(v->tile)))) {
 			continue;
-		}
-
-		if (effect_type == VE_TYPE_DEFAULT) {
-			if (v->type == VEH_TRAIN) {
-				/* Use default effect type for engine class. */
-				effect_type = RailVehInfo(v->engine_type)->engclass + 1;
-			} else {
-				/* No default effect exists, so continue */
-				continue;
-			}
 		}
 
 		int x = _vehicle_smoke_pos[v->direction] * effect_offset;
@@ -2273,5 +2278,42 @@ const GroundVehicleCache *Vehicle::GetGroundVehicleCache() const
 		return &Train::From(this)->gcache;
 	} else {
 		return &RoadVehicle::From(this)->gcache;
+	}
+}
+
+/**
+ * Calculates the set of vehicles that will be affected by a given selection.
+ * @param set Set of affected vehicles.
+ * @param v First vehicle of the selection.
+ * @param num_vehicles Number of vehicles in the selection.
+ * @pre \c set must be empty.
+ * @post \c set will contain the vehicles that will be refitted.
+ */
+void GetVehicleSet(VehicleSet &set, Vehicle *v, uint8 num_vehicles)
+{
+	if (v->type == VEH_TRAIN) {
+		Train *u = Train::From(v);
+		/* If the first vehicle in the selection is part of an articulated vehicle, add the previous parts of the vehicle. */
+		if (u->IsArticulatedPart()) {
+			u = u->GetFirstEnginePart();
+			while (u->index != v->index) {
+				set.Include(u->index);
+				u = u->GetNextArticPart();
+			}
+		}
+
+		for (;u != NULL && num_vehicles > 0; num_vehicles--, u = u->Next()) {
+			/* Include current vehicle in the selection. */
+			set.Include(u->index);
+
+			/* If the vehicle is multiheaded, add the other part too. */
+			if (u->IsMultiheaded()) set.Include(u->other_multiheaded_part->index);
+		}
+
+		/* If the last vehicle is part of an articulated vehicle, add the following parts of the vehicle. */
+		while (u != NULL && u->IsArticulatedPart()) {
+			set.Include(u->index);
+			u = u->Next();
+		}
 	}
 }
