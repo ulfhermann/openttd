@@ -237,7 +237,7 @@ STR_TOOLTIP_RESIZE                                              :{BLACK}Klicken 
 STR_TOOLTIP_TOGGLE_LARGE_SMALL_WINDOW                           :{BLACK}Zwischen Fenstergrößen umschalten
 STR_TOOLTIP_VSCROLL_BAR_SCROLLS_LIST                            :{BLACK}Bildlaufleiste: Liste auf- und abwärts blättern
 STR_TOOLTIP_HSCROLL_BAR_SCROLLS_LIST                            :{BLACK}Bildlaufleiste: Liste nach links und rechts blättern
-STR_TOOLTIP_DEMOLISH_BUILDINGS_ETC                              :{BLACK}Gebäude etc. von einem Planquadrat abreißen. Strg wählt ein diagonales Gebiet aus
+STR_TOOLTIP_DEMOLISH_BUILDINGS_ETC                              :{BLACK}Gebäude etc. von einem Planquadrat abreißen. Strg wählt ein diagonales Gebiet aus. Shift schaltet zwischen Bauen und Kostenvoranschlag um
 
 # Query window
 STR_BUTTON_DEFAULT                                              :{BLACK}Standard
@@ -332,9 +332,9 @@ STR_SCENEDIT_TOOLBAR_LANDSCAPE_GENERATION                       :{BLACK}Landflä
 STR_SCENEDIT_TOOLBAR_TOWN_GENERATION                            :{BLACK}Stadt gründen
 STR_SCENEDIT_TOOLBAR_INDUSTRY_GENERATION                        :{BLACK}Industrie errichten
 STR_SCENEDIT_TOOLBAR_ROAD_CONSTRUCTION                          :{BLACK}Straße bauen
-STR_SCENEDIT_TOOLBAR_PLANT_TREES                                :{BLACK}Bäume pflanzen
+STR_SCENEDIT_TOOLBAR_PLANT_TREES                                :{BLACK}Bäume pflanzen. Shift schaltet zwischen Bauen und Kostenvoranschlag um
 STR_SCENEDIT_TOOLBAR_PLACE_SIGN                                 :{BLACK}Schild aufstellen
-STR_SCENEDIT_TOOLBAR_PLACE_OBJECT                               :{BLACK}Objekt platzieren
+STR_SCENEDIT_TOOLBAR_PLACE_OBJECT                               :{BLACK}Objekt platzieren. Shift schaltet zwischen Bauen und Kostenvoranschlag um
 
 ############ range for SE file menu starts
 STR_SCENEDIT_FILE_MENU_SAVE_SCENARIO                            :Szenario speichern
@@ -531,7 +531,7 @@ STR_GRAPH_CARGO_PAYMENT_RATES_TITLE                             :{TINYFONT}{BLAC
 STR_GRAPH_CARGO_ENABLE_ALL                                      :{TINYFONT}{BLACK}Alle auswählen
 STR_GRAPH_CARGO_DISABLE_ALL                                     :{TINYFONT}{BLACK}Alle abwählen
 STR_GRAPH_CARGO_TOOLTIP_ENABLE_ALL                              :{BLACK}Zeige alle Frachtarten im Frachtraten-Diagramm an
-STR_GRAPH_CARGO_TOOLTIP_DISABLE_ALL                             :{BLACK}Zeige keine Fracht im Frachtraten-Diagramm an.
+STR_GRAPH_CARGO_TOOLTIP_DISABLE_ALL                             :{BLACK}Zeige keine Fracht im Frachtraten-Diagramm an
 STR_GRAPH_CARGO_PAYMENT_TOGGLE_CARGO                            :{BLACK}Diagrammschalter für Frachttyp ein/aus
 STR_GRAPH_CARGO_PAYMENT_CARGO                                   :{TINYFONT}{BLACK}{STRING}
 
@@ -785,7 +785,7 @@ STR_NEWS_INDUSTRY_CLOSURE_GENERAL                               :{BIGFONT}{BLACK
 STR_NEWS_INDUSTRY_CLOSURE_SUPPLY_PROBLEMS                       :{BIGFONT}{BLACK}Wegen fehlender Rohstoffe {G 0:2 kündigt kündigt kündigt kündigen} {STRING} die baldige Schließung an!
 STR_NEWS_INDUSTRY_CLOSURE_LACK_OF_TREES                         :{BIGFONT}{BLACK}Wegen Holzmangel {G 0:2 gibt gibt gibt geben} {STRING} die baldige Schließung bekannt!
 
-STR_NEWS_EURO_INTRODUCTION                                      :{BIGFONT}{BLACK}Europäische Währungsunion!{}{}Der Euro wird einzige Währung für alltägliche Zahlungsvorgänge.
+STR_NEWS_EURO_INTRODUCTION                                      :{BIGFONT}{BLACK}Europäische Währungsunion!{}{}Der Euro wird einzige Währung für alltägliche Zahlungsvorgänge
 STR_NEWS_BEGIN_OF_RECESSION                                     :{BLACK}{BIGFONT}Weltwirtschaftskrise!{}{}Finanzexperten befürchten schlimmsten Zusammenbruch der Wirtschaft!
 STR_NEWS_END_OF_RECESSION                                       :{BLACK}{BIGFONT}Wirtschaftskrise beendet!{}{}Aufschwung des Handels gibt Vertrauen in die Industrie und stärkt die Wirtschaft!
 
@@ -815,7 +815,7 @@ STR_NEWS_VEHICLE_IS_GETTING_OLD                                 :{WHITE}{VEHICLE
 STR_NEWS_VEHICLE_IS_GETTING_VERY_OLD                            :{WHITE}{VEHICLE} wird sehr alt
 STR_NEWS_VEHICLE_IS_GETTING_VERY_OLD_AND                        :{WHITE}{VEHICLE} wird sehr alt und sollte dringend ersetzt werden
 STR_NEWS_TRAIN_IS_STUCK                                         :{WHITE}{VEHICLE} findet keinen Weg zum Vorankommen
-STR_NEWS_VEHICLE_IS_LOST                                        :{WHITE}{VEHICLE} hat sich verirrt.
+STR_NEWS_VEHICLE_IS_LOST                                        :{WHITE}{VEHICLE} hat sich verirrt
 STR_NEWS_VEHICLE_IS_UNPROFITABLE                                :{WHITE}Der Ertrag von {VEHICLE} lag im letzten Jahr bei {CURRENCY}
 
 STR_NEWS_ORDER_REFIT_FAILED                                     :{WHITE}Umrüstungsauftag fehlgeschlagen bei {VEHICLE}
@@ -1076,8 +1076,8 @@ STR_CITY_APPROVAL_PERMISSIVE                                    :Hoch
 STR_CITY_APPROVAL_TOLERANT                                      :Mäßig
 STR_CITY_APPROVAL_HOSTILE                                       :Gering
 
-STR_WARNING_NO_SUITABLE_AI                                      :{WHITE}Keine KI gefunden...{}Verschiedene KI sind via 'Erweiterungen herunterladen' verfügbar.
-STR_WARNING_DIFFICULTY_TO_CUSTOM                                :{WHITE}Hierdurch wurde der Schwierigkeitsgrad auf "benutzerdefiniert" gestellt.
+STR_WARNING_NO_SUITABLE_AI                                      :{WHITE}Keine KI gefunden...{}Verschiedene KI sind via 'Erweiterungen herunterladen' verfügbar
+STR_WARNING_DIFFICULTY_TO_CUSTOM                                :{WHITE}Hierdurch wurde der Schwierigkeitsgrad auf "benutzerdefiniert" gestellt
 
 # Advanced settings window
 STR_CONFIG_SETTING_CAPTION                                      :{WHITE}Erweiterte Einstellungen
@@ -1146,6 +1146,7 @@ STR_CONFIG_SETTING_DYNAMIC_ENGINES_EXISTING_VEHICLES            :{WHITE}Diese Ei
 
 STR_CONFIG_SETTING_NEVER_EXPIRE_AIRPORTS                        :{LTBLUE}Flughäfen veralten nie: {ORANGE}{STRING}
 
+STR_CONFIG_SETTING_WARN_LOST_VEHICLE                            :{LTBLUE}Warnen, wenn Fahrzeug sich verirrt hat: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ORDER_REVIEW                                 :{LTBLUE}Fahrpläne prüfen: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ORDER_REVIEW_OFF                             :Nein
 STR_CONFIG_SETTING_ORDER_REVIEW_EXDEPOT                         :Ja, außer gestoppte Fahrzeuge
@@ -1421,7 +1422,7 @@ STR_ABANDON_SCENARIO_QUERY                                      :{YELLOW}Soll da
 
 # Cheat window
 STR_CHEATS                                                      :{WHITE}Cheats
-STR_CHEATS_TOOLTIP                                              :{BLACK}Die Kontrollkästchen zeigen an, ob dieser Cheat schonmal verwendet worden ist.
+STR_CHEATS_TOOLTIP                                              :{BLACK}Die Kontrollkästchen zeigen an, ob dieser Cheat schonmal verwendet worden ist
 STR_CHEATS_WARNING                                              :{BLACK}Achtung! Hiermit betrügt man seine Mitspieler. Man sollte bedenken, dass sie das niemals verzeihen werden
 STR_CHEAT_MONEY                                                 :{LTBLUE}Kontostand um {CURRENCY} erhöhen
 STR_CHEAT_CHANGE_COMPANY                                        :{LTBLUE}Spiele die Firma: {ORANGE}{COMMA}
@@ -1445,9 +1446,9 @@ STR_LIVERY_TRAIN_TOOLTIP                                        :{BLACK}Zugfarbs
 STR_LIVERY_ROAD_VEHICLE_TOOLTIP                                 :{BLACK}Fahrzeugfarbschema anzeigen
 STR_LIVERY_SHIP_TOOLTIP                                         :{BLACK}Schiffsfarbschema anzeigen
 STR_LIVERY_AIRCRAFT_TOOLTIP                                     :{BLACK}Flugzeugfarbschema anzeigen
-STR_LIVERY_PRIMARY_TOOLTIP                                      :{BLACK}Wähle die Hauptfarbe für das gewählte Schema aus.
-STR_LIVERY_SECONDARY_TOOLTIP                                    :{BLACK}Wähle die Nebenfarbe für das ausgewählte Schema.
-STR_LIVERY_PANEL_TOOLTIP                                        :{BLACK}Wähle ein Farbschema oder mehrere Farbschemata mittels Strg+Klick aus, um diese zu ändern. Klicke in das Kästchen, um ein Schema zu aktivieren.
+STR_LIVERY_PRIMARY_TOOLTIP                                      :{BLACK}Wähle die Hauptfarbe für das gewählte Schema aus
+STR_LIVERY_SECONDARY_TOOLTIP                                    :{BLACK}Wähle die Nebenfarbe für das ausgewählte Schema
+STR_LIVERY_PANEL_TOOLTIP                                        :{BLACK}Wähle ein Farbschema oder mehrere Farbschemata mittels Strg+Klick aus, um diese zu ändern. Klicke in das Kästchen, um ein Schema zu aktivieren
 
 STR_LIVERY_DEFAULT                                              :Standardlackierung
 STR_LIVERY_STEAM                                                :Dampflok
@@ -1490,7 +1491,7 @@ STR_FACE_SIMPLE                                                 :{BLACK}Einfach
 STR_FACE_SIMPLE_TOOLTIP                                         :{BLACK}Einfache Wahl des Gesichts
 STR_FACE_LOAD                                                   :{BLACK}Laden
 STR_FACE_LOAD_TOOLTIP                                           :{BLACK}Lade bevorzugtes Gesicht
-STR_FACE_LOAD_DONE                                              :{WHITE}Das bevorzugte Gesicht wurde aus der OpenTTD-Konfigurationsdatei geladen.
+STR_FACE_LOAD_DONE                                              :{WHITE}Das bevorzugte Gesicht wurde aus der OpenTTD-Konfigurationsdatei geladen
 STR_FACE_FACECODE                                               :{BLACK}Gesichtsnummer
 STR_FACE_FACECODE_TOOLTIP                                       :{BLACK}Nummer des Gesichts anschauen / setzen
 STR_FACE_FACECODE_CAPTION                                       :{WHITE}Nummer des Gesichts anschauen / setzen
@@ -1498,7 +1499,7 @@ STR_FACE_FACECODE_SET                                           :{WHITE}Neue Num
 STR_FACE_FACECODE_ERR                                           :{WHITE}Konnte keine Nummer für das Gesicht setzen, sie muss zwischen 0 und 4.294.967.295 liegen!
 STR_FACE_SAVE                                                   :{BLACK}Speichern
 STR_FACE_SAVE_TOOLTIP                                           :{BLACK}Speichere bevorzugtes Gesicht
-STR_FACE_SAVE_DONE                                              :{WHITE}Dieses Gesicht wird als bevorzugtes Gesicht in der OpenTTD-Konfigurationsdatei gespeichert.
+STR_FACE_SAVE_DONE                                              :{WHITE}Dieses Gesicht wird als bevorzugtes Gesicht in der OpenTTD-Konfigurationsdatei gespeichert
 STR_FACE_EUROPEAN                                               :{BLACK}Europäisch
 STR_FACE_SELECT_EUROPEAN                                        :{BLACK}Auswahl europäischer Gesichter
 STR_FACE_AFRICAN                                                :{BLACK}Afrikanisch
@@ -1592,7 +1593,7 @@ STR_NETWORK_START_SERVER_CAPTION                                :{WHITE}Neues Me
 STR_NETWORK_START_SERVER_NEW_GAME_NAME                          :{BLACK}Spielname:
 STR_NETWORK_START_SERVER_NEW_GAME_NAME_TOOLTIP                  :{BLACK}Der Name des Spieles wird anderen Spielern im Mehrspielerdialog angezeigt
 STR_NETWORK_START_SERVER_SET_PASSWORD                           :{BLACK}Passwort setzen
-STR_NETWORK_START_SERVER_PASSWORD_TOOLTIP                       :{BLACK}Ein Passwort verhindert, dass unbefugte Leute beitreten.
+STR_NETWORK_START_SERVER_PASSWORD_TOOLTIP                       :{BLACK}Ein Passwort verhindert, dass unbefugte Leute beitreten
 STR_NETWORK_START_SERVER_SELECT_MAP                             :{BLACK}Spielfeld auswählen:
 STR_NETWORK_START_SERVER_SELECT_MAP_TOOLTIP                     :{BLACK}Welches Spielfeld soll verwendet werden?
 STR_NETWORK_START_SERVER_SERVER_RANDOM_GAME                     :Spiel nach Zufallsprinzip erstellen
@@ -1601,7 +1602,7 @@ STR_NETWORK_START_SERVER_LAN_INTERNET                           :LAN / Internet
 STR_NETWORK_START_SERVER_INTERNET_ADVERTISE                     :Internet (ankündigen)
 STR_NETWORK_START_SERVER_CLIENTS_SELECT                         :{BLACK}{NUM} Teilnehmer
 STR_NETWORK_START_SERVER_NUMBER_OF_CLIENTS                      :{BLACK}Max. Teilnehmeranzahl:
-STR_NETWORK_START_SERVER_NUMBER_OF_CLIENTS_TOOLTIP              :{BLACK}Auswahl der maximal erlaubten Anzahl von Teilnehmern. Nicht alle Slots müssen belegt werden.
+STR_NETWORK_START_SERVER_NUMBER_OF_CLIENTS_TOOLTIP              :{BLACK}Auswahl der maximal erlaubten Anzahl von Teilnehmern. Nicht alle Slots müssen belegt werden
 STR_NETWORK_START_SERVER_COMPANIES_SELECT                       :{BLACK}{NUM} Firm{P a en}
 STR_NETWORK_START_SERVER_NUMBER_OF_COMPANIES                    :{BLACK}Max. Firmenanzahl:
 STR_NETWORK_START_SERVER_NUMBER_OF_COMPANIES_TOOLTIP            :{BLACK}Begrenzt den Server auf eine gewisse Anzahl an Firmen
@@ -1609,7 +1610,7 @@ STR_NETWORK_START_SERVER_SPECTATORS_SELECT                      :{BLACK}{NUM} Zu
 STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS                   :{BLACK}Max. Zuschaueranzahl:
 STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS_TOOLTIP           :{BLACK}Begrenzt den Server auf eine gewisse Anzahl an Zuschauern
 STR_NETWORK_START_SERVER_LANGUAGE_SPOKEN                        :{BLACK}Gesprochene Sprache:
-STR_NETWORK_START_SERVER_LANGUAGE_TOOLTIP                       :{BLACK}Damit andere Spieler wissen, welche Sprache auf diesem Server gesprochen wird.
+STR_NETWORK_START_SERVER_LANGUAGE_TOOLTIP                       :{BLACK}Damit andere Spieler wissen, welche Sprache auf diesem Server gesprochen wird
 
 STR_NETWORK_START_SERVER_START_GAME                             :{BLACK}Spiel beginnen
 STR_NETWORK_START_SERVER_START_GAME_TOOLTIP                     :{BLACK}Startet ein neues Mehrspielerspiel auf einem zufällig generierten Spielfeld oder dem ausgewählten Szenario
@@ -1662,7 +1663,7 @@ STR_NETWORK_LANG_LATVIAN                                        :Lettisch
 STR_NETWORK_GAME_LOBBY_CAPTION                                  :{WHITE}Mehrspielerlobby
 
 STR_NETWORK_GAME_LOBBY_PREPARE_TO_JOIN                          :{BLACK}Spieleintritt vorbereiten: {ORANGE}{STRING}
-STR_NETWORK_GAME_LOBBY_COMPANY_LIST_TOOLTIP                     :{BLACK}Eine Liste aller Firmen, die sich im Spiel befinden. Man kann einer Firma beitreten oder eine eigene Firma gründen, sofern ein Platz frei ist.
+STR_NETWORK_GAME_LOBBY_COMPANY_LIST_TOOLTIP                     :{BLACK}Eine Liste aller Firmen, die sich im Spiel befinden. Man kann einer Firma beitreten oder eine eigene Firma gründen, sofern ein Platz frei ist
 
 STR_NETWORK_GAME_LOBBY_COMPANY_INFO                             :{SILVER}Firmenprofil
 STR_NETWORK_GAME_LOBBY_COMPANY_NAME                             :{SILVER}Firmenname: {WHITE}{STRING}
@@ -1756,7 +1757,7 @@ STR_NETWORK_CHAT_OSKTITLE                                       :{BLACK}Chattext
 STR_NETWORK_ERROR_NOTAVAILABLE                                  :{WHITE}Keine Netzwerkschnittstellen gefunden oder ohne ENABLE_NETWORK kompiliert
 STR_NETWORK_ERROR_NOSERVER                                      :{WHITE}Keine Netzwerkspiele gefunden
 STR_NETWORK_ERROR_NOCONNECTION                                  :{WHITE}Der Server antwortet nicht
-STR_NETWORK_ERROR_NEWGRF_MISMATCH                               :{WHITE}Verbindung konnte nicht hergestellt werden, da die NewGRF-Versionen nicht übereinstimmen.
+STR_NETWORK_ERROR_NEWGRF_MISMATCH                               :{WHITE}Verbindung konnte nicht hergestellt werden, da die NewGRF-Versionen nicht übereinstimmen
 STR_NETWORK_ERROR_DESYNC                                        :{WHITE}Synchronisation des Netzwerkspiels fehlgeschlagen
 STR_NETWORK_ERROR_LOSTCONNECTION                                :{WHITE}Verbindung zum Netzwerkspiel verloren
 STR_NETWORK_ERROR_SAVEGAMEERROR                                 :{WHITE}Spielstand konnte nicht vom Server geladen werden
@@ -1775,7 +1776,7 @@ STR_NETWORK_ERROR_TOO_MANY_COMMANDS                             :{WHITE}Es wurde
 ############ Leave those lines in this order!!
 STR_NETWORK_ERROR_CLIENT_GENERAL                                :Allgemeiner Fehler
 STR_NETWORK_ERROR_CLIENT_DESYNC                                 :Synchronisationsfehler
-STR_NETWORK_ERROR_CLIENT_SAVEGAME                               :Spielfeld konnte nicht geladen werden.
+STR_NETWORK_ERROR_CLIENT_SAVEGAME                               :Spielfeld konnte nicht geladen werden
 STR_NETWORK_ERROR_CLIENT_CONNECTION_LOST                        :Verbindung verloren
 STR_NETWORK_ERROR_CLIENT_PROTOCOL_ERROR                         :Protokollfehler
 STR_NETWORK_ERROR_CLIENT_NEWGRF_MISMATCH                        :NewGRF-Versionen stimmen nicht überein
@@ -1914,16 +1915,16 @@ STR_RAIL_TOOLBAR_ELRAIL_CONSTRUCTION_CAPTION                    :Bau elektrifizi
 STR_RAIL_TOOLBAR_MONORAIL_CONSTRUCTION_CAPTION                  :Einschienenbahnbau
 STR_RAIL_TOOLBAR_MAGLEV_CONSTRUCTION_CAPTION                    :Magnetschwebebahnbau
 
-STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TRACK                   :{BLACK}Gleise legen. Strg halten, um zwischen Bauen und Entfernen umzuschalten
-STR_RAIL_TOOLBAR_TOOLTIP_BUILD_AUTORAIL                         :{BLACK}Gleise legen mit automatischer Wahl der Ausrichtung. Strg halten, um zwischen Bauen und Entfernen umzuschalten
-STR_RAIL_TOOLBAR_TOOLTIP_BUILD_TRAIN_DEPOT_FOR_BUILDING         :{BLACK}Zugdepot bauen (zum Kauf und zur Wartung von Zügen)
-STR_RAIL_TOOLBAR_TOOLTIP_CONVERT_RAIL_TO_WAYPOINT               :{BLACK}Wegpunkt (auf vorhandenem Gleis) bauen. Strg+Klick, um Wegpunkte zu verbinden
-STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_STATION                 :{BLACK}Bahnhof bauen. Strg+Klick, um Stationen zu verbinden
-STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_SIGNALS                 :{BLACK}Signale errichten. Strg+Klick wechselt zwischen Formsignal-/Signaltypen{}Klicken und Ziehen, um mehrere Signale entlang einer geraden Strecke zu bauen. Strg halten, um bis zur nächsten Kreuzung zu bauen{}Strg+Klick auf die Schaltfläche zeigt das Signal-Menü
-STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_BRIDGE                  :{BLACK}Eisenbahnbrücke bauen
-STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TUNNEL                  :{BLACK}Eisenbahntunnel bauen
-STR_RAIL_TOOLBAR_TOOLTIP_TOGGLE_BUILD_REMOVE_FOR                :{BLACK}Umschalter für Bau/Abriss mit aktuellem Bauwerkzeug. Strg+Klick um die Gleise von Wegpunkten und Bahnhöfen ebenfalls zu entfernen.
-STR_RAIL_TOOLBAR_TOOLTIP_CONVERT_RAIL                           :{BLACK}Gleistyp in den ausgewählten umwandeln
+STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TRACK                   :{BLACK}Gleise legen. Strg halten, um zwischen Bauen und Entfernen umzuschalten. Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_RAIL_TOOLBAR_TOOLTIP_BUILD_AUTORAIL                         :{BLACK}Gleise legen mit automatischer Wahl der Ausrichtung. Strg halten, um zwischen Bauen und Entfernen umzuschalten. Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_RAIL_TOOLBAR_TOOLTIP_BUILD_TRAIN_DEPOT_FOR_BUILDING         :{BLACK}Zugdepot bauen (zum Kauf und zur Wartung von Zügen). Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_RAIL_TOOLBAR_TOOLTIP_CONVERT_RAIL_TO_WAYPOINT               :{BLACK}Wegpunkt (auf vorhandenem Gleis) bauen. Strg+Klick, um Wegpunkte zu verbinden. Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_STATION                 :{BLACK}Bahnhof bauen. Strg+Klick, um Stationen zu verbinden. Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_SIGNALS                 :{BLACK}Signale errichten. Strg+Klick wechselt zwischen Formsignal-/Signaltypen{}Klicken und Ziehen, um mehrere Signale entlang einer geraden Strecke zu bauen. Strg halten, um bis zur nächsten Kreuzung zu bauen{}Strg+Klick auf die Schaltfläche zeigt das Signal-Menü. Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_BRIDGE                  :{BLACK}Eisenbahnbrücke bauen. Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TUNNEL                  :{BLACK}Eisenbahntunnel bauen. Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_RAIL_TOOLBAR_TOOLTIP_TOGGLE_BUILD_REMOVE_FOR                :{BLACK}Umschalter für Bau/Abriss mit aktuellem Bauwerkzeug. Strg+Klick um die Gleise von Wegpunkten und Bahnhöfen ebenfalls zu entfernen
+STR_RAIL_TOOLBAR_TOOLTIP_CONVERT_RAIL                           :{BLACK}Gleistyp in den ausgewählten umwandeln. Shift schaltet zwischen Bauen und Kostenvoranschlag um
 
 # Rail depot construction window
 STR_BUILD_DEPOT_TRAIN_ORIENTATION_CAPTION                       :{WHITE}Ausrichtung Zugdepot
@@ -1964,7 +1965,7 @@ STR_BUILD_SIGNAL_ELECTRIC_EXIT_TOOLTIP                          :{BLACK}Ausfahrs
 STR_BUILD_SIGNAL_ELECTRIC_COMBO_TOOLTIP                         :{BLACK}Kombinationssignal (Lichtsignal){}Das Kombinationssignal ist gleichzeitig Aus- und Einfahrsignal. Somit werden umfangreiche Signalverschaltungen möglich
 STR_BUILD_SIGNAL_ELECTRIC_PBS_TOOLTIP                           :{BLACK}Pfadsignal (Lichtsignal){}Erlaubt mehreren Zügen gleichzeitig, einen Signalbereich zu befahren, sofern sie separate Gleisabschnitte belegen können. Normale Pfadsignale können von hinten durchfahren werden
 STR_BUILD_SIGNAL_ELECTRIC_PBS_OWAY_TOOLTIP                      :{BLACK}Einseitiges Pfadsignal (Lichtsignal):{}Erlaubt mehreren Zügen, einen Signalbereich zu befahren, sofern sie separate Gleisabschnitte belegen können. Einseitige Pfadsignale können nicht von hinten durchfahren werden
-STR_BUILD_SIGNAL_CONVERT_TOOLTIP                                :{BLACK}Signalumbau{}Wenn ausgewählt, werden bestehende Signale durch Anklicken zum ausgewählten Signaltyp umgebaut. Strg+Klick ändert die bestehende Bauform
+STR_BUILD_SIGNAL_CONVERT_TOOLTIP                                :{BLACK}Signalumbau{}Wenn ausgewählt, werden bestehende Signale durch Anklicken zum ausgewählten Signaltyp umgebaut. Strg+Klick ändert die bestehende Bauform. Shift+Klick zeigt Kostenvoranschlag
 STR_BUILD_SIGNAL_DRAG_SIGNALS_DENSITY_TOOLTIP                   :{BLACK}Signalabstand beim automatischen Bau durch Ziehen
 STR_BUILD_SIGNAL_DRAG_SIGNALS_DENSITY_DECREASE_TOOLTIP          :{BLACK}Signalabstand verringern
 STR_BUILD_SIGNAL_DRAG_SIGNALS_DENSITY_INCREASE_TOOLTIP          :{BLACK}Signalabstand erhöhen
@@ -1987,21 +1988,21 @@ STR_BRIDGE_TUBULAR_SILICON                                      :Siliziumrundbr�
 # Road construction toolbar
 STR_ROAD_TOOLBAR_ROAD_CONSTRUCTION_CAPTION                      :{WHITE}Straßenbau
 STR_ROAD_TOOLBAR_TRAM_CONSTRUCTION_CAPTION                      :{WHITE}Straßenbahnbau
-STR_ROAD_TOOLBAR_TOOLTIP_BUILD_ROAD_SECTION                     :{BLACK}Straße bauen. Strg halten, um zwischen Bauen und Entfernen umzuschalten
-STR_ROAD_TOOLBAR_TOOLTIP_BUILD_TRAMWAY_SECTION                  :{BLACK}Straßenbahngleis bauen. Strg halten, um zwischen Bauen und Entfernen umzuschalten
-STR_ROAD_TOOLBAR_TOOLTIP_BUILD_AUTOROAD                         :{BLACK}Straße mit automatischer Wahl der Ausrichtung bauen. Strg halten, um zwischen Bauen und Entfernen umzuschalten
-STR_ROAD_TOOLBAR_TOOLTIP_BUILD_AUTOTRAM                         :{BLACK}Straßenbahngleis mit automatischer Wahl der Ausrichtung bauen. Strg halten, um zwischen Bauen und Entfernen umzuschalten
-STR_ROAD_TOOLBAR_TOOLTIP_BUILD_ROAD_VEHICLE_DEPOT               :{BLACK}Fahrzeugdepot bauen (zum Kauf und zur Wartung von Fahrzeugen benötigt)
-STR_ROAD_TOOLBAR_TOOLTIP_BUILD_TRAM_VEHICLE_DEPOT               :{BLACK}Straßenbahndepot bauen (zum Kauf und zur Wartung von Straßenbahnen benötigt)
-STR_ROAD_TOOLBAR_TOOLTIP_BUILD_BUS_STATION                      :{BLACK}Busbahnhof bauen. Strg+Klick, um Stationen zu verbinden
-STR_ROAD_TOOLBAR_TOOLTIP_BUILD_PASSENGER_TRAM_STATION           :{BLACK}Straßenbahnhaltestelle bauen. Strg+Klick, um Stationen zu verbinden
-STR_ROAD_TOOLBAR_TOOLTIP_BUILD_TRUCK_LOADING_BAY                :{BLACK}Lkw-Ladeplatz bauen. Strg+Klick, um Stationen zu verbinden
-STR_ROAD_TOOLBAR_TOOLTIP_BUILD_CARGO_TRAM_STATION               :{BLACK}Güterstraßenbahnhaltestelle bauen. Strg+Klick, um Stationen zu verbinden
+STR_ROAD_TOOLBAR_TOOLTIP_BUILD_ROAD_SECTION                     :{BLACK}Straße bauen. Strg halten, um zwischen Bauen und Entfernen umzuschalten. Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_ROAD_TOOLBAR_TOOLTIP_BUILD_TRAMWAY_SECTION                  :{BLACK}Straßenbahngleis bauen. Strg halten, um zwischen Bauen und Entfernen umzuschalten. Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_ROAD_TOOLBAR_TOOLTIP_BUILD_AUTOROAD                         :{BLACK}Straße mit automatischer Wahl der Ausrichtung bauen. Strg halten, um zwischen Bauen und Entfernen umzuschalten. Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_ROAD_TOOLBAR_TOOLTIP_BUILD_AUTOTRAM                         :{BLACK}Straßenbahngleis mit automatischer Wahl der Ausrichtung bauen. Strg halten, um zwischen Bauen und Entfernen umzuschalten. Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_ROAD_TOOLBAR_TOOLTIP_BUILD_ROAD_VEHICLE_DEPOT               :{BLACK}Fahrzeugdepot bauen (zum Kauf und zur Wartung von Fahrzeugen benötigt). Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_ROAD_TOOLBAR_TOOLTIP_BUILD_TRAM_VEHICLE_DEPOT               :{BLACK}Straßenbahndepot bauen (zum Kauf und zur Wartung von Straßenbahnen benötigt). Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_ROAD_TOOLBAR_TOOLTIP_BUILD_BUS_STATION                      :{BLACK}Busbahnhof bauen. Strg+Klick, um Stationen zu verbinden. Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_ROAD_TOOLBAR_TOOLTIP_BUILD_PASSENGER_TRAM_STATION           :{BLACK}Straßenbahnhaltestelle bauen. Strg+Klick, um Stationen zu verbinden. Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_ROAD_TOOLBAR_TOOLTIP_BUILD_TRUCK_LOADING_BAY                :{BLACK}Lkw-Ladeplatz bauen. Strg+Klick, um Stationen zu verbinden. Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_ROAD_TOOLBAR_TOOLTIP_BUILD_CARGO_TRAM_STATION               :{BLACK}Güterstraßenbahnhaltestelle bauen. Strg+Klick, um Stationen zu verbinden. Shift schaltet zwischen Bauen und Kostenvoranschlag um
 STR_ROAD_TOOLBAR_TOOLTIP_TOGGLE_ONE_WAY_ROAD                    :{BLACK}Aktiviere/Deaktiviere Einbahnstraßenbau
-STR_ROAD_TOOLBAR_TOOLTIP_BUILD_ROAD_BRIDGE                      :{BLACK}Straßenbrücke bauen
-STR_ROAD_TOOLBAR_TOOLTIP_BUILD_TRAMWAY_BRIDGE                   :{BLACK}Straßenbahnbrücke bauen
-STR_ROAD_TOOLBAR_TOOLTIP_BUILD_ROAD_TUNNEL                      :{BLACK}Straßentunnel bauen
-STR_ROAD_TOOLBAR_TOOLTIP_BUILD_TRAMWAY_TUNNEL                   :{BLACK}Straßenbahntunnel bauen
+STR_ROAD_TOOLBAR_TOOLTIP_BUILD_ROAD_BRIDGE                      :{BLACK}Straßenbrücke bauen. Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_ROAD_TOOLBAR_TOOLTIP_BUILD_TRAMWAY_BRIDGE                   :{BLACK}Straßenbahnbrücke bauen. Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_ROAD_TOOLBAR_TOOLTIP_BUILD_ROAD_TUNNEL                      :{BLACK}Straßentunnel bauen. Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_ROAD_TOOLBAR_TOOLTIP_BUILD_TRAMWAY_TUNNEL                   :{BLACK}Straßenbahntunnel bauen. Shift schaltet zwischen Bauen und Kostenvoranschlag um
 STR_ROAD_TOOLBAR_TOOLTIP_TOGGLE_BUILD_REMOVE_FOR_ROAD           :{BLACK}Zwischen Bau/Abriss der Straße umschalten
 STR_ROAD_TOOLBAR_TOOLTIP_TOGGLE_BUILD_REMOVE_FOR_TRAMWAYS       :{BLACK}Zwischen Bau und Abriss von Straßenbahngleisen umschalten
 
@@ -2024,13 +2025,13 @@ STR_STATION_BUILD_CARGO_TRAM_ORIENTATION_TOOLTIP                :{BLACK}Ausricht
 # Waterways toolbar (last two for SE only)
 STR_WATERWAYS_TOOLBAR_CAPTION                                   :{WHITE}Wasserwegebau
 STR_WATERWAYS_TOOLBAR_CAPTION_SE                                :{WHITE}Wasserwege
-STR_WATERWAYS_TOOLBAR_BUILD_CANALS_TOOLTIP                      :{BLACK}Kanäle bauen
-STR_WATERWAYS_TOOLBAR_BUILD_LOCKS_TOOLTIP                       :{BLACK}Schleusen bauen
-STR_WATERWAYS_TOOLBAR_BUILD_DEPOT_TOOLTIP                       :{BLACK}Werft bauen (für den Kauf und die Wartung von Schiffen benötigt)
-STR_WATERWAYS_TOOLBAR_BUILD_DOCK_TOOLTIP                        :{BLACK}Hafen bauen. Strg+Klick, um Stationen zu verbinden
-STR_WATERWAYS_TOOLBAR_BUOY_TOOLTIP                              :{BLACK}Positionsboje, wird als Wegmarkierung benötigt
-STR_WATERWAYS_TOOLBAR_BUILD_AQUEDUCT_TOOLTIP                    :{BLACK}Aquädukt bauen
-STR_WATERWAYS_TOOLBAR_CREATE_LAKE_TOOLTIP                       :{BLACK}Wasser erzeugen.{}Baut einen Kanal. Auf Meereshöhe wird bei gedrückter Strg-Taste ein Wasserfeld erzeugt, welches umliegendes Land flutet.
+STR_WATERWAYS_TOOLBAR_BUILD_CANALS_TOOLTIP                      :{BLACK}Kanäle bauen. Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_WATERWAYS_TOOLBAR_BUILD_LOCKS_TOOLTIP                       :{BLACK}Schleusen bauen. Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_WATERWAYS_TOOLBAR_BUILD_DEPOT_TOOLTIP                       :{BLACK}Werft bauen (für den Kauf und die Wartung von Schiffen benötigt). Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_WATERWAYS_TOOLBAR_BUILD_DOCK_TOOLTIP                        :{BLACK}Hafen bauen. Strg+Klick, um Stationen zu verbinden. Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_WATERWAYS_TOOLBAR_BUOY_TOOLTIP                              :{BLACK}Positionsboje, wird als Wegmarkierung benötigt. Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_WATERWAYS_TOOLBAR_BUILD_AQUEDUCT_TOOLTIP                    :{BLACK}Aquädukt bauen. Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_WATERWAYS_TOOLBAR_CREATE_LAKE_TOOLTIP                       :{BLACK}Wasser erzeugen.{}Baut einen Kanal. Auf Meereshöhe wird bei gedrückter Strg-Taste ein Wasserfeld erzeugt, welches umliegendes Land flutet
 STR_WATERWAYS_TOOLBAR_CREATE_RIVER_TOOLTIP                      :{BLACK}Flüsse platzieren
 
 # Ship depot construction window
@@ -2042,7 +2043,7 @@ STR_STATION_BUILD_DOCK_CAPTION                                  :{WHITE}Hafen
 
 # Airport toolbar
 STR_TOOLBAR_AIRCRAFT_CAPTION                                    :{WHITE}Flughäfen
-STR_TOOLBAR_AIRCRAFT_BUILD_AIRPORT_TOOLTIP                      :{BLACK}Flughafen bauen. Strg+Klick, um Stationen zu verbinden
+STR_TOOLBAR_AIRCRAFT_BUILD_AIRPORT_TOOLTIP                      :{BLACK}Flughafen bauen. Strg+Klick, um Stationen zu verbinden. Shift schaltet zwischen Bauen und Kostenvoranschlag um
 
 # Airport construction window
 STR_STATION_BUILD_AIRPORT_CAPTION                               :{WHITE}Flughafen bauen
@@ -2069,14 +2070,14 @@ STR_STATION_BUILD_NOISE                                         :{BLACK}Lärmbel
 
 # Landscaping toolbar
 STR_LANDSCAPING_TOOLBAR                                         :{WHITE}Landschaftsveränderung
-STR_LANDSCAPING_TOOLTIP_LOWER_A_CORNER_OF_LAND                  :{BLACK}Land absenken
-STR_LANDSCAPING_TOOLTIP_RAISE_A_CORNER_OF_LAND                  :{BLACK}Land anheben
-STR_LANDSCAPING_LEVEL_LAND_TOOLTIP                              :{BLACK}Höhe ausgleichen
-STR_LANDSCAPING_TOOLTIP_PURCHASE_LAND                           :{BLACK}Land für künftige Nutzung kaufen
+STR_LANDSCAPING_TOOLTIP_LOWER_A_CORNER_OF_LAND                  :{BLACK}Land absenken. Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_LANDSCAPING_TOOLTIP_RAISE_A_CORNER_OF_LAND                  :{BLACK}Land anheben. Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_LANDSCAPING_LEVEL_LAND_TOOLTIP                              :{BLACK}Höhe ausgleichen. Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_LANDSCAPING_TOOLTIP_PURCHASE_LAND                           :{BLACK}Land für künftige Nutzung kaufen. Shift schaltet zwischen Bauen und Kostenvoranschlag um
 
 # Object construction window
 STR_OBJECT_BUILD_CAPTION                                        :{WHITE}Objektauswahl
-STR_OBJECT_BUILD_TOOLTIP                                        :{BLACK}Objektauswahl - Auf das gewünschte Objekt klicken, um es zu bauen
+STR_OBJECT_BUILD_TOOLTIP                                        :{BLACK}Objektauswahl - Auf das gewünschte Objekt klicken, um es zu bauen. Shift schaltet zwischen Bauen und Kostenvoranschlag um
 STR_OBJECT_BUILD_CLASS_LABEL                                    :{BLACK}Objektklasse
 STR_OBJECT_BUILD_PREVIEW_TOOLTIP                                :{BLACK}Vorschau des Objekts
 STR_OBJECT_BUILD_SIZE                                           :{BLACK}Größe: {GOLD}{NUM} x {NUM} Felder
@@ -2088,7 +2089,7 @@ STR_OBJECT_CLASS_TRNS                                           :Sendemasten
 STR_PLANT_TREE_CAPTION                                          :{WHITE}Bäume
 STR_PLANT_TREE_TOOLTIP                                          :{BLACK}Wähle die zu pflanzende Baumart
 STR_TREES_RANDOM_TYPE                                           :{BLACK}Zufällige Baumart
-STR_TREES_RANDOM_TYPE_TOOLTIP                                   :{BLACK}Zufällige Baumart pflanzen
+STR_TREES_RANDOM_TYPE_TOOLTIP                                   :{BLACK}Zufällige Baumart pflanzen. Shift schaltet zwischen Bauen und Kostenvoranschlag um
 STR_TREES_RANDOM_TREES_BUTTON                                   :{BLACK}Zufällige Bäume
 STR_TREES_RANDOM_TREES_TOOLTIP                                  :{BLACK}Bäume zufällig über die Landschaft verteilen
 
@@ -2109,7 +2110,7 @@ STR_RESET_LANDSCAPE_CONFIRMATION_TEXT                           :{WHITE}Soll wir
 # Town generation window (SE)
 STR_FOUND_TOWN_CAPTION                                          :{WHITE}Stadt gründen
 STR_FOUND_TOWN_NEW_TOWN_BUTTON                                  :{BLACK}Neue Stadt
-STR_FOUND_TOWN_NEW_TOWN_TOOLTIP                                 :{BLACK}Neue Stadt gründen
+STR_FOUND_TOWN_NEW_TOWN_TOOLTIP                                 :{BLACK}Neue Stadt gründen. Shift+Klick zeigt einen Kostenvoranschlag
 STR_FOUND_TOWN_RANDOM_TOWN_BUTTON                               :{BLACK}Zufällige Stadt
 STR_FOUND_TOWN_RANDOM_TOWN_TOOLTIP                              :{BLACK}Stadt an zufälligem Platz gründen
 STR_FOUND_TOWN_MANY_RANDOM_TOWNS                                :{BLACK}Viele zufällige Städte
@@ -2473,7 +2474,7 @@ STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{1:STRING} Ben�
 STR_NEWGRF_ERROR_AFTER_TRANSLATED_FILE                          :der NewGRF-Datei, die es übersetzen soll,
 STR_NEWGRF_ERROR_TOO_MANY_NEWGRFS_LOADED                        :Zu viele NewGRFs geladen
 STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC                       :Das Laden von {2:STRING} als statisches NewGRF mit {4:STRING} könnte Synchronisationsfehler hervorrufen
-STR_NEWGRF_ERROR_UNEXPECTED_SPRITE                              :Unerwartetes Sprite.
+STR_NEWGRF_ERROR_UNEXPECTED_SPRITE                              :Unerwartetes Sprite
 STR_NEWGRF_ERROR_UNKNOWN_PROPERTY                               :NewGRF Fehler: 'Unknown Action 0 property'
 STR_NEWGRF_ERROR_INVALID_ID                                     :Es wurde versucht, eine ungültige ID zu verwenden
 STR_NEWGRF_ERROR_CORRUPT_SPRITE                                 :{YELLOW}{STRING} enthält kaputte Sprites. Diese werden als Fragezeichen (?) dargestellt
@@ -2489,7 +2490,7 @@ STR_NEWGRF_DUPLICATE_GRFID                                      :{WHITE}Datei ka
 STR_NEWGRF_COMPATIBLE_LOADED                                    :{ORANGE}Passende Datei nicht gefunden (kompatible NewGRF geladen)
 
 STR_NEWGRF_COMPATIBLE_LOAD_WARNING                              :{WHITE}Kompatible NewGRF(s) für fehlende Dateien geladen
-STR_NEWGRF_DISABLED_WARNING                                     :{WHITE}Fehlende NewGRF-Dateien wurden deaktiviert.
+STR_NEWGRF_DISABLED_WARNING                                     :{WHITE}Fehlende NewGRF-Dateien wurden deaktiviert
 STR_NEWGRF_UNPAUSE_WARNING_TITLE                                :{YELLOW}NewGRF-Datei(en) fehlen
 STR_NEWGRF_UNPAUSE_WARNING                                      :{WHITE}Das Beenden der Pause kann OpenTTD zum Absturz bringen. Bitte keine Fehlerberichte bei auftretenden Fehlern senden. {}Pause wirklich beenden?
 
@@ -2701,7 +2702,7 @@ STR_COMPANY_VIEW_BUILD_HQ_TOOLTIP                               :{BLACK}Firmensi
 STR_COMPANY_VIEW_VIEW_HQ_BUTTON                                 :{BLACK}Firmensitz
 STR_COMPANY_VIEW_VIEW_HQ_TOOLTIP                                :{BLACK}Firmensitz anzeigen
 STR_COMPANY_VIEW_RELOCATE_HQ                                    :{BLACK}Verlegen
-STR_COMPANY_VIEW_RELOCATE_COMPANY_HEADQUARTERS                  :{BLACK}Errichte Firmensitz für 1% des Firmenwertes an anderer Stelle neu.
+STR_COMPANY_VIEW_RELOCATE_COMPANY_HEADQUARTERS                  :{BLACK}Errichte Firmensitz für 1% des Firmenwertes an anderer Stelle neu. Shift+Klick zeigt einen Kostenvoranschlag
 
 STR_COMPANY_VIEW_NEW_FACE_BUTTON                                :{BLACK}Neues Gesicht
 STR_COMPANY_VIEW_NEW_FACE_TOOLTIP                               :{BLACK}Neues Portrait für Manager aussuchen
@@ -2714,8 +2715,8 @@ STR_COMPANY_VIEW_PRESIDENT_NAME_TOOLTIP                         :{BLACK}Managern
 
 STR_COMPANY_VIEW_BUY_SHARE_BUTTON                               :{BLACK}25% der Aktien der Firma kaufen
 STR_COMPANY_VIEW_SELL_SHARE_BUTTON                              :{BLACK}25% der Aktien der Firma verkaufen
-STR_COMPANY_VIEW_BUY_SHARE_TOOLTIP                              :{BLACK}25% der Aktien dieser Firma kaufen
-STR_COMPANY_VIEW_SELL_SHARE_TOOLTIP                             :{BLACK}25% der Aktien dieser Firma verkaufen
+STR_COMPANY_VIEW_BUY_SHARE_TOOLTIP                              :{BLACK}25% der Aktien dieser Firma kaufen. Shift+Klick zeigt einen Kostenvoranschlag
+STR_COMPANY_VIEW_SELL_SHARE_TOOLTIP                             :{BLACK}25% der Aktien dieser Firma verkaufen. Shift+Klick zeigt eine Gewinnschätzung
 
 STR_COMPANY_VIEW_COMPANY_NAME_QUERY_CAPTION                     :Firmenname
 STR_COMPANY_VIEW_PRESIDENT_S_NAME_QUERY_CAPTION                 :Name des Managers
@@ -2848,10 +2849,10 @@ STR_BUY_VEHICLE_ROAD_VEHICLE_BUY_VEHICLE_BUTTON                 :{BLACK}Fahrzeug
 STR_BUY_VEHICLE_SHIP_BUY_VEHICLE_BUTTON                         :{BLACK}Schiff kaufen
 STR_BUY_VEHICLE_AIRCRAFT_BUY_VEHICLE_BUTTON                     :{BLACK}Flugzeug kaufen
 
-STR_BUY_VEHICLE_TRAIN_BUY_VEHICLE_TOOLTIP                       :{BLACK}Angewähltes Fahrzeug kaufen
-STR_BUY_VEHICLE_ROAD_VEHICLE_BUY_VEHICLE_TOOLTIP                :{BLACK}Ausgewähltes Fahrzeug kaufen
-STR_BUY_VEHICLE_SHIP_BUY_VEHICLE_TOOLTIP                        :{BLACK}Ausgewähltes Schiff kaufen
-STR_BUY_VEHICLE_AIRCRAFT_BUY_VEHICLE_TOOLTIP                    :{BLACK}Augewähltes Flugzeug kaufen
+STR_BUY_VEHICLE_TRAIN_BUY_VEHICLE_TOOLTIP                       :{BLACK}Angewähltes Fahrzeug kaufen. Shift+Klick zeigt einen Kostenvoranschlag
+STR_BUY_VEHICLE_ROAD_VEHICLE_BUY_VEHICLE_TOOLTIP                :{BLACK}Ausgewähltes Fahrzeug kaufen. Shift+Klick zeigt einen Kostenvoranschlag
+STR_BUY_VEHICLE_SHIP_BUY_VEHICLE_TOOLTIP                        :{BLACK}Ausgewähltes Schiff kaufen. Shift+Klick zeigt einen Kostenvoranschlag
+STR_BUY_VEHICLE_AIRCRAFT_BUY_VEHICLE_TOOLTIP                    :{BLACK}Augewähltes Flugzeug kaufen. Shift schaltet zwischen Bauen und Kostenvoranschlag um
 
 STR_BUY_VEHICLE_TRAIN_RENAME_BUTTON                             :{BLACK}Umbenennen
 STR_BUY_VEHICLE_ROAD_VEHICLE_RENAME_BUTTON                      :{BLACK}Umbenennen
@@ -2916,10 +2917,10 @@ STR_DEPOT_CLONE_ROAD_VEHICLE                                    :{BLACK}Fahrzeug
 STR_DEPOT_CLONE_SHIP                                            :{BLACK}Schiff kopieren
 STR_DEPOT_CLONE_AIRCRAFT                                        :{BLACK}Flugzeug kopieren
 
-STR_DEPOT_CLONE_TRAIN_DEPOT_INFO                                :{BLACK}Kauft eine Kopie des Zuges mit allen Waggons. Klicke diese Schaltfläche und dann auf einen Zug innerhalb oder außerhalb des Depots. Strg+Klick erzeugt gemeinsamen Fahrplan
-STR_DEPOT_CLONE_ROAD_VEHICLE_DEPOT_INFO                         :{BLACK}Kauft eine Kopie des Fahrzeuges. Klicke diese Schaltfläche und dann auf ein Fahrzeug innerhalb oder außerhalb des Depots. Strg+Klick erzeugt gemeinsamen Fahrplan
-STR_DEPOT_CLONE_SHIP_DEPOT_INFO                                 :{BLACK}Kauft eine Kopie des Schiffes. Klicke diese Schaltfläche und dann auf eine Schiff innerhalb oder außerhalb der Werft. Strg+Klick erzeugt gemeinsamen Fahrplan
-STR_DEPOT_CLONE_AIRCRAFT_INFO_HANGAR_WINDOW                     :{BLACK}Kauft eine Kopie des Flugzeuges. Klicke auf diese Schaltfläche und dann auf ein Flugzeug innerhalb oder außerhalb des Hangars. Strg+Klick erzeugt gemeinsamen Fahrplan
+STR_DEPOT_CLONE_TRAIN_DEPOT_INFO                                :{BLACK}Kauft eine Kopie des Zuges mit allen Waggons. Klicke diese Schaltfläche und dann auf einen Zug innerhalb oder außerhalb des Depots. Strg+Klick erzeugt gemeinsamen Fahrplan. Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_DEPOT_CLONE_ROAD_VEHICLE_DEPOT_INFO                         :{BLACK}Kauft eine Kopie des Fahrzeuges. Klicke diese Schaltfläche und dann auf ein Fahrzeug innerhalb oder außerhalb des Depots. Strg+Klick erzeugt gemeinsamen Fahrplan. Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_DEPOT_CLONE_SHIP_DEPOT_INFO                                 :{BLACK}Kauft eine Kopie des Schiffes. Klicke diese Schaltfläche und dann auf eine Schiff innerhalb oder außerhalb der Werft. Strg+Klick erzeugt gemeinsamen Fahrplan. Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_DEPOT_CLONE_AIRCRAFT_INFO_HANGAR_WINDOW                     :{BLACK}Kauft eine Kopie des Flugzeuges. Klicke auf diese Schaltfläche und dann auf ein Flugzeug innerhalb oder außerhalb des Hangars. Strg+Klick erzeugt gemeinsamen Fahrplan. Shift schaltet zwischen Bauen und Kostenvoranschlag um
 
 STR_DEPOT_TRAIN_LOCATION_TOOLTIP                                :{BLACK}Hauptansicht zum Zugdepot scrollen. Strg+Klick öffnet neue Zusatzansicht beim Zugdepot
 STR_DEPOT_ROAD_VEHICLE_LOCATION_TOOLTIP                         :{BLACK}Hauptansicht zum Fahrzeugdepot scrollen. Strg+Klick öffnet neue Zusatzansicht beim Fahrzeugdepot
@@ -2998,15 +2999,15 @@ STR_VEHICLE_VIEW_ROAD_VEHICLE_LOCATION_TOOLTIP                  :{BLACK}Hauptans
 STR_VEHICLE_VIEW_SHIP_LOCATION_TOOLTIP                          :{BLACK}Hauptansicht zum Schiff scrollen. Strg+Klick, um dem Schiff zu folgen
 STR_VEHICLE_VIEW_AIRCRAFT_LOCATION_TOOLTIP                      :{BLACK}Hauptansicht zum Flugzeug scrollen. Strg+Klick, um dem Flugzeug zu folgen
 
-STR_VEHICLE_VIEW_TRAIN_SEND_TO_DEPOT_TOOLTIP                    :{BLACK}Zug ins Depot schicken. Strg+Klick, um dort nur Wartung durchzuführen.
-STR_VEHICLE_VIEW_ROAD_VEHICLE_SEND_TO_DEPOT_TOOLTIP             :{BLACK}Das Fahrzeug ins Depot schicken. Strg+Klick, um dort nur Wartung durchzuführen.
-STR_VEHICLE_VIEW_SHIP_SEND_TO_DEPOT_TOOLTIP                     :{BLACK}Das Schiff zur Werft schicken. Strg+Klick, um dort nur Wartung durchzuführen.
-STR_VEHICLE_VIEW_AIRCRAFT_SEND_TO_DEPOT_TOOLTIP                 :{BLACK}Das Flugzeug in den Hangar schicken. Strg+Klick, um dort nur Wartung durchzuführen.
+STR_VEHICLE_VIEW_TRAIN_SEND_TO_DEPOT_TOOLTIP                    :{BLACK}Zug ins Depot schicken. Strg+Klick, um dort nur Wartung durchzuführen
+STR_VEHICLE_VIEW_ROAD_VEHICLE_SEND_TO_DEPOT_TOOLTIP             :{BLACK}Das Fahrzeug ins Depot schicken. Strg+Klick, um dort nur Wartung durchzuführen
+STR_VEHICLE_VIEW_SHIP_SEND_TO_DEPOT_TOOLTIP                     :{BLACK}Das Schiff zur Werft schicken. Strg+Klick, um dort nur Wartung durchzuführen
+STR_VEHICLE_VIEW_AIRCRAFT_SEND_TO_DEPOT_TOOLTIP                 :{BLACK}Das Flugzeug in den Hangar schicken. Strg+Klick, um dort nur Wartung durchzuführen
 
-STR_VEHICLE_VIEW_CLONE_TRAIN_INFO                               :{BLACK}Kauft eine Kopie des Zuges mit allen Waggons. Strg+Klick erzeugt gemeinsamen Fahrplan
-STR_VEHICLE_VIEW_CLONE_ROAD_VEHICLE_INFO                        :{BLACK}Kauft eine Kopie des Fahrzeuges. Strg+Klick erzeugt gemeinsamen Fahrplan
-STR_VEHICLE_VIEW_CLONE_SHIP_INFO                                :{BLACK}Kauft eine Kopie des Schiffes. Strg+Klick erzeugt gemeinsamen Fahrplan
-STR_VEHICLE_VIEW_CLONE_AIRCRAFT_INFO                            :{BLACK}Kauft eine Kopie des Flugzeuges. Strg+Klick erzeugt gemeinsamen Fahrplan
+STR_VEHICLE_VIEW_CLONE_TRAIN_INFO                               :{BLACK}Kauft eine Kopie des Zuges mit allen Waggons. Strg+Klick erzeugt gemeinsamen Fahrplan. Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_VEHICLE_VIEW_CLONE_ROAD_VEHICLE_INFO                        :{BLACK}Kauft eine Kopie des Fahrzeuges. Strg+Klick erzeugt gemeinsamen Fahrplan. Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_VEHICLE_VIEW_CLONE_SHIP_INFO                                :{BLACK}Kauft eine Kopie des Schiffes. Strg+Klick erzeugt gemeinsamen Fahrplan. Shift schaltet zwischen Bauen und Kostenvoranschlag um
+STR_VEHICLE_VIEW_CLONE_AIRCRAFT_INFO                            :{BLACK}Kauft eine Kopie des Flugzeuges. Strg+Klick erzeugt gemeinsamen Fahrplan. Shift schaltet zwischen Bauen und Kostenvoranschlag um
 
 STR_VEHICLE_VIEW_TRAIN_IGNORE_SIGNAL_TOOLTIP                    :{BLACK}Zug zur Weiterfahrt zwingen, ohne das Signal zu beachten
 
@@ -3294,7 +3295,7 @@ STR_TIMETABLE_TICKS                                             :{COMMA} Tick{P 
 STR_TIMETABLE_TOTAL_TIME                                        :{BLACK}Dieser Fahrplan benötigt {STRING}
 STR_TIMETABLE_TOTAL_TIME_INCOMPLETE                             :{BLACK}Dieser Fahrplan benötigt mindestens {STRING} (nicht alle geplant)
 
-STR_TIMETABLE_STATUS_ON_TIME                                    :{BLACK}Das Fahrzeug ist derzeit pünktlich.
+STR_TIMETABLE_STATUS_ON_TIME                                    :{BLACK}Das Fahrzeug ist derzeit pünktlich
 STR_TIMETABLE_STATUS_LATE                                       :{BLACK}Dieses Fahrzeug hat {STRING} Verspätung
 STR_TIMETABLE_STATUS_EARLY                                      :{BLACK}Dieses Fahrzeug ist {STRING} zu früh
 STR_TIMETABLE_STATUS_NOT_STARTED                                :{BLACK}Dieser Fahrplan ist noch nicht gültig
@@ -3345,7 +3346,7 @@ STR_AI_DEBUG_BREAK_ON_LABEL                                     :{BLACK}Unterbre
 STR_AI_DEBUG_BREAK_STR_OSKTITLE                                 :{BLACK}Unterbrechung an
 STR_AI_DEBUG_BREAK_STR_TOOLTIP                                  :{BLACK}Wenn eine KI Log-Nachricht auf diesen Text paßt, wird das Spiel pausiert
 STR_AI_DEBUG_MATCH_CASE                                         :{BLACK}Groß/Klein beachten
-STR_AI_DEBUG_MATCH_CASE_TOOLTIP                                 :{BLACK}Für den Vergleich der KI Log-Nachrichten mit dem Unterbrechungs-Text den passenden Fall umschalten.
+STR_AI_DEBUG_MATCH_CASE_TOOLTIP                                 :{BLACK}Für den Vergleich der KI Log-Nachrichten mit dem Unterbrechungs-Text den passenden Fall umschalten
 STR_AI_DEBUG_CONTINUE                                           :{BLACK}Fortfahren
 STR_AI_DEBUG_CONTINUE_TOOLTIP                                   :{BLACK}Pause aufheben und die KI weiter ausführen
 STR_AI_DEBUG_SELECT_AI_TOOLTIP                                  :{BLACK}Debug-Ausgaben dieser KI anschauen
@@ -3474,7 +3475,7 @@ STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS                 :{WHITE}Die Stad
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_AIRPORT                       :{WHITE}Die Stadtverwaltung von {TOWN} verweigert die Genehmigung für den Bau eines weiteren Flughafens in der Stadt
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_NOISE                         :{WHITE}Die Stadtverwaltung von {TOWN} verweigert aus Lärmschutzgründen den Bau des Flughafens
 STR_ERROR_BRIBE_FAILED                                          :{WHITE}Der Bestechungsversuch wurde
-STR_ERROR_BRIBE_FAILED_2                                        :{WHITE}von einem regionalen Untersuchungsbeamten aufgedeckt.
+STR_ERROR_BRIBE_FAILED_2                                        :{WHITE}von einem regionalen Untersuchungsbeamten aufgedeckt
 
 # Levelling errors
 STR_ERROR_CAN_T_RAISE_LAND_HERE                                 :{WHITE}Land kann nicht angehoben werden...
@@ -3509,7 +3510,7 @@ STR_ERROR_CAN_T_EXPAND_TOWN                                     :{WHITE}Stadt ka
 STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP_SUB                          :{WHITE}... zu dicht am Spielfeldrand
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_TOWN                             :{WHITE}... zu dicht an einer anderen Stadt
 STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}... zu viele Städte
-STR_ERROR_NO_SPACE_FOR_TOWN                                     :{WHITE}... es ist kein Platz mehr auf dem Spielfeld.
+STR_ERROR_NO_SPACE_FOR_TOWN                                     :{WHITE}... es ist kein Platz mehr auf dem Spielfeld
 STR_ERROR_TOWN_EXPAND_WARN_NO_ROADS                             :{WHITE}Städte bauen im Moment keine Straßen. Städtischer Straßenbau kann mittels Erweiterte Einstellungen->Wirtschaft->Städte eingestellt werden
 STR_ERROR_ROAD_WORKS_IN_PROGRESS                                :{WHITE}Straßenarbeiten sind im Gange
 STR_ERROR_TOWN_CAN_T_DELETE                                     :{WHITE}Stadt kann nicht gelöscht werden...{}Ein Bahnhof oder Depot bezieht sich auf diese Stadt oder ein Feld im städtischen Besitz kann nicht entfernt werden.
@@ -3527,7 +3528,7 @@ STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS_WITH_POPULATION_OF_1200    :{WHITE}... kann
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_RAINFOREST                       :{WHITE}... kann nur in Regenwaldgebieten errichtet werden
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_DESERT                           :{WHITE}... kann nur in Wüstengebieten errichtet werden
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS                            :{WHITE}... kann nur in Städten gebaut werden
-STR_ERROR_CAN_ONLY_BE_BUILT_IN_LOW_AREAS                        :{WHITE}... kann nur im Tiefland gebaut werden.
+STR_ERROR_CAN_ONLY_BE_BUILT_IN_LOW_AREAS                        :{WHITE}... kann nur im Tiefland gebaut werden
 STR_ERROR_CAN_ONLY_BE_POSITIONED                                :{WHITE}... kann nur in der Nähe des Spielfeldrandes errichtet werden
 STR_ERROR_FOREST_CAN_ONLY_BE_PLANTED                            :{WHITE}... Wald kann nur oberhalb der Schneegrenze gepflanzt werden
 
@@ -3604,7 +3605,7 @@ STR_ERROR_AIRCRAFT_MUST_BE_STOPPED_INSIDE_HANGAR                :{WHITE}...das F
 STR_ERROR_TRAINS_CAN_ONLY_BE_ALTERED_INSIDE_A_DEPOT             :{WHITE}Züge können nur verändert werden, wenn sie im Depot halten
 STR_ERROR_TRAIN_TOO_LONG                                        :{WHITE}Zug zu lang
 STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE                  :{WHITE}Fahrzeug kann nicht umgedreht werden...
-STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE_MULTIPLE_UNITS   :{WHITE}Fahrzeuge, die aus mehreren Einheiten bestehen, können nicht umgedreht werden.
+STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE_MULTIPLE_UNITS   :{WHITE}Fahrzeuge, die aus mehreren Einheiten bestehen, können nicht umgedreht werden
 STR_ERROR_INCOMPATIBLE_RAIL_TYPES                               :inkompatible Gleistypen
 
 STR_ERROR_CAN_T_MOVE_VEHICLE                                    :{WHITE}Fahrzeug kann nicht bewegt werden...
@@ -3625,7 +3626,7 @@ STR_ERROR_MUST_REMOVE_SIGNALS_FIRST                             :{WHITE}Signal m
 STR_ERROR_NO_SUITABLE_RAILROAD_TRACK                            :{WHITE}Keine geeigneten Gleise
 STR_ERROR_MUST_REMOVE_RAILROAD_TRACK                            :{WHITE}Gleise müssen erst abgerissen werden
 STR_ERROR_CROSSING_ON_ONEWAY_ROAD                               :{WHITE}Einbahnstraße oder blockierter Weg
-STR_ERROR_CROSSING_DISALLOWED                                   :{WHITE}Bahnübergänge sind für diesen Schienentyp nicht erlaubt.
+STR_ERROR_CROSSING_DISALLOWED                                   :{WHITE}Bahnübergänge sind für diesen Schienentyp nicht erlaubt
 STR_ERROR_CAN_T_BUILD_SIGNALS_HERE                              :{WHITE}Signal kann hier nicht aufgestellt werden...
 STR_ERROR_CAN_T_BUILD_RAILROAD_TRACK                            :{WHITE}Gleise können hier nicht verlegt werden...
 STR_ERROR_CAN_T_REMOVE_RAILROAD_TRACK                           :{WHITE}Gleise können nicht abgerissen werden...
@@ -3749,7 +3750,7 @@ STR_ERROR_VEHICLE_IS_DESTROYED                                  :{WHITE}... Fahr
 # Specific vehicle errors
 STR_ERROR_CAN_T_MAKE_TRAIN_PASS_SIGNAL                          :{WHITE}Der Zug kann das Signal nicht ohne Gefahr passieren...
 STR_ERROR_CAN_T_REVERSE_DIRECTION_TRAIN                         :{WHITE}Die Zugbewegung kann nicht umgekehrt werden...
-STR_ERROR_TRAIN_START_NO_CATENARY                               :Wegen fehlender Oberleitung kann der Zug nicht starten.
+STR_ERROR_TRAIN_START_NO_CATENARY                               :Wegen fehlender Oberleitung kann der Zug nicht starten
 
 STR_ERROR_CAN_T_MAKE_ROAD_VEHICLE_TURN                          :{WHITE}Das Fahrzeug kann nicht wenden...
 
