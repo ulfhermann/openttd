@@ -99,6 +99,12 @@ void Order::MakeConditional(VehicleOrderID order)
 	this->dest = 0;
 }
 
+void Order::MakeAutomatic(StationID destination)
+{
+	this->type = OT_AUTOMATIC;
+	this->dest = destination;
+}
+
 void Order::SetRefit(CargoID cargo, byte subtype)
 {
 	this->refit_cargo = cargo;
@@ -264,13 +270,13 @@ StationID OrderList::GetNextStoppingStation(const Order *next, StationID curr_st
 		return INVALID_STATION;
 	}
 
-	if (next->GetType() == OT_CONDITIONAL) {
+	if (next->IsType(OT_CONDITIONAL)) {
 		StationID skip_to = this->GetNextStoppingStation(this->GetOrderAt(next->GetConditionSkipToOrder()), curr_station, hops + 1);
 		StationID advance = this->GetNextStoppingStation(this->GetNext(next), curr_station, hops + 1);
 		return (skip_to == advance) ? skip_to : INVALID_STATION;
 	}
 
-	if (next->GetType() != OT_GOTO_STATION ||
+	if (!(next->IsType(OT_GOTO_STATION) || next->IsType(OT_AUTOMATIC)) ||
 			(next->GetNonStopType() & ONSF_NO_STOP_AT_DESTINATION_STATION) != 0 ||
 			next->GetDestination() == curr_station) {
 		return GetNextStoppingStation(this->GetNext(next), curr_station, hops + 1);
@@ -297,7 +303,8 @@ StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_order, StationID
 	 * we're at, we have to check the current order; otherwise we have to check
 	 * the next one.
 	 */
-	if (curr_station == INVALID_STATION || curr->GetType() != OT_GOTO_STATION ||
+	if (curr_station == INVALID_STATION || 
+			!(curr->IsType(OT_GOTO_STATION) || curr->IsType(OT_AUTOMATIC)) ||
 			curr_station != curr->GetDestination()) {
 		return this->GetNextStoppingStation(curr, curr_station, 0);
 	} else {
@@ -717,55 +724,65 @@ CommandCost CmdInsertOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 	if (flags & DC_EXEC) {
 		Order *new_o = new Order();
 		new_o->AssignOrder(new_order);
-
-		/* Create new order and link in list */
-		if (v->orders.list == NULL) {
-			v->orders.list = new OrderList(new_o, v);
-		} else {
-			v->orders.list->InsertOrderAt(new_o, sel_ord);
-		}
-
-		Vehicle *u = v->FirstShared();
-		DeleteOrderWarnings(u);
-		for (; u != NULL; u = u->NextShared()) {
-			assert(v->orders.list == u->orders.list);
-
-			/* If there is added an order before the current one, we need
-			to update the selected order */
-			if (sel_ord <= u->cur_order_index) {
-				uint cur = u->cur_order_index + 1;
-				/* Check if we don't go out of bound */
-				if (cur < u->GetNumOrders()) {
-					u->cur_order_index = cur;
-				}
-			}
-			/* Update any possible open window of the vehicle */
-			InvalidateVehicleOrder(u, INVALID_VEH_ORDER_ID | (sel_ord << 8));
-
-			RecalcFrozenIfLoading(u);
-		}
-
-		/* As we insert an order, the order to skip to will be 'wrong'. */
-		VehicleOrderID cur_order_id = 0;
-		Order *order;
-		FOR_VEHICLE_ORDERS(v, order) {
-			if (order->IsType(OT_CONDITIONAL)) {
-				VehicleOrderID order_id = order->GetConditionSkipToOrder();
-				if (order_id >= sel_ord) {
-					order->SetConditionSkipToOrder(order_id + 1);
-				}
-				if (order_id == cur_order_id) {
-					order->SetConditionSkipToOrder((order_id + 1) % v->GetNumOrders());
-				}
-			}
-			cur_order_id++;
-		}
-
-		/* Make sure to rebuild the whole list */
-		InvalidateWindowClassesData(GetWindowClassForVehicleType(v->type), 0);
+		InsertOrder(v, new_o, sel_ord);
 	}
 
 	return CommandCost();
+}
+
+/**
+ * Insert a new order but skip the validation.
+ * @param v the vehicle to insert the order to
+ * @param new_o the new order
+ * @param sel_ord the position the order should be inserted at
+ */
+void InsertOrder(Vehicle *v, Order *new_o, VehicleOrderID sel_ord)
+{
+	/* Create new order and link in list */
+	if (v->orders.list == NULL) {
+		v->orders.list = new OrderList(new_o, v);
+	} else {
+		v->orders.list->InsertOrderAt(new_o, sel_ord);
+	}
+
+	Vehicle *u = v->FirstShared();
+	DeleteOrderWarnings(u);
+	for (; u != NULL; u = u->NextShared()) {
+		assert(v->orders.list == u->orders.list);
+
+		/* If there is added an order before the current one, we need
+		to update the selected order */
+		if (sel_ord <= u->cur_order_index) {
+			uint cur = u->cur_order_index + 1;
+			/* Check if we don't go out of bound */
+			if (cur < u->GetNumOrders()) {
+				u->cur_order_index = cur;
+			}
+		}
+		/* Update any possible open window of the vehicle */
+		InvalidateVehicleOrder(u, INVALID_VEH_ORDER_ID | (sel_ord << 8));
+		
+		RecalcFrozenIfLoading(u);
+	}
+
+	/* As we insert an order, the order to skip to will be 'wrong'. */
+	VehicleOrderID cur_order_id = 0;
+	Order *order;
+	FOR_VEHICLE_ORDERS(v, order) {
+		if (order->IsType(OT_CONDITIONAL)) {
+			VehicleOrderID order_id = order->GetConditionSkipToOrder();
+			if (order_id >= sel_ord) {
+				order->SetConditionSkipToOrder(order_id + 1);
+			}
+			if (order_id == cur_order_id) {
+				order->SetConditionSkipToOrder((order_id + 1) % v->GetNumOrders());
+			}
+		}
+		cur_order_id++;
+	}
+
+	/* Make sure to rebuild the whole list */
+	InvalidateWindowClassesData(GetWindowClassForVehicleType(v->type), 0);
 }
 
 /**
@@ -814,50 +831,58 @@ CommandCost CmdDeleteOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 	order = v->GetOrder(sel_ord);
 	if (order == NULL) return CMD_ERROR;
 
-	if (flags & DC_EXEC) {
-		v->orders.list->DeleteOrderAt(sel_ord);
+	if (flags & DC_EXEC) DeleteOrder(v, sel_ord);
+	return CommandCost();
+}
 
-		Vehicle *u = v->FirstShared();
-		DeleteOrderWarnings(u);
-		for (; u != NULL; u = u->NextShared()) {
-			if (sel_ord < u->cur_order_index) u->cur_order_index--;
+/**
+ * Delete an order but skip the parameter validation
+ * @param v the vehicle to delete the order from
+ * @param sel_ord the id of the order to be deleted
+ */
+void DeleteOrder(Vehicle *v, VehicleOrderID sel_ord)
+{
+	v->orders.list->DeleteOrderAt(sel_ord);
 
-			assert(v->orders.list == u->orders.list);
+	Vehicle *u = v->FirstShared();
+	DeleteOrderWarnings(u);
+	for (; u != NULL; u = u->NextShared()) {
+		if (sel_ord < u->cur_order_index) u->cur_order_index--;
 
-			/* NON-stop flag is misused to see if a train is in a station that is
-			 * on his order list or not */
-			if (sel_ord == u->cur_order_index && u->current_order.IsType(OT_LOADING)) {
-				u->current_order.SetNonStopType(ONSF_STOP_EVERYWHERE);
-				/* When full loading, "cancel" that order so the vehicle doesn't
-				 * stay indefinitely at this station anymore. */
-				if (u->current_order.GetLoadType() & OLFB_FULL_LOAD) u->current_order.SetLoadType(OLF_LOAD_IF_POSSIBLE);
-			}
+		assert(v->orders.list == u->orders.list);
 
-			/* Update any possible open window of the vehicle */
-			InvalidateVehicleOrder(u, sel_ord | (INVALID_VEH_ORDER_ID << 8));
-
-			RecalcFrozenIfLoading(u);
+		/* NON-stop flag is misused to see if a train is in a station that is
+		 * on his order list or not */
+		if (sel_ord == u->cur_order_index && u->current_order.IsType(OT_LOADING)) {
+			u->current_order.SetNonStopType(ONSF_STOP_EVERYWHERE);
+			/* When full loading, "cancel" that order so the vehicle doesn't
+			 * stay indefinitely at this station anymore. */
+			if (u->current_order.GetLoadType() & OLFB_FULL_LOAD) u->current_order.SetLoadType(OLF_LOAD_IF_POSSIBLE);
 		}
 
-		/* As we delete an order, the order to skip to will be 'wrong'. */
-		VehicleOrderID cur_order_id = 0;
-		FOR_VEHICLE_ORDERS(v, order) {
-			if (order->IsType(OT_CONDITIONAL)) {
-				VehicleOrderID order_id = order->GetConditionSkipToOrder();
-				if (order_id >= sel_ord) {
-					order->SetConditionSkipToOrder(max(order_id - 1, 0));
-				}
-				if (order_id == cur_order_id) {
-					order->SetConditionSkipToOrder((order_id + 1) % v->GetNumOrders());
-				}
-			}
-			cur_order_id++;
-		}
+		/* Update any possible open window of the vehicle */
+		InvalidateVehicleOrder(u, sel_ord | (INVALID_VEH_ORDER_ID << 8));
 
-		InvalidateWindowClassesData(GetWindowClassForVehicleType(v->type), 0);
+		RecalcFrozenIfLoading(u);
 	}
 
-	return CommandCost();
+	/* As we delete an order, the order to skip to will be 'wrong'. */
+	VehicleOrderID cur_order_id = 0;
+	Order *order = NULL;
+	FOR_VEHICLE_ORDERS(v, order) {
+		if (order->IsType(OT_CONDITIONAL)) {
+			VehicleOrderID order_id = order->GetConditionSkipToOrder();
+			if (order_id >= sel_ord) {
+				order->SetConditionSkipToOrder(max(order_id - 1, 0));
+			}
+			if (order_id == cur_order_id) {
+				order->SetConditionSkipToOrder((order_id + 1) % v->GetNumOrders());
+			}
+		}
+		cur_order_id++;
+	}
+
+	InvalidateWindowClassesData(GetWindowClassForVehicleType(v->type), 0);
 }
 
 /**
@@ -1708,7 +1733,15 @@ bool UpdateOrderDest(Vehicle *v, const Order *order, int conditional_depth)
 	assert(v->cur_order_index < v->GetNumOrders());
 
 	/* Get the current order */
-	order = v->GetOrder(v->cur_order_index);
+	order = v->GetNextManualOrder(v->cur_order_index);
+	if (order == NULL) {
+		order = v->GetNextManualOrder(0);
+		if (order == NULL) {
+			v->current_order.Free();
+			v->dest_tile = 0;
+			return false;
+		}
+	}
 	v->current_order = *order;
 	return UpdateOrderDest(v, order, conditional_depth + 1);
 }
@@ -1763,7 +1796,7 @@ bool ProcessOrders(Vehicle *v)
 	/* Get the current order */
 	if (v->cur_order_index >= v->GetNumOrders()) v->cur_order_index = 0;
 
-	const Order *order = v->GetOrder(v->cur_order_index);
+	const Order *order = v->GetNextManualOrder(v->cur_order_index);
 
 	/* If no order, do nothing. */
 	if (order == NULL || (v->type == VEH_AIRCRAFT && !CheckForValidOrders(v))) {
