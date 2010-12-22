@@ -1737,16 +1737,13 @@ uint GetVehicleCapacity(const Vehicle *v, uint16 *mail_capacity)
 	return capacity;
 }
 
-/**
- * Start loading the vehicle and set last_station_visited in the process.
- * @param curr_station_id ID of the station the vehicle has arrived at
- */
-void Vehicle::BeginLoading(StationID curr_station_id)
+
+void Vehicle::BeginLoading()
 {
 	assert(IsTileType(tile, MP_STATION) || type == VEH_SHIP);
 
 	if (this->current_order.IsType(OT_GOTO_STATION) &&
-			this->current_order.GetDestination() == curr_station_id) {
+			this->current_order.GetDestination() == this->last_station_visited) {
 		current_order.MakeLoading(true);
 		UpdateVehicleTimetable(this, true);
 
@@ -1767,36 +1764,35 @@ void Vehicle::BeginLoading(StationID curr_station_id)
 		Order *in_list = this->GetOrder(this->cur_order_index);
 		if ((in_list == NULL && this->cur_order_index == 0) || 
 				(in_list != NULL && (!in_list->IsType(OT_AUTOMATIC) || 
-				in_list->GetDestination() != curr_station_id))) {
+				in_list->GetDestination() != this->last_station_visited))) {
 			Order *auto_order = new Order();
-			auto_order->MakeAutomatic(curr_station_id);
+			auto_order->MakeAutomatic(this->last_station_visited);
 			InsertOrder(this, auto_order, this->cur_order_index);
 			if (this->cur_order_index > 0) --this->cur_order_index;
 		}
 		current_order.MakeLoading(false);
 	}
 
-	Station *curr_station = Station::Get(curr_station_id);
+	Station *curr_station = Station::Get(this->last_station_visited);
 	curr_station->loading_vehicles.push_back(this);
 
 	StationID next_station_id = INVALID_STATION;
 	OrderList *orders = this->orders.list;
 	if (orders != NULL) {
-		next_station_id = orders->GetNextStoppingStation(this->cur_order_index, curr_station_id);
+		next_station_id = orders->GetNextStoppingStation(this->cur_order_index, this->last_station_visited);
 	}
 
-	if (this->last_loading_station != INVALID_STATION && this->last_loading_station != curr_station_id) {
-		IncreaseStats(Station::Get(this->last_loading_station), this, curr_station_id, false);
+	if (this->last_loading_station != INVALID_STATION && this->last_loading_station != this->last_station_visited) {
+		IncreaseStats(Station::Get(this->last_loading_station), this, this->last_station_visited, false);
 	}
 
-	this->last_station_visited = curr_station_id;
 	if (this->CanLeaveWithCargo() && next_station_id != INVALID_STATION) {
-		assert(next_station_id != curr_station_id);
+		assert(next_station_id != this->last_station_visited);
 		/* freeze stats for the next link */
 		IncreaseStats(curr_station, this, next_station_id, true);
 	}
 
-	PrepareUnload(this); // refers to this->last_station_visited for the distance
+	PrepareUnload(this);
 
 	SetWindowDirty(GetWindowClassForVehicleType(this->type), this->owner);
 	SetWindowWidgetDirty(WC_VEHICLE_VIEW, this->index, VVW_WIDGET_START_STOP_VEH);
