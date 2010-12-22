@@ -240,7 +240,7 @@ public:
 	/** We want to 'destruct' the right class. */
 	virtual ~Vehicle();
 
-	void BeginLoading(StationID curr_station_id);
+	void BeginLoading();
 	void CancelReservation(StationID next, Station *st);
 	void LeaveStation();
 
@@ -665,6 +665,8 @@ public:
 	{
 		return (this->orders.list == NULL) ? NULL : this->orders.list->GetOrderAt(index);
 	}
+
+	Order *GetNextManualOrder(int index) const;
 
 	/**
 	 * Returns the last order of a vehicle, or NULL if it doesn't exists
