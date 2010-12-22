@@ -3311,6 +3311,7 @@ STR_TIMETABLE_ORDER_VIEW_TOOLTIP                                :{BLACK}Switch t
 STR_TIMETABLE_TOOLTIP                                           :{BLACK}Timetable - click on an order to highlight it
 
 STR_TIMETABLE_NO_TRAVEL                                         :No travel
+STR_TIMETABLE_NOT_TIMETABLEABLE                                 :Travel (timetabled by next manual order)
 STR_TIMETABLE_TRAVEL_NOT_TIMETABLED                             :Travel (not timetabled)
 STR_TIMETABLE_TRAVEL_FOR                                        :Travel for {STRING1}
 STR_TIMETABLE_STAY_FOR                                          :and stay for {STRING1}
