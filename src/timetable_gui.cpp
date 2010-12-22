@@ -90,7 +90,7 @@ static void SetArrivalDepartParams(int param1, int param2, Ticks ticks)
 static bool CanDetermineTimeTaken(const Order *order, bool travelling)
 {
 	/* Current order is conditional */
-	if (order->IsType(OT_CONDITIONAL)) return false;
+	if (order->IsType(OT_CONDITIONAL) || order->IsType(OT_AUTOMATIC)) return false;
 	/* No travel time and we have not already finished travelling */
 	if (travelling && order->travel_time == 0) return false;
 	/* No wait time but we are loading at this timetabled station */
@@ -317,7 +317,7 @@ struct TimetableWindow : Window {
 			if (selected != -1) {
 				const Order *order = v->GetOrder(((selected + 1) / 2) % v->GetNumOrders());
 				if (selected % 2 == 1) {
-					disable = order != NULL && order->IsType(OT_CONDITIONAL);
+					disable = order != NULL && (order->IsType(OT_CONDITIONAL) || order->IsType(OT_AUTOMATIC));
 				} else {
 					disable = order == NULL || ((!order->IsType(OT_GOTO_STATION) || (order->GetNonStopType() & ONSF_NO_STOP_AT_DESTINATION_STATION)) && !order->IsType(OT_CONDITIONAL));
 				}
@@ -387,9 +387,12 @@ struct TimetableWindow : Window {
 						}
 					} else {
 						StringID string;
-
+						TextColour colour = (i == selected) ? TC_WHITE : TC_BLACK;
 						if (order->IsType(OT_CONDITIONAL)) {
 							string = STR_TIMETABLE_NO_TRAVEL;
+						} else if(order->IsType(OT_AUTOMATIC)) {
+							string = STR_TIMETABLE_NOT_TIMETABLEABLE;
+							colour = (i == selected) ? TC_SILVER : TC_GREY;
 						} else if (order->travel_time == 0) {
 							string = STR_TIMETABLE_TRAVEL_NOT_TIMETABLED;
 						} else {
@@ -397,7 +400,7 @@ struct TimetableWindow : Window {
 							string = STR_TIMETABLE_TRAVEL_FOR;
 						}
 
-						DrawString(rtl ? r.left + WD_FRAMERECT_LEFT : middle, rtl ? middle : r.right - WD_FRAMERECT_LEFT, y, string, (i == selected) ? TC_WHITE : TC_BLACK);
+						DrawString(rtl ? r.left + WD_FRAMERECT_LEFT : middle, rtl ? middle : r.right - WD_FRAMERECT_LEFT, y, string, colour);
 
 						if (final_order) break;
 					}
