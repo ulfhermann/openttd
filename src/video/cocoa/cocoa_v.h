@@ -42,9 +42,41 @@ public:
 };
 
 
-
+/**
+ * Generic display driver for cocoa
+ * On grounds to not duplicate some code, it contains a few variables
+ * which are not used by all device drivers.
+ */
 class CocoaSubdriver {
 public:
+	int device_width;
+	int device_height;
+	int device_depth;
+
+	int window_width;
+	int window_height;
+	int window_pitch;
+
+	int buffer_depth;
+	void *pixel_buffer;   // used for direct pixel access
+	void *window_buffer;  // has colour translation from palette to screen
+	id window;            // pointer to window object
+
+#	define MAX_DIRTY_RECTS 100
+	Rect dirty_rects[MAX_DIRTY_RECTS];
+	int num_dirty_rects;
+	uint32 palette[256];
+
+	bool active;
+	bool setup;
+
+	id cocoaview;         // pointer to view object
+
+	/* Separate driver vars for Quarz
+	 * Needed here in order to avoid much code duplication */
+	CGContextRef cgcontext;
+
+	/* Driver methods */
 	virtual ~CocoaSubdriver() {}
 
 	virtual void Draw(bool force_update = false) = 0;
@@ -67,6 +99,9 @@ public:
 	virtual bool MouseIsInsideView(NSPoint *pt) = 0;
 
 	virtual bool IsActive() = 0;
+
+	virtual void SetPortAlphaOpaque() { return; };
+	virtual bool WindowResized() { return false; };
 };
 
 extern CocoaSubdriver *_cocoa_subdriver;
@@ -87,9 +122,57 @@ void QZ_GameSizeChanged();
 
 void QZ_GameLoop();
 
-void QZ_ShowMouse();
-void QZ_HideMouse();
-
 uint QZ_ListModes(OTTD_Point *modes, uint max_modes, CGDirectDisplayID display_id, int display_depth);
+
+/** Category of NSCursor to allow cursor showing/hiding */
+@interface NSCursor (OTTD_QuickdrawCursor)
++ (NSCursor *) clearCocoaCursor;
+@end
+
+/** Subclass of NSWindow to cater our special needs */
+@interface OTTD_CocoaWindow : NSWindow {
+	CocoaSubdriver *driver;
+}
+
+- (void)setDriver:(CocoaSubdriver*)drv;
+
+- (void)miniaturize:(id)sender;
+- (void)display;
+- (void)setFrame:(NSRect)frameRect display:(BOOL)flag;
+- (void)appDidHide:(NSNotification*)note;
+- (void)appWillUnhide:(NSNotification*)note;
+- (void)appDidUnhide:(NSNotification*)note;
+- (id)initWithContentRect:(NSRect)contentRect styleMask:(NSUInteger)styleMask backing:(NSBackingStoreType)backingType defer:(BOOL)flag;
+@end
+
+/** Subclass of NSView to fix Quartz rendering and mouse awareness */
+@interface OTTD_CocoaView : NSView {
+	CocoaSubdriver *driver;
+	NSTrackingRectTag trackingtag;
+}
+- (void)setDriver:(CocoaSubdriver*)drv;
+- (void)drawRect:(NSRect)rect;
+- (BOOL)isOpaque;
+- (BOOL)acceptsFirstResponder;
+- (BOOL)becomeFirstResponder;
+- (void)setTrackingRect;
+- (void)clearTrackingRect;
+- (void)resetCursorRects;
+- (void)viewWillMoveToWindow:(NSWindow *)win;
+- (void)viewDidMoveToWindow;
+- (void)mouseEntered:(NSEvent *)theEvent;
+- (void)mouseExited:(NSEvent *)theEvent;
+@end
+
+/** Delegate for our NSWindow to send ask for quit on close */
+@interface OTTD_CocoaWindowDelegate : NSObject {
+	CocoaSubdriver *driver;
+}
+
+- (void)setDriver:(CocoaSubdriver*)drv;
+
+- (BOOL)windowShouldClose:(id)sender;
+@end
+
 
 #endif /* VIDEO_COCOA_H */

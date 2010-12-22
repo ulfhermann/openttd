@@ -240,7 +240,7 @@ public:
 	/** We want to 'destruct' the right class. */
 	virtual ~Vehicle();
 
-	void BeginLoading(StationID curr_station_id);
+	void BeginLoading();
 	void LeaveStation();
 
 	GroundVehicleCache *GetGroundVehicleCache();
