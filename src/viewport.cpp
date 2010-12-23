@@ -1882,7 +1882,7 @@ static void PlaceObject()
 	pt = GetTileBelowCursor();
 	if (pt.x == -1) return;
 
-	if (_thd.place_mode == HT_POINT) {
+	if ((_thd.place_mode & HT_DRAG_MASK) == HT_POINT) {
 		pt.x += 8;
 		pt.y += 8;
 	}
@@ -2026,6 +2026,15 @@ static HighLightStyle GetAutorailHT(int x, int y)
 }
 
 /**
+ * Is the user dragging a 'diagonal rectangle'?
+ * @return User is dragging a rotated rectangle.
+ */
+bool TileHighlightData::IsDraggingDiagonal()
+{
+	return (this->place_mode & HT_DIAGONAL) != 0 && _ctrl_pressed && _left_button_down;
+}
+
+/**
  * Updates tile highlighting for all cases.
  * Uses _thd.selstart and _thd.selend and _thd.place_mode (set elsewhere) to determine _thd.pos and _thd.size
  * Also drawstyle is determined. Uses _thd.new.* as a buffer and calls SetSelectionTilesDirty() twice,
@@ -2040,7 +2049,7 @@ void UpdateTileSelection()
 	HighLightStyle new_drawstyle = HT_NONE;
 	bool new_diagonal = false;
 
-	if (_thd.place_mode == HT_SPECIAL) {
+	if ((_thd.place_mode & HT_DRAG_MASK) == HT_SPECIAL) {
 		x1 = _thd.selend.x;
 		y1 = _thd.selend.y;
 		if (x1 != -1) {
@@ -2049,7 +2058,7 @@ void UpdateTileSelection()
 			x1 &= ~TILE_UNIT_MASK;
 			y1 &= ~TILE_UNIT_MASK;
 
-			if (IsDraggingDiagonal()) {
+			if (_thd.IsDraggingDiagonal()) {
 				new_diagonal = true;
 			} else {
 				if (x1 >= x2) Swap(x1, x2);
@@ -2167,15 +2176,16 @@ void VpStartPlaceSizing(TileIndex tile, ViewportPlaceMethod method, ViewportDrag
 		_thd.selstart.y += TILE_SIZE / 2;
 	}
 
-	if (_thd.place_mode == HT_RECT) {
-		_thd.place_mode = HT_SPECIAL;
-		_thd.next_drawstyle = HT_RECT;
+	HighLightStyle others = _thd.place_mode & ~HT_DRAG_MASK;
+	if ((_thd.place_mode & HT_DRAG_MASK) == HT_RECT) {
+		_thd.place_mode = HT_SPECIAL | others;
+		_thd.next_drawstyle = HT_RECT | others;
 	} else if (_thd.place_mode & (HT_RAIL | HT_LINE)) {
-		_thd.place_mode = HT_SPECIAL;
-		_thd.next_drawstyle = _thd.drawstyle;
+		_thd.place_mode = HT_SPECIAL | others;
+		_thd.next_drawstyle = _thd.drawstyle | others;
 	} else {
-		_thd.place_mode = HT_SPECIAL;
-		_thd.next_drawstyle = HT_POINT;
+		_thd.place_mode = HT_SPECIAL | others;
+		_thd.next_drawstyle = HT_POINT | others;
 	}
 	_special_mouse_mode = WSM_SIZING;
 }
@@ -2635,7 +2645,7 @@ void VpSelectTilesWithMethod(int x, int y, ViewportPlaceMethod method)
 	}
 
 	/* Needed so level-land is placed correctly */
-	if (_thd.next_drawstyle == HT_POINT) {
+	if ((_thd.next_drawstyle & HT_DRAG_MASK) == HT_POINT) {
 		x += TILE_SIZE / 2;
 		y += TILE_SIZE / 2;
 	}
@@ -2723,7 +2733,7 @@ calc_heightdiff_single_direction:;
 				/* If dragging an area (eg dynamite tool) and it is actually a single
 				 * row/column, change the type to 'line' to get proper calculation for height */
 				style = (HighLightStyle)_thd.next_drawstyle;
-				if (IsDraggingDiagonal()) {
+				if (_thd.IsDraggingDiagonal()) {
 					/* Determine the "area" of the diagonal dragged selection.
 					 * We assume the area is the number of tiles along the X
 					 * edge and the number of tiles along the Y edge. However,
@@ -2803,14 +2813,15 @@ EventState VpHandlePlaceSizingDrag()
 	/* mouse button released..
 	 * keep the selected tool, but reset it to the original mode. */
 	_special_mouse_mode = WSM_NONE;
-	if (_thd.next_drawstyle == HT_RECT) {
-		_thd.place_mode = HT_RECT;
+	HighLightStyle others = _thd.next_drawstyle & ~HT_DRAG_MASK;
+	if ((_thd.next_drawstyle & HT_DRAG_MASK) == HT_RECT) {
+		_thd.place_mode = HT_RECT | others;
 	} else if (_thd.select_method & VPM_SIGNALDIRS) {
-		_thd.place_mode = HT_RECT;
+		_thd.place_mode = HT_RECT | others;
 	} else if (_thd.select_method & VPM_RAILDIRS) {
-		_thd.place_mode = (_thd.select_method & ~VPM_RAILDIRS) ? _thd.next_drawstyle : HT_RAIL;
+		_thd.place_mode = (_thd.select_method & ~VPM_RAILDIRS) ? _thd.next_drawstyle : (HT_RAIL | others);
 	} else {
-		_thd.place_mode = HT_POINT;
+		_thd.place_mode = HT_POINT | others;
 	}
 	SetTileSelectSize(1, 1);
 
