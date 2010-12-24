@@ -49,7 +49,6 @@
 
 #include "table/strings.h"
 
-PlaceProc *_place_proc;
 Point _tile_fract_coords;
 
 struct StringSpriteToDraw {
@@ -898,7 +897,7 @@ static bool IsPartOfAutoLine(int px, int py)
 	px -= _thd.selstart.x;
 	py -= _thd.selstart.y;
 
-	if ((_thd.drawstyle & ~HT_DIR_MASK) != HT_LINE) return false;
+	if ((_thd.drawstyle & HT_DRAG_MASK) != HT_LINE) return false;
 
 	switch (_thd.drawstyle & HT_DIR_MASK) {
 		case HT_DIR_X:  return py == 0; // x direction
@@ -970,8 +969,8 @@ static void DrawTileSelection(const TileInfo *ti)
 	bool is_redsq = _thd.redsq == ti->tile;
 	if (is_redsq) DrawTileSelectionRect(ti, PALETTE_TILE_RED_PULSATING);
 
-	/* no selection active? */
-	if (_thd.drawstyle == 0) return;
+	/* No tile selection active? */
+	if ((_thd.drawstyle & HT_DRAG_MASK) == HT_NONE) return;
 
 	if (_thd.diagonal) { // We're drawing a 45 degrees rotated (diagonal) rectangle
 		if (IsInsideRotatedRectangle((int)ti->x, (int)ti->y)) {
@@ -1903,7 +1902,8 @@ bool HandleViewportClicked(const ViewPort *vp, int x, int y)
 		if (v != NULL && VehicleClicked(v)) return true;
 	}
 
-	if (_thd.place_mode & HT_DRAG_MASK) {
+	/* Vehicle placement mode already handled above. */
+	if ((_thd.place_mode & HT_DRAG_MASK) != HT_NONE) {
 		PlaceObject();
 		return true;
 	}
@@ -2128,8 +2128,8 @@ void UpdateTileSelection()
 			_thd.outersize.x != _thd.new_outersize.x ||
 			_thd.outersize.y != _thd.new_outersize.y ||
 			_thd.diagonal    != new_diagonal) {
-		/* clear the old selection? */
-		if (_thd.drawstyle) SetSelectionTilesDirty();
+		/* Clear the old tile selection? */
+		if ((_thd.drawstyle & HT_DRAG_MASK) != HT_NONE) SetSelectionTilesDirty();
 
 		_thd.drawstyle = new_drawstyle;
 		_thd.pos = _thd.new_pos;
@@ -2138,8 +2138,8 @@ void UpdateTileSelection()
 		_thd.diagonal = new_diagonal;
 		_thd.dirty = 0xff;
 
-		/* draw the new selection? */
-		if (new_drawstyle != HT_NONE) SetSelectionTilesDirty();
+		/* Draw the new tile selection? */
+		if ((new_drawstyle & HT_DRAG_MASK) != HT_NONE) SetSelectionTilesDirty();
 	}
 }
 
@@ -2176,7 +2176,7 @@ void VpStartPlaceSizing(TileIndex tile, ViewportPlaceMethod method, ViewportDrag
 		_thd.selstart.y += TILE_SIZE / 2;
 	}
 
-	HighLightStyle others = _thd.place_mode & ~HT_DRAG_MASK;
+	HighLightStyle others = _thd.place_mode & ~(HT_DRAG_MASK | HT_DIR_MASK);
 	if ((_thd.place_mode & HT_DRAG_MASK) == HT_RECT) {
 		_thd.place_mode = HT_SPECIAL | others;
 		_thd.next_drawstyle = HT_RECT | others;
@@ -2813,7 +2813,7 @@ EventState VpHandlePlaceSizingDrag()
 	/* mouse button released..
 	 * keep the selected tool, but reset it to the original mode. */
 	_special_mouse_mode = WSM_NONE;
-	HighLightStyle others = _thd.next_drawstyle & ~HT_DRAG_MASK;
+	HighLightStyle others = _thd.place_mode & ~(HT_DRAG_MASK | HT_DIR_MASK);
 	if ((_thd.next_drawstyle & HT_DRAG_MASK) == HT_RECT) {
 		_thd.place_mode = HT_RECT | others;
 	} else if (_thd.select_method & VPM_SIGNALDIRS) {
@@ -2840,7 +2840,7 @@ void SetObjectToPlaceWnd(CursorID icon, PaletteID pal, HighLightStyle mode, Wind
 void SetObjectToPlace(CursorID icon, PaletteID pal, HighLightStyle mode, WindowClass window_class, WindowNumber window_num)
 {
 	/* undo clicking on button and drag & drop */
-	if (_thd.place_mode != HT_NONE || _special_mouse_mode == WSM_DRAGDROP) {
+	if ((_thd.place_mode & ~HT_DIR_MASK) != HT_NONE || _special_mouse_mode == WSM_DRAGDROP) {
 		Window *w = FindWindowById(_thd.window_class, _thd.window_number);
 		if (w != NULL) {
 			/* Call the abort function, but set the window class to something
