@@ -156,16 +156,14 @@ void OnTick_LinkGraph()
 	if (_date_fract == LinkGraph::COMPONENTS_SPAWN_TICK ||
 			_date_fract == LinkGraph::COMPONENTS_JOIN_TICK) {
 
-		LinkGraphSettings &settings = _settings_game.linkgraph;
-
 		/* This creates a fair distribution of all link graphs' turns over
 		 * the available dates.
 		 */
-		uint interval = settings.recalc_interval;
-		for (uint cargo = _date % interval; cargo < NUM_CARGO; cargo += interval) {
+		for (uint cargo = _date % _settings_game.linkgraph.recalc_interval; cargo < NUM_CARGO;
+				cargo += _settings_game.linkgraph.recalc_interval) {
 
 			/* don't calculate a link graph if the distribution is manual */
-			if (settings.GetDistributionType(cargo) == DT_MANUAL) continue;
+			if (_settings_game.linkgraph.GetDistributionType(cargo) == DT_MANUAL) continue;
 
 			if (_date_fract == LinkGraph::COMPONENTS_SPAWN_TICK) {
 				_link_graphs[cargo].NextComponent();
