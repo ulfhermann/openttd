@@ -407,6 +407,8 @@ int OrderList::GetPositionInSharedOrderList(const Vehicle *v) const
 bool OrderList::IsCompleteTimetable() const
 {
 	for (Order *o = this->first; o != NULL; o = o->next) {
+		/* Automatic orders are, by definition, not timetabled. */
+		if (o->IsType(OT_AUTOMATIC)) continue;
 		if (!o->IsCompletelyTimetabled()) return false;
 	}
 	return true;
@@ -1520,9 +1522,20 @@ void RemoveOrderFromAllVehicles(OrderType type, DestinationID destination)
 		int id = -1;
 		FOR_VEHICLE_ORDERS(v, order) {
 			id++;
-			if (order->IsType(OT_GOTO_DEPOT) && (order->GetDepotActionType() & ODATFB_NEAREST_DEPOT) != 0) continue;
-			if ((v->type == VEH_AIRCRAFT && order->IsType(OT_GOTO_DEPOT) ? OT_GOTO_STATION : order->GetType()) == type &&
-					order->GetDestination() == destination) {
+
+			OrderType ot = order->GetType();
+			if (ot == OT_GOTO_DEPOT && (order->GetDepotActionType() & ODATFB_NEAREST_DEPOT) != 0) continue;
+			if (ot == OT_AUTOMATIC || (v->type == VEH_AIRCRAFT && ot == OT_GOTO_DEPOT)) ot = OT_GOTO_STATION;
+			if (ot == type && order->GetDestination() == destination) {
+				/* We want to clear automatic orders, but we don't want to make them
+				 * dummy orders. They should just vanish. Also check the actual order
+				 * type as ot is currently OT_GOTO_STATION. */
+				if (order->IsType(OT_AUTOMATIC)) {
+					DeleteOrder(v, id);
+					id--;
+					continue;
+				}
+
 				order->MakeDummy();
 				for (const Vehicle *w = v->FirstShared(); w != NULL; w = w->NextShared()) {
 					/* In GUI, simulate by removing the order and adding it back */
