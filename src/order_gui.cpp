@@ -202,7 +202,7 @@ void DrawOrderString(const Vehicle *v, const Order *order, int order_index, int 
 
 	TextColour colour = TC_BLACK;
 	if (order->IsType(OT_AUTOMATIC)) {
-		colour =  selected ? TC_SILVER : TC_GREY;
+		colour = selected ? TC_SILVER : TC_GREY;
 	} else if (selected) {
 		colour = TC_WHITE;
 	}
@@ -222,7 +222,7 @@ void DrawOrderString(const Vehicle *v, const Order *order, int order_index, int 
 			SetDParam(0, STR_ORDER_GO_TO_STATION);
 			SetDParam(1, STR_ORDER_GO_TO);
 			SetDParam(2, order->GetDestination());
-			SetDParam(3, STR_EMPTY);
+			SetDParam(3, timetable ? STR_EMPTY : STR_ORDER_AUTOMATIC);
 			break;
 
 		case OT_GOTO_STATION: {

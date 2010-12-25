@@ -126,15 +126,20 @@ static void FillTimetableArrivalDepartureTable(const Vehicle *v, VehicleOrderID 
 	/* Cyclically loop over all orders until we reach the current one again.
 	 * As we may start at the current order, do a post-checking loop */
 	do {
-		if (travelling || i != start) {
-			if (!CanDetermineTimeTaken(order, true)) return;
-			sum += order->travel_time;
-			table[i].arrival = sum;
-		}
+		/* Automatic orders don't influence the overall timetable;
+		 * they just add some untimetabled entries, but the time till
+		 * the next non-automatic order can still be known. */
+		if (!order->IsType(OT_AUTOMATIC)) {
+			if (travelling || i != start) {
+				if (!CanDetermineTimeTaken(order, true)) return;
+				sum += order->travel_time;
+				table[i].arrival = sum;
+			}
 
-		if (!CanDetermineTimeTaken(order, false)) return;
-		sum += order->wait_time;
-		table[i].departure = sum;
+			if (!CanDetermineTimeTaken(order, false)) return;
+			sum += order->wait_time;
+			table[i].departure = sum;
+		}
 
 		++i;
 		order = order->next;
