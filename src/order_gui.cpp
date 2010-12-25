@@ -202,7 +202,7 @@ void DrawOrderString(const Vehicle *v, const Order *order, int order_index, int 
 
 	TextColour colour = TC_BLACK;
 	if (order->IsType(OT_AUTOMATIC)) {
-		colour = selected ? TC_SILVER : TC_GREY;
+		colour = (selected ? TC_SILVER : TC_GREY) | TC_NO_SHADE;
 	} else if (selected) {
 		colour = TC_WHITE;
 	}
