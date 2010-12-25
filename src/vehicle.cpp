@@ -1894,11 +1894,8 @@ void Vehicle::HandleLoading(bool mode)
 
 			this->PlayLeaveStationSound();
 
-			bool at_destination_station = this->current_order.GetNonStopType() != ONSF_STOP_EVERYWHERE;
 			this->LeaveStation();
 
-			/* If this was not the final order, don't remove it from the list. */
-			if (!at_destination_station) break;
 			break;
 		}
 
