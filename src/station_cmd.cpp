@@ -3046,7 +3046,7 @@ static void UpdateStationRating(Station *st)
 			bool skip = false;
 			int rating = 0;
 			uint waiting = ge->cargo.Count();
-			uint num_dests = ge->cargo.Packets()->MapSize();
+			uint num_dests = (uint)ge->cargo.Packets()->MapSize();
 
 			/* average amount of cargo per next hop, but prefer solitary stations
 			 * with only one or two next hops. They are allowed to have more
