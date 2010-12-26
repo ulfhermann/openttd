@@ -1761,10 +1761,12 @@ void Vehicle::BeginLoading()
 		this->current_order.SetNonStopType(ONSF_NO_STOP_AT_ANY_STATION);
 
 	} else {
+		/* We weren't scheduled to stop here. Insert an automatic order
+		 * to show that we are stopping here. */
 		Order *in_list = this->GetOrder(this->cur_order_index);
 		if (this->orders.list->GetNumOrders() < MAX_VEH_ORDER_ID &&
 				((in_list == NULL && this->cur_order_index == 0) ||
-				(in_list != NULL && (!in_list->IsType(OT_AUTOMATIC) || 
+				(in_list != NULL && (!in_list->IsType(OT_AUTOMATIC) ||
 				in_list->GetDestination() != this->last_station_visited)))) {
 			Order *auto_order = new Order();
 			auto_order->MakeAutomatic(this->last_station_visited);
@@ -2209,8 +2211,8 @@ void Vehicle::RemoveFromShared()
 
 /**
  * Get the next manual (not OT_AUTOMATIC) order after the one at the given index.
- * @param index the index to start searching at
- * @return the next manual order at or after index or NULL if there is none.
+ * @param index The index to start searching at.
+ * @return The next manual order at or after index or NULL if there is none.
  */
 Order *Vehicle::GetNextManualOrder(int index) const
 {
