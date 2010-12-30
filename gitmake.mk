@@ -6,9 +6,11 @@ gitmake-all: cd
 	touch gitmake-all
 	git checkout patches
 	mv patches/current/* current/
+	mv patches/incremental/* incremental/
 	mv patches/*.diff .
 	git add *.diff
-	git add current/*
+	git add current
+	git add incremental
 	git commit --allow-empty -m "patches for version `cat current/TRUNK_VERSION.txt`"
 	git checkout gitmake
 
@@ -18,7 +20,8 @@ check: clean gitmake-origin
 clean:
 	rm -f gitmake-origin
 	rm -rf patches
-	mkdir -p patches/current
+	mkdir -p patches/current/incremental
+	mkdir -p patches/incremental
 
 %:
 	git checkout ${@}-tmp
