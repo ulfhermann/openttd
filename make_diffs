@@ -1,4 +1,6 @@
 #!/bin/sh
 BRANCH=`git status | grep "On branch" | awk '{print $4}'`
 git diff gitmake > patches/${BRANCH}_`cat gitmake-origin`.diff
+git diff ${BRANCH}-tmp ${BRANCH} > patches/incremental/${BRANCH}_`cat gitmake-origin`.diff
 cp patches/${BRANCH}_`cat gitmake-origin`.diff patches/current/${BRANCH}.diff
+cp patches/incremental/${BRANCH}_`cat gitmake-origin`.diff patches/current/incremental/${BRANCH}.diff
