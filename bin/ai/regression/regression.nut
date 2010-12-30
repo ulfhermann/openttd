@@ -1028,6 +1028,7 @@ function Regression::RailTypeList()
 	print("  ListDump:");
 	for (local i = list.Begin(); !list.IsEnd(); i = list.Next()) {
 		print("    RailType:                " + i);
+		print("    GetName():               " + AIRail.GetName(i));
 		print("    IsRailTypeAvailable():   " + AIRail.IsRailTypeAvailable(i));
 		print("    GetMaxSpeed():           " + AIRail.GetMaxSpeed(i));
 	}
@@ -1477,6 +1478,7 @@ function Regression::Town()
 		print("    GetLocation():   " + AITown.GetLocation(i));
 		print("    GetHouseCount(): " + AITown.GetHouseCount(i));
 		print("    GetRating():     " + AITown.GetRating(i, AICompany.COMPANY_SELF));
+		print("    IsCity():        " + AITown.IsCity(i));
 	}
 	print("  Valid Towns:       " + j);
 	print("  GetTownCount():    " + AITown.GetTownCount());
