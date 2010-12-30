@@ -1019,7 +1019,8 @@ class SmallMapWindow : public Window {
 	/**
 	 * recalculate which vehicles are visible and their positions.
 	 */
-	void RecalcVehiclePositions() {
+	void RecalcVehiclePositions()
+	{
 		this->vehicles_on_map.clear();
 		const Vehicle *v;
 		const NWidgetCore *wi = this->GetWidget<NWidgetCore>(SM_WIDGET_MAP);
