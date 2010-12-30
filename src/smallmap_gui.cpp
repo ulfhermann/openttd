@@ -60,7 +60,6 @@ enum SmallMapWindowWidgets {
 	SM_WIDGET_SHOW_HEIGHT,       ///< Show heightmap toggle button.
 };
 
-
 static int _smallmap_industry_count; ///< Number of used industries
 
 static int _smallmap_cargo_count; ///< number of cargos in the link stats legend
@@ -157,7 +156,6 @@ static const LegendAndColour _legend_land_owners[] = {
 	MK(0x20, STR_SMALLMAP_LEGENDA_INDUSTRIES),
 	MKEND()
 };
-
 #undef MK
 #undef MC
 #undef MS
@@ -499,7 +497,6 @@ static inline uint32 GetSmallMapLinkStatsPixels(TileIndex tile, TileType t)
 	return _smallmap_show_heightmap ? GetSmallMapContoursPixels(tile, t) : GetSmallMapRoutesPixels(tile, t);
 }
 
-
 static const uint32 _vegetation_clear_bits[] = {
 	MKCOLOUR(0x54545454), ///< full grass
 	MKCOLOUR(0x52525252), ///< rough land
@@ -564,7 +561,6 @@ static inline uint32 GetSmallMapOwnerPixels(TileIndex tile, TileType t)
 
 	return _owner_colours[o];
 }
-
 
 /** Vehicle colours in #SMT_VEHICLES mode. Indexed by #VehicleTypeByte. */
 static const byte _vehicle_type_colours[6] = {
@@ -1006,7 +1002,8 @@ class SmallMapWindow : public Window {
 		}
 	}
 
-	FORCEINLINE Point GetStationMiddle(const Station *st) const {
+	FORCEINLINE Point GetStationMiddle(const Station *st) const
+	{
 		int x = (st->rect.right + st->rect.left + 1) / 2;
 		int y = (st->rect.bottom + st->rect.top + 1) / 2;
 		Point ret = this->RemapTile(x, y);
@@ -1027,7 +1024,8 @@ class SmallMapWindow : public Window {
 		return ret;
 	}
 
-	StationID DrawStationDots() const {
+	StationID DrawStationDots() const
+	{
 		const Station *supply_details = NULL;
 
 		const Station *st;
@@ -1133,7 +1131,8 @@ class SmallMapWindow : public Window {
 					(this->pta.y > (int)wi->current_y && this->ptb.y > (int)wi->current_y));
 		}
 
-		void DrawLink(StationID sta, StationID stb, bool backward) {
+		void DrawLink(StationID sta, StationID stb, bool backward)
+		{
 			bool highlight_empty = this->link_details.Empty();
 			bool highlight =
 					(sta == this->link_details.sta && stb == this->link_details.stb) ||
@@ -1185,7 +1184,8 @@ class SmallMapWindow : public Window {
 			}
 		}
 
-		void DrawForwBackLinks(StationID sta, StationID stb) {
+		void DrawForwBackLinks(StationID sta, StationID stb)
+		{
 			this->DrawLink(sta, stb, false);
 			this->DrawLink(stb, sta, true);
 			this->DrawContent();
@@ -1194,7 +1194,8 @@ class SmallMapWindow : public Window {
 			this->backward.Clear();
 		}
 
-		void DrawContent() {
+		void DrawContent()
+		{
 			GfxDrawLine(this->pta.x, this->pta.y, this->ptb.x, this->ptb.y, _colour_gradient[COLOUR_GREY][1]);
 
 			int direction_y = (this->pta.x < this->ptb.x ? 1 : -1);
@@ -1218,7 +1219,8 @@ class SmallMapWindow : public Window {
 
 	static const uint MORE_SPACE_NEEDED = 0x1000;
 
-	uint DrawLinkDetails(StatVector &details, uint x, uint y, uint right, uint bottom) const {
+	uint DrawLinkDetails(StatVector &details, uint x, uint y, uint right, uint bottom) const
+	{
 		uint x_orig = x;
 		SetDParam(0, 9999);
 		static uint entry_width = LEGEND_BLOB_WIDTH +
@@ -1259,7 +1261,8 @@ class SmallMapWindow : public Window {
 		return y + FONT_HEIGHT_SMALL;
 	}
 
-	uint DrawLinkDetailCaption(uint x, uint y, uint right, StationID sta, StationID stb) const {
+	uint DrawLinkDetailCaption(uint x, uint y, uint right, StationID sta, StationID stb) const
+	{
 		SetDParam(0, sta);
 		SetDParam(1, stb);
 		static uint height = GetStringBoundingBox(STR_SMALLMAP_LINK_CAPTION).height;
@@ -1268,7 +1271,8 @@ class SmallMapWindow : public Window {
 		return y;
 	}
 
-	void DrawLinkDetails(uint x, uint y, uint right, uint bottom) const {
+	void DrawLinkDetails(uint x, uint y, uint right, uint bottom) const
+	{
 		y = DrawLinkDetailCaption(x, y, right, this->link_details.sta, this->link_details.stb);
 		if (y + 2 * FONT_HEIGHT_SMALL > bottom) {
 			DrawString(x, right, y, "...", TC_BLACK);
@@ -1293,7 +1297,8 @@ class SmallMapWindow : public Window {
 		}
 	}
 
-	void DrawSupplyDetails(uint x, uint y_org, uint bottom) const {
+	void DrawSupplyDetails(uint x, uint y_org, uint bottom) const
+	{
 		const Station *st = Station::GetIfValid(this->supply_details);
 		if (st == NULL) return;
 		SetDParam(0, this->supply_details);
@@ -1494,11 +1499,13 @@ class SmallMapWindow : public Window {
 		_cur_dpi = old_dpi;
 	}
 
-	bool CheckStationSelected(Point *pt) const {
+	bool CheckStationSelected(Point *pt) const
+	{
 		return abs(this->cursor.x - pt->x) < 7 && abs(this->cursor.y - pt->y) < 7;
 	}
 
-	bool CheckLinkSelected(Point *pta, Point *ptb) const {
+	bool CheckLinkSelected(Point *pta, Point *ptb) const
+	{
 		if (this->cursor.x == -1 && this->cursor.y == -1) return false;
 		if (CheckStationSelected(pta) || CheckStationSelected(ptb)) return false;
 		if (pta->x > ptb->x) Swap(pta, ptb);
@@ -1526,7 +1533,8 @@ class SmallMapWindow : public Window {
 	/**
 	 * recalculate which vehicles are visible and their positions.
 	 */
-	void RecalcVehiclePositions() {
+	void RecalcVehiclePositions()
+	{
 		this->vehicles_on_map.clear();
 		const Vehicle *v;
 		const NWidgetCore *wi = this->GetWidget<NWidgetCore>(SM_WIDGET_MAP);
@@ -1669,7 +1677,8 @@ public:
 		}
 	}
 
-	uint GetNumberRowsLegend(uint columns) const {
+	uint GetNumberRowsLegend(uint columns) const
+	{
 		uint number_of_rows = this->min_number_of_fixed_rows;
 		if (this->map_type == SMT_INDUSTRY) {
 			number_of_rows = max(number_of_rows, (_smallmap_industry_count + columns - 1) / columns);
@@ -1679,14 +1688,16 @@ public:
 		return number_of_rows;
 	}
 
-	uint GetMaxNumberRowsLegend(uint columns) const {
+	uint GetMaxNumberRowsLegend(uint columns) const
+	{
 		uint number_of_rows = this->min_number_of_fixed_rows;
 		number_of_rows = max(number_of_rows, CeilDiv(_smallmap_industry_count, columns));
 		number_of_rows = max(number_of_rows, CeilDiv(_smallmap_cargo_count, (columns - 1)));
 		return number_of_rows;
 	}
 
-	void DrawLegend(const Rect &r) const {
+	void DrawLegend(const Rect &r) const
+	{
 		uint y_org = r.top + WD_FRAMERECT_TOP;
 		uint x = r.left + WD_FRAMERECT_LEFT;
 		if (this->supply_details != INVALID_STATION) {
@@ -1846,7 +1857,7 @@ public:
 			case SM_WIDGET_CONTOUR:    // Show land contours
 			case SM_WIDGET_VEHICLES:   // Show vehicles
 			case SM_WIDGET_INDUSTRIES: // Show industries
-			case SM_WIDGET_LINKSTATS:   // Show route map
+			case SM_WIDGET_LINKSTATS:  // Show route map
 			case SM_WIDGET_ROUTES:     // Show transport routes
 			case SM_WIDGET_VEGETATION: // Show vegetation
 			case SM_WIDGET_OWNERS:     // Show land owners
@@ -1931,7 +1942,8 @@ public:
 		}
 	}
 
-	virtual void OnMouseOver(Point pt, int widget) {
+	virtual void OnMouseOver(Point pt, int widget)
+	{
 		static Point invalid = {-1, -1};
 		if (widget == SM_WIDGET_MAP) {
 			const NWidgetBase *wid = this->GetWidget<NWidgetBase>(SM_WIDGET_MAP);
