@@ -25,6 +25,8 @@
  * \li AIIndustryType::INDUSTRYTYPE_TOWN
  * \li AIIndustryType::INDUSTRYTYPE_UNKNOWN
  * \li AIOrder::IsVoidOrder
+ * \li AIRail::GetName
+ * \li AITown::IsCity
  *
  * API removals:
  * \li HasNext for all lists.
