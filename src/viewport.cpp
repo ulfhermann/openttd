@@ -973,31 +973,14 @@ static void DrawTileSelection(const TileInfo *ti)
 	if ((_thd.drawstyle & HT_DRAG_MASK) == HT_NONE) return;
 
 	if (_thd.diagonal) { // We're drawing a 45 degrees rotated (diagonal) rectangle
-		if (IsInsideRotatedRectangle((int)ti->x, (int)ti->y)) {
-			if (_thd.drawstyle & HT_RECT) { // Highlighting a square (clear land)
-				/* Don't mark tiles outside the map. */
-				if (!IsValidTile(ti->tile)) return;
-
-				SpriteID image = SPR_SELECT_TILE + SlopeToSpriteOffset(ti->tileh);
-				DrawSelectionSprite(image, _thd.make_square_red ? PALETTE_SEL_TILE_RED : PAL_NONE, ti, 7, FOUNDATION_PART_NORMAL);
-			} else { // Highlighting a dot (level land)
-				/* Figure out the Z coordinate for the single dot. */
-				byte z = ti->z;
-				if (ti->tileh & SLOPE_N) {
-					z += TILE_HEIGHT;
-					if (!(ti->tileh & SLOPE_S) && (ti->tileh & SLOPE_STEEP)) {
-						z += TILE_HEIGHT;
-					}
-				}
-				AddTileSpriteToDraw(_cur_dpi->zoom != 2 ? SPR_DOT : SPR_DOT_SMALL, PAL_NONE, ti->x, ti->y, z);
-			}
-		}
+		if (IsInsideRotatedRectangle((int)ti->x, (int)ti->y)) goto draw_inner;
 		return;
 	}
 
 	/* Inside the inner area? */
 	if (IsInsideBS(ti->x, _thd.pos.x, _thd.size.x) &&
 			IsInsideBS(ti->y, _thd.pos.y, _thd.size.y)) {
+draw_inner:
 		if (_thd.drawstyle & HT_RECT) {
 			if (!is_redsq) DrawTileSelectionRect(ti, _thd.make_square_red ? PALETTE_SEL_TILE_RED : PAL_NONE);
 		} else if (_thd.drawstyle & HT_POINT) {
@@ -1888,7 +1871,7 @@ static void PlaceObject()
 	_tile_fract_coords.x = pt.x & TILE_UNIT_MASK;
 	_tile_fract_coords.y = pt.y & TILE_UNIT_MASK;
 
-	w = GetCallbackWnd();
+	w = _thd.GetCallbackWnd();
 	if (w != NULL) w->OnPlaceObject(pt, TileVirtXY(pt.x, pt.y));
 }
 
@@ -2034,6 +2017,17 @@ bool TileHighlightData::IsDraggingDiagonal()
 }
 
 /**
+ * Get the window that started the current highlighting.
+ * @return The window that requested the current tile highlighting, or \c NULL if not available.
+ */
+Window *TileHighlightData::GetCallbackWnd()
+{
+	return FindWindowById(this->window_class, this->window_number);
+}
+
+
+
+/**
  * Updates tile highlighting for all cases.
  * Uses _thd.selstart and _thd.selend and _thd.place_mode (set elsewhere) to determine _thd.pos and _thd.size
  * Also drawstyle is determined. Uses _thd.new.* as a buffer and calls SetSelectionTilesDirty() twice,
@@ -2152,7 +2146,7 @@ void UpdateTileSelection()
 static inline void ShowMeasurementTooltips(StringID str, uint paramcount, const uint64 params[], TooltipCloseCondition close_cond = TCC_LEFT_CLICK)
 {
 	if (!_settings_client.gui.measure_tooltip) return;
-	GuiShowTooltips(FindWindowById(_thd.window_class, _thd.window_number), str, paramcount, params, close_cond);
+	GuiShowTooltips(_thd.GetCallbackWnd(), str, paramcount, params, close_cond);
 }
 
 /** highlighting tiles while only going over them with the mouse */
@@ -2797,7 +2791,7 @@ EventState VpHandlePlaceSizingDrag()
 	if (_special_mouse_mode != WSM_SIZING) return ES_NOT_HANDLED;
 
 	/* stop drag mode if the window has been closed */
-	Window *w = FindWindowById(_thd.window_class, _thd.window_number);
+	Window *w = _thd.GetCallbackWnd();
 	if (w == NULL) {
 		ResetObjectToPlace();
 		return ES_HANDLED;
@@ -2840,7 +2834,7 @@ void SetObjectToPlace(CursorID icon, PaletteID pal, HighLightStyle mode, WindowC
 {
 	if (_thd.window_class != WC_INVALID) {
 		/* Undo clicking on button and drag & drop */
-		Window *w = FindWindowById(_thd.window_class, _thd.window_number);
+		Window *w = _thd.GetCallbackWnd();
 		/* Call the abort function, but set the window class to something
 		 * that will never be used to avoid infinite loops. Setting it to
 		 * the 'next' window class must not be done because recursion into
@@ -2865,7 +2859,7 @@ void SetObjectToPlace(CursorID icon, PaletteID pal, HighLightStyle mode, WindowC
 	_thd.window_class = window_class;
 	_thd.window_number = window_num;
 
-	if (mode == HT_SPECIAL) { // special tools, like tunnels or docks start with presizing mode
+	if ((mode & HT_DRAG_MASK) == HT_SPECIAL) { // special tools, like tunnels or docks start with presizing mode
 		VpStartPreSizing();
 	}
 
