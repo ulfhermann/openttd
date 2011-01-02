@@ -987,9 +987,9 @@ STR_NEWS_ROAD_REBUILDING                                        :{BIGFONT}{BLACK
 # Extra view window
 STR_EXTRA_VIEW_PORT_TITLE                                       :{WHITE}Окно просмотра {COMMA}
 STR_EXTRA_VIEW_MOVE_VIEW_TO_MAIN                                :{BLACK}Скопировать в окно
-STR_EXTRA_VIEW_MOVE_VIEW_TO_MAIN_TT                             :{BLACK}Скопировать эту позицию в окно просмотра
+STR_EXTRA_VIEW_MOVE_VIEW_TO_MAIN_TT                             :{BLACK}Скопировать текущую позицию в окно просмотра
 STR_EXTRA_VIEW_MOVE_MAIN_TO_VIEW                                :{BLACK}Вставить из окна
-STR_EXTRA_VIEW_MOVE_MAIN_TO_VIEW_TT                             :{BLACK}Вставить эту позицию из окна просмотра
+STR_EXTRA_VIEW_MOVE_MAIN_TO_VIEW_TT                             :{BLACK}Показать в основном окне
 
 # Game options window
 STR_GAME_OPTIONS_CAPTION                                        :{WHITE}Настройки игры
@@ -2144,6 +2144,7 @@ STR_SELECT_RAIL_BRIDGE_CAPTION                                  :{WHITE}Выбе
 STR_SELECT_ROAD_BRIDGE_CAPTION                                  :{WHITE}Выберите тип моста
 STR_SELECT_BRIDGE_SELECTION_TOOLTIP                             :{BLACK}Выбор моста - кликните на изображении моста, который вы хотите построить
 STR_SELECT_BRIDGE_INFO                                          :{GOLD}{STRING}{}{VELOCITY}; {WHITE}{CURRENCY}
+STR_SELECT_BRIDGE_SCENEDIT_INFO                                 :{GOLD}{STRING},{} {VELOCITY}
 STR_BRIDGE_NAME_SUSPENSION_STEEL                                :Висячий стальной
 STR_BRIDGE_NAME_GIRDER_STEEL                                    :Балочный стальной
 STR_BRIDGE_NAME_CANTILEVER_STEEL                                :Консольный стальной
@@ -2454,7 +2455,7 @@ STR_LAI_OBJECT_DESCRIPTION_COMPANY_OWNED_LAND                   :Земля в �
 STR_ABOUT_OPENTTD                                               :{WHITE}Об OpenTTD
 STR_ABOUT_ORIGINAL_COPYRIGHT                                    :{BLACK}Оригинальные авторские права {COPYRIGHT} 1995 Chris Sawyer. Все права защищены.
 STR_ABOUT_VERSION                                               :{BLACK}OpenTTD версия {REV}
-STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT} 2002-2010 Команда разработчиков OpenTTD
+STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT} 2002-2011 Команда разработчиков OpenTTD
 
 # Save/load game/scenario
 STR_SAVELOAD_SAVE_CAPTION                                       :{WHITE}Сохранить игру
