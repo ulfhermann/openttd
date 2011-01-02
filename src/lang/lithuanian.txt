@@ -2328,7 +2328,7 @@ STR_LAI_OBJECT_DESCRIPTION_COMPANY_OWNED_LAND                   :Kompanijos žem
 STR_ABOUT_OPENTTD                                               :{WHITE}Apie OpenTTD
 STR_ABOUT_ORIGINAL_COPYRIGHT                                    :{BLACK}Pradinės versijos teisės priklauso {COPYRIGHT} 1995 Chris Sawyer, Visos teisės saugomos
 STR_ABOUT_VERSION                                               :{BLACK}OpenTTD versija {REV}
-STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT}2002-2010 OpenTTD komanda
+STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT}2002-2011 OpenTTD komanda
 
 # Save/load game/scenario
 STR_SAVELOAD_SAVE_CAPTION                                       :{WHITE}Išsaugoti žaidimą
@@ -3294,6 +3294,7 @@ STR_ORDER_REFIT_STOP_ORDER                                      :(Pertvarkyti į
 STR_ORDER_STOP_ORDER                                            :(Sustoti)
 
 STR_ORDER_GO_TO_STATION                                         :{STRING} {STATION} {STRING}
+
 
 STR_ORDER_FULL_LOAD                                             :(Pilnai pasikrauti)
 STR_ORDER_FULL_LOAD_ANY                                         :(Pilnai pasikrauti, bet kurio krovinio)

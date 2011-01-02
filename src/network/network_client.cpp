@@ -312,14 +312,16 @@ static const char *GenerateCompanyPasswordHash(const char *password)
 	memset(salted_password, 0, sizeof(salted_password));
 	snprintf(salted_password, sizeof(salted_password), "%s", password);
 	/* Add the game seed and the server's ID as the salt. */
-	for (uint i = 0; i < NETWORK_SERVER_ID_LENGTH - 1; i++) salted_password[i] ^= _password_server_id[i] ^ (_password_game_seed >> i);
+	for (uint i = 0; i < NETWORK_SERVER_ID_LENGTH - 1; i++) {
+		salted_password[i] ^= _password_server_id[i] ^ (_password_game_seed >> (i % 32));
+	}
 
 	Md5 checksum;
 	uint8 digest[16];
 	static char hashed_password[NETWORK_SERVER_ID_LENGTH];
 
 	/* Generate the MD5 hash */
-	checksum.Append((const uint8*)salted_password, sizeof(salted_password) - 1);
+	checksum.Append(salted_password, sizeof(salted_password) - 1);
 	checksum.Finish(digest);
 
 	for (int di = 0; di < 16; di++) sprintf(hashed_password + di * 2, "%02x", digest[di]);
@@ -331,7 +333,7 @@ static const char *GenerateCompanyPasswordHash(const char *password)
 /**
  * Hash the current company password; used when the server 'company' sets his/her password.
  */
-void HashCurrentCompanyPassword(const char *password)
+static void HashCurrentCompanyPassword(const char *password)
 {
 	_password_game_seed = _settings_game.game_creation.generation_seed;
 	strecpy(_password_server_id, _settings_client.network.network_id, lastof(_password_server_id));
@@ -1067,12 +1069,13 @@ DEF_GAME_RECEIVE_COMMAND(Client, PACKET_SERVER_RCON)
 {
 	if (this->status < STATUS_AUTHORIZED) return NETWORK_RECV_STATUS_MALFORMED_PACKET;
 
-	char rcon_out[NETWORK_RCONCOMMAND_LENGTH];
+	uint colour_code = p->Recv_uint16();
+	if (!IsValidConsoleColour(colour_code)) return NETWORK_RECV_STATUS_MALFORMED_PACKET;
 
-	ConsoleColour colour_code = (ConsoleColour)p->Recv_uint16();
+	char rcon_out[NETWORK_RCONCOMMAND_LENGTH];
 	p->Recv_string(rcon_out, sizeof(rcon_out));
 
-	IConsolePrint(colour_code, rcon_out);
+	IConsolePrint((ConsoleColour)colour_code, rcon_out);
 
 	return NETWORK_RECV_STATUS_OKAY;
 }
