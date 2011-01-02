@@ -349,6 +349,7 @@ STR_SCENEDIT_FILE_MENU_QUIT                                     :Quit
 STR_SETTINGS_MENU_GAME_OPTIONS                                  :Game options
 STR_SETTINGS_MENU_DIFFICULTY_SETTINGS                           :Difficulty settings
 STR_SETTINGS_MENU_CONFIG_SETTINGS                               :Advanced settings
+STR_SETTINGS_MENU_AI_SETTINGS                                   :AI settings
 STR_SETTINGS_MENU_NEWGRF_SETTINGS                               :NewGRF settings
 STR_SETTINGS_MENU_TRANSPARENCY_OPTIONS                          :Transparency options
 STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :Town names displayed
@@ -2002,6 +2003,7 @@ STR_SELECT_RAIL_BRIDGE_CAPTION                                  :{WHITE}Select R
 STR_SELECT_ROAD_BRIDGE_CAPTION                                  :{WHITE}Select Road Bridge
 STR_SELECT_BRIDGE_SELECTION_TOOLTIP                             :{BLACK}Bridge selection - click on your preferred bridge to build it
 STR_SELECT_BRIDGE_INFO                                          :{GOLD}{STRING},{} {VELOCITY} {WHITE}{CURRENCY}
+STR_SELECT_BRIDGE_SCENEDIT_INFO                                 :{GOLD}{STRING},{} {VELOCITY}
 STR_BRIDGE_NAME_SUSPENSION_STEEL                                :Suspension, Steel
 STR_BRIDGE_NAME_GIRDER_STEEL                                    :Girder, Steel
 STR_BRIDGE_NAME_CANTILEVER_STEEL                                :Cantilever, Steel
@@ -2308,7 +2310,7 @@ STR_LAI_OBJECT_DESCRIPTION_COMPANY_OWNED_LAND                   :Company-owned l
 STR_ABOUT_OPENTTD                                               :{WHITE}About OpenTTD
 STR_ABOUT_ORIGINAL_COPYRIGHT                                    :{BLACK}Original copyright {COPYRIGHT} 1995 Chris Sawyer, All rights reserved
 STR_ABOUT_VERSION                                               :{BLACK}OpenTTD version {REV}
-STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT} 2002-2010 The OpenTTD team
+STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT} 2002-2011 The OpenTTD team
 
 # Save/load game/scenario
 STR_SAVELOAD_SAVE_CAPTION                                       :{WHITE}Save Game
