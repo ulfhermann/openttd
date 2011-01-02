@@ -2144,7 +2144,7 @@ STR_LAI_OBJECT_DESCRIPTION_COMPANY_OWNED_LAND                   :Tir mae cwmni b
 STR_ABOUT_OPENTTD                                               :{WHITE}Gwybodaeth am OpenTTD
 STR_ABOUT_ORIGINAL_COPYRIGHT                                    :{BLACK}Hawlfraint Wreiddiol {COPYRIGHT} 1995 Chris Sawyer, Holl cedwir pob hawl
 STR_ABOUT_VERSION                                               :{BLACK}fersiwn OpenTTD {REV}
-STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT}2002-2010 Y tîm OpenTTD
+STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT}2002-2011 Y tîm OpenTTD
 
 # Save/load game/scenario
 STR_SAVELOAD_SAVE_CAPTION                                       :{WHITE}Cadw Gêm
@@ -3024,6 +3024,7 @@ STR_ORDER_REFIT_STOP_ORDER                                      :(Ailfitio i {ST
 STR_ORDER_STOP_ORDER                                            :(Stopio)
 
 STR_ORDER_GO_TO_STATION                                         :{STRING} {STATION} {STRING}
+
 
 STR_ORDER_FULL_LOAD                                             :(Llwyth llawn)
 STR_ORDER_FULL_LOAD_ANY                                         :(Llwyth llawn o unrhyw gargo)
