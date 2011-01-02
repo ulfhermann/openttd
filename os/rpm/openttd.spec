@@ -2,7 +2,7 @@
 #-------------------------------------------------------------------------------
 # spec file for the openttd rpm package
 #
-# Copyright (c) 2007-2010 The OpenTTD developers
+# Copyright (c) 2007-2011 The OpenTTD developers
 #
 # This file and all modifications and additions to the pristine
 # package are under the same license as the package itself
@@ -26,6 +26,7 @@ Source:        %{name}-%{version}-source.tar.bz2
 Requires:      fontconfig
 Requires:      SDL
 Requires:      zlib
+Requires:      xz-devel
 BuildRequires: gcc-c++
 BuildRequires: fontconfig-devel
 BuildRequires: libpng-devel
