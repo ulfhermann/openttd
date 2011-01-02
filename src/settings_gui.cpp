@@ -186,7 +186,7 @@ struct GameOptionsWindow : Window {
 
 	GameOptionsWindow(const WindowDesc *desc) : Window()
 	{
-		this->opt = (_game_mode == GM_MENU) ? &_settings_newgame : &_settings_game;
+		this->opt = &GetGameSettings();
 		this->reload = false;
 
 		this->InitNested(desc);
@@ -591,7 +591,7 @@ public:
 
 		/* Copy current settings (ingame or in intro) to temporary holding place
 		 * change that when setting stuff, copy back on clicking 'OK' */
-		this->opt_mod_temp = (_game_mode == GM_MENU) ? _settings_newgame : _settings_game;
+		this->opt_mod_temp = GetGameSettings();
 		/* Setup disabled buttons when creating window
 		 * disable all other difficulty buttons during gameplay except for 'custom' */
 		this->SetWidgetsDisabledState(_game_mode != GM_MENU,
@@ -696,7 +696,7 @@ public:
 				break;
 
 			case GDW_ACCEPT: { // Save button - save changes
-				GameSettings *opt_ptr = (_game_mode == GM_MENU) ? &_settings_newgame : &_settings_game;
+				GameSettings *opt_ptr = &GetGameSettings();
 
 				uint i;
 				GetSettingFromName("difficulty.diff_level", &i);
@@ -1153,7 +1153,7 @@ void SettingEntry::DrawSetting(GameSettings *settings_ptr, const SettingDesc *sd
 	if (sdb->cmd == SDT_BOOLX) {
 		static const Colours _bool_ctabs[2][2] = {{COLOUR_CREAM, COLOUR_RED}, {COLOUR_DARK_GREEN, COLOUR_GREEN}};
 		/* Draw checkbox for boolean-value either on/off */
-		bool on = (bool)ReadValue(var, sd->save.conv);
+		bool on = ReadValue(var, sd->save.conv) != 0;
 
 		DrawFrameRect(buttons_left, button_y, buttons_left + 19, button_y + 8, _bool_ctabs[!!on][!!editable], on ? FR_LOWERED : FR_NONE);
 		SetDParam(0, on ? STR_CONFIG_SETTING_ON : STR_CONFIG_SETTING_OFF);
@@ -1541,7 +1541,7 @@ struct GameSettingsWindow : Window {
 	{
 		static bool first_time = true;
 
-		settings_ptr = (_game_mode == GM_MENU) ? &_settings_newgame : &_settings_game;
+		settings_ptr = &GetGameSettings();
 
 		/* Build up the dynamic settings-array only once per OpenTTD session */
 		if (first_time) {
