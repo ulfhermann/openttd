@@ -958,7 +958,7 @@ DEF_CONSOLE_CMD(ConEchoC)
 	}
 
 	if (argc < 3) return false;
-	IConsolePrint((ConsoleColour)atoi(argv[1]), argv[2]);
+	IConsolePrint((TextColour)Clamp(atoi(argv[1]), TC_BEGIN, TC_END - 1), argv[2]);
 	return true;
 }
 
@@ -995,21 +995,40 @@ DEF_CONSOLE_CMD(ConRestart)
 }
 
 #ifdef ENABLE_AI
-DEF_CONSOLE_CMD(ConListAI)
+/**
+ * Print a text buffer line by line to the console. Lines are seperated by '\n'.
+ * @param buf The buffer to print.
+ * @note All newlines are replace by '\0' characters.
+ */
+static void PrintLineByLine(char *buf)
 {
-	char buf[4096];
-	char *p = &buf[0];
-	p = AI::GetConsoleList(p, lastof(buf));
-
-	p = &buf[0];
+	char *p = buf;
 	/* Print output line by line */
-	for (char *p2 = &buf[0]; *p2 != '\0'; p2++) {
+	for (char *p2 = buf; *p2 != '\0'; p2++) {
 		if (*p2 == '\n') {
 			*p2 = '\0';
 			IConsolePrintF(CC_DEFAULT, "%s", p);
 			p = p2 + 1;
 		}
 	}
+}
+
+DEF_CONSOLE_CMD(ConListAILibs)
+{
+	char buf[4096];
+	AI::GetConsoleLibraryList(buf, lastof(buf));
+
+	PrintLineByLine(buf);
+
+	return true;
+}
+
+DEF_CONSOLE_CMD(ConListAI)
+{
+	char buf[4096];
+	AI::GetConsoleList(buf, lastof(buf));
+
+	PrintLineByLine(buf);
 
 	return true;
 }
@@ -1626,7 +1645,7 @@ DEF_CONSOLE_CMD(ConContent)
 			static const char * const types[] = { "Base graphics", "NewGRF", "AI", "AI library", "Scenario", "Heightmap", "Base sound", "Base music" };
 			assert_compile(lengthof(types) == CONTENT_TYPE_END - CONTENT_TYPE_BEGIN);
 			static const char * const states[] = { "Not selected", "Selected", "Dep Selected", "Installed", "Unknown" };
-			static const ConsoleColour state_to_colour[] = { CC_COMMAND, CC_INFO, CC_INFO, CC_WHITE, CC_ERROR };
+			static const TextColour state_to_colour[] = { CC_COMMAND, CC_INFO, CC_INFO, CC_WHITE, CC_ERROR };
 
 			const ContentInfo *ci = *iter;
 			IConsolePrintF(state_to_colour[ci->state], "%d, %s, %s, %s", ci->id, types[ci->type - 1], states[ci->state], ci->name);
@@ -1780,6 +1799,7 @@ void IConsoleStdLibRegister()
 	IConsoleAliasRegister("developer",    "setting developer %+");
 
 #ifdef ENABLE_AI
+	IConsoleCmdRegister("list_ai_libs", ConListAILibs);
 	IConsoleCmdRegister("list_ai",      ConListAI);
 	IConsoleCmdRegister("reload_ai",    ConReloadAI);
 	IConsoleCmdRegister("rescan_ai",    ConRescanAI);
