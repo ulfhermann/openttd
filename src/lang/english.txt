@@ -23,7 +23,6 @@ STR_NULL                                                        :
 STR_EMPTY                                                       :
 STR_UNDEFINED                                                   :(undefined string)
 STR_JUST_NOTHING                                                :Nothing
-STR_TINY_NOTHING                                                :{TINYFONT}Nothing
 
 # Cargo related strings
 # Plural cargo name
@@ -696,26 +695,11 @@ STR_SMALLMAP_LEGENDA_TOWNS                                      :{TINYFONT}{BLAC
 STR_SMALLMAP_LEGENDA_INDUSTRIES                                 :{TINYFONT}{BLACK}Industries
 STR_SMALLMAP_LEGENDA_DESERT                                     :{TINYFONT}{BLACK}Desert
 STR_SMALLMAP_LEGENDA_SNOW                                       :{TINYFONT}{BLACK}Snow
-STR_SMALLMAP_LEGENDA_CAPACITY                                   :{TINYFONT}{BLACK}Capacity
-STR_SMALLMAP_LEGENDA_USAGE                                      :{TINYFONT}{BLACK}Usage
-STR_SMALLMAP_LEGENDA_PLANNED                                    :{TINYFONT}{BLACK}Planned Flow
-STR_SMALLMAP_LEGENDA_SENT                                       :{TINYFONT}{BLACK}Sent Cargo
-STR_SMALLMAP_LEGENDA_SHOW_TEXT                                  :{TINYFONT}{BLACK}As Text
-STR_SMALLMAP_LEGENDA_SHOW_GRAPH                                 :{TINYFONT}{BLACK}As Graphs
-
-STR_SMALLMAP_SUPPLY_CAPTION                                     :{BLACK}Monthly supply at {STATION}
-STR_SMALLMAP_SUPPLY                                             :{TINYFONT}{CARGO}
-STR_SMALLMAP_LINK_CAPTION                                       :{BLACK}Monthly traffic from {STATION} to {STATION}
-STR_SMALLMAP_LINK                                               :{TINYFONT}{STRING} -
-STR_SMALLMAP_LINK_CAPACITY                                      :{TINYFONT}  cap: {NUM}
-STR_SMALLMAP_LINK_USAGE                                         :{TINYFONT}  usg: {NUM}
-STR_SMALLMAP_LINK_PLANNED                                       :{TINYFONT}  pln: {NUM}
-STR_SMALLMAP_LINK_SENT                                          :{TINYFONT}  snt: {NUM}
 
 STR_SMALLMAP_TOOLTIP_TOGGLE_TOWN_NAMES_ON_OFF                   :{BLACK}Toggle town names on/off on map
 STR_SMALLMAP_CENTER                                             :{BLACK}Centre the smallmap on the current position
 STR_SMALLMAP_INDUSTRY                                           :{TINYFONT}{STRING} ({NUM})
-STR_SMALLMAP_LINKSTATS_LEGEND                                   :{TINYFONT}{STRING}
+STR_SMALLMAP_LINKSTATS                                          :{TINYFONT}{STRING}
 STR_SMALLMAP_TOWN                                               :{TINYFONT}{WHITE}{TOWN}
 STR_SMALLMAP_DISABLE_ALL                                        :{BLACK}Disable all
 STR_SMALLMAP_ENABLE_ALL                                         :{BLACK}Enable all
@@ -4329,8 +4313,4 @@ STR_LORRY                                                       :{BLACK}{LORRY}
 STR_PLANE                                                       :{BLACK}{PLANE}
 STR_SHIP                                                        :{BLACK}{SHIP}
 
-STR_NUM                                                         :{NUM}
-STR_NUM_RELATION_2                                              :{NUM}/{NUM}
-STR_NUM_RELATION_3                                              :{NUM}/{NUM}/{NUM}
-STR_NUM_RELATION_4                                              :{NUM}/{NUM}/{NUM}/{NUM}
 STR_TOOLBAR_RAILTYPE_VELOCITY                                   :{STRING} ({VELOCITY})
