@@ -50,6 +50,7 @@
 #include "../engine_func.h"
 #include "../rail_gui.h"
 #include "../core/backup_type.hpp"
+#include "../smallmap_gui.h"
 
 #include "table/strings.h"
 
@@ -263,6 +264,9 @@ static void InitializeWindowsAndCaches()
 	CheckTrainsLengths();
 	ShowNewGRFError();
 	ShowAIDebugWindowIfAIError();
+
+	/* Rebuild the smallmap list of owners. */
+	BuildOwnerLegend();
 }
 
 typedef void (CDECL *SignalHandlerPointer)(int);
@@ -2400,6 +2404,13 @@ bool AfterLoadGame()
 
 			ClrBit(t->flags, 5);
 			SetBit(t->vehicle_flags, VF_PATHFINDER_LOST);
+		}
+
+		/* Introduced terraform/clear limits. */
+		Company *c;
+		FOR_ALL_COMPANIES(c) {
+			c->terraform_limit = _settings_game.construction.terraform_frame_burst << 16;
+			c->clear_limit     = _settings_game.construction.clear_frame_burst << 16;
 		}
 	}
 
