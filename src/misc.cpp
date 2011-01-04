@@ -25,6 +25,7 @@
 #include "tilehighlight_func.h"
 #include "network/network_func.h"
 #include "window_func.h"
+#include "smallmap_gui.h"
 
 
 extern TileIndex _cur_tileloop_tile;
@@ -122,6 +123,9 @@ void InitializeGame(uint size_x, uint size_y, bool reset_date, bool reset_settin
 
 	InitializeLinkGraphs();
 	InitializeEconomy();
+
+	/* Rebuild the smallmap owner legend. */
+	BuildOwnerLegend();
 
 	ResetObjectToPlace();
 
