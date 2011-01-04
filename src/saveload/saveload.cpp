@@ -220,6 +220,7 @@
  *  153   21263
  *  154   21426
  *  155   21453
+ *  156   !!TODO!!
  */
 extern const uint16 SAVEGAME_VERSION = SL_CAPACITIES; ///< Current savegame version of OpenTTD.
 
