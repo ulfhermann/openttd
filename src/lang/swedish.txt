@@ -701,8 +701,8 @@ STR_SMALLMAP_TOWN                                               :{TINYFONT}{WHIT
 STR_SMALLMAP_DISABLE_ALL                                        :{BLACK}Inaktivera alla
 STR_SMALLMAP_ENABLE_ALL                                         :{BLACK}Aktivera alla
 STR_SMALLMAP_SHOW_HEIGHT                                        :{BLACK}Visa höjd
-STR_SMALLMAP_TOOLTIP_DISABLE_ALL                                :{BLACK}Visa inga industrier på kartan
-STR_SMALLMAP_TOOLTIP_ENABLE_ALL                                 :{BLACK}Visa alla industrier på kartan
+STR_SMALLMAP_TOOLTIP_DISABLE_ALL_INDUSTRIES                     :{BLACK}Visa inga industrier på kartan
+STR_SMALLMAP_TOOLTIP_ENABLE_ALL_INDUSTRIES                      :{BLACK}Visa alla industrier på kartan
 STR_SMALLMAP_TOOLTIP_SHOW_HEIGHT                                :{BLACK}Växla visning av höjdkarta
 
 # Status bar messages
@@ -1975,6 +1975,7 @@ STR_SELECT_RAIL_BRIDGE_CAPTION                                  :{WHITE}Välj j�
 STR_SELECT_ROAD_BRIDGE_CAPTION                                  :{WHITE}Välj vägbro
 STR_SELECT_BRIDGE_SELECTION_TOOLTIP                             :{BLACK}Välj bro - klicka på önskad bro för att bygga den
 STR_SELECT_BRIDGE_INFO                                          :{GOLD}{STRING},{} {VELOCITY} {WHITE}{CURRENCY}
+STR_SELECT_BRIDGE_SCENEDIT_INFO                                 :{GOLD}{STRING},{} {VELOCITY}
 STR_BRIDGE_NAME_SUSPENSION_STEEL                                :Upphängd, Stål
 STR_BRIDGE_NAME_GIRDER_STEEL                                    :Balkbro, Stål
 STR_BRIDGE_NAME_CANTILEVER_STEEL                                :Cantilever, Stål
