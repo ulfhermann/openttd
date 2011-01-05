@@ -36,25 +36,25 @@ static const byte INITIAL_STATION_RATING = 175;
 class LinkStat : private MovingAverage<uint> {
 private:
 	/**
-	 * capacity of the link.
-	 * This is a moving average. Use MovingAverage::Monthly() to get a meaningful value
+	 * Capacity of the link.
+	 * This is a moving average. Use MovingAverage::Monthly() to get a meaningful value.
 	 */
 	uint capacity;
 
 	/**
-	 * capacity of currently loading vehicles
+	 * Capacity of currently loading vehicles.
 	 */
 	uint frozen;
 
 	/**
-	 * usage of the link.
-	 * This is a moving average. Use MovingAverage::Monthly() to get a meaningful value
+	 * Usage of the link.
+	 * This is a moving average. Use MovingAverage::Monthly() to get a meaningful value.
 	 */
 	uint usage;
 
 public:
 	/**
-	 * minimum length of moving averages for capacity and usage
+	 * Minimum length of moving averages for capacity and usage.
 	 */
 	static const uint MIN_AVERAGE_LENGTH = 96;
 
@@ -64,7 +64,7 @@ public:
 		MovingAverage<uint>(distance), capacity(capacity), frozen(frozen), usage(usage) {}
 
 	/**
-	 * reset everything to 0
+	 * Reset everything to 0.
 	 */
 	FORCEINLINE void Clear()
 	{
@@ -74,7 +74,7 @@ public:
 	}
 
 	/**
-	 * apply the moving averages to usage and capacity
+	 * Apply the moving averages to usage and capacity.
 	 */
 	FORCEINLINE void Decrease()
 	{
@@ -83,8 +83,8 @@ public:
 	}
 
 	/**
-	 * get an estimate of the current the capacity
-	 * @return the capacity
+	 * Get an estimate of the current the capacity by calculating the moving average.
+	 * @return Capacity.
 	 */
 	FORCEINLINE uint Capacity() const
 	{
@@ -92,8 +92,8 @@ public:
 	}
 
 	/**
-	 * get an estimage of the current usage
-	 * @return the usage
+	 * Get an estimage of the current usage by calculating the moving average.
+	 * @return Usage.
 	 */
 	FORCEINLINE uint Usage() const
 	{
@@ -101,7 +101,8 @@ public:
 	}
 
 	/**
-	 * get the amount of frozen capacity
+	 * Get the amount of frozen capacity.
+	 * @return Frozen capacity.
 	 */
 	FORCEINLINE uint Frozen() const
 	{
@@ -109,9 +110,9 @@ public:
 	}
 
 	/**
-	 * add some capacity and usage
-	 * @param capacity the additional capacity
-	 * @param usage the additional usage
+	 * Add some capacity and usage.
+	 * @param capacity Additional capacity.
+	 * @param usage Additional usage.
 	 */
 	FORCEINLINE void Increase(uint capacity, uint usage)
 	{
@@ -120,9 +121,9 @@ public:
 	}
 
 	/**
-	 * freeze some of the capacity and prevent it from being decreased by the
-	 * moving average
-	 * @param capacity the amount of capacity to be frozen
+	 * Freeze some of the capacity and prevent it from being decreased by the
+	 * moving average.
+	 * @param capacity Amount of capacity to be frozen.
 	 */
 	FORCEINLINE void Freeze(uint capacity)
 	{
@@ -131,8 +132,8 @@ public:
 	}
 
 	/**
-	 * thaw some of the frozen capacity and make it available for Decrease()
-	 * @oaram capacity the capacity to be thawed
+	 * Thaw some of the frozen capacity and make it available for Decrease().
+	 * @oaram capacity Capacity to be thawed.
 	 */
 	FORCEINLINE void Unfreeze(uint capacity)
 	{
@@ -140,7 +141,7 @@ public:
 	}
 
 	/**
-	 * thaw all frozen capacity
+	 * Thaw all frozen capacity.
 	 */
 	FORCEINLINE void Unfreeze()
 	{
@@ -148,11 +149,11 @@ public:
 	}
 
 	/**
-	 * check if the capacity is 0. This is necessary as Capacity() might return
-	 * 0 even if there is a miniscule amount of capacity left
-	 * @return if capacity is 0
+	 * Check if the capacity is 0. This is necessary as Capacity() might return
+	 * 0 even if there is a miniscule amount of capacity left.
+	 * @return If capacity is 0.
 	 */
-	FORCEINLINE bool IsNull() const
+	FORCEINLINE bool HasCapacity() const
 	{
 		return this->capacity == 0;
 	}

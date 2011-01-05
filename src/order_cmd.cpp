@@ -262,10 +262,10 @@ Order *OrderList::GetOrderAt(int index) const
 
 /**
  * Recursively determine the next deterministic station to stop at.
- * @param next the first order to check
- * @param curr_station the station the vehicle is just visiting or INVALID_STATION
- * @param hops the number of orders we have already checked.
- * @return the next stoppping station or INVALID_STATION
+ * @param next First order to check.
+ * @param curr_station Station the vehicle is just visiting or INVALID_STATION.
+ * @param hops Number of orders we have already checked.
+ * @return Next stoppping station or INVALID_STATION.
  */
 StationID OrderList::GetNextStoppingStation(const Order *next, StationID curr_station, uint hops) const
 {
@@ -290,9 +290,9 @@ StationID OrderList::GetNextStoppingStation(const Order *next, StationID curr_st
 
 /**
  * Get the next station the vehicle will stop at, if that is deterministic.
- * @param curr_order the ID of the current order
- * @param curr_station the station the vehicle is just visiting or INVALID_STATION
- * @return The ID of the next station the vehicle will stop at or INVALID_STATION
+ * @param curr_order ID of the current order.
+ * @param curr_station Station the vehicle is just visiting or INVALID_STATION.
+ * @return ID of the next station the vehicle will stop at or INVALID_STATION.
  */
 StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_order, StationID curr_station) const
 {

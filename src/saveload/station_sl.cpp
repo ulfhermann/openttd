@@ -223,9 +223,10 @@ static StationID _station_id;
 /**
  * Wrapper function to get the LinkStat's internal structure while
  * some of the variables are private.
- * @return the saveload description for LinkStat.
+ * @return Saveload description for LinkStat.
  */
-const SaveLoad *GetLinkStatDesc() {
+const SaveLoad *GetLinkStatDesc()
+{
 	static const SaveLoad linkstat_desc[] = {
 		SLEG_CONDVAR(             _station_id,         SLE_UINT16,      SL_CAPACITIES, SL_MAX_VERSION),
 		 SLE_CONDVAR(LinkStat,    length,              SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
@@ -448,7 +449,7 @@ static void Load_STNN()
 				LinkStat ls;
 				for (uint16 i = 0; i < _num_links; ++i) {
 					SlObject(&ls, GetLinkStatDesc());
-					assert(!ls.IsNull());
+					assert(!ls.HasCapacity());
 					st->goods[c].link_stats[_station_id] = ls;
 				}
 			}
