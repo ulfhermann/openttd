@@ -13,12 +13,12 @@ typedef std::list<NodeID> NodeList;
 /**
  * Set the demands between two nodes using the given base demand. In symmetric mode
  * this sets demands in both directions.
- * @param graph The link graph
- * @param from_id The supplying node
- * @þaram to_id The receiving node
- * @param demand_forw Demand calculated for the "forward" direction
+ * @param graph The link graph.
+ * @param from_id The supplying node.
+ * @þaram to_id The receiving node.
+ * @param demand_forw Demand calculated for the "forward" direction.
  */
-void SymmetricScaler::SetDemands(LinkGraphComponent * graph, NodeID from_id, NodeID to_id, uint demand_forw)
+void SymmetricScaler::SetDemands(LinkGraphComponent *graph, NodeID from_id, NodeID to_id, uint demand_forw)
 {
 	if (graph->GetNode(from_id).demand > 0) {
 		uint demand_back = demand_forw * this->mod_size / 100;
@@ -36,12 +36,12 @@ void SymmetricScaler::SetDemands(LinkGraphComponent * graph, NodeID from_id, Nod
 /**
  * Set the demands between two nodes using the given base demand. In asymmetric mode
  * this only sets demand in the "forward" direction.
- * @param graph The link graph
- * @param from_id The supplying node
- * @þaram to_id The receiving node
- * @param demand_forw Demand calculated for the "forward" direction
+ * @param graph The link graph.
+ * @param from_id The supplying node.
+ * @þaram to_id The receiving node.
+ * @param demand_forw Demand calculated for the "forward" direction.
  */
-FORCEINLINE void Scaler::SetDemands(LinkGraphComponent * graph, NodeID from_id, NodeID to_id, uint demand_forw)
+FORCEINLINE void Scaler::SetDemands(LinkGraphComponent *graph, NodeID from_id, NodeID to_id, uint demand_forw)
 {
 	Edge &forward = graph->GetEdge(from_id, to_id);
 	forward.demand += demand_forw;
@@ -50,7 +50,7 @@ FORCEINLINE void Scaler::SetDemands(LinkGraphComponent * graph, NodeID from_id, 
 
 /**
  * Do the actual demand calculation, called from constructor.
- * @param graph the component to calculate the demands for
+ * @param graph Component to calculate the demands for.
  */
 template<class Tscaler>
 void DemandCalculator::CalcDemand(LinkGraphComponent *graph, Tscaler scaler)
@@ -60,7 +60,7 @@ void DemandCalculator::CalcDemand(LinkGraphComponent *graph, Tscaler scaler)
 	uint num_supplies = 0;
 	uint num_demands = 0;
 
-	for(NodeID node = 0; node < graph->GetSize(); node++) {
+	for (NodeID node = 0; node < graph->GetSize(); node++) {
 		Node &n = graph->GetNode(node);
 		scaler.AddNode(n);
 		if (n.supply > 0) {
@@ -82,13 +82,13 @@ void DemandCalculator::CalcDemand(LinkGraphComponent *graph, Tscaler scaler)
 	scaler.SetDemandPerNode(num_demands);
 	uint chance = 0;
 
-	while(!supplies.empty() && !demands.empty()) {
+	while (!supplies.empty() && !demands.empty()) {
 		NodeID node1 = supplies.front();
 		supplies.pop_front();
 
 		Node &from = graph->GetNode(node1);
 
-		for(uint i = 0; i < num_demands; ++i) {
+		for (uint i = 0; i < num_demands; ++i) {
 			assert(!demands.empty());
 			NodeID node2 = demands.front();
 			demands.pop_front();
@@ -153,7 +153,7 @@ void DemandCalculator::CalcDemand(LinkGraphComponent *graph, Tscaler scaler)
 
 /**
  * Create the DemandCalculator and immediately do the calculation.
- * @param graph the component to calculate the demands for
+ * @param graph Component to calculate the demands for.
  */
 DemandCalculator::DemandCalculator(LinkGraphComponent *graph) :
 	max_distance(MapSizeX() + MapSizeY() + 1)
@@ -170,13 +170,13 @@ DemandCalculator::DemandCalculator(LinkGraphComponent *graph) :
 	}
 
 	switch (settings.GetDistributionType(cargo)) {
-	case DT_SYMMETRIC:
-		this->CalcDemand<SymmetricScaler>(graph, SymmetricScaler(settings.demand_size));
-		break;
-	case DT_ASYMMETRIC:
-		this->CalcDemand<AsymmetricScaler>(graph, AsymmetricScaler());
-		break;
-	default:
-		NOT_REACHED();
+		case DT_SYMMETRIC:
+			this->CalcDemand<SymmetricScaler>(graph, SymmetricScaler(settings.demand_size));
+			break;
+		case DT_ASYMMETRIC:
+			this->CalcDemand<AsymmetricScaler>(graph, AsymmetricScaler());
+			break;
+		default:
+			NOT_REACHED();
 	}
 }
