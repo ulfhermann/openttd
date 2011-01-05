@@ -260,8 +260,8 @@ void UpdateLandscapingLimits()
 {
 	Company *c;
 	FOR_ALL_COMPANIES(c) {
-		c->terraform_limit = min(c->terraform_limit + _settings_game.construction.terraform_per_64k_frames, _settings_game.construction.terraform_frame_burst << 16);
-		c->clear_limit     = min(c->clear_limit     + _settings_game.construction.clear_per_64k_frames,     _settings_game.construction.clear_frame_burst << 16);
+		c->terraform_limit = min(c->terraform_limit + _settings_game.construction.terraform_per_64k_frames, (uint32)_settings_game.construction.terraform_frame_burst << 16);
+		c->clear_limit     = min(c->clear_limit     + _settings_game.construction.clear_per_64k_frames,     (uint32)_settings_game.construction.clear_frame_burst << 16);
 	}
 }
 
@@ -906,8 +906,6 @@ CommandCost CmdCompanyCtrl(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 			delete c;
 			AI::BroadcastNewEvent(new AIEventCompanyBankrupt(c_index));
 			CompanyAdminBankrupt(c_index);
-			BuildOwnerLegend();
-			InvalidateWindowData(WC_SMALLMAP, 0, 1);
 			break;
 		}
 
