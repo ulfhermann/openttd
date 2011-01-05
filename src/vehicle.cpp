@@ -1828,15 +1828,15 @@ void Vehicle::CancelReservation(StationID next, Station *st)
 
 /**
  * A vehicle can leave the current station with cargo if:
- * - it can load cargo here OR (
- * - it could leave the last station with cargo AND
- * - it doesn't have to unload all cargo here)
+ * 1. it can load cargo here OR
+ * 2a. it could leave the last station with cargo AND
+ * 2b. it doesn't have to unload all cargo here.
  */
 bool Vehicle::CanLeaveWithCargo()
 {
-	return ((this->current_order.GetLoadType() & OLFB_NO_LOAD) == 0 ||
+	return (this->current_order.GetLoadType() & OLFB_NO_LOAD) == 0 ||
 			((this->current_order.GetUnloadType() & (OUFB_UNLOAD | OUFB_TRANSFER)) == 0 &&
-			this->last_loading_station != INVALID_STATION));
+			this->last_loading_station != INVALID_STATION);
 }
 
 void Vehicle::LeaveStation()
