@@ -69,12 +69,14 @@ selfaware-stationcargo: gitmake
 
 cargomap: flowmapping-core texteff multimap reservation selfaware-stationcargo
 
-reservation: gitmake 
+cargo-split-merge: gitmake
+
+reservation: cargo-split-merge
 
 multimap: gitmake 
 
 moving-average: gitmake 
 
-push: master gitmake patches cd ext-rating station-gui smallmap-stats flowmapping-core mcf demands components capacities smallmap-zoom-in texteff cargomap multimap reservation moving-average selfaware-stationcargo
+push: master gitmake patches cd ext-rating station-gui smallmap-stats flowmapping-core mcf demands components capacities smallmap-zoom-in texteff cargomap multimap reservation moving-average selfaware-stationcargo cargo-split-merge
 	git push github $(^F)
 
