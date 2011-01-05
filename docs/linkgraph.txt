@@ -24,3 +24,7 @@ updates and longer times until changes in capacities are accounted for.
 If you play a very large map with a complicated link graph you may want to
 raise the interval to avoid lags. The same holds for systems with slow
 CPUs.
+
+Another option to avoid excessive lags is to reduce the accuracy of link
+graph calculations. Generally the accurace is inversely correlated to the
+CPU requirements of the MCF algorithm.
