@@ -20,7 +20,7 @@
  * Class implementing moving average functionality. An instance of this class
  * can be used to get a meaningful (Monthly()) value from a moving average and
  * it can be used to do the decrease operation.
- * @tparam Tvalue a type supporting operator*(uint), operator/(uint),
+ * @tparam Tvalue Type supporting operator*(uint), operator/(uint),
  * operator*=(uint) and operator/=(uint) with the usual semantics.
  */
 template<class Tvalue>
@@ -30,8 +30,8 @@ protected:
 
 public:
 	/**
-	 * Create a moving average
-	 * @param length the length to be used
+	 * Create a moving average.
+	 * @param length Length to be used.
 	 */
 	FORCEINLINE MovingAverage(uint length) : length(length)
 	{
@@ -39,8 +39,8 @@ public:
 	}
 
 	/**
-	 * Get the length of this moving average
-	 * @return the length
+	 * Get the length of this moving average.
+	 * @return Length.
 	 */
 	FORCEINLINE uint Length() const
 	{
@@ -48,16 +48,24 @@ public:
 	}
 
 	/**
-	 * Get the current average for one month from the given value
-	 * @param value the raw moving average
-	 * @return the monthly average
+	 * Get the current average for one month from the given value.
+	 * @param value Raw moving average.
+	 * @return Monthly average.
 	 */
 	FORCEINLINE Tvalue Monthly(const Tvalue &value) const
 	{
-		return value * 30 / (this->length);
+		return (value * 30) / (this->length);
 	}
 
-	Tvalue &Decrease(Tvalue &value) const;
+	/**
+	 * Decrease the given value using this moving average.
+	 * @param value Moving average value to be decreased.
+	 * @return Decreased value.
+	 */
+	FORCEINLINE Tvalue &Decrease(Tvalue &value) const
+	{
+		return (value * this->length) / (this->length + 1);
+	}
 };
 
 template<class Titem> void RunAverages();
