@@ -325,7 +325,7 @@ public:
 			this->parent = NULL;
 		}
 	}
-	
+
 	uint AddFlow(uint f, LinkGraphComponent *graph, bool only_positive);
 	void Fork(Path *base, uint cap, int free_cap, uint dist);
 
