@@ -64,7 +64,7 @@ public:
 	 */
 	FORCEINLINE Tvalue &Decrease(Tvalue &value) const
 	{
-		return (value * this->length) / (this->length + 1);
+		return value = (value * this->length) / (this->length + 1);
 	}
 };
 
