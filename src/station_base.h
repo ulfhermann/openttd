@@ -184,11 +184,11 @@ struct GoodsEntry {
 	byte rating;
 	byte last_speed;
 	byte last_age;
-	byte amount_fract;      ///< Fractional part of the amount in the cargo list
-	StationCargoList cargo; ///< The cargo packets of cargo waiting in this station
-	uint supply;            ///< Cargo supplied last month
-	uint supply_new;        ///< Cargo supplied so far this month
-	LinkStatMap link_stats; ///< capacities and usage statistics for outgoing links
+	byte amount_fract;      ///< Fractional part of the amount in the cargo list.
+	StationCargoList cargo; ///< The cargo packets of cargo waiting in this station.
+	uint supply;            ///< Cargo supplied last month.
+	uint supply_new;        ///< Cargo supplied so far this month.
+	LinkStatMap link_stats; ///< Capacities and usage statistics for outgoing links.
 };
 
 /** All airport-related information. Only valid if tile != INVALID_TILE. */
