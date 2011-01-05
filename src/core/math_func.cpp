@@ -50,11 +50,12 @@ int GreatestCommonDivisor(int a, int b)
 /**
  * Deterministic approximate division.
  * Cancels out division errors stemming from the integer nature of the division over multiple runs.
- * @param a the dividend
- * @param b the divisor
- * @return a/b or (a/b)+1
+ * @param a Dividend.
+ * @param b Divisor.
+ * @return a/b or (a/b)+1.
  */
-int DivideApprox(int a, int b) {
+int DivideApprox(int a, int b)
+{
 	int random_like = ((a + b) * (a - b)) % b;
 
 	int remainder = a % b;
