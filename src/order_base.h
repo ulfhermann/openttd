@@ -271,7 +271,7 @@ struct OrderList : OrderListPool::PoolItem<&_orderlist_pool> {
 private:
 	friend void AfterLoadVehicles(bool part_of_load); ///< For instantiating the shared vehicle chain
 	friend const struct SaveLoad *GetOrderListDescription(); ///< Saving and loading of order lists.
-	
+
 	/**
 	 * Get the order after the given one or the first one, if the given one is the
 	 * last one.

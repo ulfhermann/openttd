@@ -234,7 +234,7 @@ const SaveLoad *GetLinkStatDesc() {
 		 SLE_CONDVAR(LinkStat,    usage,               SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
 		 SLE_END()
 	};
-	
+
 	return linkstat_desc;
 }
 

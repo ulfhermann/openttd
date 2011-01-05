@@ -306,7 +306,7 @@ StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_order, StationID
 	 * we're at, we have to check the current order; otherwise we have to check
 	 * the next one.
 	 */
-	if (curr_station == INVALID_STATION || 
+	if (curr_station == INVALID_STATION ||
 			!(curr->IsType(OT_GOTO_STATION) || curr->IsType(OT_AUTOMATIC)) ||
 			curr_station != curr->GetDestination()) {
 		return this->GetNextStoppingStation(curr, curr_station, 0);
@@ -772,7 +772,7 @@ void InsertOrder(Vehicle *v, Order *new_o, VehicleOrderID sel_ord)
 		}
 		/* Update any possible open window of the vehicle */
 		InvalidateVehicleOrder(u, INVALID_VEH_ORDER_ID | (sel_ord << 8));
-		
+
 		RecalcFrozenIfLoading(u);
 	}
 

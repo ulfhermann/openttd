@@ -40,12 +40,12 @@ private:
 	 * This is a moving average. Use MovingAverage::Monthly() to get a meaningful value
 	 */
 	uint capacity;
-	
+
 	/**
 	 * capacity of currently loading vehicles
 	 */
 	uint frozen;
-	
+
 	/**
 	 * usage of the link.
 	 * This is a moving average. Use MovingAverage::Monthly() to get a meaningful value
