@@ -74,7 +74,7 @@ void LinkGraph::CreateComponent(Station *first)
 		search_queue.pop();
 
 		const LinkStatMap &links = source->goods[this->cargo].link_stats;
-		for(LinkStatMap::const_iterator i = links.begin(); i != links.end(); ++i) {
+		for (LinkStatMap::const_iterator i = links.begin(); i != links.end(); ++i) {
 			Station *target = Station::GetIfValid(i->first);
 			if (target == NULL) continue;
 
@@ -84,9 +84,9 @@ void LinkGraph::CreateComponent(Station *first)
 				NodeID node = this->AddNode(target);
 				index[target] = node;
 
-				this->AddEdge(index[source], node,	i->second.Capacity());
+				this->AddEdge(index[source], node, i->second.Capacity());
 			} else {
-				this->AddEdge(index[source], index_it->second,	i->second.Capacity());
+				this->AddEdge(index[source], index_it->second, i->second.Capacity());
 			}
 		}
 	}
@@ -201,7 +201,7 @@ NodeID LinkGraphComponent::AddNode(Station *st)
 			HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
 
 	std::vector<Edge> &new_edges = this->edges[this->num_nodes];
-	for(NodeID i = 0; i < this->num_nodes; ++i) {
+	for (NodeID i = 0; i < this->num_nodes; ++i) {
 		uint distance = DistanceManhattan(st->xy, Station::Get(this->nodes[i].station)->xy);
 		if (do_resize) this->edges[i].push_back(Edge());
 		new_edges[i].Init(distance);
@@ -242,7 +242,7 @@ void LinkGraphComponent::SetSize()
 		this->edges.resize(this->num_nodes, std::vector<Edge>(this->num_nodes));
 	}
 
-	for(uint i = 0; i < this->num_nodes; ++i) {
+	for (uint i = 0; i < this->num_nodes; ++i) {
 		this->nodes[i].Init();
 		for (uint j = 0; j < this->num_nodes; ++j) {
 			this->edges[i][j].Init();
@@ -297,8 +297,8 @@ void LinkGraph::Join()
  */
 /* static */ void LinkGraphJob::ClearHandlers()
 {
-	for(HandlerList::iterator i = _handlers.begin(); i != _handlers.end(); ++i) {
-		delete (*i);
+	for (HandlerList::iterator i = _handlers.begin(); i != _handlers.end(); ++i) {
+		delete *i;
 	}
 	_handlers.clear();
 }
@@ -308,11 +308,10 @@ void LinkGraph::Join()
  */
 FORCEINLINE void LinkGraphJob::Join()
 {
-	if (this->thread != NULL) {
-		this->thread->Join();
-		delete this->thread;
-		this->thread = NULL;
-	}
+	if (this->thread == NULL) return;
+	this->thread->Join();
+	delete this->thread;
+	this->thread = NULL;
 }
 
 /**

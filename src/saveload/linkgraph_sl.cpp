@@ -21,10 +21,13 @@ const SettingDesc *GetSettingDescription(uint index);
  * Get a SaveLoad array for a link graph. The settings struct is derived from
  * the global settings saveload array. The exact entries are calculated when the function
  * is called the first time.
- * @return an array of SaveLoad structs
+ * It's necessary to keep a copy of the settings for each link graph so that you can
+ * change the settings while in-game and still not mess with current link graph runs.
+ * Of course the settings have to be saved and loaded, too, to avoid desyncs.
+ * @return Array of SaveLoad structs.
  */
-const SaveLoad *GetLinkGraphDesc() {
-
+const SaveLoad *GetLinkGraphDesc()
+{
 	static std::vector<SaveLoad> saveloads;
 	static const char *prefix = "linkgraph.";
 

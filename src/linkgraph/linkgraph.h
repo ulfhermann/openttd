@@ -220,6 +220,7 @@ private:
  */
 class LinkGraph : public LinkGraphJob {
 public:
+	/* Those are ticks where not much else is happening, so a small lag might go unnoticed. */
 	static const uint COMPONENTS_JOIN_TICK  = 21; ///< tick when jobs are joined every day
 	static const uint COMPONENTS_SPAWN_TICK = 58; ///< tick when jobs are spawned every day
 
