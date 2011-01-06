@@ -248,6 +248,7 @@ private:
  */
 class LinkGraph : public LinkGraphJob {
 public:
+	/* Those are ticks where not much else is happening, so a small lag might go unnoticed. */
 	static const uint COMPONENTS_JOIN_TICK  = 21; ///< tick when jobs are joined every day
 	static const uint COMPONENTS_SPAWN_TICK = 58; ///< tick when jobs are spawned every day
 
@@ -277,64 +278,65 @@ class Path {
 public:
 	Path(NodeID n, bool source = false);
 
-	/** get the node this leg passes. */
+	/** Get the node this leg passes. */
 	FORCEINLINE NodeID GetNode() const {return this->node;}
 
-	/** get the overall origin of the path. */
+	/** Get the overall origin of the path. */
 	FORCEINLINE NodeID GetOrigin() const {return this->origin;}
 
-	/** get the parent leg of this one. */
+	/** Get the parent leg of this one. */
 	FORCEINLINE Path *GetParent() {return this->parent;}
 
-	/** get the overall capacity of the path. */
+	/** Get the overall capacity of the path. */
 	FORCEINLINE uint GetCapacity() const {return this->capacity;}
 
-	/** get the free capacity of the path. */
+	/** Get the free capacity of the path. */
 	FORCEINLINE int GetFreeCapacity() const {return this->free_capacity;}
 
-	/** get ratio of free * 16 (so that we get fewer 0) /
-	 * overall capacity + 1 (so that we don't divide by 0)
+	/**
+	 * Get ratio of free * 16 (so that we get fewer 0) /
+	 * overall capacity + 1 (so that we don't divide by 0).
 	 */
 	FORCEINLINE int GetCapacityRatio() const {return (this->free_capacity << 4) / (this->capacity + 1);}
 
-	/** get the overall distance of the path. */
+	/** Get the overall distance of the path. */
 	FORCEINLINE uint GetDistance() const {return this->distance;}
 
-	/** reduce the flow on this leg only by the specified amount. */
+	/** Reduce the flow on this leg only by the specified amount. */
 	FORCEINLINE void ReduceFlow(uint f) {this->flow -= f;}
 
-	/** increase the flow on this leg only by the specified amount. */
+	/** Increase the flow on this leg only by the specified amount. */
 	FORCEINLINE void AddFlow(uint f) {this->flow += f;}
 
-	/** get the flow on this leg. */
+	/** Get the flow on this leg. */
 	FORCEINLINE uint GetFlow() const {return this->flow;}
 
-	/** get the number of "forked off" child legs of this one */
+	/** Get the number of "forked off" child legs of this one. */
 	FORCEINLINE uint GetNumChildren() const {return this->num_children;}
 
 	/**
-	 * detach this path from its parent.
+	 * Detach this path from its parent.
 	 */
-	FORCEINLINE void UnFork()
+	FORCEINLINE void Detach()
 	{
 		if (this->parent != NULL) {
 			this->parent->num_children--;
 			this->parent = NULL;
 		}
 	}
-	
+
 	uint AddFlow(uint f, LinkGraphComponent *graph, bool only_positive);
 	void Fork(Path *base, uint cap, int free_cap, uint dist);
 
 protected:
-	uint distance;     ///< sum(distance of all legs up to this one)
-	uint capacity;     ///< this capacity is min(capacity) fom all edges
-	int free_capacity; ///< this capacity is min(edge.capacity - edge.flow) for the current run of dijkstra
-	uint flow;         ///< this is the flow the current run of the mcf solver assigns
-	NodeID node;       ///< the link graph node this leg passes
-	NodeID origin;     ///< the link graph node this path originates from
-	uint num_children; ///< the number of child legs that have been forked from this path
-	Path *parent;      ///< the parent leg of this one
+	uint distance;     ///< Sum(distance of all legs up to this one).
+	uint capacity;     ///< This capacity is min(capacity) fom all edges.
+	int free_capacity; ///< This capacity is min(edge.capacity - edge.flow) for the current run of dijkstra.
+	uint flow;         ///< Flow the current run of the mcf solver assigns.
+	NodeID node;       ///< Link graph node this leg passes.
+	NodeID origin;     ///< Link graph node this path originates from.
+	uint num_children; ///< Number of child legs that have been forked from this path.
+	Path *parent;      ///< Parent leg of this one.
 };
 
 void InitializeLinkGraphs();
