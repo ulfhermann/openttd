@@ -36,7 +36,7 @@ CommandCost CheckTileOwnership(TileIndex tile);
 void MarkTileDirtyByTile(TileIndex tile);
 
 void ShowCostOrIncomeAnimation(int x, int y, int z, Money cost);
-void ShowFeederIncomeAnimation(int x, int y, int z, Money cost);
+void ShowFeederIncomeAnimation(int x, int y, int z, Money transfer, Money income);
 
 void AskExitGame();
 void AskExitToGameMenu();
