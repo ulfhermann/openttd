@@ -9,6 +9,7 @@
 
 /** @file moving_average.cpp Implementation of moving average functions. */
 
+#include "stdafx.h"
 #include "moving_average.h"
 #include "date_func.h"
 #include "station_base.h"
