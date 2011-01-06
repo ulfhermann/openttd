@@ -262,10 +262,10 @@ Order *OrderList::GetOrderAt(int index) const
 
 /**
  * Recursively determine the next deterministic station to stop at.
- * @param next the first order to check
- * @param curr_station the station the vehicle is just visiting or INVALID_STATION
- * @param hops the number of orders we have already checked.
- * @return the next stoppping station or INVALID_STATION
+ * @param next First order to check.
+ * @param curr_station Station the vehicle is just visiting or INVALID_STATION.
+ * @param hops Number of orders we have already checked.
+ * @return Next stoppping station or INVALID_STATION.
  */
 StationID OrderList::GetNextStoppingStation(const Order *next, StationID curr_station, uint hops) const
 {
@@ -290,9 +290,9 @@ StationID OrderList::GetNextStoppingStation(const Order *next, StationID curr_st
 
 /**
  * Get the next station the vehicle will stop at, if that is deterministic.
- * @param curr_order the ID of the current order
- * @param curr_station the station the vehicle is just visiting or INVALID_STATION
- * @return The ID of the next station the vehicle will stop at or INVALID_STATION
+ * @param curr_order ID of the current order.
+ * @param curr_station Station the vehicle is just visiting or INVALID_STATION.
+ * @return ID of the next station the vehicle will stop at or INVALID_STATION.
  */
 StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_order, StationID curr_station) const
 {
@@ -306,7 +306,7 @@ StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_order, StationID
 	 * we're at, we have to check the current order; otherwise we have to check
 	 * the next one.
 	 */
-	if (curr_station == INVALID_STATION || 
+	if (curr_station == INVALID_STATION ||
 			!(curr->IsType(OT_GOTO_STATION) || curr->IsType(OT_AUTOMATIC)) ||
 			curr_station != curr->GetDestination()) {
 		return this->GetNextStoppingStation(curr, curr_station, 0);
@@ -772,7 +772,7 @@ void InsertOrder(Vehicle *v, Order *new_o, VehicleOrderID sel_ord)
 		}
 		/* Update any possible open window of the vehicle */
 		InvalidateVehicleOrder(u, INVALID_VEH_ORDER_ID | (sel_ord << 8));
-		
+
 		RecalcFrozenIfLoading(u);
 	}
 
