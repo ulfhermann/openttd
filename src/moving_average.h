@@ -12,7 +12,6 @@
 #ifndef MOVING_AVERAGE_H_
 #define MOVING_AVERAGE_H_
 
-#include "stdafx.h"
 #include "settings_type.h"
 #include "core/math_func.hpp"
 
@@ -48,9 +47,14 @@ public:
 	}
 
 	/**
-	 * Get the current average for one month from the given value.
+	 * Get the current average for 30 "length units" from the given value.
+	 * Mind that no one forces you to decrease the average daily. If you
+	 * don't this is not a real "monthly" value. In any case it's not really
+	 * "monthly" as we don't account for months with different numbers of
+	 * days than 30. It doesn't matter, though. The point is to get an
+	 * average over a defined past timeframe.
 	 * @param value Raw moving average.
-	 * @return Monthly average.
+	 * @return 30 "length unit" average.
 	 */
 	FORCEINLINE Tvalue Monthly(const Tvalue &value) const
 	{
