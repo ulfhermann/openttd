@@ -767,12 +767,13 @@ void ShowFeederIncomeAnimation(int x, int y, int z, Money transfer, Money income
 	if (income == 0) {
 		AddTextEffect(STR_FEEDER, pt.x, pt.y, DAY_TICKS, TE_RISING);
 	} else {
-		SetDParam(1, income);
-		if (income > 0) {
-			AddTextEffect(STR_FEEDER_INCOME, pt.x, pt.y, DAY_TICKS, TE_RISING);
-		} else {
-			AddTextEffect(STR_FEEDER_COST, pt.x, pt.y, DAY_TICKS, TE_RISING);
+		StringID msg = STR_FEEDER_COST;
+		if (income < 0) {
+			income = -income;
+			msg = STR_FEEDER_INCOME;
 		}
+		SetDParam(1, income);
+		AddTextEffect(msg, pt.x, pt.y, DAY_TICKS, TE_RISING);
 	}
 }
 
