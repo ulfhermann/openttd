@@ -7,7 +7,7 @@
  * See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with OpenTTD. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @file cargopacket.cpp Implementation of the cargo packets */
+/** @file cargopacket.cpp Implementation of the cargo packets. */
 
 #include "stdafx.h"
 #include "station_base.h"
@@ -37,12 +37,12 @@ CargoPacket::CargoPacket()
 }
 
 /**
- * Creates a new cargo packet
- * @param source      the source station of the packet
- * @param source_xy   the source location of the packet
- * @param count       the number of cargo entities to put in this packet
- * @param source_type the 'type' of source the packet comes from (for subsidies)
- * @param source_id   the actual source of the packet (for subsidies)
+ * Creates a new cargo packet.
+ * @param source      Source station of the packet.
+ * @param source_xy   Source location of the packet.
+ * @param count       Number of cargo entities to put in this packet.
+ * @param source_type 'Type' of source the packet comes from (for subsidies).
+ * @param source_id   Actual source of the packet (for subsidies).
  * @pre count != 0
  * @note We have to zero memory ourselves here because we are using a 'new'
  * that, in contrary to all other pools, does not memset to 0.
@@ -63,34 +63,59 @@ CargoPacket::CargoPacket(StationID source, TileIndex source_xy, uint16 count, So
 /**
  * Creates a new cargo packet. Initializes the fields that cannot be changed later.
  * Used when loading or splitting packets.
- * @param count           the number of cargo entities to put in this packet
- * @param days_in_transit number of days the cargo has been in transit
- * @param source          the station the cargo was initially loaded
- * @param source_xy       the station location the cargo was initially loaded
- * @param loaded_at_xy    the location the cargo was loaded last
- * @param feeder_share    feeder share the packet has already accumulated
- * @param source_type     the 'type' of source the packet comes from (for subsidies)
- * @param source_id       the actual source of the packet (for subsidies)
+ * @param count           Number of cargo entities to put in this packet.
+ * @param days_in_transit Number of days the cargo has been in transit.
+ * @param source          Station the cargo was initially loaded.
+ * @param source_xy       Station location the cargo was initially loaded.
+ * @param loaded_at_xy    Location the cargo was loaded last.
+ * @param feeder_share    Feeder share the packet has already accumulated.
+ * @param source_type     'Type' of source the packet comes from (for subsidies).
+ * @param source_id       Actual source of the packet (for subsidies).
  * @note We have to zero memory ourselves here because we are using a 'new'
  * that, in contrary to all other pools, does not memset to 0.
  */
 CargoPacket::CargoPacket(uint16 count, byte days_in_transit, StationID source, TileIndex source_xy, TileIndex loaded_at_xy, Money feeder_share, SourceType source_type, SourceID source_id) :
-		feeder_share(feeder_share),
-		count(count),
-		days_in_transit(days_in_transit),
-		source_id(source_id),
-		source(source),
-		source_xy(source_xy),
-		loaded_at_xy(loaded_at_xy)
+	feeder_share(feeder_share),
+	count(count),
+	days_in_transit(days_in_transit),
+	source_id(source_id),
+	source(source),
+	source_xy(source_xy),
+	loaded_at_xy(loaded_at_xy)
 {
 	assert(count != 0);
 	this->source_type = source_type;
 }
 
 /**
- * Invalidates (sets source_id to INVALID_SOURCE) all cargo packets from given source
- * @param src_type type of source
- * @param src index of source
+ * Split this packet in two and return the split off part.
+ * @param new_size Size of the remaining part.
+ * @return Split off part.
+ */
+FORCEINLINE CargoPacket *CargoPacket::Split(uint new_size)
+{
+       Money fs = this->feeder_share * new_size / static_cast<uint>(this->count);
+       CargoPacket *cp_new = new CargoPacket(new_size, this->days_in_transit, this->source, this->source_xy, this->loaded_at_xy, fs, this->source_type, this->source_id);
+       this->feeder_share -= fs;
+       this->count -= new_size;
+       return cp_new;
+}
+
+/**
+ * Merge another packet into this one.
+ * @param cp Packet to be merged in.
+ */
+FORCEINLINE void CargoPacket::Merge(CargoPacket *cp)
+{
+       this->count += cp->count;
+       this->feeder_share += cp->feeder_share;
+       delete cp;
+}
+
+/**
+ * Invalidates (sets source_id to INVALID_SOURCE) all cargo packets from given source.
+ * @param src_type Type of source.
+ * @param src Index of source.
  */
 /* static */ void CargoPacket::InvalidateAllFrom(SourceType src_type, SourceID src)
 {
@@ -101,33 +126,8 @@ CargoPacket::CargoPacket(uint16 count, byte days_in_transit, StationID source, T
 }
 
 /**
- * Split this packet in two and return the split off part.
- * @param new_size size of the remaining part
- * @return the split off part
- */
-FORCEINLINE CargoPacket *CargoPacket::Split(uint new_size)
-{
-	Money fs = this->feeder_share * new_size / static_cast<uint>(this->count);
-	CargoPacket *cp_new = new CargoPacket(new_size, this->days_in_transit, this->source, this->source_xy, this->loaded_at_xy, fs, this->source_type, this->source_id);
-	this->feeder_share -= fs;
-	this->count -= new_size;
-	return cp_new;
-}
-
-/**
- * Merge another packet into this one
- * @param cp the packet to be merged in
- */
-FORCEINLINE void CargoPacket::Merge(CargoPacket *cp)
-{
-	this->count += cp->count;
-	this->feeder_share += cp->feeder_share;
-	delete cp;
-}
-
-/**
- * Invalidates (sets source to INVALID_STATION) all cargo packets from given station
- * @param sid the station that gets removed
+ * Invalidates (sets source to INVALID_STATION) all cargo packets from given station.
+ * @param sid Station that gets removed.
  */
 /* static */ void CargoPacket::InvalidateAllFrom(StationID sid)
 {
@@ -144,7 +144,7 @@ FORCEINLINE void CargoPacket::Merge(CargoPacket *cp)
  */
 
 /**
- * destroy the cargolist ("frees" all cargo packets)
+ * Destroy the cargolist ("frees" all cargo packets).
  */
 template <class Tinst, class Tcont>
 CargoList<Tinst, Tcont>::~CargoList()
@@ -156,8 +156,8 @@ CargoList<Tinst, Tcont>::~CargoList()
 
 /**
  * Update the cached values to reflect the removal of this packet.
- * Decreases count and days_in_transit
- * @param cp Packet to be removed from cache
+ * Decreases count and days_in_transit.
+ * @param cp Packet to be removed from cache.
  */
 template <class Tinst, class Tcont>
 void CargoList<Tinst, Tcont>::RemoveFromCache(const CargoPacket *cp)
@@ -168,8 +168,8 @@ void CargoList<Tinst, Tcont>::RemoveFromCache(const CargoPacket *cp)
 
 /**
  * Update the cache to reflect adding of this packet.
- * Increases count and days_in_transit
- * @param cp a new packet to be inserted
+ * Increases count and days_in_transit.
+ * @param cp New packet to be inserted.
  */
 template <class Tinst, class Tcont>
 void CargoList<Tinst, Tcont>::AddToCache(const CargoPacket *cp)
@@ -180,12 +180,12 @@ void CargoList<Tinst, Tcont>::AddToCache(const CargoPacket *cp)
 
 /**
  * Appends the given cargo packet. Tries to merge it with another one in the
- * packets list. if no fitting packet is found, appends it.
+ * packets list. If no fitting packet is found, appends it.
  * @warning After appending this packet may not exist anymore!
  * @note Do not use the cargo packet anymore after it has been appended to this CargoList!
- * @param cp the cargo packet to add
- * @param update_cache if false, the cache is not updated; used when loading from
- *        the reservation list
+ * @param cp Cargo packet to add.
+ * @param update_cache If false, the cache is not updated; used when loading from
+ *        the reservation list.
  * @pre cp != NULL
  */
 void VehicleCargoList::Append(CargoPacket *cp, bool update_cache)
@@ -195,10 +195,7 @@ void VehicleCargoList::Append(CargoPacket *cp, bool update_cache)
 	for (CargoPacketList::reverse_iterator it(this->packets.rbegin()); it != this->packets.rend(); it++) {
 		CargoPacket *icp = *it;
 		if (VehicleCargoList::AreMergable(icp, cp) && icp->count + cp->count <= CargoPacket::MAX_COUNT) {
-			icp->count        += cp->count;
-			icp->feeder_share += cp->feeder_share;
-
-			delete cp;
+			icp->Merge(cp);
 			return;
 		}
 	}
@@ -210,7 +207,7 @@ void VehicleCargoList::Append(CargoPacket *cp, bool update_cache)
 /**
  * Truncates the cargo in this list to the given amount. It leaves the
  * first count cargo entities and removes the rest.
- * @param max_remaining the maximum amount of entities to be in the list after the command
+ * @param max_remaining Maximum amount of entities to be in the list after the command.
  */
 template <class Tinst, class Tcont>
 void CargoList<Tinst, Tcont>::Truncate(uint max_remaining)
@@ -241,7 +238,7 @@ void CargoList<Tinst, Tcont>::Truncate(uint max_remaining)
 
 /**
  * Reserves a packet for later loading and adds it to the cache.
- * @param cp the packet to be reserved
+ * @param cp Packet to be reserved.
  */
 void VehicleCargoList::Reserve(CargoPacket *cp)
 {
@@ -253,8 +250,8 @@ void VehicleCargoList::Reserve(CargoPacket *cp)
 
 /**
  * Returns all reserved cargo to the station and removes it from the cache.
- * @param ID of next the station the cargo wants to go next
- * @param dest the station the cargo is returned to
+ * @param ID of next the station the cargo wants to go next.
+ * @param dest Station the cargo is returned to.
  */
 void VehicleCargoList::Unreserve(StationID next, StationCargoList *dest)
 {
@@ -270,8 +267,8 @@ void VehicleCargoList::Unreserve(StationID next, StationCargoList *dest)
 
 /**
  * Load packets from the reservation list.
- * @params max_move the number of cargo to load
- * @return the amount of cargo actually loaded
+ * @params max_move Number of cargo to load.
+ * @return Amount of cargo actually loaded.
  */
 uint VehicleCargoList::LoadReserved(uint max_move)
 {
@@ -299,12 +296,12 @@ uint VehicleCargoList::LoadReserved(uint max_move)
 /**
  * Move a single packet or part of it from this list to a vehicle and increment
  * the given iterator.
- * @param dest the vehicle cargo list to move to
- * @param it an iterator pointing to the packet
- * @param cap maximum amount of cargo to be moved
- * @param load_place new loaded_at for the packet
- * @param reserve if the packet should be loaded on or reserved for the vehicle
- * @return the actual amount of cargo which has been moved
+ * @param dest       Vehicle cargo list to move to.
+ * @param it         Iterator pointing to the packet.
+ * @param cap        Maximum amount of cargo to be moved.
+ * @param load_place New loaded_at for the packet.
+ * @param reserve    If the packet should be loaded on or reserved for the vehicle.
+ * @return           Actual amount of cargo which has been moved.
  */
 template<class Tinst, class Tcont>
 uint CargoList<Tinst, Tcont>::MovePacket(VehicleCargoList *dest, Iterator &it, uint cap, TileIndex load_place, bool reserve)
@@ -393,10 +390,10 @@ VehicleCargoList::~VehicleCargoList()
 /**
  * Deliver a specific packet or part of it to a station and handle payment. The
  * given iterator is incremented in the process.
- * @param it iterator pointing to the packet to be delivered
- * @param cap maximum amount of cargo to be unloaded
- * @param payment the payment object to use for payment
- * @return the amount of cargo actually unloaded
+ * @param it      Iterator pointing to the packet to be delivered.
+ * @param cap     Maximum amount of cargo to be unloaded.
+ * @param payment Payment object to use for payment.
+ * @return        Amount of cargo actually unloaded.
  */
 uint VehicleCargoList::DeliverPacket(Iterator &it, uint cap, CargoPayment *payment) {
 	CargoPacket *p = *it;
@@ -458,11 +455,11 @@ uint VehicleCargoList::TransferPacket(Iterator &it, uint cap, StationCargoList *
 /**
  * Determine what a cargo packet arriving at the station this list belongs to
  * will do, using the "old", non-cargodist algorithm.
- * @param flags unload flags telling if the cargo is accepted and what order
- *        flags there are
- * @param source ID of the packets source station
- * @return an unload type (deliver, transfer, keep) telling what to do with the
- *         packet
+ * @param flags  Unload flags telling if the cargo is accepted and what order
+ *               flags there are.
+ * @param source ID of the packets source station.
+ * @return       Unload type (deliver, transfer, keep) telling what to do with
+ *               the packet.
  */
 UnloadType StationCargoList::WillUnloadOld(byte flags, StationID source)
 {
@@ -491,15 +488,15 @@ UnloadType StationCargoList::WillUnloadOld(byte flags, StationID source)
 /**
  * Determine what a cargo packet arriving at the station this list belongs to
  * will do, using the Cargodist algorithm.
- * @param flags  unload flags telling if the cargo is accepted and what order
- *               flags there are
- * @param next   The station the vehicle the cargo is coming from will
- *               visit next (or INVALID_STATION if unknown)
- * @param via    The station the cargo wants to go to next. If that is this
+ * @param flags  Unload flags telling if the cargo is accepted and what order
+ *               flags there are.
+ * @param next   Station the vehicle the cargo is coming from will
+ *               visit next (or INVALID_STATION if unknown).
+ * @param via    Station the cargo wants to go to next. If that is this
  *               station the cargo wants to be delivered.
- * @param source ID of the packets source station
- * @return an unload type (deliver, transfer, keep) telling what to do with the
- *         packet
+ * @param source ID of the packets source station.
+ * @return       Unload type (deliver, transfer, keep) telling what to do with
+ *               the packet.
  */
 UnloadType StationCargoList::WillUnloadCargoDist(byte flags, StationID next, StationID via, StationID source)
 {
@@ -558,23 +555,23 @@ void VehicleCargoList::SwapReserved()
 /**
  * Moves the given amount of cargo from a vehicle to a station.
  * Depending on the value of flags the side effects of this function differ:
- * 	- OUFB_UNLOAD_IF_POSSIBLE and dest->acceptance_pickup & GoodsEntry::ACCEPTANCE:
+ *  - OUFB_UNLOAD_IF_POSSIBLE and dest->acceptance_pickup & GoodsEntry::ACCEPTANCE:
  *  	packets are accepted here and may be unloaded and/or delivered (=destroyed);
  *  	if not using cargodist: all packets are unloaded and delivered
- *  	if using cargodist: only packets which have this station as final destination are unloaded and delivered
- *  	if using cargodist: other packets may or may not be unloaded, depending on next_station
+ *  	if using cargodist: only packets which have this station as final destination are unloaded and delivered.
+ *  	if using cargodist: other packets may or may not be unloaded, depending on next_station.
  *  	if GoodsEntry::ACCEPTANCE is not set and using cargodist: packets may still be unloaded, but not delivered.
  *  - OUFB_UNLOAD: unload all packets unconditionally;
- *  	if OUF_UNLOAD_IF_POSSIBLE set and OUFB_TRANSFER not set: also deliver packets (no matter if using cargodist)
+ *  	if OUF_UNLOAD_IF_POSSIBLE set and OUFB_TRANSFER not set: also deliver packets (no matter if using cargodist).
  *  - OUFB_TRANSFER: don't deliver any packets;
- *  	overrides delivering aspect of OUFB_UNLOAD_IF_POSSIBLE
- * @param source       the vehicle cargo list to take the cargo from
- * @param max_unload   the maximum amount of cargo entities to move
- * @param flags        how to handle the moving (side effects)
- * @param next         the next unloading station in the vehicle's order list
- * @param has_stopped  the vehicle has stopped at this station before, so don't update the flow stats for kept cargo
- * @param payment      the payment object to be updated when delivering/transferring
- * @return the number of cargo entities actually moved
+ *  	overrides delivering aspect of OUFB_UNLOAD_IF_POSSIBLE.
+ * @param source       Vehicle cargo list to take the cargo from.
+ * @param max_unload   Maximum amount of cargo entities to move.
+ * @param flags        How to handle the moving (side effects).
+ * @param next         Next unloading station in the vehicle's order list.
+ * @param has_stopped  Vehicle has stopped at this station before, so don't update the flow stats for kept cargo.
+ * @param payment      Payment object to be updated when delivering/transferring.
+ * @return Number of cargo entities actually moved.
  */
 uint StationCargoList::TakeFrom(VehicleCargoList *source, uint max_unload, OrderUnloadFlags order_flags, StationID next, bool has_stopped, CargoPayment *payment)
 {
@@ -639,8 +636,8 @@ uint StationCargoList::TakeFrom(VehicleCargoList *source, uint max_unload, Order
 
 /**
  * Update the cached values to reflect the removal of this packet.
- * Decreases count, feeder share and days_in_transit
- * @param cp Packet to be removed from cache
+ * Decreases count, feeder share and days_in_transit.
+ * @param cp Packet to be removed from cache.
  */
 void VehicleCargoList::RemoveFromCache(const CargoPacket *cp)
 {
@@ -650,8 +647,8 @@ void VehicleCargoList::RemoveFromCache(const CargoPacket *cp)
 
 /**
  * Update the cache to reflect adding of this packet.
- * Increases count, feeder share and days_in_transit
- * @param cp a new packet to be inserted
+ * Increases count, feeder share and days_in_transit.
+ * @param cp New packet to be inserted.
  */
 void VehicleCargoList::AddToCache(const CargoPacket *cp)
 {
@@ -661,9 +658,9 @@ void VehicleCargoList::AddToCache(const CargoPacket *cp)
 
 /**
  * Moves the given amount of cargo to another vehicle (during autoreplace).
- * @param dest         the destination to move the cargo to
- * @param cap          the maximum amount of cargo entities to move
- * @return             the amount of cargo actually moved
+ * @param dest         Destination to move the cargo to.
+ * @param cap          Maximum amount of cargo entities to move.
+ * @return             Amount of cargo actually moved.
  */
 uint VehicleCargoList::MoveTo(VehicleCargoList *dest, uint cap)
 {
