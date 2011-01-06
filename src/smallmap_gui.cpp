@@ -594,7 +594,7 @@ class SmallMapWindow : public Window {
 
 	typedef std::list<VehicleAndPosition> VehicleList;
 	VehicleList vehicles_on_map; ///< cached vehicle positions to avoid glitches
-	
+
 	/** Available kinds of zoomlevel changes. */
 	enum ZoomLevelChange {
 		ZLC_INITIALIZE, ///< Initialize zoom level.
@@ -1008,7 +1008,7 @@ class SmallMapWindow : public Window {
 		void *ptr = blitter->MoveTo(dpi->dst_ptr, -dx - 4, 0);
 		int x = - dx - 4;
 		int y = 0;
-		int increment = this->zoom > 0 ? this->zoom * TILE_SIZE : TILE_SIZE / (-this->zoom); 
+		int increment = this->zoom > 0 ? this->zoom * TILE_SIZE : TILE_SIZE / (-this->zoom);
 
 		for (;;) {
 			/* Distance from left edge */
