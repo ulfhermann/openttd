@@ -673,7 +673,7 @@ class SmallMapWindow : public Window {
 
 	typedef std::list<VehicleAndPosition> VehicleList;
 	VehicleList vehicles_on_map; ///< cached vehicle positions to avoid glitches
-	
+
 	/** Available kinds of zoomlevel changes. */
 	enum ZoomLevelChange {
 		ZLC_INITIALIZE, ///< Initialize zoom level.
@@ -1330,7 +1330,7 @@ class SmallMapWindow : public Window {
 		void *ptr = blitter->MoveTo(dpi->dst_ptr, -dx - 4, 0);
 		int x = - dx - 4;
 		int y = 0;
-		int increment = this->zoom > 0 ? this->zoom * TILE_SIZE : TILE_SIZE / (-this->zoom); 
+		int increment = this->zoom > 0 ? this->zoom * TILE_SIZE : TILE_SIZE / (-this->zoom);
 
 		for (;;) {
 			/* Distance from left edge */
@@ -1495,7 +1495,8 @@ public:
 	 */
 	uint GetLegendHeight(uint num_columns) const
 	{
-		return WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM + this->GetMaxNumberRowsLegend(num_columns) * FONT_HEIGHT_SMALL;
+		return WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM +
+				this->GetNumberRowsLegend(num_columns) * FONT_HEIGHT_SMALL;
 	}
 
 	virtual void SetStringParameters(int widget) const
@@ -1657,25 +1658,19 @@ public:
 		}
 	}
 
+	/**
+	 * Get the number of rows in the legend from the number of columns. Those
+	 * are at least min_number_of_fixed_rows and possibly more if there are so
+	 * many cargoes, industry types or companies that they won't fit in the
+	 * available space.
+	 * @param columns Number of columns in the legend.
+	 * @return Number of rows needed for everything to fit in.
+	 */
 	uint GetNumberRowsLegend(uint columns) const
 	{
-		switch (this->map_type) {
-			case SMT_INDUSTRY:
-				return max(this->min_number_of_fixed_rows, CeilDiv(_smallmap_industry_count, columns));
-			case SMT_LINKSTATS:
-				return max(this->min_number_of_fixed_rows, CeilDiv(_smallmap_cargo_count, columns));
-			case SMT_OWNER:
-				return max(this->min_number_of_fixed_rows, CeilDiv(_smallmap_company_count, columns));
-			default:
-				return this->min_number_of_fixed_rows;
-		}
-	}
-
-	uint GetMaxNumberRowsLegend(uint columns) const
-	{
 		return max(this->min_number_of_fixed_rows, CeilDiv(
-				max(max(_smallmap_cargo_count, _smallmap_industry_count), _smallmap_company_count),
-				columns));
+				max(max(_smallmap_cargo_count, _smallmap_industry_count),
+				_smallmap_company_count), columns));
 	}
 
 	/**
