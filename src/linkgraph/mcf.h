@@ -19,8 +19,8 @@ public:
 	bool IsBetter(const DistanceAnnotation *base, uint cap, int free_cap, uint dist) const;
 
 	/**
-	 * return the actual value of the annotation, in this case the distance
-	 * @return the distance
+	 * Return the actual value of the annotation, in this case the distance.
+	 * @return Distance.
 	 */
 	FORCEINLINE  uint GetAnnotation() const {return this->distance;}
 
@@ -43,8 +43,8 @@ public:
 	bool IsBetter(const CapacityAnnotation *base, uint cap, int free_cap, uint dist) const;
 
 	/**
-	 * return the actual value of the annotation, in this case the capacity
-	 * @return the capacity
+	 * Return the actual value of the annotation, in this case the capacity.
+	 * @return Capacity.
 	 */
 	FORCEINLINE int GetAnnotation() const {return this->GetCapacityRatio();}
 
@@ -69,7 +69,7 @@ protected:
 
 	void CleanupPaths(NodeID source, PathVector &paths);
 
-	LinkGraphComponent *graph; ///< the component we're working with
+	LinkGraphComponent *graph; ///< Component we're working with.
 };
 
 /**
@@ -118,8 +118,8 @@ class MCFHandler : public ComponentHandler {
 public:
 
 	/**
-	 * run the calculation.
-	 * @param graph the component to be calculated.
+	 * Run the calculation.
+	 * @param graph Component to be calculated.
 	 */
 	virtual void Run(LinkGraphComponent *graph) {Tpass pass(graph);}
 
