@@ -759,12 +759,21 @@ void ShowCostOrIncomeAnimation(int x, int y, int z, Money cost)
 	AddTextEffect(msg, pt.x, pt.y, DAY_TICKS, TE_RISING);
 }
 
-void ShowFeederIncomeAnimation(int x, int y, int z, Money cost)
+void ShowFeederIncomeAnimation(int x, int y, int z, Money transfer, Money income)
 {
 	Point pt = RemapCoords(x, y, z);
 
-	SetDParam(0, cost);
-	AddTextEffect(STR_FEEDER, pt.x, pt.y, DAY_TICKS, TE_RISING);
+	SetDParam(0, transfer);
+	if (income == 0) {
+		AddTextEffect(STR_FEEDER, pt.x, pt.y, DAY_TICKS, TE_RISING);
+	} else {
+		SetDParam(1, income);
+		if (income > 0) {
+			AddTextEffect(STR_FEEDER_INCOME, pt.x, pt.y, DAY_TICKS, TE_RISING);
+		} else {
+			AddTextEffect(STR_FEEDER_COST, pt.x, pt.y, DAY_TICKS, TE_RISING);
+		}
+	}
 }
 
 TextEffectID ShowFillingPercent(int x, int y, int z, uint8 percent, StringID string)

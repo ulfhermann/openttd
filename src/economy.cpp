@@ -1024,18 +1024,16 @@ CargoPayment::~CargoPayment()
 	SubtractMoneyFromCompany(CommandCost(this->front->GetExpenseType(true), -this->route_profit));
 	this->front->profit_this_year += (this->visual_profit + this->visual_transfer) << 8;
 
-	int transfer_offset = 0;
-	if (this->route_profit != 0) {
-		if (IsLocalCompany() && !PlayVehicleSound(this->front, VSE_LOAD_UNLOAD)) {
-			SndPlayVehicleFx(SND_14_CASHTILL, this->front);
-		}
-
-		ShowCostOrIncomeAnimation(this->front->x_pos, this->front->y_pos, this->front->z_pos, -this->visual_profit);
-		transfer_offset = 6;
+	if (this->route_profit != 0 && IsLocalCompany() && !PlayVehicleSound(this->front, VSE_LOAD_UNLOAD)) {
+		SndPlayVehicleFx(SND_14_CASHTILL, this->front);
 	}
 
 	if (this->visual_transfer != 0){
-		ShowFeederIncomeAnimation(this->front->x_pos + transfer_offset, this->front->y_pos + transfer_offset, this->front->z_pos, this->visual_transfer);
+		ShowFeederIncomeAnimation(this->front->x_pos, this->front->y_pos,
+				this->front->z_pos,	this->visual_transfer, -this->visual_profit);
+	} else if (this->visual_profit) {
+		ShowCostOrIncomeAnimation(this->front->x_pos, this->front->y_pos,
+				this->front->z_pos, -this->visual_profit);
 	}
 
 	cur_company.Restore();
