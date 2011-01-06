@@ -3169,10 +3169,10 @@ void DeleteStaleFlows(StationID at, CargoID c_id, StationID to) {
 }
 
 /**
- * get the length of a moving average for a link between two stations
- * @param from the source station
- * @param to the destination station
- * @return the moving average length
+ * Get the length of a moving average for a link between two stations.
+ * @param from Source station.
+ * @param to Destination station.
+ * @return Moving average length.
  */
 uint GetMovingAverageLength(const Station *from, const Station *to)
 {
@@ -3182,9 +3182,10 @@ uint GetMovingAverageLength(const Station *from, const Station *to)
 /**
  * Run the moving average decrease function for all link stats.
  */
-void Station::RunAverages() {
+void Station::RunAverages()
+{
 	FlowStatSet new_flows;
-	for(int goods_index = 0; goods_index < NUM_CARGO; ++goods_index) {
+	for (int goods_index = 0; goods_index < NUM_CARGO; ++goods_index) {
 		LinkStatMap &links = this->goods[goods_index].link_stats;
 		for (LinkStatMap::iterator i = links.begin(); i != links.end();) {
 			StationID id = i->first;
@@ -3195,7 +3196,7 @@ void Station::RunAverages() {
 			} else {
 				LinkStat &ls = i->second;
 				ls.Decrease();
-				if (ls.IsNull()) {
+				if (ls.HasCapacity()) {
 					DeleteStaleFlows(this->index, goods_index, id);
 					this->goods[goods_index].cargo.RerouteStalePackets(id);
 					links.erase(i++);
@@ -3232,9 +3233,10 @@ void Station::RunAverages() {
 /**
  * Recalculate the frozen value of the station the given vehicle is loading at
  * if the vehicle is loading.
- * @param v the vehicle to be examined
+ * @param v Vehicle to be examined.
  */
-void RecalcFrozenIfLoading(const Vehicle *v) {
+void RecalcFrozenIfLoading(const Vehicle *v)
+{
 	if (v->current_order.IsType(OT_LOADING)) {
 		RecalcFrozen(Station::Get(v->last_station_visited));
 	}
@@ -3243,10 +3245,11 @@ void RecalcFrozenIfLoading(const Vehicle *v) {
 /**
  * Recalculate all frozen values for all link stats of a station. This is done
  * by adding up the capacities of all loading vehicles.
- * @param st the station
+ * @param st Station.
  */
-void RecalcFrozen(Station *st) {
-	for(int goods_index = 0; goods_index < NUM_CARGO; ++goods_index) {
+void RecalcFrozen(Station *st)
+{
+	for (int goods_index = 0; goods_index < NUM_CARGO; ++goods_index) {
 		GoodsEntry &good = st->goods[goods_index];
 		LinkStatMap &links = good.link_stats;
 		for (LinkStatMap::iterator i = links.begin(); i != links.end(); ++i) {
@@ -3271,44 +3274,46 @@ void RecalcFrozen(Station *st) {
 /**
  * Decrease the frozen values of all link stats associated with vehicles in the
  * given consist (ie the consist is leaving the station).
- * @param st the station to decrease the frozen values on
- * @param front the first vehicle in the consist
- * @param next_station_id the station the vehicle is leaving for
+ * @param st Station to decrease the frozen values on.
+ * @param front First vehicle in the consist.
+ * @param next_station_id Station the vehicle is leaving for.
  */
-void DecreaseFrozen(Station *st, const Vehicle *front, StationID next_station_id) {
-	assert(st->index != next_station_id && next_station_id != INVALID_STATION);
+void DecreaseFrozen(Station *st, const Vehicle *front, StationID next_station_id)
+{
+	assert(st->index != next_station_id);
+       	assert(next_station_id != INVALID_STATION);
 	for (const Vehicle *v = front; v != NULL; v = v->Next()) {
-		if (v->cargo_cap > 0) {
-			LinkStatMap &link_stats = st->goods[v->cargo_type].link_stats;
-			LinkStatMap::iterator lstat_it = link_stats.find(next_station_id);
-			if (lstat_it == link_stats.end()) {
-				DEBUG(misc, 1, "frozen not in linkstat list.");
-				RecalcFrozen(st);
-				return;
-			} else {
-				LinkStat &link_stat = lstat_it->second;
-				if (link_stat.Frozen() < v->cargo_cap) {
-					DEBUG(misc, 1, "frozen is smaller than cargo cap.");
-					RecalcFrozen(st);
-					return;
-				} else {
-					link_stat.Unfreeze(v->cargo_cap);
-				}
-				assert(!link_stat.IsNull());
-			}
+		if (v->cargo_cap <= 0) continue;
+
+		LinkStatMap &link_stats = st->goods[v->cargo_type].link_stats;
+		LinkStatMap::iterator lstat_it = link_stats.find(next_station_id);
+		if (lstat_it == link_stats.end()) {
+			DEBUG(misc, 1, "frozen not in linkstat list.");
+			RecalcFrozen(st);
+			return;
 		}
+
+		LinkStat &link_stat = lstat_it->second;
+		if (link_stat.Frozen() < v->cargo_cap) {
+			DEBUG(misc, 1, "frozen is smaller than cargo cap.");
+			RecalcFrozen(st);
+			return;
+		}
+		link_stat.Unfreeze(v->cargo_cap);
+		assert(!link_stat.HasCapacity());
 	}
 }
 
 /**
  * Either freeze or increase capacity for all link stats associated with vehicles
  * in the given consist.
- * @param st the station to get the link stats from
- * @param front the first vehicle in the consist
- * @param next_station_id the station the consist will be travelling to next
- * @param freeze if true, freeze capacity, otherwise increase capacity
+ * @param st Station to get the link stats from.
+ * @param front First vehicle in the consist.
+ * @param next_station_id Station the consist will be travelling to next.
+ * @param freeze If true, freeze capacity, otherwise increase capacity.
  */
-void IncreaseStats(Station *st, const Vehicle *front, StationID next_station_id, bool freeze) {
+void IncreaseStats(Station *st, const Vehicle *front, StationID next_station_id, bool freeze)
+{
 	Station *next = Station::GetIfValid(next_station_id);
 	assert(st->index != next_station_id && next != NULL);
 	uint average_length = GetMovingAverageLength(st, next);
@@ -3327,7 +3332,7 @@ void IncreaseStats(Station *st, const Vehicle *front, StationID next_station_id,
 				} else {
 					link_stat.Increase(v->cargo_cap, v->cargo.Count());
 				}
-				assert(!link_stat.IsNull());
+				assert(!link_stat.HasCapacity());
 			}
 		}
 	}

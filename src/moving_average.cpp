@@ -7,8 +7,9 @@
  * See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with OpenTTD. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @file moving_average.cpp Implementation of moving average functions */
+/** @file moving_average.cpp Implementation of moving average functions. */
 
+#include "stdafx.h"
 #include "moving_average.h"
 #include "date_func.h"
 #include "station_base.h"
@@ -21,25 +22,10 @@
  */
 template <class Titem> void RunAverages()
 {
-	for(uint id = _tick_counter % DAY_TICKS; id < Titem::GetPoolSize(); id += DAY_TICKS) {
+	for (uint id = _tick_counter % DAY_TICKS; id < Titem::GetPoolSize(); id += DAY_TICKS) {
 		Titem *item = Titem::GetIfValid(id);
-		if (item != NULL) {
-			item->RunAverages();
-		}
+		if (item != NULL) item->RunAverages();
 	}
-}
-
-/**
- * Decrease the given value using this moving average
- * @param value the moving average value to be decreased
- * @return the decreased value
- */
-template <class Tvalue>
-FORCEINLINE Tvalue &MovingAverage<Tvalue>::Decrease(Tvalue &value) const
-{
-	value *= this->length;
-	value /= (this->length + 1);
-	return value;
 }
 
 template class MovingAverage<uint>;

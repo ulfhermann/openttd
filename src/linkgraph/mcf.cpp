@@ -1,4 +1,4 @@
-/** @file mcf.cpp Definition of Multi-Commodity-Flow solver */
+/** @file mcf.cpp Definition of Multi-Commodity-Flow solver. */
 
 #include "mcf.h"
 #include "../core/math_func.hpp"
@@ -6,10 +6,10 @@
 /**
  * Determines if an extension to the given Path with the given parameters is
  * better than this path.
- * @param base the other path
- * @param cap the capacity of the new edge to be added to base
- * @param dist the distance of the new edge
- * @return true if base + the new edge would be better than the path associated
+ * @param base Other path.
+ * @param cap Capacity of the new edge to be added to base.
+ * @param dist Distance of the new edge.
+ * @return True if base + the new edge would be better than the path associated
  * with this annotation.
  */
 bool DistanceAnnotation::IsBetter(const DistanceAnnotation *base, uint cap,
@@ -43,10 +43,10 @@ bool DistanceAnnotation::IsBetter(const DistanceAnnotation *base, uint cap,
 /**
  * Determines if an extension to the given Path with the given parameters is
  * better than this path.
- * @param base the other path
- * @param cap the capacity of the new edge to be added to base
- * @param dist the distance of the new edge
- * @return true if base + the new edge would be better than the path associated
+ * @param base Other path.
+ * @param cap Capacity of the new edge to be added to base.
+ * @param dist Distance of the new edge.
+ * @return True if base + the new edge would be better than the path associated
  * with this annotation.
  */
 bool CapacityAnnotation::IsBetter(const CapacityAnnotation *base, uint cap,
@@ -71,11 +71,11 @@ bool CapacityAnnotation::IsBetter(const CapacityAnnotation *base, uint cap,
  * not done it uses the short_path_saturation setting to artificially decrease
  * capacities. If a path has already been created is determined by checking the
  * flows associated with its nodes.
- * @tparam Tannotation the annotation to be used
- * @param source_node the node where the algorithm starts.
- * @param paths a container for the paths to be calculated
- * @param create_new_paths if false, only use paths already seen before,
- *                         otherwise artificially limit the capacity
+ * @tparam Tannotation Annotation to be used.
+ * @param source_node Node where the algorithm starts.
+ * @param paths Container for the paths to be calculated.
+ * @param create_new_paths If false, only use paths already seen before,
+ *                         otherwise artificially limit the capacity.
  */
 template<class Tannotation>
 void MultiCommodityFlow::Dijkstra(NodeID source_node, PathVector &paths,
@@ -91,7 +91,7 @@ void MultiCommodityFlow::Dijkstra(NodeID source_node, PathVector &paths,
 		annos.insert(anno);
 		paths[node] = anno;
 	}
-	while(!annos.empty()) {
+	while (!annos.empty()) {
 		typename AnnoSet::iterator i = annos.begin();
 		Tannotation *source = *i;
 		annos.erase(i);
@@ -125,8 +125,8 @@ void MultiCommodityFlow::Dijkstra(NodeID source_node, PathVector &paths,
 
 /**
  * Clean up paths that lead nowhere and the root path.
- * @param source_id ID of the root node
- * @param paths the paths to be cleaned up
+ * @param source_id ID of the root node.
+ * @param paths Paths to be cleaned up.
  */
 void MultiCommodityFlow::CleanupPaths(NodeID source_id, PathVector &paths) {
 	Path *source = paths[source_id];
@@ -134,10 +134,10 @@ void MultiCommodityFlow::CleanupPaths(NodeID source_id, PathVector &paths) {
 	for(PathVector::iterator i = paths.begin(); i != paths.end(); ++i) {
 		Path *path = *i;
 		if (path != NULL) {
-			if (path->GetParent() == source) path->UnFork();
+			if (path->GetParent() == source) path->Detach();
 			while (path != source && path != NULL && path->GetFlow() == 0) {
 				Path *parent = path->GetParent();
-				path->UnFork();
+				path->Detach();
 				if (path->GetNumChildren() == 0) {
 					paths[path->GetNode()] = NULL;
 					delete path;
@@ -153,10 +153,10 @@ void MultiCommodityFlow::CleanupPaths(NodeID source_id, PathVector &paths) {
 /**
  * Push flow along a path and update the unsatisfied_demand of the associated
  * edge.
- * @param edge the edge whose ends the path connects
- * @param path the end of the path the flow should be pushed on
- * @param accuracy the accuracy of the calculation
- * @param positive_cap if true only push flow up to the paths capacity,
+ * @param edge Edge whose ends the path connects.
+ * @param path End of the path the flow should be pushed on.
+ * @param accuracy Accuracy of the calculation.
+ * @param positive_cap If true only push flow up to the paths capacity,
  *                     otherwise the path can be "overloaded".
  */
 uint MultiCommodityFlow::PushFlow(Edge &edge, Path *path, uint accuracy,
@@ -171,9 +171,9 @@ uint MultiCommodityFlow::PushFlow(Edge &edge, Path *path, uint accuracy,
 
 /**
  * Find the flow along a cycle including cycle_begin in path.
- * @param path the set of paths that form the cycle
- * @param cycle_begin the path to start at
- * @return the flow along the cycle
+ * @param path Set of paths that form the cycle.
+ * @param cycle_begin Path to start at.
+ * @return Flow along the cycle.
  */
 uint MCF1stPass::FindCycleFlow(const PathVector &path, const Path *cycle_begin)
 {
@@ -188,9 +188,9 @@ uint MCF1stPass::FindCycleFlow(const PathVector &path, const Path *cycle_begin)
 
 /**
  * Eliminate a cycle of the given flow in the given set of paths.
- * @param path the set of paths containing the cycle
- * @param cycle_begin a part the cycle to start at
- * @param flow the flow along the cycle
+ * @param path Set of paths containing the cycle.
+ * @param cycle_begin Part of the cycle to start at.
+ * @param flow Flow along the cycle.
  */
 void MCF1stPass::EliminateCycle(PathVector &path, Path *cycle_begin, uint flow)
 {
@@ -208,10 +208,10 @@ void MCF1stPass::EliminateCycle(PathVector &path, Path *cycle_begin, uint flow)
  * Eliminate cycles for origin_id in the graph. Start searching at next_id and
  * work recursively. Also "summarize" paths: Add up the flows along parallel
  * paths in one.
- * @param path the paths checked in parent calls to this method
- * @param origin_id the origin of the paths to be checked
- * @param next_id the next node to be checked
- * @return if any cycles have been found and eliminated
+ * @param path Paths checked in parent calls to this method.
+ * @param origin_id Origin of the paths to be checked.
+ * @param next_id Next node to be checked.
+ * @return If any cycles have been found and eliminated.
  */
 bool MCF1stPass::EliminateCycles(PathVector &path, NodeID origin_id, NodeID next_id)
 {
@@ -278,7 +278,7 @@ bool MCF1stPass::EliminateCycles(PathVector &path, NodeID origin_id, NodeID next
 /**
  * Eliminate all cycles in the graph. Check paths starting at each node for
  * potential cycles.
- * @return if any cycles have been found and eliminated.
+ * @return If any cycles have been found and eliminated.
  */
 bool MCF1stPass::EliminateCycles()
 {
@@ -297,7 +297,7 @@ bool MCF1stPass::EliminateCycles()
 
 /**
  * Run the first pass of the MCF calculation.
- * @param graph the component to calculate.
+ * @param graph Component to calculate.
  */
 MCF1stPass::MCF1stPass(LinkGraphComponent *graph) : MultiCommodityFlow(graph)
 {
@@ -342,7 +342,7 @@ MCF1stPass::MCF1stPass(LinkGraphComponent *graph) : MultiCommodityFlow(graph)
 
 /**
  * Run the second pass of the MCF calculation.
- * @param graph the component to calculate.
+ * @param graph Component to calculate.
  */
 MCF2ndPass::MCF2ndPass(LinkGraphComponent *graph) : MultiCommodityFlow(graph)
 {
@@ -374,11 +374,11 @@ MCF2ndPass::MCF2ndPass(LinkGraphComponent *graph) : MultiCommodityFlow(graph)
  * Avoid accidentally deleting different paths of the same capacity/distance in
  * a set. When the annotation is the same node IDs are compared, so there are
  * no equal ranges.
- * @tparam T the type to be compared on
- * @param x_anno the first value
- * @param y_anno the second value
- * @param x the node id associated with the first value
- * @param y the node id associated with the second value
+ * @tparam T Type to be compared on.
+ * @param x_anno First value.
+ * @param y_anno Second value.
+ * @param x Node id associated with the first value.
+ * @param y Node id associated with the second value.
  */
 template <typename T>
 bool greater(T x_anno, T y_anno, NodeID x, NodeID y) {
@@ -393,9 +393,9 @@ bool greater(T x_anno, T y_anno, NodeID x, NodeID y) {
 
 /**
  * Compare two capacity annotations.
- * @param x the first capacity annotation
- * @param y the second capacity annotation
- * @return if x is better than y
+ * @param x First capacity annotation.
+ * @param y Second capacity annotation.
+ * @return If x is better than y.
  */
 bool CapacityAnnotation::comp::operator()(const CapacityAnnotation *x,
 		const CapacityAnnotation *y) const
@@ -406,9 +406,9 @@ bool CapacityAnnotation::comp::operator()(const CapacityAnnotation *x,
 
 /**
  * Compare two distance annotations.
- * @param x the first distance annotation
- * @param y the second distance annotation
- * @return if x is better than y
+ * @param x First distance annotation.
+ * @param y Second distance annotation.
+ * @return If x is better than y.
  */
 bool DistanceAnnotation::comp::operator()(const DistanceAnnotation *x,
 		const DistanceAnnotation *y) const

@@ -1243,7 +1243,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 
 			uint prev_count = ge->cargo.Count();
 			payment->SetCargo(v->cargo_type);
-			uint delivered = ge->cargo.TakeFrom(&v->cargo, amount_unloaded, unload_flags, 
+			uint delivered = ge->cargo.TakeFrom(&v->cargo, amount_unloaded, unload_flags,
 					next_station, u->last_loading_station == last_visited, payment);
 
 			st->time_since_unload = 0;
