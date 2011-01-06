@@ -1044,8 +1044,8 @@ bool CargoSorter::SortCount(const CargoDataEntry *cd1, const CargoDataEntry *cd2
 
 bool CargoSorter::SortStation(StationID st1, StationID st2) const
 {
-	static char buf1[64];
-	static char buf2[64];
+	static char buf1[MAX_LENGTH_STATION_NAME_CHARS];
+	static char buf2[MAX_LENGTH_STATION_NAME_CHARS];
 
 	if (!Station::IsValidID(st1)) {
 		return Station::IsValidID(st2) ? this->order == SO_ASCENDING : this->SortId(st1, st2);
@@ -1082,7 +1082,7 @@ struct StationViewWindow : public Window {
 
 	typedef std::vector<RowDisplay> CargoDataVector;
 
-	static const int _num_columns = 4;
+	static const int NUM_COLUMNS = 4;
 
 	enum Invalidation {
 		INV_FLOWS = 0x100,
@@ -1100,7 +1100,7 @@ struct StationViewWindow : public Window {
 		MODE_WAITING,
 		MODE_PLANNED
 	};
-	
+
 	uint expand_shrink_width;     ///< The width allocated to the expand/shrink 'button'
 	int rating_lines;             ///< Number of lines in the cargo ratings view.
 	int accepts_lines;            ///< Number of lines in the accepted cargo view.
@@ -1115,13 +1115,13 @@ struct StationViewWindow : public Window {
 	static const StringID _sort_names[];
 	static const StringID _group_names[];
 
-	CargoSortType sortings[_num_columns];
-	SortOrder sort_orders[_num_columns];
+	CargoSortType sortings[NUM_COLUMNS];
+	SortOrder sort_orders[NUM_COLUMNS];
 
 	int scroll_to_row;
 	int grouping_index;
 	Mode current_mode;
-	Grouping groupings[_num_columns];
+	Grouping groupings[NUM_COLUMNS];
 
 	CargoDataEntry expanded_rows;
 	CargoDataEntry cached_destinations;
@@ -1163,7 +1163,7 @@ struct StationViewWindow : public Window {
 	{
 		if (count == 0) return;
 		const CargoDataEntry *expand = &this->expanded_rows;
-		for (int i = 0; i < _num_columns && expand != NULL; ++i) {
+		for (int i = 0; i < NUM_COLUMNS && expand != NULL; ++i) {
 			switch (groupings[i]) {
 			case GR_CARGO:
 				assert(i == 0);
@@ -1506,7 +1506,7 @@ struct StationViewWindow : public Window {
 						ScrollMainWindowToTile(Station::Get(station)->xy);
 					}
 				}
-				
+
 				bool rtl = _current_text_dir == TD_RTL;
 				int text_left    = rtl ? r.left + this->expand_shrink_width : r.left + WD_FRAMERECT_LEFT + column * this->expand_shrink_width;
 				int text_right   = rtl ? r.right - WD_FRAMERECT_LEFT - column * this->expand_shrink_width : r.right - this->expand_shrink_width;
@@ -1515,7 +1515,7 @@ struct StationViewWindow : public Window {
 
 				DrawString(text_left, text_right, y, str, TC_FROMSTRING);
 
-				if (column < _num_columns - 1) {
+				if (column < NUM_COLUMNS - 1) {
 					const char *sym = cd->GetNumChildren() > 0 ? "-" : "+";
 					DrawString(shrink_left, shrink_right, y, sym, TC_YELLOW);
 				}
