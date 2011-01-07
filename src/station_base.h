@@ -161,23 +161,38 @@ public:
 	}
 };
 
+/**
+ * Flow statistics telling how much flow should be and was sent along a link.
+ */
 class FlowStat : private MovingAverage<uint> {
 private:
-	uint planned;
-	uint sent;
-	StationID via;
+	uint planned;  ///< Cargo planned to be sent along a link each "month" (30 units of time, determined by moving average).
+	uint sent;     ///< Moving average of cargo being sent.
+	StationID via; ///< Other end of the link. Can be this station, then it means "deliver here".
 
 public:
 	friend const SaveLoad *GetFlowStatDesc();
 
-	FORCEINLINE FlowStat(uint distance = 1, StationID st = INVALID_STATION, uint p = 0, uint s = 0) :
-		MovingAverage<uint>(distance), planned(p), sent(s), via(st) {}
+	/**
+	 * Create a flow stat.
+	 * @param distance Distance to be used as length of moving average.
+	 * @param st Remote station.
+	 * @param planned Cargo planned to be sent along this link.
+	 * @param sent Cargo already sent along this link.
+	 */
+	FORCEINLINE FlowStat(uint distance = 1, StationID st = INVALID_STATION, uint planned = 0, uint sent = 0) :
+		MovingAverage<uint>(distance), planned(planned), sent(sent), via(st) {}
 
+	/**
+	 * Clone an existing flow stat, changing the plan.
+	 * @param prev Flow stat to be cloned.
+	 * @param new_plan New value for planned.
+	 */
 	FORCEINLINE FlowStat(const FlowStat &prev, uint new_plan) :
 		MovingAverage<uint>(prev.length), planned(new_plan), sent(prev.sent), via(prev.via) {}
 
 	/**
-	 * prevents one copy operation when moving a flowstat from one set to another and decreasing it at the same time
+	 * Prevents one copy operation when moving a flowstat from one set to another and decreasing it at the same time.
 	 */
 	FORCEINLINE FlowStat GetDecreasedCopy() const
 	{
@@ -186,28 +201,56 @@ public:
 		return ret;
 	}
 
-	FORCEINLINE void Increase(int sent)
+	/**
+	 * Increase the sent value.
+	 * @param sent Amount to be added to sent.
+	 */
+	FORCEINLINE void Increase(uint sent)
 	{
 		this->sent += sent;
 	}
 
+	/**
+	 * Get an estimate of cargo sent along this link during the last 30 time units.
+	 * @return Cargo sent along this link.
+	 */
 	FORCEINLINE uint Sent() const
 	{
 		return this->MovingAverage<uint>::Monthly(sent);
 	}
 
+	/**
+	 * Get the amount of cargo planned to be sent along this link in 30 time units.
+	 * @return Cargo planned to be sent.
+	 */
 	FORCEINLINE uint Planned() const
 	{
 		return this->planned;
 	}
 
+	/**
+	 * Get the station this link is connected to.
+	 * @return Remote station.
+	 */
 	FORCEINLINE StationID Via() const
 	{
 		return this->via;
 	}
 
+	/**
+	 * Comparator for two flow stats for ordering them in a way that makes
+	 * the next flow stat to sent cargo for show up as first element.
+	 */
 	struct comp {
-		bool operator()(const FlowStat & x, const FlowStat & y) const {
+		/**
+		 * Comparator function. Decides by planned - sent or via, if those
+		 * are equal.
+		 * @param x First flow stat.
+		 * @param y Second flow stat.
+		 * @return True if x.planned - x.sent is greater than y.planned - y.sent.
+		 */
+		bool operator()(const FlowStat &x, const FlowStat &y) const
+		{
 			int diff_x = (int)x.Planned() - (int)x.Sent();
 			int diff_y = (int)y.Planned() - (int)y.Sent();
 			if (diff_x != diff_y) {
@@ -218,6 +261,11 @@ public:
 		}
 	};
 
+	/**
+	 * Add up two flow stats' planned and sent figures and assign via from the other one to this one.
+	 * @param other Flow stat to add to this one.
+	 * @return This flow stat.
+	 */
 	FORCEINLINE FlowStat &operator+=(const FlowStat &other)
 	{
 		assert(this->via == INVALID_STATION || other.via == INVALID_STATION || this->via == other.via);
@@ -232,6 +280,9 @@ public:
 		return *this;
 	}
 
+	/**
+	 * Clear this flow stat.
+	 */
 	FORCEINLINE void Clear()
 	{
 		this->planned = 0;

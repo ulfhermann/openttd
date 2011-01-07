@@ -292,10 +292,10 @@ void LinkGraphComponent::Init(LinkGraphComponentID id)
 /**
  * Exports all entries in the FlowViaMap pointed to by "source_flows_it", erases the source
  * flows and increments the iterator afterwards.
- * @param it iterator pointing to the flows to be exported into the main game state
- * @param dest the flow stats to which the flows shall be exported
- * @param cargo the cargo we're exporting flows for (used to check if the link stats for the new
- *        flows still exist)
+ * @param it Iterator pointing to the flows to be exported into the main game state.
+ * @param dest Flow stats to which the flows shall be exported.
+ * @param cargo Cargo we're exporting flows for (used to check if the link stats for the new
+ *        flows still exist).
  */
 void Node::ExportNewFlows(FlowMap::iterator &it, FlowStatSet &dest, CargoID cargo)
 {
@@ -334,7 +334,8 @@ void Node::ExportNewFlows(FlowMap::iterator &it, FlowStatSet &dest, CargoID carg
  * Export all flows of this node to the main game state.
  * @param cargo the cargo we're exporting flows for.
  */
-void Node::ExportFlows(CargoID cargo) {
+void Node::ExportFlows(CargoID cargo)
+{
 	FlowStatMap &station_flows = Station::Get(this->station)->goods[cargo].flows;
 	FlowStatSet new_flows;
 	/* loop over all existing flows in the station and update them */
