@@ -31,9 +31,9 @@ struct SaveLoad;
  */
 class Node {
 public:
-	uint supply;       ///< supply at the station
-	uint demand;       ///< acceptance at the station
-	StationID station; ///< the station's ID
+	uint supply;       ///< Supply at the station.
+	uint demand;       ///< Acceptance at the station.
+	StationID station; ///< Station ID.
 
 	void Init(StationID st = INVALID_STATION, uint sup = 0, uint dem = 0);
 };
@@ -43,8 +43,8 @@ public:
  */
 class Edge {
 public:
-	uint distance; ///< length of the link
-	uint capacity; ///< capacity of the link
+	uint distance; ///< Length of the link.
+	uint capacity; ///< Capacity of the link.
 
 	void Init(uint distance = 0, uint capacity = 0);
 };
@@ -67,9 +67,9 @@ public:
 
 	/**
 	 * Get a reference to an edge.
-	 * @param from the origin node
-	 * @param the destination node
-	 * @return the edge between from and to
+	 * @param from Origin node.
+	 * @param to Destination node.
+	 * @return Edge between from and to.
 	 */
 	FORCEINLINE Edge &GetEdge(NodeID from, NodeID to)
 	{
@@ -78,8 +78,8 @@ public:
 
 	/**
 	 * Get a reference to a node with the specified id.
-	 * @param num ID of the node
-	 * @return the requested node
+	 * @param num ID of the node.
+	 * @return the Requested node.
 	 */
 	FORCEINLINE Node &GetNode(NodeID num)
 	{
@@ -88,7 +88,7 @@ public:
 
 	/**
 	 * Get the current size of the component.
-	 * @return the size
+	 * @return Size.
 	 */
 	FORCEINLINE uint GetSize() const
 	{
@@ -103,7 +103,7 @@ public:
 
 	/**
 	 * Get the ID of this component.
-	 * @return the ID
+	 * @return ID.
 	 */
 	FORCEINLINE LinkGraphComponentID GetIndex() const
 	{
@@ -112,7 +112,7 @@ public:
 
 	/**
 	 * Get the cargo ID this component's link graph refers to.
-	 * @return the cargo ID
+	 * @return Cargo ID.
 	 */
 	FORCEINLINE CargoID GetCargo() const
 	{
@@ -121,7 +121,7 @@ public:
 
 	/**
 	 * Get the link graph settings for this component.
-	 * @return the settings
+	 * @return Settings.
 	 */
 	FORCEINLINE const LinkGraphSettings &GetSettings() const
 	{
@@ -137,12 +137,12 @@ public:
 	}
 
 protected:
-	LinkGraphSettings settings; ///< Copy of _settings_game.linkgraph at creation time
-	CargoID cargo;              ///< Cargo of this component's link graph
-	uint num_nodes;             ///< Number of nodes in the component
-	LinkGraphComponentID index; ///< ID of the component
-	NodeVector nodes;           ///< Nodes in the component
-	EdgeMatrix edges;           ///< Edges in the component
+	LinkGraphSettings settings; ///< Copy of _settings_game.linkgraph at creation time.
+	CargoID cargo;              ///< Cargo of this component's link graph.
+	uint num_nodes;             ///< Number of nodes in the component.
+	LinkGraphComponentID index; ///< ID of the component.
+	NodeVector nodes;           ///< Nodes in the component.
+	EdgeMatrix edges;           ///< Edges in the component.
 };
 
 /**
@@ -159,6 +159,7 @@ public:
 	/**
 	 * Run the handler. A link graph handler must not read or write any data
 	 * outside the given component as that would create a potential desync.
+	 * @param component Link graph component to run the handler on.
 	 */
 	virtual void Run(LinkGraphComponent *component) = 0;
 };
@@ -188,7 +189,7 @@ public:
 
 	/**
 	 * Add a handler to the end of the list.
-	 * @param handler the handler to be added
+	 * @param handler Handler to be added.
 	 */
 	static void AddHandler(ComponentHandler *handler)
 	{
@@ -202,13 +203,13 @@ public:
 	void Join();
 
 private:
-	static HandlerList _handlers;   ///< Handlers the job is executing
-	ThreadObject *thread;           ///< Thread the job is running in or NULL if it's running in the main thread
+	static HandlerList _handlers;   ///< Handlers the job is executing.
+	ThreadObject *thread;           ///< Thread the job is running in or NULL if it's running in the main thread.
 
 	/**
 	 * Private Copy-Constructor: there cannot be two identical LinkGraphJobs.
 	 * @param other hypothetical other job to be copied.
-	 * @note It's necessary to explicitly initialize the link graph component in order to silence some compile warnings
+	 * @note It's necessary to explicitly initialize the link graph component in order to silence some compile warnings.
 	 */
 	LinkGraphJob(const LinkGraphJob &other) : LinkGraphComponent(other) {NOT_REACHED();}
 };
@@ -219,8 +220,8 @@ private:
 class LinkGraph : public LinkGraphJob {
 public:
 	/* Those are ticks where not much else is happening, so a small lag might go unnoticed. */
-	static const uint COMPONENTS_JOIN_TICK  = 21; ///< tick when jobs are joined every day
-	static const uint COMPONENTS_SPAWN_TICK = 58; ///< tick when jobs are spawned every day
+	static const uint COMPONENTS_JOIN_TICK  = 21; ///< Tick when jobs are joined every day.
+	static const uint COMPONENTS_SPAWN_TICK = 58; ///< Tick when jobs are spawned every day.
 
 	/**
 	 * Create a link graph.
@@ -234,7 +235,7 @@ public:
 	void Join();
 
 private:
-	StationID current_station_id; ///< ID of the last station examined while creating components
+	StationID current_station_id; ///< ID of the last station examined while creating components.
 
 	friend const SaveLoad *GetLinkGraphDesc();
 
