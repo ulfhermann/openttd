@@ -7,7 +7,7 @@
  * See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with OpenTTD. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @file flowmapper.h Declaration of flow mapper; maps paths into flows at nodes */
+/** @file flowmapper.h Declaration of flow mapper; maps paths into flows at nodes. */
 
 #ifndef FLOWMAPPER_H_
 #define FLOWMAPPER_H_

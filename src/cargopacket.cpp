@@ -319,11 +319,11 @@ uint CargoList<Tinst, Tcont>::MovePacket(VehicleCargoList *dest, Iterator &it, u
 /**
  * Move a single packet or part of it from this list to a station and increment
  * the given iterator.
- * @param dest the station cargo list to move to
- * @param next the next station the packet will travel to
- * @param it iterator pointing to the packet
- * @param cap maximum amount of cargo to be moved
- * @return the actual amount of cargo which has been moved
+ * @param dest Station cargo list to move to.
+ * @param next Next station the packet will travel to.
+ * @param it Iterator pointing to the packet.
+ * @param cap Maximum amount of cargo to be moved.
+ * @return Actual amount of cargo which has been moved.
  */
 template<class Tinst, class Tcont>
 uint CargoList<Tinst, Tcont>::MovePacket(StationCargoList *dest, StationID next, Iterator &it, uint cap)
@@ -337,11 +337,11 @@ uint CargoList<Tinst, Tcont>::MovePacket(StationCargoList *dest, StationID next,
 /**
  * Remove a single packet or part of it from this list and increment the given
  * iterator.
- * @param it iterator pointing to the packet
- * @param cap maximum amount of cargo to be moved
- * @param load_place new loaded_at for the packet or INVALID_TILE if the current
- *        one shall be kept
- * @return the removed packet.
+ * @param it Iterator pointing to the packet.
+ * @param cap Maximum amount of cargo to be moved.
+ * @param load_place New loaded_at for the packet or INVALID_TILE if the current
+ *        one shall be kept.
+ * @return Removed packet.
  */
 template<class Tinst, class Tcont>
 CargoPacket *CargoList<Tinst, Tcont>::RemovePacket(Iterator &it, uint cap, TileIndex load_place)
@@ -395,7 +395,8 @@ VehicleCargoList::~VehicleCargoList()
  * @param payment Payment object to use for payment.
  * @return        Amount of cargo actually unloaded.
  */
-uint VehicleCargoList::DeliverPacket(Iterator &it, uint cap, CargoPayment *payment) {
+uint VehicleCargoList::DeliverPacket(Iterator &it, uint cap, CargoPayment *payment)
+{
 	CargoPacket *p = *it;
 	uint unloaded = 0;
 	if (p->count <= cap) {
@@ -420,8 +421,8 @@ uint VehicleCargoList::DeliverPacket(Iterator &it, uint cap, CargoPayment *payme
 /**
  * Keep a packet in the vehicle while unloading by temporarily moving it to the
  * reservation list. The given iterator is incremented in the process.
- * @param it iterator pointing to the packet
- * @return size of the packet
+ * @param it Iterator pointing to the packet.
+ * @return Size of the packet.
  */
 uint VehicleCargoList::KeepPacket(Iterator &it)
 {
@@ -435,13 +436,13 @@ uint VehicleCargoList::KeepPacket(Iterator &it)
 /**
  * Transfer a packet to a station, but don't deliver it. Increment the given
  * iterator in the process.
- * @param it iterator pointing to a packet in the list
- * @param cap maximum amount of cargo to be transferred
- * @param dest cargo list of the station the cargo should be transferred to
- * @param payment payment object to be updated with the resulting transfer
- *                credits
- * @param next ID of the station the cargo wants to go to next
- * @return the amount of cargo actually moved
+ * @param it Iterator pointing to a packet in the list.
+ * @param cap Maximum amount of cargo to be transferred.
+ * @param dest Cargo list of the station the cargo should be transferred to.
+ * @param payment Payment object to be updated with the resulting transfer
+ *                credits.
+ * @param next ID of the station the cargo wants to go to next.
+ * @return Amount of cargo actually moved.
  */
 uint VehicleCargoList::TransferPacket(Iterator &it, uint cap, StationCargoList *dest, CargoPayment *payment, StationID next)
 {
@@ -741,14 +742,15 @@ void StationCargoList::Append(StationID next, CargoPacket *cp)
 
 /**
  * Move packets from a specific range in this list to a vehicle.
- * @param dest the cargo list the packets will be moved to
- * @param cap maximum amount of cargo to move
- * @param begin begin of the range to take packets from
- * @param end end of the range to take packets from
- * @param reserve if the packets should be loaded on or reserved for the vehicle
- * @return the amount of cargo that has been moved
+ * @param dest Cargo list the packets will be moved to.
+ * @param cap Maximum amount of cargo to move.
+ * @param begin Begin of the range to take packets from.
+ * @param end End of the range to take packets from.
+ * @param reserve If the packets should be loaded on or reserved for the vehicle.
+ * @return Amount of cargo that has been moved.
  */
-uint StationCargoList::MovePackets(VehicleCargoList *dest, uint cap, Iterator begin, Iterator end, bool reserve) {
+uint StationCargoList::MovePackets(VehicleCargoList *dest, uint cap, Iterator begin, Iterator end, bool reserve)
+{
 	uint orig_cap = cap;
 	while(begin != end && cap > 0) {
 		cap -= this->MovePacket(dest, begin, cap, this->station->xy, reserve);
@@ -758,13 +760,14 @@ uint StationCargoList::MovePackets(VehicleCargoList *dest, uint cap, Iterator be
 
 /**
  * Move suitable packets from this list to a vehicle.
- * @param dest the vehicle cargo list to move packets to
- * @param cap the maximum amount of cargo to be moved
- * @param next the next station the vehicle will stop at
- * @param reserve if the packets should be loaded on or reserved for the vehicle
- * @return the amount of cargo that has been moved
+ * @param dest Vehicle cargo list to move packets to.
+ * @param cap Maximum amount of cargo to be moved.
+ * @param next Next station the vehicle will stop at.
+ * @param reserve If the packets should be loaded on or reserved for the vehicle.
+ * @return Amount of cargo that has been moved.
  */
-uint StationCargoList::MoveTo(VehicleCargoList *dest, uint cap, StationID next, bool reserve) {
+uint StationCargoList::MoveTo(VehicleCargoList *dest, uint cap, StationID next, bool reserve)
+{
 	uint orig_cap = cap;
 	if (next != INVALID_STATION) {
 		std::pair<Iterator, Iterator> bounds(this->packets.equal_range(next));
@@ -783,7 +786,8 @@ uint StationCargoList::MoveTo(VehicleCargoList *dest, uint cap, StationID next, 
  * Route all packets with station "to" as next hop to a different place.
  * @param to station to exclude from routing.
  */
-void StationCargoList::RerouteStalePackets(StationID to) {
+void StationCargoList::RerouteStalePackets(StationID to)
+{
 	std::pair<Iterator, Iterator> range(this->packets.equal_range(to));
 	for(Iterator it(range.first); it != range.second && it.GetKey() == to;) {
 		CargoPacket *packet = *it;
@@ -804,7 +808,8 @@ void StationCargoList::RerouteStalePackets(StationID to) {
  * This is done by randomizing the selection of packets to be removed.
  * @param max_remaining maximum amount of cargo to keep in the list.
  */
-void StationCargoList::RandomTruncate(uint max_remaining) {
+void StationCargoList::RandomTruncate(uint max_remaining)
+{
 	uint prev_count = this->count;
 	while (this->count > max_remaining) {
 		for(Iterator it(this->packets.begin()); it != this->packets.end();) {
