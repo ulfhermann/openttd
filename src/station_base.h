@@ -269,11 +269,12 @@ public:
 	FORCEINLINE FlowStat &operator+=(const FlowStat &other)
 	{
 		assert(this->via == INVALID_STATION || other.via == INVALID_STATION || this->via == other.via);
-		this->via = other.via;
+		if (other.via != INVALID_STATION) this->via = other.via;
 		this->planned += other.planned;
 		uint sent = this->sent + other.sent;
 		if (sent > 0) {
 			this->length = (this->length * this->sent + other.length * other.sent) / sent;
+			assert(this->length > 0);
 		}
 		this->sent = sent;
 		return *this;
@@ -290,10 +291,10 @@ public:
 	}
 };
 
-typedef std::set<FlowStat, FlowStat::comp> FlowStatSet; ///< percentage of flow to be sent via specified station (or consumed locally)
+typedef std::set<FlowStat, FlowStat::comp> FlowStatSet; ///< Percentage of flow to be sent via specified station (or consumed locally).
 
 typedef std::map<StationID, LinkStat> LinkStatMap;
-typedef std::map<StationID, FlowStatSet> FlowStatMap; ///< flow descriptions by origin stations
+typedef std::map<StationID, FlowStatSet> FlowStatMap; ///< Flow descriptions by origin stations.
 
 uint GetMovingAverageLength(const Station *from, const Station *to);
 
