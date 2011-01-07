@@ -3149,13 +3149,21 @@ static void UpdateStationRating(Station *st)
 	}
 }
 
-void DeleteStaleFlows(StationID at, CargoID c_id, StationID to) {
+/**
+ * Delete all flows at a station for specific cargo and destination.
+ * @param at Station to delete flows from.
+ * @param c_id Cargo for which flows shall be deleted.
+ * @param to Remote station of flows to be deleted.
+ */
+void DeleteStaleFlows(StationID at, CargoID c_id, StationID to)
+{
 	FlowStatMap &flows = Station::Get(at)->goods[c_id].flows;
 	for (FlowStatMap::iterator f_it = flows.begin(); f_it != flows.end();) {
 		FlowStatSet &s_flows = f_it->second;
 		for (FlowStatSet::iterator s_it = s_flows.begin(); s_it != s_flows.end();) {
 			if (s_it->Via() == to) {
 				s_flows.erase(s_it++);
+				break; // There can only be one flow stat for this remote station in each set.
 			} else {
 				++s_it;
 			}
@@ -3774,12 +3782,18 @@ static CommandCost TerraformTile_Station(TileIndex tile, DoCommandFlag flags, ui
 	return DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
 }
 
-FlowStat GoodsEntry::GetSumFlowVia(StationID via) const {
+/**
+ * Get the sum of flows via a specific station from this GoodsEntry.
+ * @param via Remote station to look for.
+ * @return a FlowStat with all flows for 'via' added up.
+ */
+FlowStat GoodsEntry::GetSumFlowVia(StationID via) const
+{
 	FlowStat ret(1, via);
 	for(FlowStatMap::const_iterator i = flows.begin(); i != flows.end(); ++i) {
-		const FlowStatSet & flow_set = i->second;
+		const FlowStatSet &flow_set = i->second;
 		for (FlowStatSet::const_iterator j = flow_set.begin(); j != flow_set.end(); ++j) {
-			const FlowStat & flow = *j;
+			const FlowStat &flow = *j;
 			if (flow.Via() == via) {
 				ret += flow;
 			}
