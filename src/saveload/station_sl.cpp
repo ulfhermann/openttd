@@ -245,7 +245,8 @@ const SaveLoad *GetLinkStatDesc()
  * some of the variables are private.
  * @return the saveload description for FlowStat.
  */
-const SaveLoad *GetFlowStatDesc() {
+const SaveLoad *GetFlowStatDesc()
+{
 	static const SaveLoad _flowstat_desc[] = {
 		SLEG_CONDVAR(             _station_id,         SLE_UINT16,         SL_FLOWMAP, SL_MAX_VERSION),
 		 SLE_CONDVAR(FlowStat,    via,                 SLE_UINT16,         SL_FLOWMAP, SL_MAX_VERSION),

@@ -3176,13 +3176,21 @@ static void UpdateStationRating(Station *st)
 	}
 }
 
-void DeleteStaleFlows(StationID at, CargoID c_id, StationID to) {
+/**
+ * Delete all flows at a station for specific cargo and destination.
+ * @param at Station to delete flows from.
+ * @param c_id Cargo for which flows shall be deleted.
+ * @param to Remote station of flows to be deleted.
+ */
+void DeleteStaleFlows(StationID at, CargoID c_id, StationID to)
+{
 	FlowStatMap &flows = Station::Get(at)->goods[c_id].flows;
 	for (FlowStatMap::iterator f_it = flows.begin(); f_it != flows.end();) {
 		FlowStatSet &s_flows = f_it->second;
 		for (FlowStatSet::iterator s_it = s_flows.begin(); s_it != s_flows.end();) {
 			if (s_it->Via() == to) {
 				s_flows.erase(s_it++);
+				break; // There can only be one flow stat for this remote station in each set.
 			} else {
 				++s_it;
 			}
@@ -3813,10 +3821,10 @@ static CommandCost TerraformTile_Station(TileIndex tile, DoCommandFlag flags, ui
 }
 
 /**
- * update the flow stats for a specific entry.
- * @param flow_stats the flow stats to update
- * @param flow_it an iterator pointing to an entry in flow_stats
- * @param count the amount by which the flow should be increased
+ * Update the flow stats for a specific entry.
+ * @param flow_stats Flow stats to update.
+ * @param flow_it Iterator pointing to an entry in flow_stats.
+ * @param count Amount by which the flow should be increased.
  */
 void GoodsEntry::UpdateFlowStats(FlowStatSet &flow_stats, FlowStatSet::iterator flow_it, uint count)
 {
@@ -3827,10 +3835,10 @@ void GoodsEntry::UpdateFlowStats(FlowStatSet &flow_stats, FlowStatSet::iterator 
 }
 
 /**
- * update the flow stats for a specific next station
- * @param flow_stats the flow stats to update
- * @param count the amount by which the flow should be increased
- * @param next the next hop for which the flow stats should be updated
+ * Update the flow stats for a specific next station.
+ * @param flow_stats Flow stats to update.
+ * @param count Amount by which the flow should be increased.
+ * @param next Next hop for which the flow stats should be updated.
  */
 void GoodsEntry::UpdateFlowStats(FlowStatSet &flow_stats, uint count, StationID next)
 {
@@ -3847,10 +3855,10 @@ void GoodsEntry::UpdateFlowStats(FlowStatSet &flow_stats, uint count, StationID 
 }
 
 /**
- * update the flow stats for "count" cargo from "source" sent to "next"
- * @param source the ID of station the cargo is from
- * @param count the amount of cargo
- * @param next ID of the station the cargo is travelling to
+ * Update the flow stats for "count" cargo from "source" sent to "next".
+ * @param source ID of station the cargo is from.
+ * @param count Amount of cargo.
+ * @param next ID of the station the cargo is travelling to.
  */
 void GoodsEntry::UpdateFlowStats(StationID source, uint count, StationID next)
 {
@@ -3860,13 +3868,14 @@ void GoodsEntry::UpdateFlowStats(StationID source, uint count, StationID next)
 }
 
 /**
- * update the flow stats for "count" cargo that cannot be delivered here.
- * @param source the ID of station where the cargo is from
- * @param count the amount of cargo
- * @param curr the ID of station where it is stored for now
- * @return the ID of the station where the cargo is sent next
+ * Update the flow stats for "count" cargo that cannot be delivered here.
+ * @param source ID of station where the cargo is from.
+ * @param count Amount of cargo.
+ * @param curr ID of station where it is stored for now.
+ * @return ID of the station where the cargo is sent next.
  */
-StationID GoodsEntry::UpdateFlowStatsTransfer(StationID source, uint count, StationID curr) {
+StationID GoodsEntry::UpdateFlowStatsTransfer(StationID source, uint count, StationID curr)
+{
 	if (source == INVALID_STATION || this->flows.empty()) return INVALID_STATION;
 	FlowStatSet &flow_stats = this->flows[source];
 	FlowStatSet::iterator flow_it = flow_stats.begin();
@@ -3883,7 +3892,13 @@ StationID GoodsEntry::UpdateFlowStatsTransfer(StationID source, uint count, Stat
 	return INVALID_STATION;
 }
 
-FlowStat GoodsEntry::GetSumFlowVia(StationID via) const {
+/**
+ * Get the sum of flows via a specific station from this GoodsEntry.
+ * @param via Remote station to look for.
+ * @return a FlowStat with all flows for 'via' added up.
+ */
+FlowStat GoodsEntry::GetSumFlowVia(StationID via) const
+{
 	FlowStat ret(1, via);
 	for(FlowStatMap::const_iterator i = this->flows.begin(); i != this->flows.end(); ++i) {
 		const FlowStatSet &flow_set = i->second;
