@@ -3790,7 +3790,7 @@ static CommandCost TerraformTile_Station(TileIndex tile, DoCommandFlag flags, ui
 FlowStat GoodsEntry::GetSumFlowVia(StationID via) const
 {
 	FlowStat ret(1, via);
-	for(FlowStatMap::const_iterator i = flows.begin(); i != flows.end(); ++i) {
+	for(FlowStatMap::const_iterator i = this->flows.begin(); i != this->flows.end(); ++i) {
 		const FlowStatSet &flow_set = i->second;
 		for (FlowStatSet::const_iterator j = flow_set.begin(); j != flow_set.end(); ++j) {
 			const FlowStat &flow = *j;
