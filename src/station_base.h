@@ -291,10 +291,10 @@ public:
 	}
 };
 
-typedef std::set<FlowStat, FlowStat::comp> FlowStatSet; ///< percentage of flow to be sent via specified station (or consumed locally)
+typedef std::set<FlowStat, FlowStat::comp> FlowStatSet; ///< Percentage of flow to be sent via specified station (or consumed locally).
 
 typedef std::map<StationID, LinkStat> LinkStatMap;
-typedef std::map<StationID, FlowStatSet> FlowStatMap; ///< flow descriptions by origin stations
+typedef std::map<StationID, FlowStatSet> FlowStatMap; ///< Flow descriptions by origin stations.
 
 uint GetMovingAverageLength(const Station *from, const Station *to);
 
