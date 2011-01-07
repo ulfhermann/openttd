@@ -29,9 +29,9 @@ LinkGraphJob::HandlerList LinkGraphJob::_handlers;
 
 /**
  * Create a node.
- * @param st ID of the associated station
- * @param sup supply of cargo at the station last month
- * @param dem acceptance for cargo at the station
+ * @param st ID of the associated station.
+ * @param sup Supply of cargo at the station last month.
+ * @param dem Acceptance for cargo at the station.
  */
 FORCEINLINE void Node::Init(StationID st, uint sup, uint dem)
 {
@@ -43,8 +43,8 @@ FORCEINLINE void Node::Init(StationID st, uint sup, uint dem)
 
 /**
  * Create an edge.
- * @param distance length of the link as manhattan distance
- * @param capacity capacity of the link
+ * @param distance Length of the link as manhattan distance.
+ * @param capacity Capacity of the link.
  */
 FORCEINLINE void Edge::Init(uint distance, uint capacity)
 {
@@ -58,7 +58,7 @@ FORCEINLINE void Edge::Init(uint distance, uint capacity)
  * 1. Build the link graph component containing the given station by using BFS on the link stats.
  * 2. Set every included station's last_component to the new component's ID (this->current_component_id).
  * 3. Start a link graph job with the new component.
- * @param first Station to start the search at
+ * @param first Station to start the search at.
  */
 void LinkGraph::CreateComponent(Station *first)
 {
@@ -182,8 +182,8 @@ void OnTick_LinkGraph()
  * the station's last_component to this component. Calculate the distances to all
  * other nodes. The distances to _all_ nodes are important as the demand
  * calculator relies on their availability.
- * @param st the new node's station
- * @return the new node's ID
+ * @param st New node's station.
+ * @return New node's ID.
  */
 NodeID LinkGraphComponent::AddNode(Station *st)
 {
@@ -213,9 +213,9 @@ NodeID LinkGraphComponent::AddNode(Station *st)
 
 /**
  * Fill an edge with values from a link.
- * @param from source node of the link
- * @param to destination node of the link
- * @param capacity capacity of the link
+ * @param from Source node of the link.
+ * @param to Destination node of the link.
+ * @param capacity Capacity of the link.
  */
 FORCEINLINE void LinkGraphComponent::AddEdge(NodeID from, NodeID to, uint capacity)
 {
@@ -261,7 +261,7 @@ LinkGraphComponent::LinkGraphComponent() :
 {}
 
 /**
- * (re-)initialize this component with a new ID and a new copy of the settings.
+ * (Re-)initialize this component with a new ID and a new copy of the settings.
  */
 void LinkGraphComponent::Init(LinkGraphComponentID id)
 {
@@ -282,7 +282,7 @@ void LinkGraph::Join()
 
 /**
  * Run all handlers for the given Job.
- * @param j a pointer to a link graph job
+ * @param j Pointer to a link graph job.
  */
 /* static */ void LinkGraphJob::RunLinkGraphJob(void *j)
 {
@@ -338,7 +338,7 @@ void LinkGraphJob::SpawnThread()
 /**
  * (Re-)Initialize the link graph: join all jobs and set current_station_id and
  * cargo to their start values.
- * @param cargo the new cargo ID for the link graph
+ * @param cargo New cargo ID for the link graph.
  */
 void LinkGraph::Init(CargoID cargo)
 {
