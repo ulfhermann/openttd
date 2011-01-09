@@ -877,36 +877,41 @@ static void HandleStationPlacement(TileIndex start, TileIndex end)
 
 /** Enum referring to the widgets of the rail stations window */
 enum BuildRailStationWidgets {
-	BRSW_BACKGROUND,
+	BRSW_PLATFORM_DIR_X,       ///< Button to select '/' view.
+	BRSW_PLATFORM_DIR_Y,       ///< Button to select '\' view.
 
-	BRSW_PLATFORM_DIR_X,
-	BRSW_PLATFORM_DIR_Y,
+	BRSW_PLATFORM_NUM_1,       ///< Button to select stations with a single platform.
+	BRSW_PLATFORM_NUM_2,       ///< Button to select stations with 2 platforms.
+	BRSW_PLATFORM_NUM_3,       ///< Button to select stations with 3 platforms.
+	BRSW_PLATFORM_NUM_4,       ///< Button to select stations with 4 platforms.
+	BRSW_PLATFORM_NUM_5,       ///< Button to select stations with 5 platforms.
+	BRSW_PLATFORM_NUM_6,       ///< Button to select stations with 6 platforms.
+	BRSW_PLATFORM_NUM_7,       ///< Button to select stations with 7 platforms.
 
-	BRSW_PLATFORM_NUM_1,
-	BRSW_PLATFORM_NUM_2,
-	BRSW_PLATFORM_NUM_3,
-	BRSW_PLATFORM_NUM_4,
-	BRSW_PLATFORM_NUM_5,
-	BRSW_PLATFORM_NUM_6,
-	BRSW_PLATFORM_NUM_7,
+	BRSW_PLATFORM_LEN_1,       ///< Button to select single tile length station platforms.
+	BRSW_PLATFORM_LEN_2,       ///< Button to select 2 tiles length station platforms.
+	BRSW_PLATFORM_LEN_3,       ///< Button to select 3 tiles length station platforms.
+	BRSW_PLATFORM_LEN_4,       ///< Button to select 4 tiles length station platforms.
+	BRSW_PLATFORM_LEN_5,       ///< Button to select 5 tiles length station platforms.
+	BRSW_PLATFORM_LEN_6,       ///< Button to select 6 tiles length station platforms.
+	BRSW_PLATFORM_LEN_7,       ///< Button to select 7 tiles length station platforms.
 
-	BRSW_PLATFORM_LEN_1,
-	BRSW_PLATFORM_LEN_2,
-	BRSW_PLATFORM_LEN_3,
-	BRSW_PLATFORM_LEN_4,
-	BRSW_PLATFORM_LEN_5,
-	BRSW_PLATFORM_LEN_6,
-	BRSW_PLATFORM_LEN_7,
+	BRSW_PLATFORM_DRAG_N_DROP, ///< Button to enable drag and drop type station placement.
 
-	BRSW_PLATFORM_DRAG_N_DROP,
+	BRSW_HIGHLIGHT_OFF,        ///< Button for turning coverage highlighting off.
+	BRSW_HIGHLIGHT_ON,         ///< Button for turning coverage highlighting on.
+	BRSW_COVERAGE_TEXTS,       ///< Empty space for the coverage texts.
 
-	BRSW_HIGHLIGHT_OFF,
-	BRSW_HIGHLIGHT_ON,
+	BRSW_MATRIX,               ///< Matrix widget displaying the available stations.
+	BRSW_IMAGE,                ///< Panel used at each cell of the matrix.
+	BRSW_MATRIX_SCROLL,        ///< Scrollbar of the matrix widget.
 
-	BRSW_SHOW_NEWST_ADDITIONS,
-	BRSW_NEWST_DROPDOWN,
-	BRSW_NEWST_LIST,
-	BRSW_NEWST_SCROLL,
+	BRSW_SHOW_NEWST_ADDITIONS, ///< Selection for newstation class selection list.
+	BRSW_SHOW_NEWST_MATRIX,    ///< Selection for newstation image matrix.
+	BRSW_SHOW_NEWST_RESIZE,    ///< Selection for panel and resize at bottom right for newstation.
+	BRSW_SHOW_NEWST_TYPE,      ///< Display of selected station type.
+	BRSW_NEWST_LIST,           ///< List with available newstation classes.
+	BRSW_NEWST_SCROLL,         ///< Scrollbar of the #BRSW_NEWST_LIST.
 
 	BRSW_PLATFORM_NUM_BEGIN = BRSW_PLATFORM_NUM_1 - 1,
 	BRSW_PLATFORM_LEN_BEGIN = BRSW_PLATFORM_LEN_1 - 1,
@@ -914,8 +919,10 @@ enum BuildRailStationWidgets {
 
 struct BuildRailStationWindow : public PickerWindowBase {
 private:
-	uint line_height; ///< Height of a single line in the newstation selection matrix (#BRSW_NEWST_LIST widget).
-	Scrollbar *vscroll;
+	uint line_height;     ///< Height of a single line in the newstation selection matrix (#BRSW_NEWST_LIST widget).
+	uint coverage_height; ///< Height of the coverage texts.
+	Scrollbar *vscroll;   ///< Vertical scrollbar of the new station list.
+	Scrollbar *vscroll2;  ///< Vertical scrollbar of the matrix with new stations.
 
 	/**
 	 * Verify whether the currently selected station size is allowed after selecting a new station class/type.
@@ -946,25 +953,19 @@ private:
 		}
 	}
 
-	/** Build a dropdown list of available station classes */
-	static DropDownList *BuildStationClassDropDown()
-	{
-		DropDownList *list = new DropDownList();
-
-		for (uint i = 0; i < StationClass::GetCount(); i++) {
-			if (i == STAT_CLASS_WAYP) continue;
-			list->push_back(new DropDownListStringItem(StationClass::GetName((StationClassID)i), i, false));
-		}
-
-		return list;
-	}
-
 public:
 	BuildRailStationWindow(const WindowDesc *desc, Window *parent, bool newstation) : PickerWindowBase(parent)
 	{
+		this->coverage_height = 2 * FONT_HEIGHT_NORMAL + 3 * WD_PAR_VSEP_NORMAL;
+		this->vscroll = NULL;
+		_railstation.newstations = newstation;
+
 		this->CreateNestedTree(desc);
-		this->vscroll = this->GetScrollbar(BRSW_NEWST_SCROLL);
 		NWidgetStacked *newst_additions = this->GetWidget<NWidgetStacked>(BRSW_SHOW_NEWST_ADDITIONS);
+		newst_additions->SetDisplayedPlane(newstation ? 0 : SZSP_NONE);
+		newst_additions = this->GetWidget<NWidgetStacked>(BRSW_SHOW_NEWST_MATRIX);
+		newst_additions->SetDisplayedPlane(newstation ? 0 : SZSP_NONE);
+		newst_additions = this->GetWidget<NWidgetStacked>(BRSW_SHOW_NEWST_RESIZE);
 		newst_additions->SetDisplayedPlane(newstation ? 0 : SZSP_NONE);
 		this->FinishInitNested(desc, TRANSPORT_RAIL);
 
@@ -978,19 +979,32 @@ public:
 		this->SetWidgetLoweredState(BRSW_HIGHLIGHT_OFF, !_settings_client.gui.station_show_coverage);
 		this->SetWidgetLoweredState(BRSW_HIGHLIGHT_ON, _settings_client.gui.station_show_coverage);
 
-		_railstation.newstations = newstation;
-
-		if (newstation) {
-			_railstation.station_count = StationClass::GetCount(_railstation.station_class);
-
-			this->vscroll->SetCount(_railstation.station_count);
-			this->vscroll->SetCapacity(GB(this->GetWidget<NWidgetCore>(BRSW_NEWST_LIST)->widget_data, MAT_ROW_START, MAT_ROW_BITS));
-			this->vscroll->SetPosition(Clamp(_railstation.station_type - 2, 0, max(this->vscroll->GetCount() - this->vscroll->GetCapacity(), 0)));
-		} else {
-			/* New stations are not available, so ensure the default station
+		if (!newstation || _railstation.station_class >= (int)StationClass::GetCount()) {
+			/* New stations are not available or changed, so ensure the default station
 			 * type is 'selected'. */
 			_railstation.station_class = STAT_CLASS_DFLT;
 			_railstation.station_type = 0;
+			this->vscroll2 = NULL;
+		}
+		if (newstation) {
+			_railstation.station_count = StationClass::GetCount(_railstation.station_class);
+			_railstation.station_type = min(_railstation.station_type, _railstation.station_count - 1);
+
+			int count = 0;
+			for (uint i = 0; i < StationClass::GetCount(); i++) {
+				if (i == STAT_CLASS_WAYP) continue;
+				count++;
+			}
+			this->vscroll = this->GetScrollbar(BRSW_NEWST_SCROLL);
+			this->vscroll->SetCount(count);
+			this->vscroll->SetCapacity(GB(this->GetWidget<NWidgetCore>(BRSW_NEWST_LIST)->widget_data, MAT_ROW_START, MAT_ROW_BITS));
+			this->vscroll->SetPosition(Clamp(_railstation.station_class - 2, 0, max(this->vscroll->GetCount() - this->vscroll->GetCapacity(), 0)));
+
+			this->vscroll2 = this->GetScrollbar(BRSW_MATRIX_SCROLL);
+			NWidgetMatrix *matrix = this->GetWidget<NWidgetMatrix>(BRSW_MATRIX);
+			matrix->SetScrollbar(this->vscroll2);
+			matrix->SetCount(_railstation.station_count);
+			matrix->SetClicked(0);
 		}
 	}
 
@@ -1033,48 +1047,67 @@ public:
 		this->DrawWidgets();
 
 		/* 'Accepts' and 'Supplies' texts. */
-		int top = this->GetWidget<NWidgetBase>(BRSW_HIGHLIGHT_ON)->pos_y + this->GetWidget<NWidgetBase>(BRSW_HIGHLIGHT_ON)->current_y + WD_PAR_VSEP_NORMAL;
-		NWidgetBase *back_nwi = this->GetWidget<NWidgetBase>(BRSW_BACKGROUND);
-		int right = back_nwi->pos_x +  back_nwi->current_x;
-		int bottom = back_nwi->pos_y +  back_nwi->current_y;
-		top = DrawStationCoverageAreaText(back_nwi->pos_x + WD_FRAMERECT_LEFT, right - WD_FRAMERECT_RIGHT, top, SCT_ALL, rad, false) + WD_PAR_VSEP_NORMAL;
-		top = DrawStationCoverageAreaText(back_nwi->pos_x + WD_FRAMERECT_LEFT, right - WD_FRAMERECT_RIGHT, top, SCT_ALL, rad, true) + WD_PAR_VSEP_NORMAL;
-		/* Resize background if the text is not equally long as the window. */
-		if (top > bottom || (top < bottom && back_nwi->current_y > back_nwi->smallest_y)) {
-			ResizeWindow(this, 0, top - bottom);
+		NWidgetBase *cov = this->GetWidget<NWidgetBase>(BRSW_COVERAGE_TEXTS);
+		int top = cov->pos_y + WD_PAR_VSEP_NORMAL;
+		int left = cov->pos_x + WD_FRAMERECT_LEFT;
+		int right = cov->pos_x + cov->current_x - WD_FRAMERECT_RIGHT;
+		int bottom = cov->pos_y + cov->current_y;
+		top = DrawStationCoverageAreaText(left, right, top, SCT_ALL, rad, false) + WD_PAR_VSEP_NORMAL;
+		top = DrawStationCoverageAreaText(left, right, top, SCT_ALL, rad, true) + WD_PAR_VSEP_NORMAL;
+		/* Resize the coverage text space if the text is not equally long as the window. */
+		if (top != bottom) {
+			this->coverage_height += top - bottom;
+			this->ReInit();
 		}
 	}
 
 	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		switch (widget) {
-			case BRSW_NEWST_DROPDOWN: {
+			case BRSW_NEWST_LIST: {
 				Dimension d = {0, 0};
 				for (uint i = 0; i < StationClass::GetCount(); i++) {
 					if (i == STAT_CLASS_WAYP) continue;
 					SetDParam(0, StationClass::GetName((StationClassID)i));
 					d = maxdim(d, GetStringBoundingBox(STR_BLACK_STRING));
 				}
-				d.width += padding.width;
-				d.height += padding.height;
-				*size = maxdim(*size, d);
+				size->width = max(size->width, d.width + padding.width);
+				this->line_height = FONT_HEIGHT_NORMAL + WD_MATRIX_TOP + WD_MATRIX_BOTTOM;
+				size->height = GB(this->GetWidget<NWidgetCore>(widget)->widget_data, MAT_ROW_START, MAT_ROW_BITS) * this->line_height;
+				resize->height = this->line_height;
 				break;
 			}
-			case BRSW_NEWST_LIST: {
-				Dimension d = GetStringBoundingBox(STR_STATION_CLASS_DFLT);
+
+			case BRSW_SHOW_NEWST_TYPE: {
+				if (!_railstation.newstations) {
+					size->width = 0;
+					size->height = 0;
+					break;
+				}
+
+				/* If newstations exist, compute the non-zero minimal size. */
+				Dimension d = {0, 0};
+				StringID str = this->GetWidget<NWidgetCore>(widget)->widget_data;
 				for (StationClassID statclass = STAT_CLASS_BEGIN; statclass < (StationClassID)StationClass::GetCount(); statclass++) {
 					if (statclass == STAT_CLASS_WAYP) continue;
 					for (uint16 j = 0; j < StationClass::GetCount(statclass); j++) {
 						const StationSpec *statspec = StationClass::Get(statclass, j);
-						if (statspec != NULL && statspec->name != 0) d = maxdim(d, GetStringBoundingBox(statspec->name));
+						SetDParam(0, (statspec != NULL && statspec->name != 0) ? statspec->name : STR_STATION_CLASS_DFLT);
+						d = maxdim(d, GetStringBoundingBox(str));
 					}
 				}
 				size->width = max(size->width, d.width + padding.width);
-
-				this->line_height = FONT_HEIGHT_NORMAL + WD_MATRIX_TOP + WD_MATRIX_BOTTOM;
-				size->height = GB(this->GetWidget<NWidgetCore>(widget)->widget_data, MAT_ROW_START, MAT_ROW_BITS) * this->line_height;
 				break;
 			}
+
+			case BRSW_COVERAGE_TEXTS:
+				size->height = this->coverage_height;
+				break;
+
+			case BRSW_MATRIX:
+				fill->height = 1;
+				resize->height = 1;
+				break;
 		}
 	}
 
@@ -1082,7 +1115,7 @@ public:
 	{
 		DrawPixelInfo tmp_dpi;
 
-		switch (widget) {
+		switch (GB(widget, 0, 16)) {
 			case BRSW_PLATFORM_DIR_X:
 				/* Set up a clipping area for the '/' station preview */
 				if (FillDrawPixelInfo(&tmp_dpi, r.left, r.top, r.right - r.left + 1, r.bottom - r.top + 1)) {
@@ -1108,34 +1141,64 @@ public:
 				break;
 
 			case BRSW_NEWST_LIST: {
-				uint y = r.top;
-				for (uint16 i = this->vscroll->GetPosition(); i < _railstation.station_count && this->vscroll->IsVisible(i); i++) {
-					const StationSpec *statspec = StationClass::Get(_railstation.station_class, i);
-
-					StringID str = STR_STATION_CLASS_DFLT;
-					if (statspec != NULL && statspec->name != 0) {
-						if (HasBit(statspec->callback_mask, CBM_STATION_AVAIL) && GB(GetStationCallback(CBID_STATION_AVAILABILITY, 0, 0, statspec, NULL, INVALID_TILE), 0, 8) == 0) {
-							GfxFillRect(r.left + 1, y + 1, r.right - 1, y + this->line_height - 2, 0, FILLRECT_CHECKER);
-						}
-						str = statspec->name;
+				uint statclass = 0;
+				uint row = 0;
+				for (uint i = 0; i < StationClass::GetCount(); i++) {
+					if (i == STAT_CLASS_WAYP) continue;
+					if (this->vscroll->IsVisible(statclass)) {
+						SetDParam(0, StationClass::GetName((StationClassID)i));
+						DrawString(r.left + WD_MATRIX_LEFT, r.right - WD_MATRIX_RIGHT, row * this->line_height + r.top + WD_MATRIX_TOP, STR_JUST_STRING,
+								(StationClassID)i == _railstation.station_class ? TC_WHITE : TC_BLACK);
+						row++;
 					}
-					DrawString(r.left + WD_MATRIX_LEFT, r.right - WD_MATRIX_RIGHT, y + WD_MATRIX_TOP, str, i == _railstation.station_type ? TC_WHITE : TC_BLACK);
+					statclass++;
+				}
+				break;
+			}
 
-					y += this->line_height;
+			case BRSW_IMAGE: {
+				byte type = GB(widget, 16, 16);
+				assert(type < _railstation.station_count);
+				/* Check station availability callback */
+				const StationSpec *statspec = StationClass::Get(_railstation.station_class, type);
+				if (statspec != NULL && HasBit(statspec->callback_mask, CBM_STATION_AVAIL) &&
+						GB(GetStationCallback(CBID_STATION_AVAILABILITY, 0, 0, statspec, NULL, INVALID_TILE), 0, 8) == 0) {
+					GfxFillRect(r.left + 1, r.top + 1, r.right - 1, r.bottom - 1, 0, FILLRECT_CHECKER);
+				}
+
+				/* Set up a clipping area for the station preview. */
+				if (FillDrawPixelInfo(&tmp_dpi, r.left + 1, r.top + 1, r.right - (r.left + 1) + 1, r.bottom - 1 - (r.top + 1) + 1)) {
+					DrawPixelInfo *old_dpi = _cur_dpi;
+					_cur_dpi = &tmp_dpi;
+					if (!DrawStationTile(31, 29, _cur_railtype, _railstation.orientation, _railstation.station_class, type)) {
+						StationPickerDrawSprite(31, 29, STATION_RAIL, _cur_railtype, INVALID_ROADTYPE, 2 + _railstation.orientation);
+					}
+					_cur_dpi = old_dpi;
 				}
 				break;
 			}
 		}
 	}
 
+	virtual void OnResize()
+	{
+		if (this->vscroll != NULL) { // New stations available.
+			this->vscroll->SetCapacityFromWidget(this, BRSW_NEWST_LIST);
+			this->GetWidget<NWidgetCore>(BRSW_NEWST_LIST)->widget_data = (this->vscroll->GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
+		}
+	}
+
 	virtual void SetStringParameters(int widget) const
 	{
-		if (widget == BRSW_NEWST_DROPDOWN) SetDParam(0, StationClass::GetName(_railstation.station_class));
+		if (widget == BRSW_SHOW_NEWST_TYPE) {
+			const StationSpec *statspec = StationClass::Get(_railstation.station_class, _railstation.station_type);
+			SetDParam(0, (statspec != NULL && statspec->name != 0) ? statspec->name : STR_STATION_CLASS_DFLT);
+		}
 	}
 
 	virtual void OnClick(Point pt, int widget, int click_count)
 	{
-		switch (widget) {
+		switch (GB(widget, 0, 16)) {
 			case BRSW_PLATFORM_DIR_X:
 			case BRSW_PLATFORM_DIR_Y:
 				this->RaiseWidget(_railstation.orientation + BRSW_PLATFORM_DIR_X);
@@ -1260,12 +1323,35 @@ public:
 				this->SetDirty();
 				break;
 
-			case BRSW_NEWST_DROPDOWN:
-				ShowDropDownList(this, BuildStationClassDropDown(), _railstation.station_class, BRSW_NEWST_DROPDOWN);
-				break;
-
 			case BRSW_NEWST_LIST: {
 				int y = this->vscroll->GetScrolledRowFromWidget(pt.y, this, BRSW_NEWST_LIST, 0, this->line_height);
+				if (y >= (int)StationClass::GetCount()) return;
+				for (uint i = 0; i < StationClass::GetCount(); i++) {
+					if (i == STAT_CLASS_WAYP) continue;
+					if (y == 0) {
+						if (_railstation.station_class != (StationClassID)i) {
+							_railstation.station_class = (StationClassID)i;
+							_railstation.station_count = StationClass::GetCount(_railstation.station_class);
+							_railstation.station_type  = min((int)_railstation.station_type, max(0, (int)_railstation.station_count - 1));
+
+							this->CheckSelectedSize(StationClass::Get(_railstation.station_class, _railstation.station_type));
+
+							NWidgetMatrix *matrix = this->GetWidget<NWidgetMatrix>(BRSW_MATRIX);
+							matrix->SetCount(_railstation.station_count);
+							matrix->SetClicked(_railstation.station_type);
+						}
+						SndPlayFx(SND_15_BEEP);
+						this->SetDirty();
+						DeleteWindowById(WC_SELECT_STATION, 0);
+						break;
+					}
+					y--;
+				}
+				break;
+			}
+
+			case BRSW_IMAGE: {
+				int y = GB(widget, 16, 16);
 				if (y >= _railstation.station_count) return;
 
 				/* Check station availability callback */
@@ -1276,6 +1362,7 @@ public:
 				_railstation.station_type = y;
 
 				this->CheckSelectedSize(statspec);
+				this->GetWidget<NWidgetMatrix>(BRSW_MATRIX)->SetClicked(_railstation.station_type);
 
 				SndPlayFx(SND_15_BEEP);
 				this->SetDirty();
@@ -1283,24 +1370,6 @@ public:
 				break;
 			}
 		}
-	}
-
-	virtual void OnDropdownSelect(int widget, int index)
-	{
-		if (_railstation.station_class != index) {
-			_railstation.station_class = (StationClassID)index;
-			_railstation.station_type  = 0;
-			_railstation.station_count = StationClass::GetCount(_railstation.station_class);
-
-			this->CheckSelectedSize(StationClass::Get(_railstation.station_class, _railstation.station_type));
-
-			this->vscroll->SetCount(_railstation.station_count);
-			this->vscroll->SetPosition(_railstation.station_type);
-		}
-
-		SndPlayFx(SND_15_BEEP);
-		this->SetDirty();
-		DeleteWindowById(WC_SELECT_STATION, 0);
 	}
 
 	virtual void OnTick()
@@ -1314,73 +1383,93 @@ static const NWidgetPart _nested_station_builder_widgets[] = {
 		NWidget(WWT_CLOSEBOX, COLOUR_DARK_GREEN),
 		NWidget(WWT_CAPTION, COLOUR_DARK_GREEN), SetDataTip(STR_STATION_BUILD_RAIL_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_DARK_GREEN, BRSW_BACKGROUND),
-		/* begin newstations gui additions. */
-		NWidget(NWID_SELECTION, INVALID_COLOUR, BRSW_SHOW_NEWST_ADDITIONS),
+	NWidget(WWT_PANEL, COLOUR_DARK_GREEN),
+		NWidget(NWID_HORIZONTAL),
 			NWidget(NWID_VERTICAL),
-				NWidget(WWT_DROPDOWN, COLOUR_GREY, BRSW_NEWST_DROPDOWN), SetMinimalSize(134, 12), SetFill(1, 0), SetPadding(3, 7, 3, 7), SetDataTip(STR_BLACK_STRING, STR_STATION_BUILD_STATION_CLASS_TOOLTIP),
-				NWidget(NWID_HORIZONTAL), SetPIP(7, 0, 7),
-					NWidget(WWT_MATRIX, COLOUR_GREY, BRSW_NEWST_LIST), SetMinimalSize(122, 71), SetFill(1, 0), SetDataTip(0x501, STR_STATION_BUILD_STATION_TYPE_TOOLTIP), SetScrollbar(BRSW_NEWST_SCROLL),
-					NWidget(NWID_VSCROLLBAR, COLOUR_GREY, BRSW_NEWST_SCROLL),
+				NWidget(NWID_SELECTION, INVALID_COLOUR, BRSW_SHOW_NEWST_ADDITIONS),
+					NWidget(NWID_HORIZONTAL), SetPIP(7, 0, 7), SetPadding(2, 0, 1, 0),
+						NWidget(WWT_MATRIX, COLOUR_GREY, BRSW_NEWST_LIST), SetMinimalSize(122, 71), SetFill(1, 0),
+								SetDataTip(0x501, STR_STATION_BUILD_STATION_CLASS_TOOLTIP), SetScrollbar(BRSW_NEWST_SCROLL),
+						NWidget(NWID_VSCROLLBAR, COLOUR_GREY, BRSW_NEWST_SCROLL),
+					EndContainer(),
 				EndContainer(),
-				NWidget(NWID_SPACER), SetMinimalSize(0, 1),
+				NWidget(WWT_LABEL, COLOUR_DARK_GREEN), SetMinimalSize(144, 11), SetDataTip(STR_STATION_BUILD_ORIENTATION, STR_NULL), SetPadding(1, 2, 0, 2),
+				NWidget(NWID_HORIZONTAL),
+					NWidget(NWID_SPACER), SetMinimalSize(7, 0), SetFill(1, 0),
+					NWidget(WWT_PANEL, COLOUR_GREY, BRSW_PLATFORM_DIR_X), SetMinimalSize(66, 48), SetFill(0, 0), SetDataTip(0x0, STR_STATION_BUILD_RAILROAD_ORIENTATION_TOOLTIP), EndContainer(),
+					NWidget(NWID_SPACER), SetMinimalSize(2, 0), SetFill(1, 0),
+					NWidget(WWT_PANEL, COLOUR_GREY, BRSW_PLATFORM_DIR_Y), SetMinimalSize(66, 48), SetFill(0, 0), SetDataTip(0x0, STR_STATION_BUILD_RAILROAD_ORIENTATION_TOOLTIP), EndContainer(),
+					NWidget(NWID_SPACER), SetMinimalSize(7, 0), SetFill(1, 0),
+				EndContainer(),
+				NWidget(WWT_LABEL, COLOUR_DARK_GREEN, BRSW_SHOW_NEWST_TYPE), SetMinimalSize(144, 11), SetDataTip(STR_ORANGE_STRING, STR_NULL), SetPadding(1, 2, 4, 2),
+				NWidget(WWT_LABEL, COLOUR_DARK_GREEN), SetMinimalSize(144, 11), SetDataTip(STR_STATION_BUILD_NUMBER_OF_TRACKS, STR_NULL), SetPadding(0, 2, 0, 2),
+				NWidget(NWID_HORIZONTAL),
+					NWidget(NWID_SPACER), SetFill(1, 0),
+					NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_PLATFORM_NUM_1), SetMinimalSize(15, 12), SetDataTip(STR_BLACK_1, STR_STATION_BUILD_NUMBER_OF_TRACKS_TOOLTIP),
+					NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_PLATFORM_NUM_2), SetMinimalSize(15, 12), SetDataTip(STR_BLACK_2, STR_STATION_BUILD_NUMBER_OF_TRACKS_TOOLTIP),
+					NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_PLATFORM_NUM_3), SetMinimalSize(15, 12), SetDataTip(STR_BLACK_3, STR_STATION_BUILD_NUMBER_OF_TRACKS_TOOLTIP),
+					NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_PLATFORM_NUM_4), SetMinimalSize(15, 12), SetDataTip(STR_BLACK_4, STR_STATION_BUILD_NUMBER_OF_TRACKS_TOOLTIP),
+					NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_PLATFORM_NUM_5), SetMinimalSize(15, 12), SetDataTip(STR_BLACK_5, STR_STATION_BUILD_NUMBER_OF_TRACKS_TOOLTIP),
+					NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_PLATFORM_NUM_6), SetMinimalSize(15, 12), SetDataTip(STR_BLACK_6, STR_STATION_BUILD_NUMBER_OF_TRACKS_TOOLTIP),
+					NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_PLATFORM_NUM_7), SetMinimalSize(15, 12), SetDataTip(STR_BLACK_7, STR_STATION_BUILD_NUMBER_OF_TRACKS_TOOLTIP),
+					NWidget(NWID_SPACER), SetFill(1, 0),
+				EndContainer(),
+				NWidget(WWT_LABEL, COLOUR_DARK_GREEN), SetMinimalSize(144, 11), SetDataTip(STR_STATION_BUILD_PLATFORM_LENGTH, STR_NULL), SetPadding(2, 2, 0, 2),
+				NWidget(NWID_HORIZONTAL),
+					NWidget(NWID_SPACER), SetFill(1, 0),
+					NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_PLATFORM_LEN_1), SetMinimalSize(15, 12), SetDataTip(STR_BLACK_1, STR_STATION_BUILD_PLATFORM_LENGTH_TOOLTIP),
+					NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_PLATFORM_LEN_2), SetMinimalSize(15, 12), SetDataTip(STR_BLACK_2, STR_STATION_BUILD_PLATFORM_LENGTH_TOOLTIP),
+					NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_PLATFORM_LEN_3), SetMinimalSize(15, 12), SetDataTip(STR_BLACK_3, STR_STATION_BUILD_PLATFORM_LENGTH_TOOLTIP),
+					NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_PLATFORM_LEN_4), SetMinimalSize(15, 12), SetDataTip(STR_BLACK_4, STR_STATION_BUILD_PLATFORM_LENGTH_TOOLTIP),
+					NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_PLATFORM_LEN_5), SetMinimalSize(15, 12), SetDataTip(STR_BLACK_5, STR_STATION_BUILD_PLATFORM_LENGTH_TOOLTIP),
+					NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_PLATFORM_LEN_6), SetMinimalSize(15, 12), SetDataTip(STR_BLACK_6, STR_STATION_BUILD_PLATFORM_LENGTH_TOOLTIP),
+					NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_PLATFORM_LEN_7), SetMinimalSize(15, 12), SetDataTip(STR_BLACK_7, STR_STATION_BUILD_PLATFORM_LENGTH_TOOLTIP),
+					NWidget(NWID_SPACER), SetFill(1, 0),
+				EndContainer(),
+				NWidget(NWID_SPACER), SetMinimalSize(0, 2),
+				NWidget(NWID_HORIZONTAL),
+					NWidget(NWID_SPACER), SetMinimalSize(2, 0), SetFill(1, 0),
+					NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_PLATFORM_DRAG_N_DROP), SetMinimalSize(75, 12), SetDataTip(STR_STATION_BUILD_DRAG_DROP, STR_STATION_BUILD_DRAG_DROP_TOOLTIP),
+					NWidget(NWID_SPACER), SetMinimalSize(2, 0), SetFill(1, 0),
+				EndContainer(),
+				NWidget(WWT_LABEL, COLOUR_DARK_GREEN), SetMinimalSize(144, 11), SetDataTip(STR_STATION_BUILD_COVERAGE_AREA_TITLE, STR_NULL), SetPadding(3, 2, 0, 2),
+				NWidget(NWID_HORIZONTAL),
+					NWidget(NWID_SPACER), SetMinimalSize(2, 0), SetFill(1, 0),
+					NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_HIGHLIGHT_OFF), SetMinimalSize(60, 12),
+												SetDataTip(STR_STATION_BUILD_COVERAGE_OFF, STR_STATION_BUILD_COVERAGE_AREA_OFF_TOOLTIP),
+					NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_HIGHLIGHT_ON), SetMinimalSize(60, 12),
+												SetDataTip(STR_STATION_BUILD_COVERAGE_ON, STR_STATION_BUILD_COVERAGE_AREA_ON_TOOLTIP),
+					NWidget(NWID_SPACER), SetMinimalSize(2, 0), SetFill(1, 0),
+				EndContainer(),
+			EndContainer(),
+			NWidget(NWID_SELECTION, INVALID_COLOUR, BRSW_SHOW_NEWST_MATRIX),
+				NWidget(NWID_VERTICAL),
+					NWidget(NWID_HORIZONTAL),
+						NWidget(NWID_MATRIX, COLOUR_DARK_GREEN, BRSW_MATRIX), SetScrollbar(BRSW_MATRIX_SCROLL), SetPIP(0, 2, 0), SetPadding(2, 0, 0, 0),
+							NWidget(WWT_PANEL, COLOUR_DARK_GREEN, BRSW_IMAGE), SetMinimalSize(66, 60),
+									SetFill(0, 0), SetResize(0, 0), SetDataTip(0x0, STR_STATION_BUILD_STATION_TYPE_TOOLTIP),
+							EndContainer(),
+						EndContainer(),
+						NWidget(NWID_VSCROLLBAR, COLOUR_DARK_GREEN, BRSW_MATRIX_SCROLL),
+					EndContainer(),
+				EndContainer(),
 			EndContainer(),
 		EndContainer(),
-		/* end newstations gui additions. */
-		NWidget(WWT_LABEL, COLOUR_DARK_GREEN), SetMinimalSize(144, 11), SetDataTip(STR_STATION_BUILD_ORIENTATION, STR_NULL), SetPadding(1, 2, 0, 2),
 		NWidget(NWID_HORIZONTAL),
-			NWidget(NWID_SPACER), SetMinimalSize(7, 0), SetFill(1, 0),
-			NWidget(WWT_PANEL, COLOUR_GREY, BRSW_PLATFORM_DIR_X), SetMinimalSize(66, 48), SetFill(0, 0), SetDataTip(0x0, STR_STATION_BUILD_RAILROAD_ORIENTATION_TOOLTIP), EndContainer(),
-			NWidget(NWID_SPACER), SetMinimalSize(2, 0), SetFill(1, 0),
-			NWidget(WWT_PANEL, COLOUR_GREY, BRSW_PLATFORM_DIR_Y), SetMinimalSize(66, 48), SetFill(0, 0), SetDataTip(0x0, STR_STATION_BUILD_RAILROAD_ORIENTATION_TOOLTIP), EndContainer(),
-			NWidget(NWID_SPACER), SetMinimalSize(7, 0), SetFill(1, 0),
+			NWidget(WWT_EMPTY, INVALID_COLOUR, BRSW_COVERAGE_TEXTS), SetFill(1, 1), SetResize(1, 0),
+			NWidget(NWID_SELECTION, INVALID_COLOUR, BRSW_SHOW_NEWST_RESIZE),
+				NWidget(NWID_VERTICAL),
+					NWidget(WWT_PANEL, COLOUR_DARK_GREEN), SetFill(0, 1), EndContainer(),
+					NWidget(WWT_RESIZEBOX, COLOUR_DARK_GREEN),
+				EndContainer(),
+			EndContainer(),
 		EndContainer(),
-		NWidget(WWT_LABEL, COLOUR_DARK_GREEN), SetMinimalSize(144, 11), SetDataTip(STR_STATION_BUILD_NUMBER_OF_TRACKS, STR_NULL), SetPadding(2, 2, 0, 2),
-		NWidget(NWID_HORIZONTAL),
-			NWidget(NWID_SPACER), SetFill(1, 0),
-			NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_PLATFORM_NUM_1), SetMinimalSize(15, 12), SetDataTip(STR_BLACK_1, STR_STATION_BUILD_NUMBER_OF_TRACKS_TOOLTIP),
-			NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_PLATFORM_NUM_2), SetMinimalSize(15, 12), SetDataTip(STR_BLACK_2, STR_STATION_BUILD_NUMBER_OF_TRACKS_TOOLTIP),
-			NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_PLATFORM_NUM_3), SetMinimalSize(15, 12), SetDataTip(STR_BLACK_3, STR_STATION_BUILD_NUMBER_OF_TRACKS_TOOLTIP),
-			NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_PLATFORM_NUM_4), SetMinimalSize(15, 12), SetDataTip(STR_BLACK_4, STR_STATION_BUILD_NUMBER_OF_TRACKS_TOOLTIP),
-			NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_PLATFORM_NUM_5), SetMinimalSize(15, 12), SetDataTip(STR_BLACK_5, STR_STATION_BUILD_NUMBER_OF_TRACKS_TOOLTIP),
-			NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_PLATFORM_NUM_6), SetMinimalSize(15, 12), SetDataTip(STR_BLACK_6, STR_STATION_BUILD_NUMBER_OF_TRACKS_TOOLTIP),
-			NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_PLATFORM_NUM_7), SetMinimalSize(15, 12), SetDataTip(STR_BLACK_7, STR_STATION_BUILD_NUMBER_OF_TRACKS_TOOLTIP),
-			NWidget(NWID_SPACER), SetFill(1, 0),
-		EndContainer(),
-		NWidget(WWT_LABEL, COLOUR_DARK_GREEN), SetMinimalSize(144, 11), SetDataTip(STR_STATION_BUILD_PLATFORM_LENGTH, STR_NULL), SetPadding(2, 2, 0, 2),
-		NWidget(NWID_HORIZONTAL),
-			NWidget(NWID_SPACER), SetFill(1, 0),
-			NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_PLATFORM_LEN_1), SetMinimalSize(15, 12), SetDataTip(STR_BLACK_1, STR_STATION_BUILD_PLATFORM_LENGTH_TOOLTIP),
-			NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_PLATFORM_LEN_2), SetMinimalSize(15, 12), SetDataTip(STR_BLACK_2, STR_STATION_BUILD_PLATFORM_LENGTH_TOOLTIP),
-			NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_PLATFORM_LEN_3), SetMinimalSize(15, 12), SetDataTip(STR_BLACK_3, STR_STATION_BUILD_PLATFORM_LENGTH_TOOLTIP),
-			NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_PLATFORM_LEN_4), SetMinimalSize(15, 12), SetDataTip(STR_BLACK_4, STR_STATION_BUILD_PLATFORM_LENGTH_TOOLTIP),
-			NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_PLATFORM_LEN_5), SetMinimalSize(15, 12), SetDataTip(STR_BLACK_5, STR_STATION_BUILD_PLATFORM_LENGTH_TOOLTIP),
-			NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_PLATFORM_LEN_6), SetMinimalSize(15, 12), SetDataTip(STR_BLACK_6, STR_STATION_BUILD_PLATFORM_LENGTH_TOOLTIP),
-			NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_PLATFORM_LEN_7), SetMinimalSize(15, 12), SetDataTip(STR_BLACK_7, STR_STATION_BUILD_PLATFORM_LENGTH_TOOLTIP),
-			NWidget(NWID_SPACER), SetFill(1, 0),
-		EndContainer(),
-		NWidget(NWID_SPACER), SetMinimalSize(0, 2),
-		NWidget(NWID_HORIZONTAL),
-			NWidget(NWID_SPACER), SetMinimalSize(2, 0), SetFill(1, 0),
-			NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_PLATFORM_DRAG_N_DROP), SetMinimalSize(75, 12), SetDataTip(STR_STATION_BUILD_DRAG_DROP, STR_STATION_BUILD_DRAG_DROP_TOOLTIP),
-			NWidget(NWID_SPACER), SetMinimalSize(2, 0), SetFill(1, 0),
-		EndContainer(),
-		NWidget(WWT_LABEL, COLOUR_DARK_GREEN), SetMinimalSize(144, 11), SetDataTip(STR_STATION_BUILD_COVERAGE_AREA_TITLE, STR_NULL), SetPadding(3, 2, 0, 2),
-		NWidget(NWID_HORIZONTAL),
-			NWidget(NWID_SPACER), SetMinimalSize(2, 0), SetFill(1, 0),
-			NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_HIGHLIGHT_OFF), SetMinimalSize(60, 12),
-										SetDataTip(STR_STATION_BUILD_COVERAGE_OFF, STR_STATION_BUILD_COVERAGE_AREA_OFF_TOOLTIP),
-			NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_HIGHLIGHT_ON), SetMinimalSize(60, 12),
-										SetDataTip(STR_STATION_BUILD_COVERAGE_ON, STR_STATION_BUILD_COVERAGE_AREA_ON_TOOLTIP),
-			NWidget(NWID_SPACER), SetMinimalSize(2, 0), SetFill(1, 0),
-		EndContainer(),
-		NWidget(NWID_SPACER), SetMinimalSize(0, 20), SetResize(0, 1),
 	EndContainer(),
 };
 
 /** High level window description of the station-build window (default & newGRF) */
 static const WindowDesc _station_builder_desc(
-	WDP_AUTO, 0, 0,
+	WDP_AUTO, 350, 0,
 	WC_BUILD_STATION, WC_BUILD_TOOLBAR,
 	WDF_CONSTRUCTION,
 	_nested_station_builder_widgets, lengthof(_nested_station_builder_widgets)
