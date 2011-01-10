@@ -441,6 +441,9 @@
     <ClInclude Include="..\src\cargoaction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\cargodest_base.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="..\src\cargomonitor.h">
       <Filter>Header Files</Filter>
     </ClInclude>

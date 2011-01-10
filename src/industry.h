@@ -16,6 +16,7 @@
 #include "subsidy_type.h"
 #include "industry_map.h"
 #include "tilearea_type.h"
+#include "cargodest_base.h"
 
 
 typedef Pool<Industry, IndustryID, 64, 64000> IndustryPool;
@@ -36,7 +37,7 @@ enum ProductionLevels {
 /**
  * Defines the internal data of a functional industry.
  */
-struct Industry : IndustryPool::PoolItem<&_industry_pool> {
+struct Industry : IndustryPool::PoolItem<&_industry_pool>, CargoSourceSink {
 	TileArea location;                  ///< Location of the industry
 	Town *town;                         ///< Nearest town
 	CargoID produced_cargo[2];          ///< 2 production cargo slots
@@ -75,6 +76,16 @@ struct Industry : IndustryPool::PoolItem<&_industry_pool> {
 	~Industry();
 
 	void RecomputeProductionMultipliers();
+
+	/* virtual */ SourceType GetType() const
+	{
+		return ST_INDUSTRY;
+	}
+
+	/* virtual */ SourceID GetID() const
+	{
+		return this->index;
+	}
 
 	/**
 	 * Check if a given tile belongs to this industry.
