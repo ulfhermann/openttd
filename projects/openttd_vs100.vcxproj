@@ -385,6 +385,7 @@
     <ClInclude Include="..\src\bmp.h" />
     <ClInclude Include="..\src\bridge.h" />
     <ClInclude Include="..\src\cargo_type.h" />
+    <ClInclude Include="..\src\cargodest_base.h" />
     <ClInclude Include="..\src\cargopacket.h" />
     <ClInclude Include="..\src\cargotype.h" />
     <ClInclude Include="..\src\cheat_func.h" />

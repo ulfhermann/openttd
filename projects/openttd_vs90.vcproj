@@ -812,6 +812,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\cargodest_base.h"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\cargopacket.h"
 				>
 			</File>
