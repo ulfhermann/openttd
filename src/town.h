@@ -17,6 +17,7 @@
 #include "command_type.h"
 #include "town_map.h"
 #include "subsidy_type.h"
+#include "cargodest_base.h"
 
 template <typename T>
 struct BuildingCounts {
@@ -33,7 +34,7 @@ typedef Pool<Town, TownID, 64, 64000> TownPool;
 extern TownPool _town_pool;
 
 /** Town data structure. */
-struct Town : TownPool::PoolItem<&_town_pool> {
+struct Town : TownPool::PoolItem<&_town_pool>, CargoSourceSink {
 	TileIndex xy;
 
 	/* Current population of people and amount of houses. */
@@ -115,6 +116,16 @@ struct Town : TownPool::PoolItem<&_town_pool> {
 	~Town();
 
 	void InitializeLayout(TownLayout layout);
+
+	/* virtual */ SourceType GetType() const
+	{
+		return ST_TOWN;
+	}
+
+	/* virtual */ SourceID GetID() const
+	{
+		return this->index;
+	}
 
 	/**
 	 * Calculate the max town noise.

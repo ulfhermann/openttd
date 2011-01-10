@@ -375,6 +375,9 @@
     <ClInclude Include="..\src\cargo_type.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\cargodest_base.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="..\src\cargopacket.h">
       <Filter>Header Files</Filter>
     </ClInclude>
