@@ -3476,7 +3476,9 @@ STR_INCOME_FLOAT_INCOME_SMALL                                   :{TINYFONT}{GREE
 STR_INCOME_FLOAT_INCOME                                         :{GREEN}Income: {CURRENCY}
 STR_FEEDER_TINY                                                 :{TINYFONT}{YELLOW}Transfer: {CURRENCY}
 STR_FEEDER                                                      :{YELLOW}Transfer: {CURRENCY}
+STR_FEEDER_INCOME_TINY                                          :{TINYFONT}{YELLOW}Transfer: {CURRENCY}{WHITE} / {GREEN}Income: {CURRENCY}
 STR_FEEDER_INCOME                                               :{YELLOW}Transfer: {CURRENCY}{WHITE} / {GREEN}Income: {CURRENCY}
+STR_FEEDER_COST_TINY                                            :{TINYFONT}{YELLOW}Transfer: {CURRENCY}{WHITE} / {RED}Cost: {CURRENCY}
 STR_FEEDER_COST                                                 :{YELLOW}Transfer: {CURRENCY}{WHITE} / {RED}Cost: {CURRENCY}
 STR_MESSAGE_ESTIMATED_COST                                      :{WHITE}Estimated Cost: {CURRENCY}
 STR_MESSAGE_ESTIMATED_INCOME                                    :{WHITE}Estimated Income: {CURRENCY}
