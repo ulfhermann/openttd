@@ -225,7 +225,7 @@ void BuildIndustriesLegend()
 }
 
 /** Legend entries for the link stats view. */
-static LegendAndColour _legend_linkstats[NUM_CARGO + 1];
+static LegendAndColour _legend_linkstats[NUM_CARGO + sizeof(_smallmap_link_colours) + 1];
 
 /**
  * Populate legend table for the link stat view.
@@ -245,9 +245,24 @@ void BuildLinkStatsLegend()
 		_legend_linkstats[i].show_on_map = true;
 	}
 
-	_legend_linkstats[i].end = true;
-
+	_legend_linkstats[i].col_break = true;
 	_smallmap_cargo_count = i;
+
+	_legend_linkstats[i].legend = STR_SMALLMAP_LEGENDA_LINK_UNUSED;
+	_legend_linkstats[i].colour = _smallmap_link_colours[0];
+	_legend_linkstats[i].show_on_map = true;
+
+	for (++i; i < _smallmap_cargo_count + sizeof(_smallmap_link_colours) / 2; ++i) {
+		_legend_linkstats[i].legend = STR_EMPTY;
+		_legend_linkstats[i].colour = _smallmap_link_colours[(i - _smallmap_cargo_count) * 2];
+		_legend_linkstats[i].show_on_map = true;
+	}
+
+	_legend_linkstats[i].legend = STR_SMALLMAP_LEGENDA_LINK_OVERLOADED;
+	_legend_linkstats[i].colour = _smallmap_link_colours[sizeof(_smallmap_link_colours) - 1];
+	_legend_linkstats[i].show_on_map = true;
+	_legend_linkstats[(_smallmap_cargo_count + i) / 2].legend = STR_SMALLMAP_LEGENDA_LINK_SATURATED;
+	_legend_linkstats[++i].end = true;
 }
 
 static const LegendAndColour * const _legend_table[] = {
@@ -1512,7 +1527,7 @@ public:
 	{
 		uint min_width = 0;
 		this->min_number_of_columns = INDUSTRY_MIN_NUMBER_OF_COLUMNS;
-		this->min_number_of_fixed_rows = 0;
+		this->min_number_of_fixed_rows = sizeof(_smallmap_link_colours) / 2 + 1;
 		for (uint i = 0; i < lengthof(_legend_table); i++) {
 			uint height = 0;
 			uint num_columns = 1;
@@ -1668,9 +1683,11 @@ public:
 	 */
 	uint GetNumberRowsLegend(uint columns) const
 	{
-		return max(this->min_number_of_fixed_rows, CeilDiv(
-				max(max(_smallmap_cargo_count, _smallmap_industry_count),
-				_smallmap_company_count), columns));
+		/* reserve one column for link colours */
+		uint num_rows_linkstats = CeilDiv(_smallmap_cargo_count, columns - 1);
+
+		uint num_rows_others = CeilDiv(max(_smallmap_industry_count,_smallmap_company_count), columns);
+		return max(this->min_number_of_fixed_rows, max(num_rows_linkstats, num_rows_others));
 	}
 
 	/**
@@ -2138,7 +2155,7 @@ static const NWidgetPart _nested_smallmap_widgets[] = {
 };
 
 static const WindowDesc _smallmap_desc(
-	WDP_AUTO, 446, 314,
+	WDP_AUTO, 484, 314,
 	WC_SMALLMAP, WC_NONE,
 	WDF_UNCLICK_BUTTONS,
 	_nested_smallmap_widgets, lengthof(_nested_smallmap_widgets)
