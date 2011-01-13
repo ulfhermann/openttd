@@ -700,6 +700,10 @@ STR_SMALLMAP_LEGENDA_INDUSTRIES                                 :{TINYFONT}{BLAC
 STR_SMALLMAP_LEGENDA_DESERT                                     :{TINYFONT}{BLACK}Desert
 STR_SMALLMAP_LEGENDA_SNOW                                       :{TINYFONT}{BLACK}Snow
 
+STR_SMALLMAP_LEGENDA_LINK_UNUSED                                :{TINYFONT}{BLACK}unused
+STR_SMALLMAP_LEGENDA_LINK_SATURATED                             :{TINYFONT}{BLACK}saturated
+STR_SMALLMAP_LEGENDA_LINK_OVERLOADED                            :{TINYFONT}{BLACK}overloaded
+
 STR_SMALLMAP_TOOLTIP_TOGGLE_TOWN_NAMES_ON_OFF                   :{BLACK}Toggle town names on/off on map
 STR_SMALLMAP_CENTER                                             :{BLACK}Centre the smallmap on the current position
 STR_SMALLMAP_INDUSTRY                                           :{TINYFONT}{STRING} ({NUM})
