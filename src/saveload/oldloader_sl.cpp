@@ -1530,7 +1530,7 @@ static bool LoadTTDPatchExtraChunks(LoadgameState *ls, int num)
 						DEBUG(oldloader, 3, "TTDPatch game using GRF file with GRFID %0X", BSWAP32(c->ident.grfid));
 					}
 					len -= 5;
-				};
+				}
 
 				/* Append static NewGRF configuration */
 				AppendStaticGRFConfigs(&_grfconfig);
@@ -1656,7 +1656,7 @@ static const OldChunks main_chunk[] = {
 
 	OCL_ASSERT( OC_TTO, 0x496AC ),
 
-	OCL_VAR ( OC_UINT16,    1, &_vehicle_id_ctr_day ),
+	OCL_NULL ( 2 ), // _vehicle_id_ctr_day
 
 	OCL_CHUNK(  8, LoadOldSubsidy ),
 
