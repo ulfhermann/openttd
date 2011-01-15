@@ -175,9 +175,15 @@ uint GetMaxSpriteID()
 	return _spritecache_items;
 }
 
-static void *AllocSprite(size_t);
-
-static void *ReadSprite(SpriteCache *sc, SpriteID id, SpriteType sprite_type)
+/**
+ * Read a sprite from disk.
+ * @param sc          Location of sprite.
+ * @param id          Sprite number.
+ * @param sprite_type Type of sprite.
+ * @param allocator   Allocator function to use.
+ * @return Read sprite data.
+ */
+static void *ReadSprite(const SpriteCache *sc, SpriteID id, SpriteType sprite_type, AllocatorProc *allocator)
 {
 	uint8 file_slot = sc->file_slot;
 	size_t file_pos = sc->file_pos;
@@ -194,9 +200,7 @@ static void *ReadSprite(SpriteCache *sc, SpriteID id, SpriteType sprite_type)
 		SpriteLoader::Sprite sprite;
 
 		if (sprite_loader.LoadSprite(&sprite, file_slot, sc->id, sprite_type)) {
-			sc->ptr = BlitterFactoryBase::GetCurrentBlitter()->Encode(&sprite, &AllocSprite);
-
-			return sc->ptr;
+			return BlitterFactoryBase::GetCurrentBlitter()->Encode(&sprite, allocator);
 		}
 		/* If the PNG couldn't be loaded, fall back to 8bpp grfs */
 #else
@@ -222,9 +226,7 @@ static void *ReadSprite(SpriteCache *sc, SpriteID id, SpriteType sprite_type)
 		 * GRFs which are the same as 257 byte recolour sprites, but with the last
 		 * 240 bytes zeroed.  */
 		static const int RECOLOUR_SPRITE_SIZE = 257;
-		byte *dest = (byte *)AllocSprite(max(RECOLOUR_SPRITE_SIZE, num));
-
-		sc->ptr = dest;
+		byte *dest = (byte *)allocator(max(RECOLOUR_SPRITE_SIZE, num));
 
 		if (_palette_remap_grf[sc->file_slot]) {
 			byte *dest_tmp = AllocaM(byte, max(RECOLOUR_SPRITE_SIZE, num));
@@ -241,7 +243,7 @@ static void *ReadSprite(SpriteCache *sc, SpriteID id, SpriteType sprite_type)
 			FioReadBlock(dest, num);
 		}
 
-		return sc->ptr;
+		return dest;
 	}
 
 	/* Ugly hack to work around the problem that the old landscape
@@ -260,8 +262,7 @@ static void *ReadSprite(SpriteCache *sc, SpriteID id, SpriteType sprite_type)
 		byte *dest;
 
 		num = width * height;
-		sprite = (Sprite *)AllocSprite(sizeof(*sprite) + num);
-		sc->ptr = sprite;
+		sprite = (Sprite *)allocator(sizeof(*sprite) + num);
 		sprite->height = height;
 		sprite->width  = width;
 		sprite->x_offs = FioReadWord();
@@ -281,9 +282,7 @@ static void *ReadSprite(SpriteCache *sc, SpriteID id, SpriteType sprite_type)
 			}
 		}
 
-		sc->type = sprite_type;
-
-		return sc->ptr;
+		return sprite;
 	}
 
 	assert(sprite_type == ST_NORMAL || sprite_type == ST_FONT);
@@ -293,11 +292,9 @@ static void *ReadSprite(SpriteCache *sc, SpriteID id, SpriteType sprite_type)
 
 	if (!sprite_loader.LoadSprite(&sprite, file_slot, file_pos, sprite_type)) {
 		if (id == SPR_IMG_QUERY) usererror("Okay... something went horribly wrong. I couldn't load the fallback sprite. What should I do?");
-		return (void*)GetRawSprite(SPR_IMG_QUERY, ST_NORMAL);
+		return (void*)GetRawSprite(SPR_IMG_QUERY, ST_NORMAL, allocator);
 	}
-	sc->ptr = BlitterFactoryBase::GetCurrentBlitter()->Encode(&sprite, &AllocSprite);
-
-	return sc->ptr;
+	return BlitterFactoryBase::GetCurrentBlitter()->Encode(&sprite, allocator);
 }
 
 
@@ -533,7 +530,7 @@ static void *AllocSprite(size_t mem_req)
  * @return fallback sprite
  * @note this function will do usererror() in the case the fallback sprite isn't available
  */
-static void *HandleInvalidSpriteRequest(SpriteID sprite, SpriteType requested, SpriteCache *sc)
+static void *HandleInvalidSpriteRequest(SpriteID sprite, SpriteType requested, SpriteCache *sc, AllocatorProc *allocator)
 {
 	static const char * const sprite_types[] = {
 		"normal",        // ST_NORMAL
@@ -545,7 +542,7 @@ static void *HandleInvalidSpriteRequest(SpriteID sprite, SpriteType requested, S
 	SpriteType available = sc->type;
 	if (requested == ST_FONT && available == ST_NORMAL) {
 		if (sc->ptr == NULL) sc->type = ST_FONT;
-		return GetRawSprite(sprite, sc->type);
+		return GetRawSprite(sprite, sc->type, allocator);
 	}
 
 	byte warning_level = sc->warned ? 6 : 0;
@@ -557,10 +554,10 @@ static void *HandleInvalidSpriteRequest(SpriteID sprite, SpriteType requested, S
 			if (sprite == SPR_IMG_QUERY) usererror("Uhm, would you be so kind not to load a NewGRF that makes the 'query' sprite a non-normal sprite?");
 			/* FALL THROUGH */
 		case ST_FONT:
-			return GetRawSprite(SPR_IMG_QUERY, ST_NORMAL);
+			return GetRawSprite(SPR_IMG_QUERY, ST_NORMAL, allocator);
 		case ST_RECOLOUR:
 			if (sprite == PALETTE_TO_DARK_BLUE) usererror("Uhm, would you be so kind not to load a NewGRF that makes the 'PALETTE_TO_DARK_BLUE' sprite a non-remap sprite?");
-			return GetRawSprite(PALETTE_TO_DARK_BLUE, ST_RECOLOUR);
+			return GetRawSprite(PALETTE_TO_DARK_BLUE, ST_RECOLOUR, allocator);
 		case ST_MAPGEN:
 			/* this shouldn't happen, overriding of ST_MAPGEN sprites is checked in LoadNextSprite()
 			 * (the only case the check fails is when these sprites weren't even loaded...) */
@@ -569,7 +566,15 @@ static void *HandleInvalidSpriteRequest(SpriteID sprite, SpriteType requested, S
 	}
 }
 
-void *GetRawSprite(SpriteID sprite, SpriteType type)
+/**
+ * Reads a sprite (from disk or sprite cache).
+ * If the sprite is not available or of wrong type, a fallback sprite is returned.
+ * @param sprite Sprite to read.
+ * @param type Expected sprite type.
+ * @param allocator Allocator function to use. Set to NULL to use the usual sprite cache.
+ * @return Sprite raw data
+ */
+void *GetRawSprite(SpriteID sprite, SpriteType type, AllocatorProc *allocator)
 {
 	assert(IsMapgenSpriteID(sprite) == (type == ST_MAPGEN));
 	assert(type < ST_INVALID);
@@ -583,17 +588,22 @@ void *GetRawSprite(SpriteID sprite, SpriteType type)
 
 	SpriteCache *sc = GetSpriteCache(sprite);
 
-	if (sc->type != type) return HandleInvalidSpriteRequest(sprite, type, sc);
+	if (sc->type != type) return HandleInvalidSpriteRequest(sprite, type, sc, allocator);
 
-	/* Update LRU */
-	sc->lru = ++_sprite_lru_counter;
+	if (allocator == NULL) {
+		/* Load sprite into/from spritecache */
 
-	void *p = sc->ptr;
+		/* Update LRU */
+		sc->lru = ++_sprite_lru_counter;
 
-	/* Load the sprite, if it is not loaded, yet */
-	if (p == NULL) p = ReadSprite(sc, sprite, type);
+		/* Load the sprite, if it is not loaded, yet */
+		if (sc->ptr == NULL) sc->ptr = ReadSprite(sc, sprite, type, AllocSprite);
 
-	return p;
+		return sc->ptr;
+	} else {
+		/* Do not use the spritecache, but a different allocator. */
+		return ReadSprite(sc, sprite, type, allocator);
+	}
 }
 
 
