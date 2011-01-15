@@ -28,6 +28,7 @@
 #include "tilehighlight_func.h"
 #include "company_base.h"
 #include "hotkeys.h"
+#include "road_gui.h"
 
 #include "table/strings.h"
 
@@ -79,11 +80,27 @@ static void PlaceRoad_Bridge(TileIndex tile, Window *w)
 	}
 }
 
-void CcBuildRoadTunnel(const CommandCost &result, TileIndex tile, uint32 p1, uint32 p2)
+/**
+ * Callback executed after a build road tunnel command has been called.
+ *
+ * @param result Whether the build succeeded.
+ * @param start_tile Starting tile of the tunnel.
+ * @param p1 bit 0-3 railtype or roadtypes
+ *           bit 8-9 transport type
+ * @param p2 unused
+ */
+void CcBuildRoadTunnel(const CommandCost &result, TileIndex start_tile, uint32 p1, uint32 p2)
 {
 	if (result.Succeeded()) {
-		SndPlayTileFx(SND_20_SPLAT_2, tile);
+		SndPlayTileFx(SND_20_SPLAT_2, start_tile);
 		if (!_settings_client.gui.persistent_buildingtools) ResetObjectToPlace();
+
+		DiagDirection start_direction = ReverseDiagDir(GetTunnelBridgeDirection(start_tile));
+		ConnectRoadToStructure(start_tile, start_direction);
+
+		TileIndex end_tile = GetOtherTunnelBridgeEnd(start_tile);
+		DiagDirection end_direction = ReverseDiagDir(GetTunnelBridgeDirection(end_tile));
+		ConnectRoadToStructure(end_tile, end_direction);
 	} else {
 		SetRedErrorSquare(_build_tunnel_endtile);
 	}
@@ -135,7 +152,12 @@ static const RoadTypeInfo _road_type_infos[] = {
 	},
 };
 
-static void BuildRoadOutsideStation(TileIndex tile, DiagDirection direction)
+/**
+ * If required, connects a new structure to an existing road or tram by building the missing roadbit.
+ * @param tile Tile containing the structure to connect.
+ * @param direction Direction to check.
+ */
+void ConnectRoadToStructure(TileIndex tile, DiagDirection direction)
 {
 	tile += TileOffsByDiagDir(direction);
 	/* if there is a roadpiece just outside of the station entrance, build a connecting route */
@@ -153,7 +175,7 @@ void CcRoadDepot(const CommandCost &result, TileIndex tile, uint32 p1, uint32 p2
 	DiagDirection dir = (DiagDirection)GB(p1, 0, 2);
 	SndPlayTileFx(SND_1F_SPLAT, tile);
 	if (!_settings_client.gui.persistent_buildingtools) ResetObjectToPlace();
-	BuildRoadOutsideStation(tile, dir);
+	ConnectRoadToStructure(tile, dir);
 }
 
 /**
@@ -179,9 +201,9 @@ void CcRoadStop(const CommandCost &result, TileIndex tile, uint32 p1, uint32 p2)
 	if (!_settings_client.gui.persistent_buildingtools) ResetObjectToPlace();
 	TileArea roadstop_area(tile, GB(p1, 0, 8), GB(p1, 8, 8));
 	TILE_AREA_LOOP(cur_tile, roadstop_area) {
-		BuildRoadOutsideStation(cur_tile, dir);
+		ConnectRoadToStructure(cur_tile, dir);
 		/* For a drive-through road stop build connecting road for other entrance. */
-		if (HasBit(p2, 1)) BuildRoadOutsideStation(cur_tile, ReverseDiagDir(dir));
+		if (HasBit(p2, 1)) ConnectRoadToStructure(cur_tile, ReverseDiagDir(dir));
 	}
 }
 
