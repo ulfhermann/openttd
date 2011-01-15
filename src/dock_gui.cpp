@@ -157,7 +157,7 @@ struct BuildDocksToolbarWindow : Window {
 
 			case DTW_BUOY: // Build buoy button
 				if (!CanBuildVehicleInfrastructure(VEH_SHIP)) return;
-				HandlePlacePushButton(this, DTW_BUOY, SPR_CURSOR_BOUY, HT_RECT);
+				HandlePlacePushButton(this, DTW_BUOY, SPR_CURSOR_BUOY, HT_RECT);
 				break;
 
 			case DTW_RIVER: // Build river button (in scenario editor)
@@ -318,7 +318,7 @@ static const NWidgetPart _nested_build_docks_toolbar_widgets[] = {
 		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, DTW_DEMOLISH), SetMinimalSize(22, 22), SetFill(0, 1), SetDataTip(SPR_IMG_DYNAMITE, STR_TOOLTIP_DEMOLISH_BUILDINGS_ETC),
 		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, DTW_DEPOT), SetMinimalSize(22, 22), SetFill(0, 1), SetDataTip(SPR_IMG_SHIP_DEPOT, STR_WATERWAYS_TOOLBAR_BUILD_DEPOT_TOOLTIP),
 		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, DTW_STATION), SetMinimalSize(22, 22), SetFill(0, 1), SetDataTip(SPR_IMG_SHIP_DOCK, STR_WATERWAYS_TOOLBAR_BUILD_DOCK_TOOLTIP),
-		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, DTW_BUOY), SetMinimalSize(22, 22), SetFill(0, 1), SetDataTip(SPR_IMG_BOUY, STR_WATERWAYS_TOOLBAR_BUOY_TOOLTIP),
+		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, DTW_BUOY), SetMinimalSize(22, 22), SetFill(0, 1), SetDataTip(SPR_IMG_BUOY, STR_WATERWAYS_TOOLBAR_BUOY_TOOLTIP),
 		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, DTW_BUILD_AQUEDUCT), SetMinimalSize(23, 22), SetFill(0, 1), SetDataTip(SPR_IMG_AQUEDUCT, STR_WATERWAYS_TOOLBAR_BUILD_AQUEDUCT_TOOLTIP),
 	EndContainer(),
 };
