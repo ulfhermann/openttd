@@ -58,7 +58,6 @@
 
 #define GEN_HASH(x, y) ((GB((y), 6, 6) << 6) + GB((x), 7, 6))
 
-VehicleID _vehicle_id_ctr_day;
 VehicleID _new_vehicle_id;
 uint16 _returned_refit_capacity;      ///< Stores the capacity after a refit operation.
 uint16 _returned_mail_refit_capacity; ///< Stores the mail capacity after a refit operation (Aircraft only).
@@ -1266,6 +1265,7 @@ void VehicleEnterDepot(Vehicle *v)
 
 		if (t.GetDepotOrderType() & ODTFB_PART_OF_ORDERS) {
 			/* Part of orders */
+			v->DeleteUnreachedAutoOrders();
 			UpdateVehicleTimetable(v, true);
 			v->IncrementOrderIndex();
 		}
@@ -1737,6 +1737,18 @@ uint GetVehicleCapacity(const Vehicle *v, uint16 *mail_capacity)
 	return capacity;
 }
 
+/**
+ * Delete all automatic orders which were not reached.
+ */
+void Vehicle::DeleteUnreachedAutoOrders()
+{
+	const Order *order = this->GetOrder(this->cur_order_index);
+	while (order != NULL && order->IsType(OT_AUTOMATIC)) {
+		/* Delete order effectively deletes order, so get the next before deleting it. */
+		order = order->next;
+		DeleteOrder(this, this->cur_order_index);
+	}
+}
 
 void Vehicle::BeginLoading()
 {
@@ -1744,13 +1756,7 @@ void Vehicle::BeginLoading()
 
 	if (this->current_order.IsType(OT_GOTO_STATION) &&
 			this->current_order.GetDestination() == this->last_station_visited) {
-		/* Delete all automatic orders which were not reached */
-		const Order *order = this->GetOrder(this->cur_order_index);
-		while (order != NULL && order->IsType(OT_AUTOMATIC)) {
-			/* Delete order effectively deletes order, so get the next before deleting it. */
-			order = order->next;
-			DeleteOrder(this, this->cur_order_index);
-		}
+		this->DeleteUnreachedAutoOrders();
 
 		/* Now cur_order_index points to the destination station, and we can start loading */
 		this->current_order.MakeLoading(true);
@@ -1765,12 +1771,12 @@ void Vehicle::BeginLoading()
 
 	} else {
 		/* We weren't scheduled to stop here. Insert an automatic order
-		 * to show that we are stopping here. */
+		 * to show that we are stopping here, but only do that if the order
+		 * list isn't empty. */
 		Order *in_list = this->GetOrder(this->cur_order_index);
-		if ((this->orders.list == NULL || this->orders.list->GetNumOrders() < MAX_VEH_ORDER_ID) &&
-				((in_list == NULL && this->cur_order_index == 0) ||
-				(in_list != NULL && (!in_list->IsType(OT_AUTOMATIC) ||
-				in_list->GetDestination() != this->last_station_visited)))) {
+		if (in_list != NULL && this->orders.list->GetNumOrders() < MAX_VEH_ORDER_ID &&
+				(!in_list->IsType(OT_AUTOMATIC) ||
+				in_list->GetDestination() != this->last_station_visited)) {
 			Order *auto_order = new Order();
 			auto_order->MakeAutomatic(this->last_station_visited);
 			InsertOrder(this, auto_order, this->cur_order_index);
@@ -2173,19 +2179,6 @@ Order *Vehicle::GetNextManualOrder(int index) const
 		order = order->next;
 	}
 	return order;
-}
-
-void StopAllVehicles()
-{
-	Vehicle *v;
-	FOR_ALL_VEHICLES(v) {
-		/* Code ripped from CmdStartStopTrain. Can't call it, because of
-		 * ownership problems, so we'll duplicate some code, for now */
-		v->vehstatus |= VS_STOPPED;
-		v->MarkDirty();
-		SetWindowWidgetDirty(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
-		SetWindowDirty(WC_VEHICLE_DEPOT, v->tile);
-	}
 }
 
 void VehiclesYearlyLoop()
