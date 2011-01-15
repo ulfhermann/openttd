@@ -2030,7 +2030,6 @@ STR_LANDSCAPING_TOOLTIP_PURCHASE_LAND                           :{BLACK}Pirkt ze
 # Object construction window
 STR_OBJECT_BUILD_CAPTION                                        :{WHITE}Objektu izvēle
 STR_OBJECT_BUILD_TOOLTIP                                        :{BLACK}Izvēlēties objektu būvniecībai. Shift pārslēdz būvniecību/izmaksu attēlošanu
-STR_OBJECT_BUILD_CLASS_LABEL                                    :{BLACK}Objekta klase
 STR_OBJECT_BUILD_PREVIEW_TOOLTIP                                :{BLACK}Objekta paraugs
 STR_OBJECT_BUILD_SIZE                                           :{BLACK}Izmērs: {GOLD}{NUM} x {NUM} lauciņi
 
@@ -3940,7 +3939,7 @@ STR_VEHICLE_NAME_ROAD_VEHICLE_PERRY_OIL_TANKER                  :Perry naftas ci
 STR_VEHICLE_NAME_ROAD_VEHICLE_TALBOTT_LIVESTOCK_VAN             :Talbott lopu vedējs
 STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_LIVESTOCK_VAN                 :Uhl lopu vedējs
 STR_VEHICLE_NAME_ROAD_VEHICLE_FOSTER_LIVESTOCK_VAN              :Foster lopu vedējs
-STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_GOODS_TRUCK                :Balogh lopu vedējs
+STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_GOODS_TRUCK                :Balogh preču vedējs
 STR_VEHICLE_NAME_ROAD_VEHICLE_CRAIGHEAD_GOODS_TRUCK             :Craighead preču vedējs
 STR_VEHICLE_NAME_ROAD_VEHICLE_GOSS_GOODS_TRUCK                  :Goss preču vedējs
 STR_VEHICLE_NAME_ROAD_VEHICLE_HEREFORD_GRAIN_TRUCK              :Hereford graudu pašizgāzējs
