@@ -243,7 +243,7 @@ public:
 	/** We want to 'destruct' the right class. */
 	virtual ~Vehicle();
 
-	void BeginLoading();
+	void BeginLoading(StationID station);
 	void LeaveStation();
 
 	GroundVehicleCache *GetGroundVehicleCache();

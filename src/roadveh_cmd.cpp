@@ -1353,9 +1353,8 @@ again:
 					v->owner == GetTileOwner(v->tile) && !v->current_order.IsType(OT_LEAVESTATION) &&
 					GetRoadStopType(v->tile) == (v->IsBus() ? ROADSTOP_BUS : ROADSTOP_TRUCK)) {
 				Station *st = Station::GetByTile(v->tile);
-				v->last_station_visited = st->index;
 				RoadVehArrivesAt(v, st);
-				v->BeginLoading();
+				v->BeginLoading(st->index);
 			}
 			return false;
 		}
@@ -1413,13 +1412,13 @@ again:
 			rs->SetEntranceBusy(false);
 			SetBit(v->state, RVS_ENTERED_STOP);
 
-			v->last_station_visited = st->index;
-
 			if (IsDriveThroughStopTile(v->tile) || (v->current_order.IsType(OT_GOTO_STATION) && v->current_order.GetDestination() == st->index)) {
 				RoadVehArrivesAt(v, st);
-				v->BeginLoading();
+				v->BeginLoading(st->index);
 				return false;
 			}
+
+			v->last_station_visited = st->index;
 		} else {
 			/* Vehicle is ready to leave a bay in a road stop */
 			if (rs->IsEntranceBusy()) {

@@ -1832,11 +1832,14 @@ void Vehicle::DeleteUnreachedAutoOrders()
 
 /**
  * Prepare everything to begin the loading when arriving at a station.
+ * @param station The station ID of the station.
  * @pre IsTileType(this->tile, MP_STATION) || this->type == VEH_SHIP.
  */
-void Vehicle::BeginLoading()
+void Vehicle::BeginLoading(StationID station)
 {
 	assert(IsTileType(this->tile, MP_STATION) || this->type == VEH_SHIP);
+
+	this->last_station_visited = station;
 
 	if (this->current_order.IsType(OT_GOTO_STATION) &&
 			this->current_order.GetDestination() == this->last_station_visited) {
