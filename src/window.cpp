@@ -1424,48 +1424,29 @@ static void HandlePlacePresize()
 }
 
 /**
- * Handle drop in mouse dragging mode (#WSM_DRAGDROP).
+ * Handle dragging and dropping in mouse dragging mode (#WSM_DRAGDROP).
  * @return State of handling the event.
  */
-static EventState HandleDragDrop()
+static EventState HandleMouseDragDrop()
 {
 	if (_special_mouse_mode != WSM_DRAGDROP) return ES_NOT_HANDLED;
-	if (_left_button_down) return ES_HANDLED;
+
+	if (_left_button_down && _cursor.delta.x == 0 && _cursor.delta.y == 0) return ES_HANDLED; // Dragging, but the mouse did not move.
 
 	Window *w = _thd.GetCallbackWnd();
-
-	if (w != NULL) {
-		/* send an event in client coordinates. */
-		Point pt;
-		pt.x = _cursor.pos.x - w->left;
-		pt.y = _cursor.pos.y - w->top;
-		w->OnDragDrop(pt, GetWidgetFromPos(w, pt.x, pt.y));
-	}
-
-	ResetObjectToPlace();
-
-	return ES_HANDLED;
-}
-
-/**
- * Handle dragging in mouse dragging mode (#WSM_DRAGDROP).
- * @return State of handling the event.
- */
-static EventState HandleMouseDrag()
-{
-	if (_special_mouse_mode != WSM_DRAGDROP) return ES_NOT_HANDLED;
-	if (!_left_button_down || (_cursor.delta.x == 0 && _cursor.delta.y == 0)) return ES_NOT_HANDLED;
-
-	Window *w = _thd.GetCallbackWnd();
-
 	if (w != NULL) {
 		/* Send an event in client coordinates. */
 		Point pt;
 		pt.x = _cursor.pos.x - w->left;
 		pt.y = _cursor.pos.y - w->top;
-		w->OnMouseDrag(pt, GetWidgetFromPos(w, pt.x, pt.y));
+		if (_left_button_down) {
+			w->OnMouseDrag(pt, GetWidgetFromPos(w, pt.x, pt.y));
+		} else {
+			w->OnDragDrop(pt, GetWidgetFromPos(w, pt.x, pt.y));
+		}
 	}
 
+	if (!_left_button_down) ResetObjectToPlace(); // Button released, finished dragging.
 	return ES_HANDLED;
 }
 
@@ -2176,8 +2157,7 @@ static void MouseLoop(MouseClick click, int mousewheel)
 	UpdateTileSelection();
 
 	if (VpHandlePlaceSizingDrag()  == ES_HANDLED) return;
-	if (HandleMouseDrag()          == ES_HANDLED) return;
-	if (HandleDragDrop()           == ES_HANDLED) return;
+	if (HandleMouseDragDrop()      == ES_HANDLED) return;
 	if (HandleWindowDragging()     == ES_HANDLED) return;
 	if (HandleScrollbarScrolling() == ES_HANDLED) return;
 	if (HandleViewportScroll()     == ES_HANDLED) return;
