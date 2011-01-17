@@ -191,6 +191,9 @@ static const uint8 _smallmap_link_colours[] = {
 	0xba, 0xb9, 0xb7, 0xb5
 };
 
+/** Link stat colours shown in legenda. */
+static uint8 _linkstat_colours_in_legenda[] = {0, 1, 3, 5, 7, 9, 11};
+
 /**
  * Fills an array for the industries legends.
  */
@@ -223,7 +226,7 @@ void BuildIndustriesLegend()
 }
 
 /** Legend entries for the link stats view. */
-static LegendAndColour _legend_linkstats[NUM_CARGO + sizeof(_smallmap_link_colours) + 1];
+static LegendAndColour _legend_linkstats[NUM_CARGO + sizeof(_linkstat_colours_in_legenda) + 1];
 
 /**
  * Populate legend table for the link stat view.
@@ -246,21 +249,16 @@ void BuildLinkStatsLegend()
 	_legend_linkstats[i].col_break = true;
 	_smallmap_cargo_count = i;
 
-	_legend_linkstats[i].legend = STR_SMALLMAP_LEGENDA_LINK_UNUSED;
-	_legend_linkstats[i].colour = _smallmap_link_colours[0];
-	_legend_linkstats[i].show_on_map = true;
-
-	for (++i; i < _smallmap_cargo_count + sizeof(_smallmap_link_colours) / 2; ++i) {
+	for (; i < _smallmap_cargo_count + sizeof(_linkstat_colours_in_legenda); ++i) {
 		_legend_linkstats[i].legend = STR_EMPTY;
-		_legend_linkstats[i].colour = _smallmap_link_colours[(i - _smallmap_cargo_count) * 2];
+		_legend_linkstats[i].colour = _smallmap_link_colours[_linkstat_colours_in_legenda[i - _smallmap_cargo_count]];
 		_legend_linkstats[i].show_on_map = true;
 	}
 
-	_legend_linkstats[i].legend = STR_SMALLMAP_LEGENDA_LINK_OVERLOADED;
-	_legend_linkstats[i].colour = _smallmap_link_colours[sizeof(_smallmap_link_colours) - 1];
-	_legend_linkstats[i].show_on_map = true;
-	_legend_linkstats[(_smallmap_cargo_count + i) / 2].legend = STR_SMALLMAP_LEGENDA_LINK_SATURATED;
-	_legend_linkstats[++i].end = true;
+	_legend_linkstats[_smallmap_cargo_count].legend = STR_SMALLMAP_LEGENDA_LINK_UNUSED;
+	_legend_linkstats[i - 1].legend = STR_SMALLMAP_LEGENDA_LINK_OVERLOADED;
+	_legend_linkstats[(_smallmap_cargo_count + i - 1) / 2].legend = STR_SMALLMAP_LEGENDA_LINK_SATURATED;
+	_legend_linkstats[i].end = true;
 }
 
 static const LegendAndColour * const _legend_table[] = {
@@ -1853,7 +1851,9 @@ public:
 					default:
 						NOT_REACHED();
 				}
-				for (;!tbl->end; ++tbl) tbl->show_on_map = (widget == SM_WIDGET_ENABLE_ALL);
+				for (;!tbl->end && tbl->legend != STR_SMALLMAP_LEGENDA_LINK_UNUSED; ++tbl) {
+					tbl->show_on_map = (widget == SM_WIDGET_ENABLE_ALL);
+				}
 				this->SetDirty();
 				break;
 			}
