@@ -501,6 +501,11 @@ restart:;
 	}
 }
 
+/**
+ * Reset the livery schemes to the company's primary colour.
+ * This is used on loading games without livery information and on new company start up.
+ * @param c Company to reset.
+ */
 void ResetCompanyLivery(Company *c)
 {
 	for (LiveryScheme scheme = LS_BEGIN; scheme < LS_END; scheme++) {
@@ -830,7 +835,7 @@ CommandCost CmdCompanyCtrl(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 				assert(_local_company == COMPANY_SPECTATOR);
 				SetLocalCompany(c->index);
 				if (!StrEmpty(_settings_client.network.default_company_pass)) {
-					NetworkChangeCompanyPassword(_settings_client.network.default_company_pass);
+					NetworkChangeCompanyPassword(_local_company, _settings_client.network.default_company_pass);
 				}
 
 				/* Now that we have a new company, broadcast our company settings to
