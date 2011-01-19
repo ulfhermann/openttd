@@ -221,6 +221,7 @@
  *  154   21426
  *  155   21453
  *  156   21728
+ *  157   21862
  */
 extern const uint16 SAVEGAME_VERSION = SL_CARGOMAP; ///< Current savegame version of OpenTTD.
 
