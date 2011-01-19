@@ -298,55 +298,6 @@ const char *_network_join_company_password = NULL;
 /** Make sure the server ID length is the same as a md5 hash. */
 assert_compile(NETWORK_SERVER_ID_LENGTH == 16 * 2 + 1);
 
-/**
- * Generates a hashed password for the company name.
- * @param password the password to 'encrypt'.
- * @return the hashed password.
- */
-static const char *GenerateCompanyPasswordHash(const char *password)
-{
-	if (StrEmpty(password)) return password;
-
-	char salted_password[NETWORK_SERVER_ID_LENGTH];
-
-	memset(salted_password, 0, sizeof(salted_password));
-	snprintf(salted_password, sizeof(salted_password), "%s", password);
-	/* Add the game seed and the server's ID as the salt. */
-	for (uint i = 0; i < NETWORK_SERVER_ID_LENGTH - 1; i++) {
-		salted_password[i] ^= _password_server_id[i] ^ (_password_game_seed >> (i % 32));
-	}
-
-	Md5 checksum;
-	uint8 digest[16];
-	static char hashed_password[NETWORK_SERVER_ID_LENGTH];
-
-	/* Generate the MD5 hash */
-	checksum.Append(salted_password, sizeof(salted_password) - 1);
-	checksum.Finish(digest);
-
-	for (int di = 0; di < 16; di++) sprintf(hashed_password + di * 2, "%02x", digest[di]);
-	hashed_password[lengthof(hashed_password) - 1] = '\0';
-
-	return hashed_password;
-}
-
-/**
- * Hash the current company password; used when the server 'company' sets his/her password.
- */
-static void HashCurrentCompanyPassword(const char *password)
-{
-	_password_game_seed = _settings_game.game_creation.generation_seed;
-	strecpy(_password_server_id, _settings_client.network.network_id, lastof(_password_server_id));
-
-	const char *new_pw = GenerateCompanyPasswordHash(password);
-	strecpy(_network_company_states[_local_company].password, new_pw, lastof(_network_company_states[_local_company].password));
-
-	if (_network_server) {
-		NetworkServerUpdateCompanyPassworded(_local_company, !StrEmpty(_network_company_states[_local_company].password));
-	}
-}
-
-
 /***********
  * Sending functions
  *   DEF_CLIENT_SEND_COMMAND has no parameters
@@ -396,7 +347,7 @@ NetworkRecvStatus ClientNetworkGameSocketHandler::SendGamePassword(const char *p
 NetworkRecvStatus ClientNetworkGameSocketHandler::SendCompanyPassword(const char *password)
 {
 	Packet *p = new Packet(PACKET_CLIENT_COMPANY_PASSWORD);
-	p->Send_string(GenerateCompanyPasswordHash(password));
+	p->Send_string(GenerateCompanyPasswordHash(password, _password_server_id, _password_game_seed));
 	my_client->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
@@ -475,7 +426,7 @@ NetworkRecvStatus ClientNetworkGameSocketHandler::SendSetPassword(const char *pa
 {
 	Packet *p = new Packet(PACKET_CLIENT_SET_PASSWORD);
 
-	p->Send_string(GenerateCompanyPasswordHash(password));
+	p->Send_string(GenerateCompanyPasswordHash(password, _password_server_id, _password_game_seed));
 	my_client->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
@@ -506,11 +457,11 @@ NetworkRecvStatus ClientNetworkGameSocketHandler::SendRCon(const char *pass, con
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
-NetworkRecvStatus ClientNetworkGameSocketHandler::SendMove(CompanyID company, const char *pass)
+NetworkRecvStatus ClientNetworkGameSocketHandler::SendMove(CompanyID company, const char *password)
 {
 	Packet *p = new Packet(PACKET_CLIENT_MOVE);
 	p->Send_uint8(company);
-	p->Send_string(GenerateCompanyPasswordHash(pass));
+	p->Send_string(GenerateCompanyPasswordHash(password, _password_server_id, _password_game_seed));
 	my_client->SendPacket(p);
 	return NETWORK_RECV_STATUS_OKAY;
 }
@@ -1227,7 +1178,11 @@ void NetworkClientSendChat(NetworkAction action, DestType type, int dest, const 
 	MyClient::SendChat(action, type, dest, msg, data);
 }
 
-static void NetworkClientSetPassword(const char *password)
+/**
+ * Set/Reset company password on the client side.
+ * @param password Password to be set.
+ */
+void NetworkClientSetCompanyPassword(const char *password)
 {
 	MyClient::SendSetPassword(password);
 }
@@ -1248,24 +1203,6 @@ bool NetworkClientPreferTeamChat(const NetworkClientInfo *cio)
 	}
 
 	return false;
-}
-
-/**
- * Sets/resets company password
- * @param password new password, "" or "*" resets password
- * @return new password
- */
-const char *NetworkChangeCompanyPassword(const char *password)
-{
-	if (strcmp(password, "*") == 0) password = "";
-
-	if (!_network_server) {
-		NetworkClientSetPassword(password);
-	} else {
-		HashCurrentCompanyPassword(password);
-	}
-
-	return password;
 }
 
 /**
