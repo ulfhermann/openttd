@@ -308,6 +308,23 @@ void AfterLoadVehicles(bool part_of_load)
 		}
 	}
 
+	if (IsSavegameVersionBefore(157)) {
+		/* The road vehicle subtype was converted to a flag. */
+		RoadVehicle *rv;
+		FOR_ALL_ROADVEHICLES(rv) {
+			if (rv->subtype == 0) {
+				/* The road vehicle is at the front. */
+				rv->SetFrontEngine();
+			} else if (rv->subtype == 1) {
+				/* The road vehicle is an articulated part. */
+				rv->subtype = 0;
+				rv->SetArticulatedPart();
+			} else {
+				NOT_REACHED();
+			}
+		}
+	}
+
 	CheckValidVehicles();
 
 	FOR_ALL_VEHICLES(v) {
@@ -325,7 +342,7 @@ void AfterLoadVehicles(bool part_of_load)
 
 			case VEH_ROAD: {
 				RoadVehicle *rv = RoadVehicle::From(v);
-				if (rv->IsRoadVehFront()) {
+				if (rv->IsFrontEngine()) {
 					RoadVehUpdateCache(rv);
 					if (_settings_game.vehicle.roadveh_acceleration_model != AM_ORIGINAL) {
 						rv->CargoChanged();
