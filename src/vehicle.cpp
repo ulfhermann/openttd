@@ -629,7 +629,7 @@ bool Vehicle::IsEngineCountable() const
 		case VEH_TRAIN:
 			return !Train::From(this)->IsArticulatedPart() && // tenders and other articulated parts
 					!Train::From(this)->IsRearDualheaded(); // rear parts of multiheaded engines
-		case VEH_ROAD: return RoadVehicle::From(this)->IsRoadVehFront();
+		case VEH_ROAD: return RoadVehicle::From(this)->IsFrontEngine();
 		case VEH_SHIP: return true;
 		default: return false; // Only count company buildable vehicles
 	}
@@ -831,7 +831,7 @@ void CallVehicleTicks()
 
 				if (v->type == VEH_TRAIN && Train::From(v)->IsWagon()) continue;
 				if (v->type == VEH_AIRCRAFT && v->subtype != AIR_HELICOPTER) continue;
-				if (v->type == VEH_ROAD && !RoadVehicle::From(v)->IsRoadVehFront()) continue;
+				if (v->type == VEH_ROAD && !RoadVehicle::From(v)->IsFrontEngine()) continue;
 
 				v->motion_counter += v->cur_speed;
 				/* Play a running sound if the motion counter passes 256 (Do we not skip sounds?) */
@@ -1163,7 +1163,7 @@ uint8 CalcPercentVehicleFilled(const Vehicle *v, StringID *colour)
 
 	/* Count up max and used */
 	for (; v != NULL; v = v->Next()) {
-		count += v->cargo.Count();
+		count += v->cargo.OnboardCount();
 		max += v->cargo_cap;
 		if (v->cargo_cap != 0 && colour != NULL) {
 			unloading += HasBit(v->vehicle_flags, VF_CARGO_UNLOADING) ? 1 : 0;
@@ -2443,7 +2443,7 @@ void GetVehicleSet(VehicleSet &set, Vehicle *v, uint8 num_vehicles)
 			u = u->GetFirstEnginePart();
 			while (u->index != v->index) {
 				set.Include(u->index);
-				u = u->GetNextArticPart();
+				u = u->GetNextArticulatedPart();
 			}
 		}
 
