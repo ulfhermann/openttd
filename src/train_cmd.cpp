@@ -1443,6 +1443,23 @@ static void SwapTrainFlags(uint16 *swap_flag1, uint16 *swap_flag2)
 	}
 }
 
+/**
+ * Updates some variables after swapping the vehicle.
+ * @param v swapped vehicle
+ */
+static void UpdateStatusAfterSwap(Train *v)
+{
+	/* Reverse the direction. */
+	if (v->track != TRACK_BIT_DEPOT) v->direction = ReverseDir(v->direction);
+
+	/* Call the proper EnterTile function unless we are in a wormhole. */
+	if (v->track != TRACK_BIT_WORMHOLE) {
+		VehicleEnterTile(v, v->tile, v->x_pos, v->y_pos);
+	}
+
+	v->UpdateViewport(true, true);
+}
+
 static void ReverseTrainSwapVeh(Train *v, int l, int r)
 {
 	Train *a, *b;
@@ -1461,11 +1478,6 @@ static void ReverseTrainSwapVeh(Train *v, int l, int r)
 
 		Swap(a->track, b->track);
 		Swap(a->direction, b->direction);
-
-		/* toggle direction */
-		if (a->track != TRACK_BIT_DEPOT) a->direction = ReverseDir(a->direction);
-		if (b->track != TRACK_BIT_DEPOT) b->direction = ReverseDir(b->direction);
-
 		Swap(a->x_pos, b->x_pos);
 		Swap(a->y_pos, b->y_pos);
 		Swap(a->tile,  b->tile);
@@ -1473,18 +1485,10 @@ static void ReverseTrainSwapVeh(Train *v, int l, int r)
 
 		SwapTrainFlags(&a->gv_flags, &b->gv_flags);
 
-		/* update other vars */
-		a->UpdateViewport(true, true);
-		b->UpdateViewport(true, true);
-
-		/* call the proper EnterTile function unless we are in a wormhole */
-		if (a->track != TRACK_BIT_WORMHOLE) VehicleEnterTile(a, a->tile, a->x_pos, a->y_pos);
-		if (b->track != TRACK_BIT_WORMHOLE) VehicleEnterTile(b, b->tile, b->x_pos, b->y_pos);
+		UpdateStatusAfterSwap(a);
+		UpdateStatusAfterSwap(b);
 	} else {
-		if (a->track != TRACK_BIT_DEPOT) a->direction = ReverseDir(a->direction);
-		a->UpdateViewport(true, true);
-
-		if (a->track != TRACK_BIT_WORMHOLE) VehicleEnterTile(a, a->tile, a->x_pos, a->y_pos);
+		UpdateStatusAfterSwap(a);
 	}
 
 	/* Update power of the train in case tiles were different rail type. */
@@ -2632,7 +2636,7 @@ int Train::UpdateSpeed()
 	{
 		int tempmax = max_speed;
 		if (this->cur_speed > max_speed) {
-			tempmax = this->cur_speed - (this->cur_speed / 10) - 1;
+			tempmax = max(this->cur_speed - (this->cur_speed / 10) - 1, tempmax);
 		}
 		/* Force a minimum speed of 1 km/h when realistic acceleration is on and the train is not braking. */
 		int min_speed = (_settings_game.vehicle.train_acceleration_model == AM_ORIGINAL || this->GetAccelerationStatus() == AS_BRAKE) ? 0 : 2;
@@ -3142,6 +3146,11 @@ static void TrainController(Train *v, Vehicle *nomove)
 				if (v->IsFrontEngine()) {
 					TryReserveRailTrack(gp.new_tile, DiagDirToDiagTrack(GetTunnelBridgeDirection(gp.new_tile)));
 					CheckNextTrainTile(v);
+				}
+				/* Prevent v->UpdateInclination() being called with wrong parameters.
+				 * This could happen if the train was reversed inside the tunnel/bridge. */
+				if (gp.old_tile == gp.new_tile) {
+					gp.old_tile = GetOtherTunnelBridgeEnd(gp.old_tile);
 				}
 			} else {
 				v->x_pos = gp.x;
