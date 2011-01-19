@@ -1163,7 +1163,7 @@ uint8 CalcPercentVehicleFilled(const Vehicle *v, StringID *colour)
 
 	/* Count up max and used */
 	for (; v != NULL; v = v->Next()) {
-		count += v->cargo.Count();
+		count += v->cargo.OnboardCount();
 		max += v->cargo_cap;
 		if (v->cargo_cap != 0 && colour != NULL) {
 			unloading += HasBit(v->vehicle_flags, VF_CARGO_UNLOADING) ? 1 : 0;
