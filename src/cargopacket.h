@@ -56,16 +56,13 @@ public:
 	static const uint16 MAX_COUNT = UINT16_MAX;
 
 	CargoPacket();
-
 	CargoPacket(StationID source, TileIndex source_xy, uint16 count, SourceType source_type, SourceID source_id);
-
 	CargoPacket(uint16 count, byte days_in_transit, StationID source, TileIndex source_xy, TileIndex loaded_at_xy, Money feeder_share = 0, SourceType source_type = ST_INDUSTRY, SourceID source_id = INVALID_SOURCE);
 
 	/** Destroy the packet. */
 	~CargoPacket() { }
 
 	CargoPacket *Split(uint new_size);
-
 	void Merge(CargoPacket *cp);
 
 	/**
@@ -247,7 +244,6 @@ public:
 
 
 	void Append(CargoPacket *cp);
-
 	void Truncate(uint max_remaining);
 
 	template <class Tother_inst>
@@ -267,7 +263,6 @@ protected:
 	Money feeder_share; ///< Cache for the feeder share.
 
 	void AddToCache(const CargoPacket *cp);
-
 	void RemoveFromCache(const CargoPacket *cp);
 
 public:
