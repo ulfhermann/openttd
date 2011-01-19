@@ -201,7 +201,7 @@ Function DetermineSVNVersion()
 						End If ' line <> "master"
 					End If ' Err.Number = 0
 
-					Set oExec = WshShell.Exec("git log --pretty=format:%s --grep=" & Chr(34) & "^(svn r[0-9]*)" & Chr(34) & " -1 ../")
+					Set oExec = WshShell.Exec("git log --pretty=format:%s --grep=" & Chr(34) & "^(svn r[0-9]*)" & Chr(34) & " -1")
 					if Err.Number = 0 Then
 						revision = Mid(oExec.StdOut.ReadLine(), 7)
 						revision = Mid(revision, 1, InStr(revision, ")") - 1)
@@ -210,13 +210,26 @@ Function DetermineSVNVersion()
 						' No revision? Maybe it is a custom git-svn clone
 						' Reset error number as WshShell.Exec will not do that on success
 						Err.Clear
-						Set oExec = WshShell.Exec("git log --pretty=format:%b --grep=" & Chr(34) & "git-svn-id:.*@[0-9]*" & Chr(34) & " -1 ../")
+						Set oExec = WshShell.Exec("git log --pretty=format:%b --grep=" & Chr(34) & "git-svn-id:.*@[0-9]*" & Chr(34) & " -1")
 						If Err.Number = 0 Then
 							revision = oExec.StdOut.ReadLine()
 							revision = Mid(revision, InStr(revision, "@") + 1)
 							revision = Mid(revision, 1, InStr(revision, " ") - 1)
 						End If ' Err.Number = 0
 					End If ' revision = ""
+
+					' Check if a tag is currently checked out
+					Err.Clear
+					Set oExec = WshShell.Exec("git name-rev --name-only --tags --no-undefined HEAD")
+					If Err.Number = 0 Then
+						' Wait till the application is finished ...
+						Do While oExec.Status = 0
+						Loop
+						If oExec.ExitCode = 0 Then
+							version = oExec.StdOut.ReadLine()
+							branch = ""
+						End If ' oExec.ExitCode = 0
+					End If ' Err.Number = 0
 				End If ' Err.Number = 0
 			End If ' oExec.ExitCode = 0
 		End If ' Err.Number = 0
@@ -224,7 +237,7 @@ Function DetermineSVNVersion()
 		If version = "norev000" Then
 			' git detection failed, reset error and try mercurial (hg)
 			Err.Clear
-			Set oExec = WshShell.Exec("hg parents")
+			Set oExec = WshShell.Exec("hg id -i")
 			If Err.Number = 0 Then
 				' Wait till the application is finished ...
 				Do While oExec.Status = 0
@@ -232,8 +245,21 @@ Function DetermineSVNVersion()
 
 				If oExec.ExitCode = 0 Then
 					line = OExec.StdOut.ReadLine()
-					hash = Mid(line, InStrRev(line, ":") + 1)
+					hash = Left(line, 12)
 					version = "h" & Mid(hash, 1, 8)
+
+					' Check if a tag is currently checked out
+					Err.Clear
+					Set oExec = WshShell.Exec("hg id -t")
+					If Err.Number = 0 Then
+						line = oExec.StdOut.ReadLine()
+						If Len(line) > 0 And Right(line, 3) <> "tip" Then
+							version = line
+							branch = ""
+						End If ' Len(line) > 0 And Right(line, 3) <> "tip"
+					End If ' Err.Number = 0
+
+					Err.Clear
 					Set oExec = WshShell.Exec("hg status ../")
 					If Err.Number = 0 Then
 						Do
@@ -252,11 +278,23 @@ Function DetermineSVNVersion()
 							End If ' line <> "default"
 						End If ' Err.Number = 0
 
-						Set oExec = WshShell.Exec("hg log -f -k " & Chr(34) & "(svn r" & Chr(34) & " -l 1 --template " & Chr(34) & "{desc}\n" & Chr(34) & " --cwd ../")
+						Set oExec = WshShell.Exec("hg log -f -k " & Chr(34) & "(svn r" & Chr(34) & " -l 1 --template " & Chr(34) & "{desc|firstline}\n" & Chr(34) & " --cwd ../")
 						If Err.Number = 0 Then
-							revision = Mid(OExec.StdOut.ReadLine(), 7)
-							revision = Mid(revision, 1, InStr(revision, ")") - 1)
+							line = oExec.StdOut.ReadLine()
+							If Left(line, 6) = "(svn r" Then
+								revision = Mid(line, 7)
+								revision = Mid(revision, 1, InStr(revision, ")") - 1)
+							End If 'Left(line, 6) = "(svn r"
 						End If ' Err.Number = 0
+
+						If revision = "" Then
+							' No rev? Maybe it is a custom hgsubversion clone
+							Err.Clear
+							Set oExec = WshShell.Exec("hg parent --template=" & Chr(34) & "{svnrev}" & Chr(34))
+							If Err.Number = 0 Then
+								revision = oExec.StdOut.ReadLine()
+							End If ' Err.Number = 0
+						End If ' revision = ""
 					End If ' Err.Number = 0
 				End If ' oExec.ExitCode = 0
 			End If ' Err.Number = 0
