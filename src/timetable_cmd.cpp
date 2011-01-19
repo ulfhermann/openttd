@@ -279,8 +279,14 @@ void UpdateVehicleTimetable(Vehicle *v, bool travelling)
 		if (!v->current_order.IsType(OT_CONDITIONAL) && (travelling || time_taken > v->current_order.wait_time)) {
 			/* Round the time taken up to the nearest day, as this will avoid
 			 * confusion for people who are timetabling in days, and can be
-			 * adjusted later by people who aren't. */
-			time_taken = CeilDiv(time_taken, DAY_TICKS) * DAY_TICKS;
+			 * adjusted later by people who aren't.
+			 * For trains/aircraft multiple movement cycles are done in one
+			 * tick. This makes it possible to leave the station and process
+			 * e.g. a depot order in the same tick, causing it to not fill
+			 * the timetable entry like is done for road vehicles/ships.
+			 * Thus always make sure at least one tick is used between the
+			 * processing of different orders when filling the timetable. */
+			time_taken = CeilDiv(max(time_taken, 1U), DAY_TICKS) * DAY_TICKS;
 
 			ChangeTimetable(v, v->cur_order_index, time_taken, travelling);
 		}
@@ -303,6 +309,18 @@ void UpdateVehicleTimetable(Vehicle *v, bool travelling)
 	if (timetabled == 0 && (travelling || v->lateness_counter >= 0)) return;
 
 	v->lateness_counter -= (timetabled - time_taken);
+
+	/* When we are more late than this timetabled bit takes we (somewhat expensively)
+	 * check how many ticks the (fully filled) timetable has. If a timetable cycle is
+	 * shorter than the amount of ticks we are late we reduce the lateness by the
+	 * length of a full cycle till lateness is less than the length of a timetable
+	 * cycle. When the timetable isn't fully filled the cycle will be INVALID_TICKS. */
+	if (v->lateness_counter > (int)timetabled) {
+		Ticks cycle = v->orders.list->GetTimetableTotalDuration();
+		if (cycle != INVALID_TICKS && v->lateness_counter > cycle) {
+			v->lateness_counter %= cycle;
+		}
+	}
 
 	for (v = v->FirstShared(); v != NULL; v = v->NextShared()) {
 		SetWindowDirty(WC_VEHICLE_TIMETABLE, v->index);

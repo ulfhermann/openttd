@@ -151,6 +151,59 @@ byte NetworkSpectatorCount()
 }
 
 /**
+ * Change the company password of a given company.
+ * @param company_id ID of the company the password should be changed for.
+ * @param password The unhashed password we like to set ('*' or '' resets the password)
+ * @return The password.
+ */
+const char *NetworkChangeCompanyPassword(CompanyID company_id, const char *password, bool already_hashed)
+{
+	if (strcmp(password, "*") == 0) password = "";
+
+	if (_network_server) {
+		NetworkServerSetCompanyPassword(company_id, password, already_hashed);
+	} else {
+		NetworkClientSetCompanyPassword(password);
+	}
+
+	return password;
+}
+
+/**
+ * Hash the given password using server ID and game seed.
+ * @param password Password to hash.
+ * @param password_server_id Server ID.
+ * @param password_game_seed Game seed.
+ * @return The hashed password.
+ */
+const char *GenerateCompanyPasswordHash(const char *password, const char *password_server_id, uint32 password_game_seed)
+{
+	if (StrEmpty(password)) return password;
+
+	char salted_password[NETWORK_SERVER_ID_LENGTH];
+
+	memset(salted_password, 0, sizeof(salted_password));
+	snprintf(salted_password, sizeof(salted_password), "%s", password);
+	/* Add the game seed and the server's ID as the salt. */
+	for (uint i = 0; i < NETWORK_SERVER_ID_LENGTH - 1; i++) {
+		salted_password[i] ^= password_server_id[i] ^ (password_game_seed >> (i % 32));
+	}
+
+	Md5 checksum;
+	uint8 digest[16];
+	static char hashed_password[NETWORK_SERVER_ID_LENGTH];
+
+	/* Generate the MD5 hash */
+	checksum.Append(salted_password, sizeof(salted_password) - 1);
+	checksum.Finish(digest);
+
+	for (int di = 0; di < 16; di++) sprintf(hashed_password + di * 2, "%02x", digest[di]);
+	hashed_password[lengthof(hashed_password) - 1] = '\0';
+
+	return hashed_password;
+}
+
+/**
  * Check if the company we want to join requires a password.
  * @param company_id id of the company we want to check the 'passworded' flag for.
  * @return true if the company requires a password.

@@ -149,6 +149,9 @@ extern const TrackdirBits _uphill_trackdirs[] = {
 	TRACKDIR_BIT_X_NE | TRACKDIR_BIT_Y_SE, ///< 30 SLOPE_STEEP_E -> inclined for diagonal track
 };
 
+/**
+ * Return the rail type of tile, or INVALID_RAILTYPE if this is no rail tile.
+ */
 RailType GetTileRailType(TileIndex tile)
 {
 	switch (GetTileType(tile)) {
@@ -174,16 +177,34 @@ RailType GetTileRailType(TileIndex tile)
 	return INVALID_RAILTYPE;
 }
 
+/**
+ * Finds out if a company has a certain railtype available
+ * @param company the company in question
+ * @param railtype requested RailType
+ * @return true if company has requested RailType available
+ */
 bool HasRailtypeAvail(const CompanyID company, const RailType railtype)
 {
 	return HasBit(Company::Get(company)->avail_railtypes, railtype);
 }
 
+/**
+ * Validate functions for rail building.
+ * @param rail the railtype to check.
+ * @return true if the current company may build the rail.
+ */
 bool ValParamRailtype(const RailType rail)
 {
 	return rail < RAILTYPE_END && HasRailtypeAvail(_current_company, rail);
 }
 
+/**
+ * Returns the "best" railtype a company can build.
+ * As the AI doesn't know what the BEST one is, we have our own priority list
+ * here. When adding new railtypes, modify this function
+ * @param company the company "in action"
+ * @return The "best" railtype a company has available
+ */
 RailType GetBestRailtype(const CompanyID company)
 {
 	if (HasRailtypeAvail(company, RAILTYPE_MAGLEV)) return RAILTYPE_MAGLEV;
@@ -192,9 +213,48 @@ RailType GetBestRailtype(const CompanyID company)
 	return RAILTYPE_RAIL;
 }
 
+/**
+ * Add the rail types that are to be introduced at the given date.
+ * @param current The currently available railtypes.
+ * @param date    The date for the introduction comparisions.
+ * @return The rail types that should be available when date
+ *         introduced rail types are taken into account as well.
+ */
+RailTypes AddDateIntroducedRailTypes(RailTypes current, Date date)
+{
+	RailTypes rts = current;
+
+	for (RailType rt = RAILTYPE_BEGIN; rt != RAILTYPE_END; rt++) {
+		const RailtypeInfo *rti = GetRailTypeInfo(rt);
+		/* Unused rail type. */
+		if (rti->label == 0) continue;
+
+		/* Not date introduced. */
+		if (!IsInsideMM(rti->introduction_date, 0, MAX_DAY)) continue;
+
+		/* Not yet introduced at this date. */
+		if (rti->introduction_date > date) continue;
+
+		/* Have we introduced all required railtypes? */
+		RailTypes required = rti->introduction_required_railtypes;
+		if ((rts & required) != required) continue;
+
+		rts |= rti->introduces_railtypes;
+	}
+
+	/* When we added railtypes we need to run this method again; the added
+	 * railtypes might enable more rail types to become introduced. */
+	return rts == current ? rts : AddDateIntroducedRailTypes(rts, date);
+}
+
+/**
+ * Get the rail types the given company can build.
+ * @param c the company to get the rail types for.
+ * @return the rail types.
+ */
 RailTypes GetCompanyRailtypes(CompanyID company)
 {
-	RailTypes rt = RAILTYPES_NONE;
+	RailTypes rts = RAILTYPES_NONE;
 
 	Engine *e;
 	FOR_ALL_ENGINES_OF_TYPE(e, VEH_TRAIN) {
@@ -206,14 +266,19 @@ RailTypes GetCompanyRailtypes(CompanyID company)
 
 			if (rvi->railveh_type != RAILVEH_WAGON) {
 				assert(rvi->railtype < RAILTYPE_END);
-				SetBit(rt, rvi->railtype);
+				rts |= GetRailTypeInfo(rvi->railtype)->introduces_railtypes;
 			}
 		}
 	}
 
-	return rt;
+	return AddDateIntroducedRailTypes(rts, _date);
 }
 
+/**
+ * Get the rail type for a given label.
+ * @param label the railtype label.
+ * @return the railtype.
+ */
 RailType GetRailTypeByLabel(RailTypeLabel label)
 {
 	/* Loop through each rail type until the label is found */
