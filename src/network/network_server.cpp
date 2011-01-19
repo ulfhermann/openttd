@@ -1287,10 +1287,7 @@ DEF_GAME_RECEIVE_COMMAND(Server, PACKET_CLIENT_SET_PASSWORD)
 	p->Recv_string(password, sizeof(password));
 	ci = this->GetInfo();
 
-	if (Company::IsValidID(ci->client_playas)) {
-		strecpy(_network_company_states[ci->client_playas].password, password, lastof(_network_company_states[ci->client_playas].password));
-		NetworkServerUpdateCompanyPassworded(ci->client_playas, !StrEmpty(_network_company_states[ci->client_playas].password));
-	}
+	NetworkServerSetCompanyPassword(ci->client_playas, password);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -1627,6 +1624,24 @@ bool NetworkServerChangeClientName(ClientID client_id, const char *new_name)
 
 	NetworkUpdateClientInfo(client_id);
 	return true;
+}
+
+/**
+ * Set/Reset a company password on the server end.
+ * @param company_id ID of the company the password should be changed for.
+ * @param password The new password.
+ * @param already_hashed Is the given password already hashed?
+ */
+void NetworkServerSetCompanyPassword(CompanyID company_id, const char *password, bool already_hashed)
+{
+	if (!Company::IsValidHumanID(company_id)) return;
+
+	if (!already_hashed) {
+		password = GenerateCompanyPasswordHash(password, _settings_client.network.network_id, _settings_game.game_creation.generation_seed);
+	}
+
+	strecpy(_network_company_states[company_id].password, password, lastof(_network_company_states[company_id].password));
+	NetworkServerUpdateCompanyPassworded(company_id, !StrEmpty(_network_company_states[company_id].password));
 }
 
 /* Handle the local command-queue */
