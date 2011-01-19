@@ -1179,6 +1179,7 @@ static size_t ReferenceToInt(const void *obj, SLRefType rt)
 		case REF_ENGINE_RENEWS: return ((const EngineRenew*)obj)->index + 1;
 		case REF_CARGO_PACKET:  return ((const CargoPacket*)obj)->index + 1;
 		case REF_ORDERLIST:     return ((const   OrderList*)obj)->index + 1;
+		case REF_ROUTE_LINK:    return ((const   RouteLink*)obj)->index + 1;
 		default: NOT_REACHED();
 	}
 }
@@ -1247,6 +1248,10 @@ static void *IntToReference(size_t index, SLRefType rt)
 		case REF_CARGO_PACKET:
 			if (CargoPacket::IsValidID(index)) return CargoPacket::Get(index);
 			SlErrorCorrupt("Referencing invalid CargoPacket");
+
+		case REF_ROUTE_LINK:
+			if (RouteLink::IsValidID(index)) return RouteLink::Get(index);
+			SlErrorCorrupt("Referencing invalid RouteLink");
 
 		default: NOT_REACHED();
 	}
