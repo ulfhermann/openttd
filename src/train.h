@@ -138,136 +138,12 @@ struct Train : public GroundVehicle<Train, VEH_TRAIN> {
 	int GetCurrentMaxSpeed() const;
 
 	/**
-	 * enum to handle train subtypes
-	 * Do not access it directly unless you have to. Use the access functions below
-	 * This is an enum to tell what bit to access as it is a bitmask
-	 */
-	enum TrainSubtype {
-		TS_FRONT             = 0, ///< Leading engine of a train
-		TS_ARTICULATED_PART  = 1, ///< Articulated part of an engine
-		TS_WAGON             = 2, ///< Wagon
-		TS_ENGINE            = 3, ///< Engine that can be front engine, but might be placed behind another engine.
-		TS_FREE_WAGON        = 4, ///< First in a wagon chain (in depot)
-		TS_MULTIHEADED       = 5, ///< Engine is multiheaded
-	};
-
-	/**
-	 * Set front engine state
-	 */
-	FORCEINLINE void SetFrontEngine() { SetBit(this->subtype, TS_FRONT); }
-
-	/**
-	 * Remove the front engine state
-	 */
-	FORCEINLINE void ClearFrontEngine() { ClrBit(this->subtype, TS_FRONT); }
-
-	/**
-	 * Set a vehicle to be an articulated part
-	 */
-	FORCEINLINE void SetArticulatedPart() { SetBit(this->subtype, TS_ARTICULATED_PART); }
-
-	/**
-	 * Clear a vehicle from being an articulated part
-	 */
-	FORCEINLINE void ClearArticulatedPart() { ClrBit(this->subtype, TS_ARTICULATED_PART); }
-
-	/**
-	 * Set a vehicle to be a wagon
-	 */
-	FORCEINLINE void SetWagon() { SetBit(this->subtype, TS_WAGON); }
-
-	/**
-	 * Clear wagon property
-	 */
-	FORCEINLINE void ClearWagon() { ClrBit(this->subtype, TS_WAGON); }
-
-	/**
-	 * Set engine status
-	 */
-	FORCEINLINE void SetEngine() { SetBit(this->subtype, TS_ENGINE); }
-
-	/**
-	 * Clear engine status
-	 */
-	FORCEINLINE void ClearEngine() { ClrBit(this->subtype, TS_ENGINE); }
-
-	/**
-	 * Set if a vehicle is a free wagon
-	 */
-	FORCEINLINE void SetFreeWagon() { SetBit(this->subtype, TS_FREE_WAGON); }
-
-	/**
-	 * Clear a vehicle from being a free wagon
-	 */
-	FORCEINLINE void ClearFreeWagon() { ClrBit(this->subtype, TS_FREE_WAGON); }
-
-	/**
-	 * Set if a vehicle is a multiheaded engine
-	 */
-	FORCEINLINE void SetMultiheaded() { SetBit(this->subtype, TS_MULTIHEADED); }
-
-	/**
-	 * Clear multiheaded engine property
-	 */
-	FORCEINLINE void ClearMultiheaded() { ClrBit(this->subtype, TS_MULTIHEADED); }
-
-
-	/**
-	 * Check if train is a front engine
-	 * @return Returns true if train is a front engine
-	 */
-	FORCEINLINE bool IsFrontEngine() const { return HasBit(this->subtype, TS_FRONT); }
-
-	/**
-	 * Check if train is a free wagon (got no engine in front of it)
-	 * @return Returns true if train is a free wagon
-	 */
-	FORCEINLINE bool IsFreeWagon() const { return HasBit(this->subtype, TS_FREE_WAGON); }
-
-	/**
-	 * Check if a vehicle is an engine (can be first in a train)
-	 * @return Returns true if vehicle is an engine
-	 */
-	FORCEINLINE bool IsEngine() const { return HasBit(this->subtype, TS_ENGINE); }
-
-	/**
-	 * Check if a train is a wagon
-	 * @return Returns true if vehicle is a wagon
-	 */
-	FORCEINLINE bool IsWagon() const { return HasBit(this->subtype, TS_WAGON); }
-
-	/**
-	 * Check if train is a multiheaded engine
-	 * @return Returns true if vehicle is a multiheaded engine
-	 */
-	FORCEINLINE bool IsMultiheaded() const { return HasBit(this->subtype, TS_MULTIHEADED); }
-
-	/**
-	 * Tell if we are dealing with the rear end of a multiheaded engine.
-	 * @return True if the engine is the rear part of a dualheaded engine.
-	 */
-	FORCEINLINE bool IsRearDualheaded() const { return this->IsMultiheaded() && !this->IsEngine(); }
-
-	/**
-	 * Check if train is an articulated part of an engine
-	 * @return Returns true if train is an articulated part
-	 */
-	FORCEINLINE bool IsArticulatedPart() const { return HasBit(this->subtype, TS_ARTICULATED_PART); }
-
-	/**
-	 * Check if an engine has an articulated part.
-	 * @return True if the engine has an articulated part.
-	 */
-	FORCEINLINE bool HasArticulatedPart() const { return this->Next() != NULL && this->Next()->IsArticulatedPart(); }
-
-
-	/**
 	 * Get the next part of a multi-part engine.
 	 * Will only work on a multi-part engine (this->EngineHasArticPart() == true),
 	 * Result is undefined for normal engine.
 	 * @return next part of articulated engine
 	 */
-	FORCEINLINE Train *GetNextArticPart() const
+	FORCEINLINE Train *GetNextArticulatedPart() const
 	{
 		assert(this->HasArticulatedPart());
 		return this->Next();
@@ -302,7 +178,7 @@ struct Train : public GroundVehicle<Train, VEH_TRAIN> {
 	FORCEINLINE Train *GetLastEnginePart()
 	{
 		Train *v = this;
-		while (v->HasArticulatedPart()) v = v->GetNextArticPart();
+		while (v->HasArticulatedPart()) v = v->GetNextArticulatedPart();
 		return v;
 	}
 
@@ -313,7 +189,7 @@ struct Train : public GroundVehicle<Train, VEH_TRAIN> {
 	FORCEINLINE Train *GetNextVehicle() const
 	{
 		const Train *v = this;
-		while (v->HasArticulatedPart()) v = v->GetNextArticPart();
+		while (v->HasArticulatedPart()) v = v->GetNextArticulatedPart();
 
 		/* v now contains the last artic part in the engine */
 		return v->Next();
