@@ -73,13 +73,13 @@ CargoPacket::CargoPacket(StationID source, TileIndex source_xy, uint16 count, So
  * that, in contrary to all other pools, does not memset to 0.
  */
 CargoPacket::CargoPacket(uint16 count, byte days_in_transit, StationID source, TileIndex source_xy, TileIndex loaded_at_xy, Money feeder_share, SourceType source_type, SourceID source_id) :
-	feeder_share(feeder_share),
-	count(count),
-	days_in_transit(days_in_transit),
-	source_id(source_id),
-	source(source),
-	source_xy(source_xy),
-	loaded_at_xy(loaded_at_xy)
+		feeder_share(feeder_share),
+		count(count),
+		days_in_transit(days_in_transit),
+		source_id(source_id),
+		source(source),
+		source_xy(source_xy),
+		loaded_at_xy(loaded_at_xy)
 {
 	assert(count != 0);
 	this->source_type = source_type;
@@ -92,11 +92,11 @@ CargoPacket::CargoPacket(uint16 count, byte days_in_transit, StationID source, T
  */
 FORCEINLINE CargoPacket *CargoPacket::Split(uint new_size)
 {
-       Money fs = this->feeder_share * new_size / static_cast<uint>(this->count);
-       CargoPacket *cp_new = new CargoPacket(new_size, this->days_in_transit, this->source, this->source_xy, this->loaded_at_xy, fs, this->source_type, this->source_id);
-       this->feeder_share -= fs;
-       this->count -= new_size;
-       return cp_new;
+	Money fs = this->feeder_share * new_size / static_cast<uint>(this->count);
+	CargoPacket *cp_new = new CargoPacket(new_size, this->days_in_transit, this->source, this->source_xy, this->loaded_at_xy, fs, this->source_type, this->source_id);
+	this->feeder_share -= fs;
+	this->count -= new_size;
+	return cp_new;
 }
 
 /**
@@ -105,9 +105,9 @@ FORCEINLINE CargoPacket *CargoPacket::Split(uint new_size)
  */
 FORCEINLINE void CargoPacket::Merge(CargoPacket *cp)
 {
-       this->count += cp->count;
-       this->feeder_share += cp->feeder_share;
-       delete cp;
+	this->count += cp->count;
+	this->feeder_share += cp->feeder_share;
+	delete cp;
 }
 
 /**
