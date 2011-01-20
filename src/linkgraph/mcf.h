@@ -24,7 +24,7 @@ public:
 	 */
 	FORCEINLINE  uint GetAnnotation() const {return this->distance;}
 
-	struct comp {
+	struct Comparator {
 		bool operator()(const DistanceAnnotation *x, const DistanceAnnotation *y) const;
 	};
 };
@@ -48,7 +48,7 @@ public:
 	 */
 	FORCEINLINE int GetAnnotation() const {return this->GetCapacityRatio();}
 
-	struct comp {
+	struct Comparator {
 		bool operator()(const CapacityAnnotation *x, const CapacityAnnotation *y) const;
 	};
 };

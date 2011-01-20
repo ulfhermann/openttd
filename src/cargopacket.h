@@ -424,8 +424,8 @@ public:
 	static void InvalidateAllFrom(SourceType src_type, SourceID src);
 
 protected:
-	Station *station;
-	CargoID cargo;
+	Station *station; ///< Station this cargo list belongs to.
+	CargoID cargo;    ///< Cargo type this list holds.
 
 	byte GetUnloadFlags(OrderUnloadFlags order_flags);
 
