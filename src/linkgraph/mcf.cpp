@@ -1,7 +1,8 @@
 /** @file mcf.cpp Definition of Multi-Commodity-Flow solver. */
 
-#include "mcf.h"
+#include "../stdafx.h"
 #include "../core/math_func.hpp"
+#include "mcf.h"
 
 /**
  * Determines if an extension to the given Path with the given parameters is
@@ -81,7 +82,7 @@ template<class Tannotation>
 void MultiCommodityFlow::Dijkstra(NodeID source_node, PathVector &paths,
 		bool create_new_paths)
 {
-	typedef std::set<Tannotation *, typename Tannotation::comp> AnnoSet;
+	typedef std::set<Tannotation *, typename Tannotation::Comparator> AnnoSet;
 	uint size = this->graph->GetSize();
 	StationID source_station = this->graph->GetNode(source_node).station;
 	AnnoSet annos;
@@ -100,9 +101,8 @@ void MultiCommodityFlow::Dijkstra(NodeID source_node, PathVector &paths,
 		while (to != INVALID_NODE) {
 			Edge &edge = this->graph->GetEdge(from, to);
 			assert(edge.distance < UINT_MAX);
-			if (create_new_paths ||
-					this->graph->GetNode(from).flows[source_station]
-					[this->graph->GetNode(to).station] > 0) {
+			if (create_new_paths || this->graph->GetNode(from)
+					.flows[source_station][this->graph->GetNode(to).station] > 0) {
 				uint capacity = edge.capacity;
 				if (create_new_paths) {
 					capacity *= this->graph->GetSettings().short_path_saturation;
@@ -128,22 +128,22 @@ void MultiCommodityFlow::Dijkstra(NodeID source_node, PathVector &paths,
  * @param source_id ID of the root node.
  * @param paths Paths to be cleaned up.
  */
-void MultiCommodityFlow::CleanupPaths(NodeID source_id, PathVector &paths) {
+void MultiCommodityFlow::CleanupPaths(NodeID source_id, PathVector &paths)
+{
 	Path *source = paths[source_id];
 	paths[source_id] = NULL;
-	for(PathVector::iterator i = paths.begin(); i != paths.end(); ++i) {
+	for (PathVector::iterator i = paths.begin(); i != paths.end(); ++i) {
 		Path *path = *i;
-		if (path != NULL) {
-			if (path->GetParent() == source) path->Detach();
-			while (path != source && path != NULL && path->GetFlow() == 0) {
-				Path *parent = path->GetParent();
-				path->Detach();
-				if (path->GetNumChildren() == 0) {
-					paths[path->GetNode()] = NULL;
-					delete path;
-				}
-				path = parent;
+		if (path == NULL) continue;
+		if (path->GetParent() == source) path->Detach();
+		while (path != source && path != NULL && path->GetFlow() == 0) {
+			Path *parent = path->GetParent();
+			path->Detach();
+			if (path->GetNumChildren() == 0) {
+				paths[path->GetNode()] = NULL;
+				delete path;
 			}
+			path = parent;
 		}
 	}
 	delete source;
@@ -182,7 +182,7 @@ uint MCF1stPass::FindCycleFlow(const PathVector &path, const Path *cycle_begin)
 	do {
 		flow = min(flow, cycle_begin->GetFlow());
 		cycle_begin = path[cycle_begin->GetNode()];
-	} while(cycle_begin != cycle_end);
+	} while (cycle_begin != cycle_end);
 	return flow;
 }
 
@@ -201,7 +201,7 @@ void MCF1stPass::EliminateCycle(PathVector &path, Path *cycle_begin, uint flow)
 		cycle_begin = path[cycle_begin->GetNode()];
 		Edge &edge = this->graph->GetEdge(prev, cycle_begin->GetNode());
 		edge.flow -= flow;
-	} while(cycle_begin != cycle_end);
+	} while (cycle_begin != cycle_end);
 }
 
 /**
@@ -226,7 +226,7 @@ bool MCF1stPass::EliminateCycles(PathVector &path, NodeID origin_id, NodeID next
 		 */
 		PathSet &paths = this->graph->GetNode(next_id).paths;
 		PathViaMap next_hops;
-		for(PathSet::iterator i = paths.begin(); i != paths.end(); ++i) {
+		for (PathSet::iterator i = paths.begin(); i != paths.end(); ++i) {
 			Path *new_child = *i;
 			if (new_child->GetOrigin() == origin_id) {
 				PathViaMap::iterator via_it = next_hops.find(new_child->GetNode());
@@ -243,8 +243,7 @@ bool MCF1stPass::EliminateCycles(PathVector &path, NodeID origin_id, NodeID next
 		bool found = false;
 		/* search the next hops for nodes we have already visited */
 		for (PathViaMap::iterator via_it = next_hops.begin();
-				via_it != next_hops.end(); ++via_it)
-		{
+				via_it != next_hops.end(); ++via_it) {
 			Path *child = via_it->second;
 			if (child->GetFlow() > 0) {
 				/* push one child into the path vector and search this child's
@@ -341,7 +340,8 @@ MCF1stPass::MCF1stPass(LinkGraphComponent *graph) : MultiCommodityFlow(graph)
 }
 
 /**
- * Run the second pass of the MCF calculation.
+ * Run the second pass of the MCF calculation which assigns all remaining
+ * demands to existing paths.
  * @param graph Component to calculate.
  */
 MCF2ndPass::MCF2ndPass(LinkGraphComponent *graph) : MultiCommodityFlow(graph)
@@ -353,13 +353,11 @@ MCF2ndPass::MCF2ndPass(LinkGraphComponent *graph) : MultiCommodityFlow(graph)
 	while (demand_left) {
 		demand_left = false;
 		for (NodeID source = 0; source < size; ++source) {
-			/* Then assign all remaining demands */
 			this->Dijkstra<CapacityAnnotation>(source, paths, false);
 			for (NodeID dest = 0; dest < size; ++dest) {
 				Edge &edge = this->graph->GetEdge(source, dest);
 				Path *path = paths[dest];
-				if (edge.unsatisfied_demand > 0 && path->GetFreeCapacity() > INT_MIN)
-				{
+				if (edge.unsatisfied_demand > 0 && path->GetFreeCapacity() > INT_MIN) {
 					this->PushFlow(edge, path, accuracy, false);
 					if (edge.unsatisfied_demand > 0) demand_left = true;
 				}
@@ -381,7 +379,8 @@ MCF2ndPass::MCF2ndPass(LinkGraphComponent *graph) : MultiCommodityFlow(graph)
  * @param y Node id associated with the second value.
  */
 template <typename T>
-bool greater(T x_anno, T y_anno, NodeID x, NodeID y) {
+bool greater(T x_anno, T y_anno, NodeID x, NodeID y)
+{
 	if (x_anno > y_anno) {
 		return true;
 	} else if (x_anno < y_anno) {
@@ -397,7 +396,7 @@ bool greater(T x_anno, T y_anno, NodeID x, NodeID y) {
  * @param y Second capacity annotation.
  * @return If x is better than y.
  */
-bool CapacityAnnotation::comp::operator()(const CapacityAnnotation *x,
+bool CapacityAnnotation::Comparator::operator()(const CapacityAnnotation *x,
 		const CapacityAnnotation *y) const
 {
 	return x != y && greater<int>(x->GetAnnotation(), y->GetAnnotation(),
@@ -410,7 +409,7 @@ bool CapacityAnnotation::comp::operator()(const CapacityAnnotation *x,
  * @param y Second distance annotation.
  * @return If x is better than y.
  */
-bool DistanceAnnotation::comp::operator()(const DistanceAnnotation *x,
+bool DistanceAnnotation::Comparator::operator()(const DistanceAnnotation *x,
 		const DistanceAnnotation *y) const
 {
 	return x != y && !greater<uint>(x->GetAnnotation(), y->GetAnnotation(),
