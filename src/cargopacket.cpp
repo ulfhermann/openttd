@@ -582,7 +582,7 @@ uint StationCargoList::TakeFrom(VehicleCargoList *source, uint max_unload, Order
 	GoodsEntry *dest = &this->station->goods[this->cargo];
 	UnloadType action;
 
-	for(VehicleCargoList::Iterator c = source->packets.begin(); c != source->packets.end() && remaining_unload > 0;) {
+	for (VehicleCargoList::Iterator c = source->packets.begin(); c != source->packets.end() && remaining_unload > 0;) {
 		StationID cargo_source = (*c)->source;
 		FlowStatSet &flows = dest->flows[cargo_source];
 		FlowStatSet::iterator begin = flows.begin();
@@ -667,7 +667,7 @@ uint VehicleCargoList::MoveTo(VehicleCargoList *dest, uint cap)
 {
 	uint orig_cap = cap;
 	Iterator it = packets.begin();
-	while(it != packets.end() && cap > 0) {
+	while (it != packets.end() && cap > 0) {
 		cap -= MovePacket(dest, it, cap);
 	}
 	return orig_cap - cap;
@@ -752,7 +752,7 @@ void StationCargoList::Append(StationID next, CargoPacket *cp)
 uint StationCargoList::MovePackets(VehicleCargoList *dest, uint cap, Iterator begin, Iterator end, bool reserve)
 {
 	uint orig_cap = cap;
-	while(begin != end && cap > 0) {
+	while (begin != end && cap > 0) {
 		cap -= this->MovePacket(dest, begin, cap, this->station->xy, reserve);
 	}
 	return orig_cap - cap;
@@ -789,7 +789,7 @@ uint StationCargoList::MoveTo(VehicleCargoList *dest, uint cap, StationID next, 
 void StationCargoList::RerouteStalePackets(StationID to)
 {
 	std::pair<Iterator, Iterator> range(this->packets.equal_range(to));
-	for(Iterator it(range.first); it != range.second && it.GetKey() == to;) {
+	for (Iterator it(range.first); it != range.second && it.GetKey() == to;) {
 		CargoPacket *packet = *it;
 		this->packets.erase(it++);
 		StationID next = this->station->goods[this->cargo].UpdateFlowStatsTransfer(packet->source, packet->count, this->station->index);
@@ -812,7 +812,7 @@ void StationCargoList::RandomTruncate(uint max_remaining)
 {
 	uint prev_count = this->count;
 	while (this->count > max_remaining) {
-		for(Iterator it(this->packets.begin()); it != this->packets.end();) {
+		for (Iterator it(this->packets.begin()); it != this->packets.end();) {
 			if (RandomRange(prev_count) < max_remaining) {
 				++it;
 				continue;

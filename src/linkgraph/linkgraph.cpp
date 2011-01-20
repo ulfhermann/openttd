@@ -9,14 +9,15 @@
 
 /** @file linkgraph.cpp Definition of link graph classes used for cargo distribution. */
 
-#include "linkgraph.h"
-#include "demands.h"
-#include "mcf.h"
-#include "flowmapper.h"
+#include "../stdafx.h"
 #include "../map_func.h"
 #include "../core/bitmath_func.hpp"
 #include "../debug.h"
 #include "../moving_average.h"
+#include "linkgraph.h"
+#include "demands.h"
+#include "mcf.h"
+#include "flowmapper.h"
 #include <queue>
 
 /**
@@ -43,7 +44,7 @@ void Node::Init(StationID st, uint sup, uint dem)
 	this->station = st;
 
 	for (PathSet::iterator i = this->paths.begin(); i != this->paths.end(); ++i) {
-		delete (*i);
+		delete *i;
 	}
 	this->paths.clear();
 	this->flows.clear();
@@ -80,7 +81,7 @@ void LinkGraph::CreateComponent(Station *first)
 	search_queue.push(first);
 
 	/* find all stations belonging to the current component */
-	while(!search_queue.empty()) {
+	while (!search_queue.empty()) {
 		Station *source = search_queue.front();
 		search_queue.pop();
 
@@ -339,7 +340,7 @@ void Node::ExportFlows(CargoID cargo)
 	FlowStatMap &station_flows = Station::Get(this->station)->goods[cargo].flows;
 	FlowStatSet new_flows;
 	/* loop over all existing flows in the station and update them */
-	for(FlowStatMap::iterator station_outer_it(station_flows.begin()); station_outer_it != station_flows.end();) {
+	for (FlowStatMap::iterator station_outer_it(station_flows.begin()); station_outer_it != station_flows.end();) {
 		FlowMap::iterator node_outer_it(this->flows.find(station_outer_it->first));
 		if (node_outer_it == this->flows.end()) {
 			/* there are no flows for this source node anymore */
@@ -382,7 +383,7 @@ void LinkGraph::Join()
 {
 	this->LinkGraphJob::Join();
 
-	for(NodeID node_id = 0; node_id < this->GetSize(); ++node_id) {
+	for (NodeID node_id = 0; node_id < this->GetSize(); ++node_id) {
 		Node &node = this->GetNode(node_id);
 		if (Station::IsValidID(node.station)) {
 			node.ExportFlows(this->cargo);
@@ -416,7 +417,7 @@ void LinkGraph::Join()
 }
 
 /**
- * add this path as a new child to the given base path, thus making this path
+ * Add this path as a new child to the given base path, thus making this path
  * a "fork" of the base path.
  * @param base the path to fork from
  * @param cap maximum capacity of the new path
@@ -450,7 +451,7 @@ uint Path::AddFlow(uint new_flow, LinkGraphComponent *graph, bool only_positive)
 		Edge &edge = graph->GetEdge(this->parent->node, this->node);
 		if (only_positive) {
 			uint usable_cap = edge.capacity * graph->GetSettings().short_path_saturation / 100;
-			if(usable_cap > edge.flow) {
+			if (usable_cap > edge.flow) {
 				new_flow = min(new_flow, usable_cap - edge.flow);
 			} else {
 				return 0;
@@ -471,7 +472,7 @@ uint Path::AddFlow(uint new_flow, LinkGraphComponent *graph, bool only_positive)
  * @param n id of the link graph node this path passes
  * @param source if true, this is the first leg of the path
  */
-Path::Path(NodeID n, bool source)  :
+Path::Path(NodeID n, bool source) :
 	distance(source ? 0 : UINT_MAX),
 	capacity(0),
 	free_capacity(source ? INT_MAX : INT_MIN),
