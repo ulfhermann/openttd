@@ -1102,7 +1102,7 @@ void PrepareUnload(Station *curr_station, Vehicle *front_v, StationID next_stati
 		} else {
 			for (Vehicle *v = front_v; v != NULL; v = v->Next()) {
 				const CargoPacketList *packets = v->cargo.Packets();
-				for(VehicleCargoList::ConstIterator i(packets->begin()); i != packets->end(); ++i) {
+				for (VehicleCargoList::ConstIterator i(packets->begin()); i != packets->end(); ++i) {
 					curr_station->goods[v->cargo_type].UpdateFlowStats(
 							(*i)->SourceStation(), (*i)->Count(), next_station_id);
 				}
@@ -1344,7 +1344,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 				unloading_time += loaded;
 
 				dirty_vehicle = dirty_station = true;
-			} else if  (_settings_game.order.improved_load && HasBit(cargos_reserved, v->cargo_type)) {
+			} else if (_settings_game.order.improved_load && HasBit(cargos_reserved, v->cargo_type)) {
 				/* Skip loading this vehicle if another train/vehicle is already handling
 				 * the same cargo type at this station */
 				SetBit(cargo_not_full, v->cargo_type);

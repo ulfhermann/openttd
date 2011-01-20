@@ -241,7 +241,7 @@ public:
 	 * Comparator for two flow stats for ordering them in a way that makes
 	 * the next flow stat to sent cargo for show up as first element.
 	 */
-	struct comp {
+	struct Comparator {
 		/**
 		 * Comparator function. Decides by planned - sent or via, if those
 		 * are equal.
@@ -291,7 +291,7 @@ public:
 	}
 };
 
-typedef std::set<FlowStat, FlowStat::comp> FlowStatSet; ///< Percentage of flow to be sent via specified station (or consumed locally).
+typedef std::set<FlowStat, FlowStat::Comparator> FlowStatSet; ///< Percentage of flow to be sent via specified station (or consumed locally).
 
 typedef std::map<StationID, LinkStat> LinkStatMap;
 typedef std::map<StationID, FlowStatSet> FlowStatMap; ///< Flow descriptions by origin stations.
