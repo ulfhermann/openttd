@@ -3854,10 +3854,9 @@ StationID GoodsEntry::UpdateFlowStatsTransfer(StationID source, uint count, Stat
 	while (flow_it != flow_stats.end()) {
 		StationID via = flow_it->Via();
 		if (via != curr) {
-			UpdateFlowStats(flow_stats, flow_it, count);
+			this->UpdateFlowStats(flow_stats, flow_it, count);
 			return via;
-		}
-		else {
+		} else {
 			++flow_it;
 		}
 	}
