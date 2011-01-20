@@ -3046,11 +3046,18 @@ static void UpdateStationRating(Station *st)
 			bool skip = false;
 			int rating = 0;
 			uint waiting = ge->cargo.Count();
+
+			/* num_dests is at least 1 if there is any cargo as
+			 * INVALID_STATION is also a destination.
+			 */
 			uint num_dests = (uint)ge->cargo.Packets()->MapSize();
 
-			/* average amount of cargo per next hop, but prefer solitary stations
+			/* Average amount of cargo per next hop, but prefer solitary stations
 			 * with only one or two next hops. They are allowed to have more
-			 * cargo waiting per next hop. */
+			 * cargo waiting per next hop.
+			 * With manual cargo distribution waiting_avg = waiting / 2 as then
+			 * INVALID_STATION is the only destination.
+			 */
 			uint waiting_avg = waiting / (num_dests + 1);
 
 			if (HasBit(cs->callback_mask, CBM_CARGO_STATION_RATING_CALC)) {
