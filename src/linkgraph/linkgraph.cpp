@@ -9,14 +9,15 @@
 
 /** @file linkgraph.cpp Definition of link graph classes used for cargo distribution. */
 
-#include "linkgraph.h"
-#include "demands.h"
-#include "mcf.h"
-#include "flowmapper.h"
+#include "../stdafx.h"
 #include "../map_func.h"
 #include "../core/bitmath_func.hpp"
 #include "../debug.h"
 #include "../moving_average.h"
+#include "linkgraph.h"
+#include "demands.h"
+#include "mcf.h"
+#include "flowmapper.h"
 #include <queue>
 
 /**
@@ -80,7 +81,7 @@ void LinkGraph::CreateComponent(Station *first)
 	search_queue.push(first);
 
 	/* find all stations belonging to the current component */
-	while(!search_queue.empty()) {
+	while (!search_queue.empty()) {
 		Station *source = search_queue.front();
 		search_queue.pop();
 
@@ -339,7 +340,7 @@ void Node::ExportFlows(CargoID cargo)
 	FlowStatMap &station_flows = Station::Get(this->station)->goods[cargo].flows;
 	FlowStatSet new_flows;
 	/* loop over all existing flows in the station and update them */
-	for(FlowStatMap::iterator station_outer_it(station_flows.begin()); station_outer_it != station_flows.end();) {
+	for (FlowStatMap::iterator station_outer_it(station_flows.begin()); station_outer_it != station_flows.end();) {
 		FlowMap::iterator node_outer_it(this->flows.find(station_outer_it->first));
 		if (node_outer_it == this->flows.end()) {
 			/* there are no flows for this source node anymore */
@@ -382,7 +383,7 @@ void LinkGraph::Join()
 {
 	this->LinkGraphJob::Join();
 
-	for(NodeID node_id = 0; node_id < this->GetSize(); ++node_id) {
+	for (NodeID node_id = 0; node_id < this->GetSize(); ++node_id) {
 		Node &node = this->GetNode(node_id);
 		if (Station::IsValidID(node.station)) {
 			node.ExportFlows(this->cargo);

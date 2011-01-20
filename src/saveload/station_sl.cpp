@@ -245,11 +245,11 @@ static StationID _station_id;
 const SaveLoad *GetLinkStatDesc()
 {
 	static const SaveLoad linkstat_desc[] = {
-		SLEG_CONDVAR(             _station_id,         SLE_UINT16,      SL_CAPACITIES, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkStat,    length,              SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkStat,    capacity,            SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkStat,    frozen,              SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkStat,    usage,               SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
+		SLEG_VAR(             _station_id,         SLE_UINT16),
+		 SLE_VAR(LinkStat,    length,              SLE_UINT32),
+		 SLE_VAR(LinkStat,    capacity,            SLE_UINT32),
+		 SLE_VAR(LinkStat,    frozen,              SLE_UINT32),
+		 SLE_VAR(LinkStat,    usage,               SLE_UINT32),
 		 SLE_END()
 	};
 
@@ -485,7 +485,7 @@ static void RealSave_STNN(BaseStation *bst)
 			_num_dests = (uint32)st->goods[c].cargo.Packets()->MapSize();
 			_num_links = (uint16)st->goods[c].link_stats.size();
 			_num_flows = 0;
-			for(FlowStatMap::const_iterator it(st->goods[c].flows.begin()); it != st->goods[c].flows.end(); ++it) {
+			for (FlowStatMap::const_iterator it(st->goods[c].flows.begin()); it != st->goods[c].flows.end(); ++it) {
 				_num_flows += (uint32)it->second.size();
 			}
 			SlObject(&st->goods[c], GetGoodsDesc());
@@ -551,7 +551,7 @@ static void Load_STNN()
 					SwapPackets(&st->goods[c]);
 				} else {
 					StationCargoPair pair;
-					for(uint i = 0; i < _num_dests; ++i) {
+					for (uint i = 0; i < _num_dests; ++i) {
 						SlObject(&pair, _cargo_list_desc);
 						const_cast<StationCargoPacketMap &>(*(st->goods[c].cargo.Packets()))[pair.first].swap(pair.second);
 						assert(pair.second.empty());
