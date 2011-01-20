@@ -3046,6 +3046,10 @@ static void UpdateStationRating(Station *st)
 			bool skip = false;
 			int rating = 0;
 			uint waiting = ge->cargo.Count();
+
+			/* num_dests is at least 1 if there is any cargo as
+			 * INVALID_STATION is also a destination.
+			 */
 			uint num_dests = (uint)ge->cargo.Packets()->MapSize();
 
 			/* average amount of cargo per next hop, but prefer solitary stations
