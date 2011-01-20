@@ -3871,7 +3871,7 @@ StationID GoodsEntry::UpdateFlowStatsTransfer(StationID source, uint count, Stat
 FlowStat GoodsEntry::GetSumFlowVia(StationID via) const
 {
 	FlowStat ret(1, via);
-	for(FlowStatMap::const_iterator i = this->flows.begin(); i != this->flows.end(); ++i) {
+	for (FlowStatMap::const_iterator i = this->flows.begin(); i != this->flows.end(); ++i) {
 		const FlowStatSet &flow_set = i->second;
 		for (FlowStatSet::const_iterator j = flow_set.begin(); j != flow_set.end(); ++j) {
 			const FlowStat &flow = *j;
