@@ -1,11 +1,12 @@
 /** @file demands.h Definition of demand calculating link graph handler. */
 
-#include "demands.h"
+#include "../stdafx.h"
 #include "../station_base.h"
 #include "../settings_type.h"
 #include "../newgrf_cargo.h"
 #include "../cargotype.h"
 #include "../core/math_func.hpp"
+#include "demands.h"
 #include <list>
 
 typedef std::list<NodeID> NodeList;

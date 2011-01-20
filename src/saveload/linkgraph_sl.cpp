@@ -9,6 +9,7 @@
 
 /** @file linkgraph_sl.cpp Code handling saving and loading of link graphs */
 
+#include "../stdafx.h"
 #include "../linkgraph/linkgraph.h"
 #include "../linkgraph/demands.h"
 #include "../settings_internal.h"
@@ -93,7 +94,8 @@ static const SaveLoad _edge_desc[] = {
  * Save/load a component of a link graph
  * @param comp the component to be saved or loaded
  */
-static void SaveLoad_LinkGraphComponent(LinkGraphComponent &comp) {
+static void SaveLoad_LinkGraphComponent(LinkGraphComponent &comp)
+{
 	uint size = comp.GetSize();
 	for (NodeID from = 0; from < size; ++from) {
 		Node *node = &comp.GetNode(from);
@@ -109,7 +111,7 @@ static void SaveLoad_LinkGraphComponent(LinkGraphComponent &comp) {
  */
 static void DoSave_LGRP(void *)
 {
-	for(CargoID cargo = 0; cargo < NUM_CARGO; ++cargo) {
+	for (CargoID cargo = 0; cargo < NUM_CARGO; ++cargo) {
 		LinkGraph &graph = _link_graphs[cargo];
 		SlObject(&graph, GetLinkGraphDesc());
 		SaveLoad_LinkGraphComponent(graph);
@@ -121,7 +123,7 @@ static void DoSave_LGRP(void *)
  */
 static void Load_LGRP()
 {
-	for(CargoID cargo = 0; cargo < NUM_CARGO; ++cargo) {
+	for (CargoID cargo = 0; cargo < NUM_CARGO; ++cargo) {
 		LinkGraph &graph = _link_graphs[cargo];
 		assert(graph.GetSize() == 0);
 		SlObject(&graph, GetLinkGraphDesc());
@@ -140,13 +142,14 @@ static void Load_LGRP()
  */
 void AfterLoadLinkGraphs()
 {
-	for(CargoID cargo = 0; cargo < NUM_CARGO; ++cargo) {
+	for (CargoID cargo = 0; cargo < NUM_CARGO; ++cargo) {
 		LinkGraph &graph = _link_graphs[cargo];
 		if (graph.GetSize() > 0) graph.SpawnThread();
 	}
 }
 
-static void Save_LGRP() {
+static void Save_LGRP()
+{
 	SlAutolength((AutolengthProc*)DoSave_LGRP, NULL);
 }
 
