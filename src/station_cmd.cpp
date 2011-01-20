@@ -3255,16 +3255,15 @@ void RecalcFrozenIfLoading(const Vehicle *v)
  */
 void RecalcFrozen(Station *st)
 {
-	for (int goods_index = 0; goods_index < NUM_CARGO; ++goods_index) {
-		GoodsEntry &good = st->goods[goods_index];
-		LinkStatMap &links = good.link_stats;
+	for (CargoID cargo = 0; cargo < NUM_CARGO; ++cargo) {
+		LinkStatMap &links = st->goods[cargo].link_stats;
 		for (LinkStatMap::iterator i = links.begin(); i != links.end(); ++i) {
 			i->second.Unfreeze();
 		}
 	}
 
 	std::list<Vehicle *>::iterator v_it = st->loading_vehicles.begin();
-	while(v_it != st->loading_vehicles.end()) {
+	while (v_it != st->loading_vehicles.end()) {
 		const Vehicle *front = *v_it;
 		OrderList *orders = front->orders.list;
 		if (orders != NULL) {
@@ -3287,7 +3286,7 @@ void RecalcFrozen(Station *st)
 void DecreaseFrozen(Station *st, const Vehicle *front, StationID next_station_id)
 {
 	assert(st->index != next_station_id);
-       	assert(next_station_id != INVALID_STATION);
+	assert(next_station_id != INVALID_STATION);
 	for (const Vehicle *v = front; v != NULL; v = v->Next()) {
 		if (v->cargo_cap <= 0) continue;
 
