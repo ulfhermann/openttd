@@ -330,7 +330,7 @@ public:
 protected:
 	uint distance;     ///< Sum(distance of all legs up to this one).
 	uint capacity;     ///< This capacity is min(capacity) fom all edges.
-	int free_capacity; ///< This capacity is min(edge.capacity - edge.flow) for the current run of dijkstra.
+	int free_capacity; ///< This capacity is min(edge.capacity - edge.flow) for the current run of Dijkstra.
 	uint flow;         ///< Flow the current run of the mcf solver assigns.
 	NodeID node;       ///< Link graph node this leg passes.
 	NodeID origin;     ///< Link graph node this path originates from.
