@@ -388,8 +388,8 @@ public:
 	void AssignTo(Station *station, CargoID cargo);
 
 private:
-	Station *station;
-	CargoID cargo;
+	Station *station; ///< Station this cargo list belongs to.
+	CargoID cargo;    ///< Cargo type this list holds.
 };
 
 #endif /* CARGOPACKET_H */
