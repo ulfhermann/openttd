@@ -550,7 +550,7 @@ static void Load_STNN()
 					SwapPackets(&st->goods[c]);
 				} else {
 					StationCargoPair pair;
-					for(uint i = 0; i < _num_dests; ++i) {
+					for (uint i = 0; i < _num_dests; ++i) {
 						SlObject(&pair, _cargo_list_desc);
 						const_cast<StationCargoPacketMap &>(*(st->goods[c].cargo.Packets()))[pair.first].swap(pair.second);
 						assert(pair.second.empty());
