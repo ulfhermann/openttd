@@ -4,7 +4,6 @@
 #define DEMANDS_H_
 
 #include "linkgraph.h"
-#include "../stdafx.h"
 #include "../cargo_type.h"
 #include "../map_func.h"
 
@@ -31,7 +30,10 @@ public:
 	 * Count a node's supply into the sum of supplies.
 	 * @param node Node.
 	 */
-	FORCEINLINE void AddNode(const Node &node) {this->supply_sum += node.supply;}
+	FORCEINLINE void AddNode(const Node &node)
+	{
+		this->supply_sum += node.supply;
+	}
 
 	/**
 	 * Calculate the mean demand per node using the sum of supplies.
@@ -76,41 +78,44 @@ private:
  * A scaler for asymmetric distribution.
  */
 class AsymmetricScaler : public Scaler {
-	public:
-		AsymmetricScaler() : demand_sum(0) {}
+public:
+	AsymmetricScaler() : demand_sum(0) {}
 
-		/**
-		 * Count a node's demand into the sum of demands.
-		 * @param node The node to be counted.
-		 */
-		FORCEINLINE void AddNode(const Node &node) {this->demand_sum += node.demand;}
+	/**
+	 * Count a node's demand into the sum of demands.
+	 * @param node The node to be counted.
+	 */
+	FORCEINLINE void AddNode(const Node &node)
+	{
+		this->demand_sum += node.demand;
+	}
 
-		/**
-		 * Calculate the mean demand per node using the sum of demands.
-		 * @param num_demands Number of accepting nodes.
-		 */
-		FORCEINLINE void SetDemandPerNode(uint num_demands)
-		{
-			this->demand_per_node = max(this->demand_sum / num_demands, (uint)1);
-		}
+	/**
+	 * Calculate the mean demand per node using the sum of demands.
+	 * @param num_demands Number of accepting nodes.
+	 */
+	FORCEINLINE void SetDemandPerNode(uint num_demands)
+	{
+		this->demand_per_node = max(this->demand_sum / num_demands, (uint)1);
+	}
 
-		/**
-		 * Get the effective supply of one node towards another one. In asymmetric
-		 * distribution the demand of the other node is weighed in.
-		 * @param from The supplying node.
-		 * @param to The receiving node.
-		 */
-		FORCEINLINE uint EffectiveSupply(const Node &from, const Node &to)
-		{
-			return max(from.supply * to.demand / this->demand_per_node, (uint)1);
-		}
+	/**
+	 * Get the effective supply of one node towards another one. In asymmetric
+	 * distribution the demand of the other node is weighed in.
+	 * @param from The supplying node.
+	 * @param to The receiving node.
+	 */
+	FORCEINLINE uint EffectiveSupply(const Node &from, const Node &to)
+	{
+		return max(from.supply * to.demand / this->demand_per_node, (uint)1);
+	}
 
-		/**
-		 * Check if there is any acceptance left for this node. In asymmetric distribution
-		 * nodes always accept as long as their demand > 0.
-		 * @param to The node to be checked.
-		 */
-	FORCEINLINE bool DemandLeft(Node &to) {return to.demand > 0;}
+	/**
+	 * Check if there is any acceptance left for this node. In asymmetric distribution
+	 * nodes always accept as long as their demand > 0.
+	 * @param to The node to be checked.
+	 */
+	FORCEINLINE bool DemandLeft(Node &to) { return to.demand > 0; }
 
 private:
 	uint demand_sum; ///< Sum of all demands in the component.
@@ -143,7 +148,7 @@ public:
 	 * Call the demand calculator on the given component.
 	 * @param graph Component to calculate the demands for.
 	 */
-	virtual void Run(LinkGraphComponent *graph) {DemandCalculator c(graph);}
+	virtual void Run(LinkGraphComponent *graph) { DemandCalculator c(graph); }
 
 	/**
 	 * Virtual destructor has to be defined because of virtual Run().
