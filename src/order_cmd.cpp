@@ -27,6 +27,7 @@
 #include "station_base.h"
 #include "waypoint_base.h"
 #include "company_base.h"
+#include "cargodest_func.h"
 
 #include "table/strings.h"
 
@@ -242,6 +243,8 @@ Order::Order(uint32 packed)
 		if (v->current_order.index == index) v->current_order.index = INVALID_ORDER;
 		if (v->last_order_id == index) v->last_order_id = INVALID_ORDER;
 	}
+
+	InvalidateOrderRouteLinks((OrderID)index);
 }
 
 /**
@@ -1269,6 +1272,7 @@ CommandCost CmdModifyOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 		switch (mof) {
 			case MOF_NON_STOP:
 				order->SetNonStopType((OrderNonStopFlags)data);
+				InvalidateOrderRouteLinks(order->index);
 				break;
 
 			case MOF_STOP_LOCATION:
