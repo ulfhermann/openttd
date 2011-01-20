@@ -44,7 +44,7 @@ void Node::Init(StationID st, uint sup, uint dem)
 	this->station = st;
 
 	for (PathSet::iterator i = this->paths.begin(); i != this->paths.end(); ++i) {
-		delete (*i);
+		delete *i;
 	}
 	this->paths.clear();
 	this->flows.clear();
@@ -417,7 +417,7 @@ void LinkGraph::Join()
 }
 
 /**
- * add this path as a new child to the given base path, thus making this path
+ * Add this path as a new child to the given base path, thus making this path
  * a "fork" of the base path.
  * @param base the path to fork from
  * @param cap maximum capacity of the new path
@@ -451,7 +451,7 @@ uint Path::AddFlow(uint new_flow, LinkGraphComponent *graph, bool only_positive)
 		Edge &edge = graph->GetEdge(this->parent->node, this->node);
 		if (only_positive) {
 			uint usable_cap = edge.capacity * graph->GetSettings().short_path_saturation / 100;
-			if(usable_cap > edge.flow) {
+			if (usable_cap > edge.flow) {
 				new_flow = min(new_flow, usable_cap - edge.flow);
 			} else {
 				return 0;
@@ -472,7 +472,7 @@ uint Path::AddFlow(uint new_flow, LinkGraphComponent *graph, bool only_positive)
  * @param n id of the link graph node this path passes
  * @param source if true, this is the first leg of the path
  */
-Path::Path(NodeID n, bool source)  :
+Path::Path(NodeID n, bool source) :
 	distance(source ? 0 : UINT_MAX),
 	capacity(0),
 	free_capacity(source ? INT_MAX : INT_MIN),
