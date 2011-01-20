@@ -1,7 +1,8 @@
 /** @file mcf.cpp Definition of Multi-Commodity-Flow solver. */
 
-#include "mcf.h"
+#include "../stdafx.h"
 #include "../core/math_func.hpp"
+#include "mcf.h"
 
 /**
  * Determines if an extension to the given Path with the given parameters is
