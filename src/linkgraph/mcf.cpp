@@ -129,10 +129,11 @@ void MultiCommodityFlow::Dijkstra(NodeID source_node, PathVector &paths,
  * @param source_id ID of the root node.
  * @param paths Paths to be cleaned up.
  */
-void MultiCommodityFlow::CleanupPaths(NodeID source_id, PathVector &paths) {
+void MultiCommodityFlow::CleanupPaths(NodeID source_id, PathVector &paths)
+{
 	Path *source = paths[source_id];
 	paths[source_id] = NULL;
-	for(PathVector::iterator i = paths.begin(); i != paths.end(); ++i) {
+	for (PathVector::iterator i = paths.begin(); i != paths.end(); ++i) {
 		Path *path = *i;
 		if (path != NULL) {
 			if (path->GetParent() == source) path->Detach();
@@ -183,7 +184,7 @@ uint MCF1stPass::FindCycleFlow(const PathVector &path, const Path *cycle_begin)
 	do {
 		flow = min(flow, cycle_begin->GetFlow());
 		cycle_begin = path[cycle_begin->GetNode()];
-	} while(cycle_begin != cycle_end);
+	} while (cycle_begin != cycle_end);
 	return flow;
 }
 
@@ -202,7 +203,7 @@ void MCF1stPass::EliminateCycle(PathVector &path, Path *cycle_begin, uint flow)
 		cycle_begin = path[cycle_begin->GetNode()];
 		Edge &edge = this->graph->GetEdge(prev, cycle_begin->GetNode());
 		edge.flow -= flow;
-	} while(cycle_begin != cycle_end);
+	} while (cycle_begin != cycle_end);
 }
 
 /**
@@ -227,7 +228,7 @@ bool MCF1stPass::EliminateCycles(PathVector &path, NodeID origin_id, NodeID next
 		 */
 		PathSet &paths = this->graph->GetNode(next_id).paths;
 		PathViaMap next_hops;
-		for(PathSet::iterator i = paths.begin(); i != paths.end(); ++i) {
+		for (PathSet::iterator i = paths.begin(); i != paths.end(); ++i) {
 			Path *new_child = *i;
 			if (new_child->GetOrigin() == origin_id) {
 				PathViaMap::iterator via_it = next_hops.find(new_child->GetNode());
@@ -382,7 +383,8 @@ MCF2ndPass::MCF2ndPass(LinkGraphComponent *graph) : MultiCommodityFlow(graph)
  * @param y Node id associated with the second value.
  */
 template <typename T>
-bool greater(T x_anno, T y_anno, NodeID x, NodeID y) {
+bool greater(T x_anno, T y_anno, NodeID x, NodeID y)
+{
 	if (x_anno > y_anno) {
 		return true;
 	} else if (x_anno < y_anno) {
