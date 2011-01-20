@@ -9,14 +9,15 @@
 
 /** @file linkgraph.cpp Definition of link graph classes used for cargo distribution. */
 
-#include "linkgraph.h"
-#include "demands.h"
-#include "mcf.h"
-#include "flowmapper.h"
+#include "../stdafx.h"
 #include "../map_func.h"
 #include "../core/bitmath_func.hpp"
 #include "../debug.h"
 #include "../moving_average.h"
+#include "linkgraph.h"
+#include "demands.h"
+#include "mcf.h"
+#include "flowmapper.h"
 #include <queue>
 
 /**
@@ -80,7 +81,7 @@ void LinkGraph::CreateComponent(Station *first)
 	search_queue.push(first);
 
 	/* find all stations belonging to the current component */
-	while(!search_queue.empty()) {
+	while (!search_queue.empty()) {
 		Station *source = search_queue.front();
 		search_queue.pop();
 
