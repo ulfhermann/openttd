@@ -12,7 +12,6 @@
 #ifndef LINKGRAPH_H_
 #define LINKGRAPH_H_
 
-#include "../stdafx.h"
 #include "../station_base.h"
 #include "../cargo_type.h"
 #include "../thread/thread.h"
