@@ -245,11 +245,11 @@ static StationID _station_id;
 const SaveLoad *GetLinkStatDesc()
 {
 	static const SaveLoad linkstat_desc[] = {
-		SLEG_CONDVAR(             _station_id,         SLE_UINT16,      SL_CAPACITIES, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkStat,    length,              SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkStat,    capacity,            SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkStat,    frozen,              SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkStat,    usage,               SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
+		SLEG_VAR(             _station_id,         SLE_UINT16),
+		 SLE_VAR(LinkStat,    length,              SLE_UINT32),
+		 SLE_VAR(LinkStat,    capacity,            SLE_UINT32),
+		 SLE_VAR(LinkStat,    frozen,              SLE_UINT32),
+		 SLE_VAR(LinkStat,    usage,               SLE_UINT32),
 		 SLE_END()
 	};
 
