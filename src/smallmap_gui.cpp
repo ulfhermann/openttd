@@ -226,7 +226,7 @@ void BuildIndustriesLegend()
 }
 
 /** Legend entries for the link stats view. */
-static LegendAndColour _legend_linkstats[NUM_CARGO + sizeof(_linkstat_colours_in_legenda) + 1];
+static LegendAndColour _legend_linkstats[NUM_CARGO + lengthof(_linkstat_colours_in_legenda) + 1];
 
 /**
  * Populate legend table for the link stat view.
@@ -249,7 +249,7 @@ void BuildLinkStatsLegend()
 	_legend_linkstats[i].col_break = true;
 	_smallmap_cargo_count = i;
 
-	for (; i < _smallmap_cargo_count + sizeof(_linkstat_colours_in_legenda); ++i) {
+	for (; i < _smallmap_cargo_count + lengthof(_linkstat_colours_in_legenda); ++i) {
 		_legend_linkstats[i].legend = STR_EMPTY;
 		_legend_linkstats[i].colour = _smallmap_link_colours[_linkstat_colours_in_legenda[i - _smallmap_cargo_count]];
 		_legend_linkstats[i].show_on_map = true;
@@ -635,7 +635,7 @@ static const byte _vehicle_type_colours[6] = {
  * @param colour the colour with which the vertex will be filled
  * @param border_colour the colour for the border of the vertex
  */
-void DrawVertex(int x, int y, int size, int colour, int boder_colour)
+void DrawVertex(int x, int y, int size, int colour, int border_colour)
 {
 	size--;
 	int w1 = size / 2;
@@ -645,10 +645,10 @@ void DrawVertex(int x, int y, int size, int colour, int boder_colour)
 
 	w1++;
 	w2++;
-	GfxDrawLine(x - w1, y - w1, x + w2, y - w1, boder_colour);
-	GfxDrawLine(x - w1, y + w2, x + w2, y + w2, boder_colour);
-	GfxDrawLine(x - w1, y - w1, x - w1, y + w2, boder_colour);
-	GfxDrawLine(x + w2, y - w1, x + w2, y + w2, boder_colour);
+	GfxDrawLine(x - w1, y - w1, x + w2, y - w1, border_colour);
+	GfxDrawLine(x - w1, y + w2, x + w2, y + w2, border_colour);
+	GfxDrawLine(x - w1, y - w1, x - w1, y + w2, border_colour);
+	GfxDrawLine(x + w2, y - w1, x + w2, y + w2, border_colour);
 }
 
 /** Class managing the smallmap window. */
@@ -700,24 +700,24 @@ class SmallMapWindow : public Window {
 	uint min_number_of_fixed_rows; ///< Minimal number of rows in the legends for the fixed layouts only (all except #SMT_INDUSTRY).
 	uint column_width;             ///< Width of a column in the #SM_WIDGET_LEGEND widget.
 
-	struct BaseCargoDetail {
-		BaseCargoDetail()
-		{
-			this->Clear();
-		}
+	/**
+	 * Properties of a link between two stations.
+	 */
+	struct LinkProperties {
+		LinkProperties() { this->Clear(); }
 
-		void Clear()
-		{
-			this->capacity = this->usage = this->planned = 0;
-		}
+		void Clear() { this->capacity = this->usage = this->planned = 0; }
 
 		uint capacity;
 		uint usage;
 		uint planned;
 	};
 
-	struct CargoDetail : public BaseCargoDetail {
-		CargoDetail(const LegendAndColour *c, const LinkStat &ls, const FlowStat &fs) : legend(c)
+	/**
+	 * Properties of a link in connection with a legent entry.
+	 */
+	struct LinkLegendProperties : public LinkProperties {
+		LinkLegendProperties(const LegendAndColour *c, const LinkStat &ls, const FlowStat &fs) : legend(c)
 		{
 			this->AddLink(ls, fs);
 		}
@@ -732,10 +732,13 @@ class SmallMapWindow : public Window {
 		const LegendAndColour *legend;
 	};
 
-	typedef std::vector<CargoDetail> StatVector;
+	typedef std::vector<LinkLegendProperties> StatVector;
 
-	struct LinkDetails {
-		LinkDetails() {this->Clear();}
+	/**
+	 * Properties of multiple parallel links.
+	 */
+	struct MultiLinkProperties {
+		MultiLinkProperties() { this->Clear(); }
 
 		StationID sta;
 		StationID stb;
@@ -750,10 +753,7 @@ class SmallMapWindow : public Window {
 			this->b_to_a.clear();
 		}
 
-		bool Empty() const
-		{
-			return this->sta == INVALID_STATION;
-		}
+		bool Empty() const { return this->sta == INVALID_STATION; }
 	};
 
 	int32 scroll_x;  ///< Horizontal world coordinate of the base tile left of the top-left corner of the smallmap display.
@@ -1059,7 +1059,7 @@ class SmallMapWindow : public Window {
 		int x = (st->rect.right + st->rect.left + 1) / 2;
 		int y = (st->rect.bottom + st->rect.top + 1) / 2;
 		Point ret = this->RemapTile(x, y);
-		ret.x -= 3 + this->subscroll;
+		ret.x -= 3 + this->subscroll; 
 		if (this->zoom < 0) {
 			/* add half a tile if width or height is odd */
 			if (((st->rect.bottom - st->rect.top) & 1) == 0) {
@@ -1082,8 +1082,7 @@ class SmallMapWindow : public Window {
 
 		const Station *st;
 		FOR_ALL_STATIONS(st) {
-			if ((st->owner != _local_company && Company::IsValidID(st->owner)) ||
-					st->rect.IsEmpty()) continue;
+			if ((st->owner != _local_company && Company::IsValidID(st->owner)) || st->rect.IsEmpty()) continue;
 
 			Point pt = GetStationMiddle(st);
 
@@ -1128,6 +1127,7 @@ class SmallMapWindow : public Window {
 
 			const Station *sta;
 			FOR_ALL_STATIONS(sta) {
+				/* Show links between own stations or "neutral" ones like oilrigs.*/
 				if (sta->owner != _local_company && Company::IsValidID(sta->owner)) continue;
 				for (int i = 0; i < _smallmap_cargo_count; ++i) {
 					const LegendAndColour &tbl = _legend_table[window->map_type][i];
@@ -1162,7 +1162,7 @@ class SmallMapWindow : public Window {
 	protected:
 
 		Point pta, ptb;
-		BaseCargoDetail forward, backward;
+		LinkProperties forward, backward;
 		const SmallMapWindow *window;
 
 		FORCEINLINE bool IsLinkVisible()
@@ -1192,14 +1192,15 @@ class SmallMapWindow : public Window {
 			}
 		}
 
-		void AddLink(const LinkStat &orig_link, const FlowStat &orig_flow, BaseCargoDetail &cargo)
+		void AddLink(const LinkStat &orig_link, const FlowStat &orig_flow, LinkProperties &cargo)
 		{
 			uint new_cap = orig_link.Capacity();
 			uint new_usg = orig_link.Usage();
 			uint new_plan = orig_flow.Planned();
 
+			/* multiply the numbers by 32 in order to avoid comparing to 0 too often. */
 			if (cargo.capacity == 0 ||
-					max(cargo.usage, cargo.planned) * 8 / (cargo.capacity + 1) < max(new_usg, new_plan) * 8 / (new_cap + 1)) {
+					max(cargo.usage, cargo.planned) * 32 / (cargo.capacity + 1) < max(new_usg, new_plan) * 32 / (new_cap + 1)) {
 				cargo.capacity = new_cap;
 				cargo.usage = new_usg;
 				cargo.planned = new_plan;
@@ -1523,7 +1524,7 @@ public:
 	{
 		uint min_width = 0;
 		this->min_number_of_columns = INDUSTRY_MIN_NUMBER_OF_COLUMNS;
-		this->min_number_of_fixed_rows = sizeof(_smallmap_link_colours) / 2 + 1;
+		this->min_number_of_fixed_rows = lengthof(_smallmap_link_colours) / 2 + 1;
 		for (uint i = 0; i < lengthof(_legend_table); i++) {
 			uint height = 0;
 			uint num_columns = 1;
@@ -1611,7 +1612,7 @@ public:
 				uint blob_right = rtl ? this->column_width - 1 : LEGEND_BLOB_WIDTH;
 
 				StringID string = STR_NULL;
-			       	switch (this->map_type) {
+				switch (this->map_type) {
 					case SMT_INDUSTRY:
 						string = STR_SMALLMAP_INDUSTRY;
 						break;
@@ -1626,7 +1627,7 @@ public:
 				}
 
 				for (const LegendAndColour *tbl = _legend_table[this->map_type]; !tbl->end; ++tbl) {
-					if (tbl->col_break || ((this->map_type == SMT_INDUSTRY || this->map_type == SMT_OWNER ||  this->map_type == SMT_LINKSTATS) && i++ >= number_of_rows)) {
+					if (tbl->col_break || ((this->map_type == SMT_INDUSTRY || this->map_type == SMT_OWNER || this->map_type == SMT_LINKSTATS) && i++ >= number_of_rows)) {
 						/* Column break needed, continue at top, COLUMN_WIDTH pixels
 						 * (one "row") to the right. */
 						x += rtl ? -(int)this->column_width : this->column_width;
@@ -1641,6 +1642,7 @@ public:
 							SetDParam(1, Industry::GetIndustryTypeCount(tbl->type));
 						case SMT_LINKSTATS:
 							SetDParam(0, tbl->legend);
+							/* FALL_THROUGH */
 						case SMT_OWNER:
 							if (this->map_type != SMT_OWNER || tbl->company != INVALID_COMPANY) {
 								if (this->map_type == SMT_OWNER) SetDParam(0, tbl->company);
@@ -1653,13 +1655,15 @@ public:
 									GfxFillRect(x + blob_left, y + 1, x + blob_right, y + row_height - 1, 0); // Outer border of the legend colour
 								}
 								break;
-							} // else fall through
+							}
+							/* FALL_THROUGH */
 						default:
 							if (this->map_type == SMT_CONTOUR) SetDParam(0, tbl->height * TILE_HEIGHT_STEP);
 
 							/* Anything that is not an industry or a company is using normal process */
 							GfxFillRect(x + blob_left, y + 1, x + blob_right, y + row_height - 1, 0);
 							DrawString(x + text_left, x + text_right, y, tbl->legend);
+							break;
 					}
 					GfxFillRect(x + blob_left + 1, y + 2, x + blob_right - 1, y + row_height - 2, tbl->colour); // Legend colour
 
