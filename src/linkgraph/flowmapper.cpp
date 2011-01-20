@@ -22,7 +22,7 @@ void FlowMapper::Run(LinkGraphComponent *component)
 		Node &prev_node = component->GetNode(node_id);
 		StationID prev = prev_node.station;
 		PathSet &paths = prev_node.paths;
-		for(PathSet::iterator i = paths.begin(); i != paths.end(); ++i) {
+		for (PathSet::iterator i = paths.begin(); i != paths.end(); ++i) {
 			Path *path = *i;
 			uint flow = path->GetFlow();
 			if (flow == 0) continue;

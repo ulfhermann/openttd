@@ -447,7 +447,7 @@ static void RealSave_STNN(BaseStation *bst)
 		for (CargoID c = 0; c < NUM_CARGO; c++) {
 			_num_links = (uint16)st->goods[c].link_stats.size();
 			_num_flows = 0;
-			for(FlowStatMap::const_iterator it(st->goods[c].flows.begin()); it != st->goods[c].flows.end(); ++it) {
+			for (FlowStatMap::const_iterator it(st->goods[c].flows.begin()); it != st->goods[c].flows.end(); ++it) {
 				_num_flows += (uint32)it->second.size();
 			}
 			SlObject(&st->goods[c], GetGoodsDesc());
