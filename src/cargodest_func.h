@@ -14,10 +14,12 @@
 
 #include "cargo_type.h"
 #include "vehicle_type.h"
+#include "station_type.h"
 
 bool CargoHasDestinations(CargoID cid);
 
 void UpdateVehicleRouteLinks(const Vehicle *v, StationID arrived_at);
+void InvalidateStationRouteLinks(Station *station);
 
 void RebuildCargoLinkCounts();
 void UpdateCargoLinks();

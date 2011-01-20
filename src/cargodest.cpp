@@ -736,3 +736,35 @@ void UpdateVehicleRouteLinks(const Vehicle *v, StationID arrived_at)
 	/* Update incoming route link. */
 	UpdateVehicleRouteLinks(v, from, v->last_order_id, arrived_at, v->current_order.index);
 }
+
+/**
+ * Remove all route links to and from a station.
+ * @param station Station being removed.
+ */
+void InvalidateStationRouteLinks(Station *station)
+{
+	/* Delete all outgoing links. */
+	for (CargoID cid = 0; cid < NUM_CARGO; cid++) {
+		for (RouteLinkList::iterator link = station->goods[cid].routes.begin(); link != station->goods[cid].routes.end(); ++link) {
+			delete *link;
+		}
+	}
+
+	/* Delete all incoming link. */
+	Station *st_from;
+	FOR_ALL_STATIONS(st_from) {
+		if (st_from == station) continue;
+
+		for (CargoID cid = 0; cid < NUM_CARGO; cid++) {
+			/* Don't increment the iterator directly in the for loop as we don't want to increment when deleting a link. */
+			for (RouteLinkList::iterator link = st_from->goods[cid].routes.begin(); link != st_from->goods[cid].routes.end(); ) {
+				if ((*link)->GetDestination() == station->index) {
+					delete *link;
+					link = st_from->goods[cid].routes.erase(link);
+				} else {
+					++link;
+				}
+			}
+		}
+	}
+}

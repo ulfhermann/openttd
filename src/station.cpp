@@ -25,6 +25,7 @@
 #include "roadstop_base.h"
 #include "industry.h"
 #include "core/random_func.hpp"
+#include "cargodest_func.h"
 
 #include "table/strings.h"
 
@@ -113,6 +114,7 @@ Station::~Station()
 	}
 
 	CargoPacket::InvalidateAllFrom(this->index);
+	InvalidateStationRouteLinks(this);
 }
 
 
