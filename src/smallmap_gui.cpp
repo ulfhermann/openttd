@@ -1027,7 +1027,7 @@ class SmallMapWindow : public Window {
 			if (v == NULL) continue;
 
 			/* Remap into flat coordinates. */
-			Point pt = RemapTile(i->position.x / (int)TILE_SIZE, i->position.y / (int)TILE_SIZE);
+			Point pt = this->RemapTile(i->position.x / (int)TILE_SIZE, i->position.y / (int)TILE_SIZE);
 
 			int y = pt.y - dpi->top;
 			int x = pt.x - this->subscroll - 3 - dpi->left; // Offset X coordinate.
@@ -1402,7 +1402,7 @@ class SmallMapWindow : public Window {
 			if (v->vehstatus & (VS_HIDDEN | VS_UNCLICKABLE)) continue;
 
 			/* Remap into flat coordinates. We have to do that again in DrawVehicles to account for scrolling. */
-			Point pos = RemapTile(v->x_pos / (int)TILE_SIZE, v->y_pos / (int)TILE_SIZE);
+			Point pos = this->RemapTile(v->x_pos / (int)TILE_SIZE, v->y_pos / (int)TILE_SIZE);
 
 			/* Check if rhombus is inside bounds */
 			if (IsInsideMM(pos.x, -2 * scale, wi->current_x + 2 * scale) &&
