@@ -97,7 +97,7 @@ struct Train : public GroundVehicle<Train, VEH_TRAIN> {
 	uint16 wait_counter;
 
 	/** We don't want GCC to zero our struct! It already is zeroed and has an index! */
-	Train() : GroundVehicle<Train, VEH_TRAIN>() {}
+	Train() : GroundVehicleBase() {}
 	/** We want to 'destruct' the right class. */
 	virtual ~Train() { this->PreDestructor(); }
 
@@ -379,6 +379,16 @@ protected: // These functions should not be called outside acceleration code.
 	{
 		/* Any track that isn't TRACK_BIT_X or TRACK_BIT_Y cannot be sloped. */
 		return this->track == TRACK_BIT_X || this->track == TRACK_BIT_Y;
+	}
+
+	/**
+	 * Trains can always use the faster algorithm because they
+	 * have always the same direction as the track under them.
+	 * @return false
+	 */
+	FORCEINLINE bool HasToUseGetSlopeZ()
+	{
+		return false;
 	}
 };
 
