@@ -12,10 +12,10 @@
 #include "../../stdafx.h"
 #include "../../string_func.h"
 #include "../../company_base.h"
+#include "../../company_func.h"
 #include "../../rev.h"
 
 #include "ai_controller.hpp"
-#include "../ai_storage.hpp"
 #include "../ai_instance.hpp"
 #include "../ai_config.hpp"
 #include "ai_log.hpp"
