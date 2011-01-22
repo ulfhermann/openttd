@@ -13,9 +13,8 @@
 #define NEWGRF_INDUSTRYTILES_H
 
 #include "tile_cmd.h"
-#include "industry_type.h"
 #include "newgrf_animation_type.h"
-#include "newgrf_callbacks.h"
+#include "newgrf_industries.h"
 #include "core/random_func.hpp"
 
 bool DrawNewIndustryTile(TileInfo *ti, Industry *i, IndustryGfx gfx, const IndustryTileSpec *inds);
