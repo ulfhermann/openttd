@@ -75,6 +75,8 @@ struct GroundVehicle : public SpecializedVehicle<T, Type> {
 	GroundVehicleCache gcache; ///< Cache of often calculated values.
 	uint16 gv_flags;           ///< @see GroundVehicleFlags.
 
+	typedef GroundVehicle<T, Type> GroundVehicleBase; ///< Our type
+
 	/**
 	 * The constructor at SpecializedVehicle must be called.
 	 */
@@ -83,6 +85,21 @@ struct GroundVehicle : public SpecializedVehicle<T, Type> {
 	void PowerChanged();
 	void CargoChanged();
 	int GetAcceleration() const;
+
+	/**
+	 * Common code executed for crashed ground vehicles
+	 * @param flooded was this vehicle flooded?
+	 * @return number of victims
+	 */
+	/* virtual */ uint Crash(bool flooded)
+	{
+		/* Crashed vehicles aren't going up or down */
+		for (T *v = T::From(this); v != NULL; v = v->Next()) {
+			ClrBit(v->gv_flags, GVF_GOINGUP_BIT);
+			ClrBit(v->gv_flags, GVF_GOINGDOWN_BIT);
+		}
+		return this->Vehicle::Crash(flooded);
+	}
 
 	/**
 	 * Calculates the total slope resistance for this vehicle.
@@ -104,6 +121,103 @@ struct GroundVehicle : public SpecializedVehicle<T, Type> {
 	}
 
 	/**
+	 * Updates vehicle's Z position and inclination.
+	 * Used when the vehicle entered given tile.
+	 * @pre The vehicle has to be at (or near to) a border of the tile,
+	 *      directed towards tile centre
+	 */
+	FORCEINLINE void UpdateZPositionAndInclination()
+	{
+		this->z_pos = GetSlopeZ(this->x_pos, this->y_pos);
+		ClrBit(this->gv_flags, GVF_GOINGUP_BIT);
+		ClrBit(this->gv_flags, GVF_GOINGDOWN_BIT);
+
+		if (T::From(this)->TileMayHaveSlopedTrack()) {
+			/* To check whether the current tile is sloped, and in which
+			 * direction it is sloped, we get the 'z' at the center of
+			 * the tile (middle_z) and the edge of the tile (old_z),
+			 * which we then can compare. */
+			byte middle_z = GetSlopeZ((this->x_pos & ~TILE_UNIT_MASK) | HALF_TILE_SIZE, (this->y_pos & ~TILE_UNIT_MASK) | HALF_TILE_SIZE);
+
+			if (middle_z != this->z_pos) {
+				SetBit(this->gv_flags, (middle_z > this->z_pos) ? GVF_GOINGUP_BIT : GVF_GOINGDOWN_BIT);
+			}
+		}
+	}
+
+	/**
+	 * Updates vehicle's Z position.
+	 * Inclination can't change in the middle of a tile.
+	 * The faster code is used for trains and road vehicles unless they are
+	 * reversing on a sloped tile.
+	 */
+	FORCEINLINE void UpdateZPosition()
+	{
+#if 0
+		/* The following code does this: */
+
+		if (HasBit(this->gv_flags, GVF_GOINGUP_BIT)) {
+			switch (this->direction) {
+				case DIR_NE:
+					this->z_pos += (this->x_pos & 1); break;
+				case DIR_SW:
+					this->z_pos += (this->x_pos & 1) ^ 1; break;
+				case DIR_NW:
+					this->z_pos += (this->y_pos & 1); break;
+				case DIR_SE:
+					this->z_pos += (this->y_pos & 1) ^ 1; break;
+				default: break;
+			}
+		} else if (HasBit(this->gv_flags, GVF_GOINGDOWN_BIT)) {
+			switch (this->direction) {
+				case DIR_NE:
+					this->z_pos -= (this->x_pos & 1); break;
+				case DIR_SW:
+					this->z_pos -= (this->x_pos & 1) ^ 1; break;
+				case DIR_NW:
+					this->z_pos -= (this->y_pos & 1); break;
+				case DIR_SE:
+					this->z_pos -= (this->y_pos & 1) ^ 1; break;
+				default: break;
+			}
+		}
+
+		/* But gcc 4.4.5 isn't able to nicely optimise it, and the resulting
+		 * code is full of conditional jumps. */
+#endif
+
+		/* Vehicle's Z position can change only if it has GVF_GOINGUP_BIT or GVF_GOINGDOWN_BIT set.
+		 * Furthermore, if this function is called once every time the vehicle's position changes,
+		 * we know the Z position changes by +/-1 at certain moments - when x_pos, y_pos is odd/even,
+		 * depending on orientation of the slope and vehicle's direction */
+
+		if (HasBit(this->gv_flags, GVF_GOINGUP_BIT) || HasBit(this->gv_flags, GVF_GOINGDOWN_BIT)) {
+			if (T::From(this)->HasToUseGetSlopeZ()) {
+				/* In some cases, we have to use GetSlopeZ() */
+				this->z_pos = GetSlopeZ(this->x_pos, this->y_pos);
+				return;
+			}
+			/* DirToDiagDir() is a simple right shift */
+			DiagDirection dir = DirToDiagDir(this->direction);
+			/* Read variables, so the compiler knows the access doesn't trap */
+			int8 x_pos = this->x_pos;
+			int8 y_pos = this->y_pos;
+			/* DiagDirToAxis() is a simple mask */
+			int8 d = DiagDirToAxis(dir) == AXIS_X ? x_pos : y_pos;
+			/* We need only the least significant bit */
+			d &= 1;
+			/* Conditional "^ 1". Optimised to "(dir - 1) <= 1". */
+			d ^= (int8)(dir == DIAGDIR_SW || dir == DIAGDIR_SE);
+			/* Subtraction instead of addition because we are testing for GVF_GOINGUP_BIT.
+			 * GVF_GOINGUP_BIT is used because it's bit 0, so simple AND can be used,
+			 * without any shift */
+			this->z_pos += HasBit(this->gv_flags, GVF_GOINGUP_BIT) ? d : -d;
+		}
+
+		assert(this->z_pos == GetSlopeZ(this->x_pos, this->y_pos));
+	}
+
+	/**
 	 * Checks if the vehicle is in a slope and sets the required flags in that case.
 	 * @param new_tile True if the vehicle reached a new tile.
 	 * @param turned Indicates if the vehicle has turned.
@@ -114,36 +228,9 @@ struct GroundVehicle : public SpecializedVehicle<T, Type> {
 		byte old_z = this->z_pos;
 
 		if (new_tile) {
-			this->z_pos = GetSlopeZ(this->x_pos, this->y_pos);
-			ClrBit(this->gv_flags, GVF_GOINGUP_BIT);
-			ClrBit(this->gv_flags, GVF_GOINGDOWN_BIT);
-
-			if (T::From(this)->TileMayHaveSlopedTrack()) {
-				/* To check whether the current tile is sloped, and in which
-				 * direction it is sloped, we get the 'z' at the center of
-				 * the tile (middle_z) and the edge of the tile (old_z),
-				 * which we then can compare. */
-				static const int HALF_TILE_SIZE = TILE_SIZE / 2;
-				static const int INV_TILE_SIZE_MASK = ~(TILE_SIZE - 1);
-
-				byte middle_z = GetSlopeZ((this->x_pos & INV_TILE_SIZE_MASK) | HALF_TILE_SIZE, (this->y_pos & INV_TILE_SIZE_MASK) | HALF_TILE_SIZE);
-
-				if (middle_z != this->z_pos) {
-					SetBit(this->gv_flags, (middle_z > old_z) ? GVF_GOINGUP_BIT : GVF_GOINGDOWN_BIT);
-				}
-			}
+			this->UpdateZPositionAndInclination();
 		} else {
-			/* Flat tile, tile with two opposing corners raised and tile with 3 corners
-			 * raised can never have sloped track ... */
-			static const uint32 never_sloped = 1 << SLOPE_FLAT | 1 << SLOPE_EW | 1 << SLOPE_NS | 1 << SLOPE_NWS | 1 << SLOPE_WSE | 1 << SLOPE_SEN | 1 << SLOPE_ENW;
-			/* ... unless it's a bridge head. */
-			if (IsTileType(this->tile, MP_TUNNELBRIDGE) || // the following check would be true for tunnels anyway
-					(T::From(this)->TileMayHaveSlopedTrack() && !HasBit(never_sloped, GetTileSlope(this->tile, NULL)))) {
-				this->z_pos = GetSlopeZ(this->x_pos, this->y_pos);
-			} else {
-				/* Verify that assumption. */
-				assert(this->z_pos == GetSlopeZ(this->x_pos, this->y_pos));
-			}
+			this->UpdateZPosition();
 		}
 
 		this->UpdateViewport(true, turned);
