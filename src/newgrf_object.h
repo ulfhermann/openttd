@@ -13,9 +13,7 @@
 #define NEWGRF_OBJECT_H
 
 #include "newgrf_callbacks.h"
-#include "date_type.h"
 #include "economy_func.h"
-#include "strings_type.h"
 #include "tile_cmd.h"
 #include "object_type.h"
 #include "newgrf_animation_type.h"
@@ -73,12 +71,6 @@ struct ObjectSpec {
 	bool enabled;                 ///< Is this spec enabled?
 
 	/**
-	 * Check whether the object is available at this time.
-	 * @return true if it is available.
-	 */
-	bool IsAvailable() const;
-
-	/**
 	 * Get the cost for building a structure of this type.
 	 * @return The cost for building.
 	 */
@@ -90,24 +82,10 @@ struct ObjectSpec {
 	 */
 	Money GetClearCost() const { return (_price[PR_CLEAR_OBJECT] * this->clear_cost_multiplier); }
 
-	/**
-	 * Gets the index of this spec.
-	 * @return The index.
-	 */
+	bool IsAvailable() const;
 	uint Index() const;
 
-	/**
-	 * Get the specification associated with a specific ObjectType.
-	 * @param index The object type to fetch.
-	 * @return The specification.
-	 */
 	static const ObjectSpec *Get(ObjectType index);
-
-	/**
-	 * Get the specification associated with a tile.
-	 * @param tile The tile to fetch the data for.
-	 * @return The specification.
-	 */
 	static const ObjectSpec *GetByTile(TileIndex tile);
 };
 
