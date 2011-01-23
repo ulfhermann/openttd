@@ -53,7 +53,7 @@ public:
 	MultiMapIterator() : list_valid(false) {}
 
 	/**
-	 * Constructor to allow possibly const iterators to be assigned from possibly 
+	 * Constructor to allow possibly const iterators to be assigned from possibly
 	 * non-const map iterators. You can assign end() like this.
 	 * @tparam Tnon_const Iterator type assignable to Tmap_iter (which might be const).
 	 * @param mi One such iterator.
@@ -123,8 +123,8 @@ public:
 	const Tkey &GetKey() const {return this->map_iter->first;}
 
 	/**
-	 * Prefix increment operator. Increment the iterator and set it to the 
-	 * next item in the MultiMap. This either increments the list iterator 
+	 * Prefix increment operator. Increment the iterator and set it to the
+	 * next item in the MultiMap. This either increments the list iterator
 	 * or the map iterator and sets list_valid accordingly.
 	 * @return This iterator after incrementing.
 	 */
@@ -161,7 +161,7 @@ public:
 	}
 
 	/**
-	 * Prefix decrement operator. Decrement the iterator and set it to the 
+	 * Prefix decrement operator. Decrement the iterator and set it to the
 	 * previous item in the MultiMap.
 	 * @return This iterator after decrementing.
 	 */
@@ -288,8 +288,8 @@ bool operator!=(const Tmap_iter2 &iter2, const MultiMapIterator<Tmap_iter1, Tlis
 /**
  * Hand-rolled multimap as map of lists. Behaves mostly like a list, but is sorted
  * by Tkey so that you can easily look up ranges of equal keys. Those ranges are
- * internally ordered in a deterministic way (contrary to STL multimap). All 
- * STL-compatible members are named in STL style, all others are named in OpenTTD 
+ * internally ordered in a deterministic way (contrary to STL multimap). All
+ * STL-compatible members are named in STL style, all others are named in OpenTTD
  * style.
  */
 template<typename Tkey, typename Tvalue, typename Tcompare = std::less<Tkey> >
