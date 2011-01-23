@@ -383,6 +383,23 @@ bool StationRect::PtInExtendedRect(int x, int y, int distance) const
 			this->top - distance <= y && y <= this->bottom + distance;
 }
 
+/**
+ * Determines whether a tile area intersects the station rectangle with a given offset.
+ * @param area The tile area to test.
+ * @param distance Offset the station rect is grown on all sides (L1 norm).
+ * @return True if the tile area intersects with the station rectangle.
+ */
+bool StationRect::AreaInExtendedRect(const TileArea& area, int distance) const
+{
+	int area_left = TileX(area.tile);
+	int area_right = area_left + area.w;
+	int area_top = TileY(area.tile);
+	int area_bottom = area_top + area.h;
+
+	return this->left - distance <= area_right && area_left <= this->right + distance &&
+			this->top - distance <= area_bottom && area_top <= this->bottom + distance;
+}
+
 bool StationRect::IsEmpty() const
 {
 	return this->left == 0 || this->left > this->right || this->top > this->bottom;
