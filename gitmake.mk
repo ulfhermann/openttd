@@ -2,7 +2,7 @@
 
 VPATH=.:./.git/refs/heads/
 
-gitmake-all: cd linkgraph-overlay smallmap-refactor
+gitmake-all: cd smallmap-overlay
 	touch gitmake-all
 	git checkout patches
 	mv patches/current/*.diff current/
@@ -79,6 +79,8 @@ linkgraph-overlay: cargomap
 
 smallmap-refactor: gitmake
 
-push: master gitmake patches cd ext-rating station-gui smallmap-stats flowmapping-core mcf demands components capacities smallmap-zoom-in texteff cargomap multimap reservation moving-average selfaware-stationcargo linkgraph-overlay smallmap-refactor
+smallmap-overlay: linkgraph-overlay smallmap-refactor
+
+push: master gitmake patches cd ext-rating station-gui smallmap-stats flowmapping-core mcf demands components capacities smallmap-zoom-in texteff cargomap multimap reservation moving-average selfaware-stationcargo linkgraph-overlay smallmap-refactor smallmap-overlay
 	git push github $(^F)
 
