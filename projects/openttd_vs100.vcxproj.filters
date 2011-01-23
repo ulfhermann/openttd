@@ -2457,6 +2457,9 @@
     <ClInclude Include="..\src\pathfinder\yapf\yapf_cache.h">
       <Filter>YAPF</Filter>
     </ClInclude>
+    <ClCompile Include="..\src\pathfinder\yapf\yapf_cargo.cpp">
+      <Filter>YAPF</Filter>
+    </ClCompile>
     <ClInclude Include="..\src\pathfinder\yapf\yapf_common.hpp">
       <Filter>YAPF</Filter>
     </ClInclude>

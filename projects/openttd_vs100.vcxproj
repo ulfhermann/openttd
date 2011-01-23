@@ -1079,6 +1079,7 @@
     <ClInclude Include="..\src\pathfinder\yapf\yapf.hpp" />
     <ClInclude Include="..\src\pathfinder\yapf\yapf_base.hpp" />
     <ClInclude Include="..\src\pathfinder\yapf\yapf_cache.h" />
+    <ClCompile Include="..\src\pathfinder\yapf\yapf_cargo.cpp" />
     <ClInclude Include="..\src\pathfinder\yapf\yapf_common.hpp" />
     <ClInclude Include="..\src\pathfinder\yapf\yapf_costbase.hpp" />
     <ClInclude Include="..\src\pathfinder\yapf\yapf_costcache.hpp" />

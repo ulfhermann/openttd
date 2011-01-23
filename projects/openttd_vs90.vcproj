@@ -3680,6 +3680,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\pathfinder\yapf\yapf_cargo.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\pathfinder\yapf\yapf_common.hpp"
 				>
 			</File>
