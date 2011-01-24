@@ -29,6 +29,7 @@
 #include "sortlist_type.h"
 #include "core/geometry_func.hpp"
 #include "vehiclelist.h"
+#include "cargodest_base.h"
 
 #include "table/strings.h"
 
@@ -829,6 +830,8 @@ static const NWidgetPart _nested_station_view_widgets[] = {
 				SetDataTip(STR_BUTTON_LOCATION, STR_STATION_VIEW_CENTER_TOOLTIP),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_ACCEPTS), SetMinimalSize(61, 12), SetResize(1, 0), SetFill(1, 1),
 				SetDataTip(STR_STATION_VIEW_RATINGS_BUTTON, STR_STATION_VIEW_RATINGS_TOOLTIP),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_CARGO_VIA), SetMinimalSize(60, 12), SetResize(1, 0), SetFill(1, 1),
+				SetDataTip(STR_STATION_VIEW_WAITING_VIA_BUTTON, STR_STATION_VIEW_WAITING_VIA_TOOLTIP),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_RENAME), SetMinimalSize(60, 12), SetResize(1, 0), SetFill(1, 1),
 				SetDataTip(STR_BUTTON_RENAME, STR_STATION_VIEW_RENAME_TOOLTIP),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_TRAINS), SetMinimalSize(14, 12), SetFill(0, 1), SetDataTip(STR_TRAIN, STR_STATION_VIEW_SCHEDULED_TRAINS_TOOLTIP),
@@ -865,17 +868,144 @@ static void DrawCargoIcons(CargoID i, uint waiting, int left, int right, int y)
 
 struct CargoData {
 	CargoID cargo;
-	StationID source;
+	union {
+		StationID station;
+		SourceID  css;
+	};
 	uint count;
+	SourceType type;
 
-	CargoData(CargoID cargo, StationID source, uint count) :
+	CargoData(CargoID cargo, StationID station, uint count, SourceType type = ST_INDUSTRY) :
 		cargo(cargo),
-		source(source),
-		count(count)
+		station(station),
+		count(count),
+		type(type)
 	{ }
 };
 
 typedef std::list<CargoData> CargoDataList;
+
+/** List of cargo for either one next hop or one destination. */
+struct CargoDestEntry {
+	typedef std::list<CargoDestEntry> List;
+
+	/** Enum for type of stored data. */
+	enum Type {
+		FINAL_DEST,   ///< Data is the final destination.
+		NEXT_HOP,     ///< Data is the next hop.
+		TRANSFER_HOP  ///< Data is the transfer station.
+	};
+
+	List          children;       ///< Child entries of this entry.
+	CargoData     data;           ///< Stores the info for the current item.
+	Type          type;           ///< Type of the data stored in #entry.
+	uint16        start_row;      ///< Row number of the header line.
+	bool          expanded;       ///< Is this entry expanded?
+
+	CargoDestEntry(Type type, StationID station, uint count, SourceType st = ST_INDUSTRY) :
+		data(INVALID_CARGO, station, count, st),
+		type(type),
+		start_row(0),
+		expanded(false)
+	{ }
+
+	/** Zero out this entry and all child entries. */
+	void Zero()
+	{
+		for (List::iterator i = this->children.begin(); i != this->children.end(); ++i ) {
+			i->Zero();
+		}
+		this->data.count = 0;
+		this->start_row = 0;
+	}
+
+	/** Remove all empty child entries. */
+	void RemoveEmpty()
+	{
+		for (List::iterator i = this->children.begin(); i != this->children.end(); ) {
+			if (i->data.count > 0) {
+				i->RemoveEmpty();
+				++i;
+			} else {
+				i = this->children.erase(i);
+			}
+		}
+	}
+
+	/** Update header row number. */
+	int UpdateRowCount(int row)
+	{
+		this->start_row = ++row;
+		if (this->expanded) {
+			for (List::iterator i = this->children.begin(); i != this->children.end(); ++i) {
+				row = i->UpdateRowCount(row);
+			}
+		}
+		return row;
+	}
+};
+
+/**
+ * Get the next hop of a cargo packet.
+ * @param ge Station cargo info for the matching cargo type.
+ * @param cp The cargo packet.
+ * @return Station ID of the next hop or INVALID_STATION if not possible.
+ */
+static StationID GetNextHopStation(const GoodsEntry &ge, const CargoPacket *cp)
+{
+	StationID next = INVALID_STATION;
+	for (RouteLinkList::const_iterator i = ge.routes.begin(); i != ge.routes.end(); ++i) {
+		if ((*i)->GetOriginOrderId() == cp->NextHop()) {
+			next = (*i)->GetDestination();
+			break;
+		}
+	}
+	return next;
+}
+
+/**
+ * Add a cargo packet to a #CargoDestEntry list.
+ * @param list The list to add the packet to.
+ * @param type Which value to select as the entry info.
+ * @param cp The cargo packet.
+ * @param ge Where this cargo packets belongs to.
+ * @return Pointer to the added entry or NULL if the packet had no valid destination of the specified type.
+ */
+static CargoDestEntry *AddCargoPacketToList(CargoDestEntry::List &list, CargoDestEntry::Type type, const CargoPacket *cp, const GoodsEntry &ge)
+{
+	assert_compile(INVALID_STATION == INVALID_SOURCE);
+
+	/* Extract the wanted sort type from the cargo packet. */
+	uint16 sort_val;
+	switch (type) {
+		case CargoDestEntry::FINAL_DEST:
+			sort_val = cp->DestinationID();
+			break;
+		case CargoDestEntry::NEXT_HOP:
+			sort_val = GetNextHopStation(ge, cp);
+			break;
+		case CargoDestEntry::TRANSFER_HOP:
+			sort_val = cp->NextStation();
+			break;
+		default:
+			NOT_REACHED();
+	}
+
+	if (sort_val == INVALID_STATION) return NULL;
+
+	/* Search for a matching child. */
+	for (CargoDestEntry::List::iterator i = list.begin(); i != list.end(); ++i) {
+		if (type == CargoDestEntry::FINAL_DEST ? i->data.css == sort_val && i->data.type == cp->DestinationType() : i->data.station == sort_val) {
+			i->data.count += cp->Count();
+			return &*i;
+		}
+	}
+
+	/* No entry found, add new. */
+	list.push_back(CargoDestEntry(type, sort_val, cp->Count(), cp->DestinationType()));
+	return &list.back();
+}
+
 
 /**
  * The StationView window
@@ -887,6 +1017,7 @@ struct StationViewWindow : public Window {
 	int rating_lines;             ///< Number of lines in the cargo ratings view.
 	int accepts_lines;            ///< Number of lines in the accepted cargo view.
 	Scrollbar *vscroll;
+	CargoDestEntry::List cargodest_list[NUM_CARGO]; ///< List of cargoes sorted by destination.
 
 	/** Height of the #SVW_ACCEPTLIST widget for different views. */
 	enum AcceptListHeight {
@@ -938,9 +1069,30 @@ struct StationViewWindow : public Window {
 	{
 		CargoDataList cargolist;
 		uint32 transfers = 0;
-		this->OrderWaitingCargo(&cargolist, &transfers);
 
-		this->vscroll->SetCount((int)cargolist.size() + 1); // update scrollbar
+		NWidgetCore *cargo_btn = this->GetWidget<NWidgetCore>(SVW_CARGO_FROM);
+		if (cargo_btn->widget_data == STR_STATION_VIEW_WAITING_TO_BUTTON) {
+			this->OrderWaitingCargo(&cargolist, &transfers);
+			this->vscroll->SetCount((int)cargolist.size() + 1); // update scrollbar
+		} else {
+			/* Determine the current view. */
+			CargoDestEntry::Type dest_type;
+			switch (cargo_btn->widget_data) {
+				case STR_STATION_VIEW_WAITING_VIA_BUTTON:
+					dest_type = CargoDestEntry::FINAL_DEST;
+					break;
+				case STR_STATION_VIEW_WAITING_TRANSFER_BUTTON:
+					dest_type = CargoDestEntry::NEXT_HOP;
+					break;
+				case STR_STATION_VIEW_WAITING_BUTTON:
+					dest_type = CargoDestEntry::TRANSFER_HOP;
+					break;
+				default:
+					NOT_REACHED();
+			}
+			int num = this->FillCargodestList(dest_type, this->cargodest_list);
+			this->vscroll->SetCount(num + 1); // update scrollbar
+		}
 
 		/* disable some buttons */
 		const Station *st = Station::Get(this->window_number);
@@ -975,7 +1127,11 @@ struct StationViewWindow : public Window {
 			/* Draw waiting cargo. */
 			NWidgetBase *nwi = this->GetWidget<NWidgetBase>(SVW_WAITING);
 			Rect waiting_rect = {nwi->pos_x, nwi->pos_y, nwi->pos_x + nwi->current_x - 1, nwi->pos_y + nwi->current_y - 1};
-			this->DrawWaitingCargo(waiting_rect, cargolist, transfers);
+			if (cargo_btn->widget_data == STR_STATION_VIEW_WAITING_TO_BUTTON) {
+				this->DrawWaitingCargo(waiting_rect, cargolist, transfers);
+			} else {
+				this->DrawWaitingCargoByDest(waiting_rect, this->cargodest_list);
+			}
 		}
 	}
 
@@ -1029,7 +1185,7 @@ struct StationViewWindow : public Window {
 						/* Check if we already have this source in the list */
 						for (CargoDataList::iterator jt(cargolist->begin()); jt != cargolist->end(); jt++) {
 							CargoData *cd = &(*jt);
-							if (cd->cargo == i && cd->source == cp->SourceStation()) {
+							if (cd->cargo == i && cd->station == cp->SourceStation()) {
 								cd->count += cp->Count();
 								added = true;
 								break;
@@ -1041,6 +1197,70 @@ struct StationViewWindow : public Window {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Fill cargo list sorted by type and destination/next hop.
+	 * @param sort_via Set to true to sort by next hop, false to sort by final destination.
+	 * @param list Cargo list to fill.
+	 * @return Number of visible lines.
+	 */
+	int FillCargodestList(CargoDestEntry::Type sort_by, CargoDestEntry::List *list)
+	{
+		StationID station_id = this->window_number;
+		const Station *st = Station::Get(station_id);
+
+		int lines = 0;
+
+		/* Fill the list for each cargo type. */
+		for (CargoID cid = 0; cid < NUM_CARGO; cid++) {
+			/* Zero out all existing items. */
+			for (CargoDestEntry::List::iterator i = list[cid].begin(); i != list[cid].end(); ++i) {
+				i->Zero();
+			}
+
+			/* Remove all entries if no cargo of this type is present. */
+			if (st->goods[cid].cargo.Empty()) {
+				this->cargo_rows[cid] = 0;
+				list[cid].clear();
+				continue;
+			}
+
+			/* Store line number of the header line. */
+			this->cargo_rows[cid] = ++lines;
+
+			/* Add each cargo packet to the list. */
+			const StationCargoList::List *packets = st->goods[cid].cargo.Packets();
+			for (StationCargoList::ConstIterator it = packets->begin(); it != packets->end(); ++it) {
+				const CargoPacket *cp = *it;
+
+				/* Add entry and sub-entries according to the chosen sort type. */
+				static const CargoDestEntry::Type sort_types[][3] = {
+					{CargoDestEntry::FINAL_DEST, CargoDestEntry::NEXT_HOP, CargoDestEntry::TRANSFER_HOP},
+					{CargoDestEntry::NEXT_HOP, CargoDestEntry::TRANSFER_HOP, CargoDestEntry::FINAL_DEST},
+					{CargoDestEntry::TRANSFER_HOP, CargoDestEntry::NEXT_HOP, CargoDestEntry::FINAL_DEST}
+				};
+
+				CargoDestEntry *entry = AddCargoPacketToList(list[cid], sort_types[sort_by][0], cp, st->goods[cid]);
+				if (entry != NULL) {
+					entry = AddCargoPacketToList(entry->children, sort_types[sort_by][1], cp, st->goods[cid]);
+					if (entry != NULL) AddCargoPacketToList(entry->children, sort_types[sort_by][2], cp, st->goods[cid]);
+				}
+			}
+
+			/* Remove all empty list items and update visible row numbers. */
+			for (CargoDestEntry::List::iterator i = list[cid].begin(); i != list[cid].end(); )  {
+				if (i->data.count > 0) {
+					i->RemoveEmpty();
+					if (HasBit(this->cargo, cid)) lines = i->UpdateRowCount(lines);
+					++i;
+				} else {
+					i = list[cid].erase(i);
+				}
+			}
+		}
+
+		return lines;
 	}
 
 	/**
@@ -1076,7 +1296,7 @@ struct StationViewWindow : public Window {
 		for (CargoDataList::const_iterator it = cargolist.begin(); it != cargolist.end() && pos > -maxrows; ++it) {
 			if (--pos < 0) {
 				const CargoData *cd = &(*it);
-				if (cd->source == INVALID_STATION) {
+				if (cd->station == INVALID_STATION) {
 					/* Heading */
 					DrawCargoIcons(cd->cargo, cd->count, r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y);
 					SetDParam(0, cd->cargo);
@@ -1092,11 +1312,116 @@ struct StationViewWindow : public Window {
 				} else {
 					SetDParam(0, cd->cargo);
 					SetDParam(1, cd->count);
-					SetDParam(2, cd->source);
+					SetDParam(2, cd->station);
 					DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y, STR_STATION_VIEW_EN_ROUTE_FROM, TC_FROMSTRING, SA_RIGHT);
 				}
 
 				y += FONT_HEIGHT_NORMAL;
+			}
+		}
+	}
+
+	/**
+	 * Draw a dest entry and its children.
+	 * @param cid Current cargo type.
+	 * @param pos Scroll position
+	 * @param maxrows Number of visible rows.
+	 * @param left Left string bound.
+	 * @param right Right string bound.
+	 * @param shrink_left Left bound of the expand marker.
+	 * @param shrink_right Right bound of the expand marker.
+	 * @param offs_left Child offset of the left bound.
+	 * @param offs_right Child offset of the right bound.
+	 * @param y Top of the current line.
+	 * @param entry The entry to draw.
+	 * @return The new y value.
+	 */
+	int DrawSingleDestEntry(CargoID cid, int *pos, int maxrows, int left, int right, int shrink_left, int shrink_right, int offs_left, int offs_right, int y, const CargoDestEntry &entry) const
+	{
+		if (--(*pos) < 0) {
+			/* Draw current line. */
+			StringID str;
+
+			SetDParam(0, cid);
+			SetDParam(1, entry.data.count);
+			if (entry.type == CargoDestEntry::FINAL_DEST) {
+				SetDParam(2, entry.data.type == ST_INDUSTRY ? STR_INDUSTRY_NAME : (entry.data.type == ST_TOWN ? STR_TOWN_NAME : STR_COMPANY_NAME));
+				SetDParam(3, entry.data.css);
+				str = STR_STATION_VIEW_WAITING_TO;
+			} else {
+				SetDParam(2, entry.data.station);
+				str = (entry.type == CargoDestEntry::NEXT_HOP) ? STR_STATION_VIEW_WAITING_VIA : STR_STATION_VIEW_WAITING_TRANSFER;
+			}
+			DrawString(left, right, y, str);
+			y += FONT_HEIGHT_NORMAL;
+
+			if (!entry.children.empty()) {
+				/* Draw expand/collapse marker. */
+				DrawString(shrink_left, shrink_right, y - FONT_HEIGHT_NORMAL, entry.expanded ? "-" : "+", TC_YELLOW, SA_RIGHT);
+
+				if (entry.expanded) {
+					/* Draw visible children. */
+					for (CargoDestEntry::List::const_iterator i = entry.children.begin(); i != entry.children.end() && *pos > -maxrows; ++i) {
+						y = this->DrawSingleDestEntry(cid, pos, maxrows, left + offs_left, right + offs_right, shrink_left, shrink_right, offs_left, offs_right, y, *i);
+					}
+				}
+			}
+		}
+
+		return y;
+	}
+
+	/**
+	 * Draw waiting cargo ordered by destination/next hop.
+	 * @param r Rectangle of the widget.
+	 * @param list List to draw.
+	 */
+	void DrawWaitingCargoByDest(const Rect &r, const CargoDestEntry::List *list) const
+	{
+		int y = r.top + WD_FRAMERECT_TOP;
+		int pos = this->vscroll->GetPosition();
+
+		const Station *st = Station::Get(this->window_number);
+		if (--pos < 0) {
+			StringID str = STR_JUST_NOTHING;
+			for (CargoID i = 0; i < NUM_CARGO; i++) {
+				if (!st->goods[i].cargo.Empty()) str = STR_EMPTY;
+			}
+			SetDParam(0, str);
+			DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y, STR_STATION_VIEW_WAITING_TITLE);
+			y += FONT_HEIGHT_NORMAL;
+		}
+
+		bool rtl = _current_text_dir == TD_RTL;
+		int text_left    = rtl ? r.left + this->expand_shrink_width : r.left + WD_FRAMERECT_LEFT;
+		int text_right   = rtl ? r.right - WD_FRAMERECT_LEFT : r.right - this->expand_shrink_width;
+		int shrink_left  = rtl ? r.left + WD_FRAMERECT_LEFT : r.right - this->expand_shrink_width + WD_FRAMERECT_LEFT;
+		int shrink_right = rtl ? r.left + this->expand_shrink_width - WD_FRAMERECT_RIGHT : r.right - WD_FRAMERECT_RIGHT;
+
+		int offs_left   = rtl ? 0 : this->expand_shrink_width;
+		int offs_right  = rtl ? this->expand_shrink_width : 0;
+
+		int maxrows = this->vscroll->GetCapacity();
+		for (CargoID cid = 0; cid < NUM_CARGO && pos > -maxrows; cid++) {
+			if (st->goods[cid].cargo.Empty()) continue;
+
+			if (--pos < 0) {
+				/* Draw heading. */
+				DrawCargoIcons(cid, st->goods[cid].cargo.Count(), r.left + WD_FRAMETEXT_LEFT, r.right - WD_FRAMERECT_RIGHT, y);
+				SetDParam(0, cid);
+				SetDParam(1, st->goods[cid].cargo.Count());
+				DrawString(text_left, text_right, y, STR_STATION_VIEW_WAITING_CARGO, TC_FROMSTRING, SA_RIGHT);
+				if (!list[cid].empty()) {
+					DrawString(shrink_left, shrink_right, y, HasBit(this->cargo, cid) ? "-" : "+", TC_YELLOW, SA_RIGHT);
+				}
+				y += FONT_HEIGHT_NORMAL;
+			}
+
+			/* Draw sub-entries. */
+			if (HasBit(this->cargo, cid)) {
+				for (CargoDestEntry::List::const_iterator i = list[cid].begin(); i != list[cid].end() && pos > -maxrows; ++i) {
+					y = this->DrawSingleDestEntry(cid, &pos, maxrows, text_left + offs_left, text_right + offs_right, shrink_left, shrink_right, offs_left, offs_right, y, *i);
+				}
 			}
 		}
 	}
@@ -1146,16 +1471,60 @@ struct StationViewWindow : public Window {
 		return CeilDiv(y - r.top - WD_FRAMERECT_TOP, FONT_HEIGHT_NORMAL);
 	}
 
+	/**
+	 * Test and handle a possible mouse click on a dest entry and its children.
+	 * @param entry The entry to test for a hit.
+	 * @param row The number of the clicked row.
+	 * @return True if further entries need to be processed.
+	 */
+	bool HandleCargoDestEntryClick(CargoDestEntry &entry, int row)
+	{
+		if (entry.start_row == row && !entry.children.empty()) {
+			entry.expanded = !entry.expanded;
+			this->SetWidgetDirty(SVW_WAITING);
+			this->SetWidgetDirty(SVW_SCROLLBAR);
+		}
+
+		if (entry.start_row < row) {
+			/* Test child entries. */
+			for (CargoDestEntry::List::iterator i = entry.children.begin(); i != entry.children.end(); ++i) {
+				if (!this->HandleCargoDestEntryClick(*i, row)) return false;
+			}
+			return true;
+		}
+
+		return false;
+	}
+
 	void HandleCargoWaitingClick(int row)
 	{
 		if (row == 0) return;
 
+		bool dest_view = this->GetWidget<NWidgetCore>(SVW_CARGO_FROM)->widget_data != STR_STATION_VIEW_WAITING_TO_BUTTON;
+
 		for (CargoID c = 0; c < NUM_CARGO; c++) {
+			/* Test for cargo type line. */
 			if (this->cargo_rows[c] == row) {
 				ToggleBit(this->cargo, c);
 				this->SetWidgetDirty(SVW_WAITING);
+				this->SetWidgetDirty(SVW_SCROLLBAR);
 				break;
 			}
+
+			if (dest_view) {
+				/* Test for dest view lines. */
+				for (CargoDestEntry::List::iterator i = this->cargodest_list[c].begin(); i != this->cargodest_list[c].end(); ++i) {
+					if (!this->HandleCargoDestEntryClick(*i, row)) break;
+				}
+			}
+		}
+	}
+
+	/** Clear the 'cargo by destination' list. */
+	void ClearCargodestList()
+	{
+		for (CargoID cid = 0; cid < NUM_CARGO; cid++) {
+			this->cargodest_list[cid].clear();
 		}
 	}
 
@@ -1186,6 +1555,32 @@ struct StationViewWindow : public Window {
 					height_change = this->accepts_lines - this->rating_lines;
 				}
 				this->ReInit(0, height_change * FONT_HEIGHT_NORMAL);
+				break;
+			}
+
+			case SVW_CARGO_FROM: {
+				/* Swap between 'Source', 'Destination', 'Next hop' and 'Transfer' view. */
+				NWidgetCore *nwi = this->GetWidget<NWidgetCore>(SVW_CARGO_FROM);
+				switch (nwi->widget_data) {
+					case STR_STATION_VIEW_WAITING_BUTTON:
+						nwi->SetDataTip(STR_STATION_VIEW_WAITING_TO_BUTTON, STR_STATION_VIEW_WAITING_TO_TOOLTIP);
+						break;
+					case STR_STATION_VIEW_WAITING_TO_BUTTON:
+						nwi->SetDataTip(STR_STATION_VIEW_WAITING_VIA_BUTTON, STR_STATION_VIEW_WAITING_VIA_TOOLTIP);
+						break;
+					case STR_STATION_VIEW_WAITING_VIA_BUTTON:
+						nwi->SetDataTip(STR_STATION_VIEW_WAITING_TRANSFER_BUTTON, STR_STATION_VIEW_WAITING_TRANSFER_TOOLTIP);
+						break;
+					case STR_STATION_VIEW_WAITING_TRANSFER_BUTTON:
+						nwi->SetDataTip(STR_STATION_VIEW_WAITING_BUTTON, STR_STATION_VIEW_WAITING_TOOLTIP);
+						break;
+					default:
+						NOT_REACHED();
+				}
+				this->ClearCargodestList();
+				this->SetWidgetDirty(SVW_CARGO_FROM);
+				this->SetWidgetDirty(SVW_WAITING);
+				this->SetWidgetDirty(SVW_SCROLLBAR);
 				break;
 			}
 
