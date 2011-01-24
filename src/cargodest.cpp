@@ -23,6 +23,7 @@
 #include "window_func.h"
 #include "vehicle_base.h"
 #include "station_base.h"
+#include "pathfinder/yapf/yapf.h"
 
 
 /* Possible link weight modifiers. */
@@ -764,6 +765,27 @@ CargoLink *CargoSourceSink::GetRandomLink(CargoID cid, bool allow_self)
 	}
 
 	return l;
+}
+
+
+/**
+ * Get the current best route link for a cargo packet at a station.
+ * @param st Station the route starts at.
+ * @param cid Cargo type.
+ * @param cp Cargo packet with destination information.
+ * @param order Incoming order of the cargo packet.
+ * @param[out] found Set to true if a route was found.
+ * @return The preferred route link or NULL if either no suitable link found or the station is the final destination.
+ */
+RouteLink *FindRouteLinkForCargo(Station *st, CargoID cid, const CargoPacket *cp, OrderID order, bool *found)
+{
+	if (cp->DestinationID() == INVALID_SOURCE) return NULL;
+
+	StationList sl;
+	*sl.Append() = st;
+
+	TileArea area = (cp->DestinationType() == ST_INDUSTRY) ? Industry::Get(cp->DestinationID())->location : TileArea(cp->DestinationXY(), 2, 2);
+	return YapfChooseRouteLink(cid, &sl, st->xy, area, NULL, found, order);
 }
 
 
