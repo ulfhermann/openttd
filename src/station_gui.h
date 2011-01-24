@@ -26,8 +26,11 @@ enum StationViewWidgets {
 	SVW_LOCATION   =  4, ///< 'Location' button
 	SVW_RATINGS    =  5, ///< 'Ratings' button
 	SVW_ACCEPTS    =  5, ///< 'Accepts' button
-	SVW_RENAME     =  6, ///< 'Rename' button
-	SVW_TRAINS     =  7, ///< List of scheduled trains button
+	SVW_CARGO_FROM =  6, ///< 'Source' button
+	SVW_CARGO_TO   =  6, ///< 'Destination' button
+	SVW_CARGO_VIA  =  6, ///< 'Next hop' button
+	SVW_RENAME     =  7, ///< 'Rename' button
+	SVW_TRAINS     =  8, ///< List of scheduled trains button
 	SVW_ROADVEHS,        ///< List of scheduled road vehs button
 	SVW_SHIPS,           ///< List of scheduled ships button
 	SVW_PLANES,          ///< List of scheduled planes button

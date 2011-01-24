@@ -2618,9 +2618,20 @@ STR_STATION_LIST_NO_WAITING_CARGO                               :{BLACK}No cargo
 
 # Station view window
 STR_STATION_VIEW_CAPTION                                        :{WHITE}{STATION} {STATIONFEATURES}
+STR_STATION_VIEW_WAITING_BUTTON                                 :{BLACK}Source
+STR_STATION_VIEW_WAITING_TOOLTIP                                :{BLACK}Show list of waiting cargo with its source
+STR_STATION_VIEW_WAITING_TO_BUTTON                              :{BLACK}Destination
+STR_STATION_VIEW_WAITING_TO_TOOLTIP                             :{BLACK}Show list of waiting cargo with its destination
+STR_STATION_VIEW_WAITING_VIA_BUTTON                             :{BLACK}Next hop
+STR_STATION_VIEW_WAITING_VIA_TOOLTIP                            :{BLACK}Show list of waiting cargo with its next hop
+STR_STATION_VIEW_WAITING_TRANSFER_BUTTON                        :{BLACK}Transfer
+STR_STATION_VIEW_WAITING_TRANSFER_TOOLTIP                       :{BLACK}Show list of waiting cargo with its next transfer station
 STR_STATION_VIEW_WAITING_TITLE                                  :{BLACK}Waiting: {WHITE}{STRING}
 STR_STATION_VIEW_WAITING_CARGO                                  :{WHITE}{CARGO}
 STR_STATION_VIEW_EN_ROUTE_FROM                                  :{YELLOW}({SHORTCARGO} en-route from {STATION})
+STR_STATION_VIEW_WAITING_VIA                                    :{YELLOW}{SHORTCARGO} en-route via {STATION}
+STR_STATION_VIEW_WAITING_TRANSFER                               :{YELLOW}{SHORTCARGO} transfering at {STATION}
+STR_STATION_VIEW_WAITING_TO                                     :{YELLOW}{SHORTCARGO} en-route to {STRING1}
 
 STR_STATION_VIEW_ACCEPTS_BUTTON                                 :{BLACK}Accepts
 STR_STATION_VIEW_ACCEPTS_TOOLTIP                                :{BLACK}Show list of accepted cargo
