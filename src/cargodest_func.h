@@ -12,12 +12,15 @@
 #ifndef CARGODEST_FUNC_H
 #define CARGODEST_FUNC_H
 
+#include "cargodest_type.h"
 #include "cargo_type.h"
 #include "vehicle_type.h"
 #include "station_type.h"
 #include "order_type.h"
 
 bool CargoHasDestinations(CargoID cid);
+
+RouteLink *FindRouteLinkForCargo(Station *st, CargoID cid, const struct CargoPacket *cp, OrderID order = INVALID_ORDER, bool *found = NULL);
 
 void UpdateVehicleRouteLinks(const Vehicle *v, StationID arrived_at);
 void PrefillRouteLinks(const Vehicle *v);
