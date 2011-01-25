@@ -32,6 +32,7 @@
 #include "pathfinder/opf/opf_ship.h"
 #include "engine_base.h"
 #include "company_base.h"
+#include "cargotype.h"
 
 #include "table/strings.h"
 
@@ -156,6 +157,7 @@ static void CheckIfShipNeedsService(Vehicle *v)
 void Ship::UpdateCache()
 {
 	this->vcache.cached_max_speed = GetVehicleProperty(this, PROP_SHIP_SPEED, ShipVehInfo(this->engine_type)->max_speed);
+	this->vcache.cached_cargo_mask = (this->cargo_type != INVALID_CARGO && this->cargo_cap > 0) ? 1 << this->cargo_type : 0;
 
 	this->UpdateVisualEffect();
 }

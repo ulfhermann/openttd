@@ -188,6 +188,8 @@ void Train::ConsistChanged(bool same_length)
 		u->InvalidateNewGRFCache();
 	}
 
+	uint32 cargo_mask = 0;
+
 	for (Train *u = this; u != NULL; u = u->Next()) {
 		const Engine *e_u = Engine::Get(u->engine_type);
 		const RailVehicleInfo *rvi_u = &e_u->u.rail;
@@ -232,7 +234,9 @@ void Train::ConsistChanged(bool same_length)
 			}
 		}
 
+		/* Store carried cargo. */
 		u->cargo_cap = GetVehicleCapacity(u);
+		if (u->cargo_type != INVALID_CARGO && u->cargo_cap > 0) SetBit(cargo_mask, u->cargo_type);
 
 		/* check the vehicle length (callback) */
 		uint16 veh_len = CALLBACK_FAILED;
@@ -254,6 +258,7 @@ void Train::ConsistChanged(bool same_length)
 	}
 
 	/* store consist weight/max speed in cache */
+	this->vcache.cached_cargo_mask = cargo_mask;
 	this->vcache.cached_max_speed = max_speed;
 	this->tcache.cached_tilt = train_can_tilt;
 	this->tcache.cached_max_curve_speed = this->GetCurveSpeedLimit();
