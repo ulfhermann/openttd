@@ -35,6 +35,7 @@
 #include "engine_base.h"
 #include "core/random_func.hpp"
 #include "core/backup_type.hpp"
+#include "cargotype.h"
 
 #include "table/strings.h"
 
@@ -549,6 +550,13 @@ void UpdateAircraftCache(Aircraft *v)
 		/* Use the default max speed of the vehicle. */
 		v->vcache.cached_max_speed = AircraftVehInfo(v->engine_type)->max_speed;
 	}
+
+	/* Cache carried cargo types. */
+	uint32 cargo_mask = 0;
+	for (Aircraft *u = v; u != NULL; u = u->Next()) {
+		if (u->cargo_type != INVALID_CARGO && u->cargo_cap > 0) SetBit(cargo_mask, u->cargo_type);
+	}
+	v->vcache.cached_cargo_mask = cargo_mask;
 }
 
 
