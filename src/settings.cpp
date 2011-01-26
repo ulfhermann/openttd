@@ -1152,6 +1152,20 @@ static bool StationCatchmentChanged(int32 p1)
 
 static bool CargodestModeChanged(int32 p1)
 {
+	/* Clear route links for cargoes that aren't routed anymore. */
+	Station *st;
+	FOR_ALL_STATIONS(st) {
+		for (CargoID cid = 0; cid < NUM_CARGO; cid++) {
+			if (CargoHasDestinations(cid)) continue;
+
+			/* Clear route links. */
+			for (RouteLinkList::iterator i = st->goods[cid].routes.begin(); i != st->goods[cid].routes.end(); ++i) {
+				delete *i;
+			}
+			st->goods[cid].routes.clear();
+		}
+	}
+
 	/* Clear all links for cargoes that aren't routed anymore. */
 	CargoSourceSink *css;
 	FOR_ALL_TOWNS(css) {
