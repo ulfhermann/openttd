@@ -12,6 +12,10 @@
 #include "stdafx.h"
 #include "core/pool_func.hpp"
 #include "economy_base.h"
+#include "cargodest_func.h"
+#include "cargodest_base.h"
+#include "settings_type.h"
+#include "station_base.h"
 
 /* Initialize the cargopacket-pool */
 CargoPacketPool _cargopacket_pool("CargoPacket");
@@ -136,6 +140,9 @@ FORCEINLINE void CargoPacket::Merge(CargoPacket *cp)
  */
 /* static */ void CargoPacket::InvalidateAllFrom(SourceType src_type, SourceID src)
 {
+	/* Invalidate next hop of all packets that loose their destination. */
+	StationCargoList::InvalidateAllTo(src_type, src);
+
 	CargoPacket *cp;
 	FOR_ALL_CARGOPACKETS(cp) {
 		if (cp->source_type == src_type && cp->source_id == src) cp->source_id = INVALID_SOURCE;
@@ -473,6 +480,82 @@ void StationCargoList::InvalidateCache()
 {
 	this->order_cache.clear();
 	this->Parent::InvalidateCache();
+}
+
+/**
+ * Recompute the desired next hop of all cargo packets.
+ * @param st  Station of  this list.
+ * @param cid Cargo type of this list.
+ */
+void StationCargoList::UpdateCargoNextHop(Station *st, CargoID cid, OrderID oid)
+{
+	int count = 0;
+	StationCargoList::Iterator iter;
+	for (iter = this->packets.begin(); count < this->next_start + _settings_game.economy.cargodest.route_recalc_chunk && iter != this->packets.end(); count++) {
+		if (count < this->next_start) continue;
+		if ((*iter)->DestinationID() != INVALID_SOURCE && (oid == INVALID_ORDER || (*iter)->NextHop() == oid)) {
+			StationID next_unload;
+			RouteLink *l = FindRouteLinkForCargo(st, cid, *iter, &next_unload);
+			if (l != NULL) {
+				/* Update next hop if needed. */
+				(*iter)->next_station = next_unload;
+				if ((*iter)->next_order != l->GetOriginOrderId()) {
+					this->RemoveFromCache(*iter);
+					(*iter)->next_order = l->GetOriginOrderId();
+					this->AddToCache(*iter);
+				}
+				++iter;
+			} else {
+				/* No route to target anymore? Drop packet. */
+				this->RemoveFromCache(*iter);
+				delete *iter;
+				iter = this->packets.erase(iter);
+			}
+		} else {
+			++iter;
+		}
+	}
+
+	/* Update start counter for next loop. */
+	this->next_start = (iter == this->packets.end()) ? 0 : count;
+}
+
+/**
+ * Invalidate and update all cargo packets with a specific next hop.
+ * @param order The order that was removed.
+ */
+/* static */ void StationCargoList::InvalidateNextHop(OrderID order)
+{
+	Station *st;
+	FOR_ALL_STATIONS(st) {
+		for (CargoID cid = 0; cid < NUM_CARGO; cid++) {
+			/* Update the next hop of all cargo with the given order. */
+			st->goods[cid].cargo.UpdateCargoNextHop(st, cid, order);
+		}
+	}
+}
+
+/**
+ * Invalidate the next hop of all cargo packets going to a given destination.
+ * @param type Type of destination.
+ * @param dest Index of destination.
+ */
+/* static */ void StationCargoList::InvalidateAllTo(SourceType type, SourceID dest)
+{
+	Station *st;
+	FOR_ALL_STATIONS(st) {
+		for (CargoID cid = 0; cid < NUM_CARGO; cid++) {
+			for (StationCargoList::Iterator it = st->goods[cid].cargo.packets.begin(); it != st->goods[cid].cargo.packets.end(); ++it) {
+				if ((*it)->dest_type == type && (*it)->dest_id == dest) {
+					/* Invalidate the next hop. */
+					st->goods[cid].cargo.RemoveFromCache(*it);
+					(*it)->next_order = INVALID_ORDER;
+					(*it)->next_station = INVALID_STATION;
+					st->goods[cid].cargo.AddToCache(*it);
+				}
+			}
+		}
+	}
 }
 
 /*

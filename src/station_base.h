@@ -48,6 +48,7 @@ struct GoodsEntry {
 	byte last_speed;
 	byte last_age;
 	byte amount_fract;      ///< Fractional part of the amount in the cargo list
+	uint16 cargo_counter;   ///< Update timer for the packets' next hop
 	StationCargoList cargo; ///< The cargo packets of cargo waiting in this station
 	RouteLinkList routes;   ///< List of originating route links
 };

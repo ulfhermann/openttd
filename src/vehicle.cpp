@@ -1947,7 +1947,18 @@ void Vehicle::BeginLoading(StationID station)
 	this->last_order_id = this->current_order.index;
 	this->last_station_loaded = station;
 
-	Station::Get(this->last_station_visited)->loading_vehicles.push_back(this);
+	Station *last_visited = Station::Get(this->last_station_visited);
+	last_visited->loading_vehicles.push_back(this);
+
+	/* Update the next hop for waiting cargo. */
+	CargoID cid;
+	FOR_EACH_SET_CARGO_ID(cid, this->vcache.cached_cargo_mask) {
+		/* Only update if the last update was at least route_recalc_delay ticks earlier. */
+		if (CargoHasDestinations(cid) && last_visited->goods[cid].cargo_counter == 0) {
+			last_visited->goods[cid].cargo.UpdateCargoNextHop(last_visited, cid);
+			last_visited->goods[cid].cargo_counter = _settings_game.economy.cargodest.route_recalc_delay;
+		}
+	}
 
 	PrepareUnload(this);
 

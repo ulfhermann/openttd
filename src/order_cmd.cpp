@@ -245,6 +245,7 @@ Order::Order(uint32 packed)
 	}
 
 	InvalidateOrderRouteLinks((OrderID)index);
+	StationCargoList::InvalidateNextHop((OrderID)index);
 }
 
 /**

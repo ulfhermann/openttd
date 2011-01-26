@@ -378,6 +378,7 @@ protected:
 	typedef CargoList<StationCargoList> Parent;
 
 	OrderMap order_cache;
+	int32 next_start;        ///< Packet number to start the next hop update loop from.
 
 	void AddToCache(const CargoPacket *cp);
 	void RemoveFromCache(const CargoPacket *cp);
@@ -390,6 +391,8 @@ public:
 	friend const struct SaveLoad *GetGoodsDesc();
 
 	void InvalidateCache();
+
+	void UpdateCargoNextHop(Station *st, CargoID cid, OrderID oid = INVALID_ORDER);
 
 	/**
 	 * Gets the cargo counts per next hop.
@@ -430,6 +433,9 @@ public:
 				cp1->next_order      == cp2->next_order &&
 				cp1->next_station    == cp2->next_station;
 	}
+
+	static void InvalidateNextHop(OrderID order);
+	static void InvalidateAllTo(SourceType type, SourceID dest);
 };
 
 #endif /* CARGOPACKET_H */

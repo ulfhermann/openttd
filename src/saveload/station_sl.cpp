@@ -258,7 +258,9 @@ const SaveLoad *GetGoodsDesc()
 		SLEG_CONDVAR(            _cargo_feeder_share, SLE_FILE_U32 | SLE_VAR_I64, 14, 64),
 		SLEG_CONDVAR(            _cargo_feeder_share, SLE_INT64,                  65, 67),
 		 SLE_CONDVAR(GoodsEntry, amount_fract,        SLE_UINT8,                 150, SL_MAX_VERSION),
+		 SLE_CONDVAR(GoodsEntry, cargo_counter,       SLE_UINT16,                161, SL_MAX_VERSION),
 		 SLE_CONDLST(GoodsEntry, cargo.packets,       REF_CARGO_PACKET,           68, SL_MAX_VERSION),
+		 SLE_CONDVAR(GoodsEntry, cargo.next_start,    SLE_INT32,                 161, SL_MAX_VERSION),
 		 SLE_CONDLST(GoodsEntry, routes,              REF_ROUTE_LINK,            161, SL_MAX_VERSION),
 
 		SLE_END()
