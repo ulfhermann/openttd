@@ -259,6 +259,7 @@ void CargoList<Tinst>::Truncate(uint max_remaining)
 			uint diff = local_count - max_remaining;
 			this->count -= diff;
 			this->cargo_days_in_transit -= cp->days_in_transit * diff;
+			static_cast<Tinst *>(this)->RemoveFromCacheLocal(cp, diff);
 			cp->count = max_remaining;
 			max_remaining = 0;
 		} else {
@@ -432,6 +433,46 @@ void VehicleCargoList::InvalidateNextStation()
 	for (ConstIterator it(this->packets.begin()); it != this->packets.end(); it++) {
 		(*it)->next_station = INVALID_STATION;
 	}
+}
+
+/**
+ * Update the local next-hop count cache.
+ * @param cp Packet the be removed.
+ * @param amount Cargo amount to be removed.
+ */
+void StationCargoList::RemoveFromCacheLocal(const CargoPacket *cp, uint amount)
+{
+	this->order_cache[cp->next_order] -= amount;
+	if (this->order_cache[cp->next_order] == 0) this->order_cache.erase(cp->next_order);
+}
+
+/**
+ * Update the cached values to reflect the removal of this packet.
+ * Decreases count and days_in_transit.
+ * @param cp Packet to be removed from cache.
+ */
+void StationCargoList::RemoveFromCache(const CargoPacket *cp)
+{
+	this->RemoveFromCacheLocal(cp, cp->count);
+	this->Parent::RemoveFromCache(cp);
+}
+
+/**
+ * Update the cache to reflect adding of this packet.
+ * Increases count and days_in_transit.
+ * @param cp New packet to be inserted.
+ */
+void StationCargoList::AddToCache(const CargoPacket *cp)
+{
+	this->order_cache[cp->next_order] += cp->count;
+	this->Parent::AddToCache(cp);
+}
+
+/** Invalidates the cached data and rebuild it. */
+void StationCargoList::InvalidateCache()
+{
+	this->order_cache.clear();
+	this->Parent::InvalidateCache();
 }
 
 /*
