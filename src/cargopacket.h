@@ -231,6 +231,7 @@ public:
 		MTA_CARGO_LOAD,     ///< Load the packet onto a vehicle, i.e. set the last loaded station ID.
 		MTA_TRANSFER,       ///< The cargo is moved as part of a transfer.
 		MTA_UNLOAD,         ///< The cargo is moved as part of a forced unload.
+		MTA_NO_ACTION,      ///< The station doesn't accept the cargo, so do nothing (only applicable to cargo without destination)
 	};
 
 	friend bool CargodestModeChanged(int32 p1);
@@ -305,7 +306,7 @@ public:
 	void Truncate(uint max_remaining);
 
 	template <class Tother_inst>
-	bool MoveTo(Tother_inst *dest, uint count, MoveToAction mta, CargoPayment *payment, uint data = 0);
+	bool MoveTo(Tother_inst *dest, uint count, MoveToAction mta, CargoPayment *payment, uint data = 0, OrderID cur_order = INVALID_ORDER, bool *did_transfer = NULL);
 
 	void InvalidateCache();
 };

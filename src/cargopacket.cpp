@@ -283,15 +283,19 @@ void CargoList<Tinst>::Truncate(uint max_remaining)
  *  - MTA_CARGO_LOAD:     Sets the loaded_at_xy value of the moved packets.
  *  - MTA_TRANSFER:       Just move without side effects.
  *  - MTA_UNLOAD:         Just move without side effects.
+ *  - MTA_NO_ACTION:      Does nothing for packets without destination, otherwise either like MTA_TRANSFER or MTA_FINAL_DELIVERY.
  * @param dest  Destination to move the cargo to.
  * @param count Amount of cargo entities to move.
  * @param mta   How to handle the moving (side effects).
  * @param data  Depending on mta the data of this variable differs:
  *              - MTA_FINAL_DELIVERY - Station ID of packet's origin not to remove.
  *              - MTA_CARGO_LOAD     - Station's tile index of load.
- *              - MTA_TRANSFER       - Unused.
- *              - MTA_UNLOAD         - Unused.
+ *              - MTA_TRANSFER       - Station ID unloading to.
+ *              - MTA_UNLOAD         - Station ID unloading to.
+ *              - MTA_NO_ACTION      - Station ID unloading to.
  * @param payment The payment helper.
+ * @param cur_order The current order of the loading vehicle.
+ * @param did_transfer Set to true if some cargo was transfered.
  *
  * @pre mta == MTA_FINAL_DELIVERY || dest != NULL
  * @pre mta == MTA_UNLOAD || mta == MTA_CARGO_LOAD || payment != NULL
@@ -299,26 +303,79 @@ void CargoList<Tinst>::Truncate(uint max_remaining)
  */
 template <class Tinst>
 template <class Tother_inst>
-bool CargoList<Tinst>::MoveTo(Tother_inst *dest, uint max_move, MoveToAction mta, CargoPayment *payment, uint data)
+bool CargoList<Tinst>::MoveTo(Tother_inst *dest, uint max_move, MoveToAction mta, CargoPayment *payment, uint data, OrderID cur_order, bool *did_transfer)
 {
 	assert(mta == MTA_FINAL_DELIVERY || dest != NULL);
 	assert(mta == MTA_UNLOAD || mta == MTA_CARGO_LOAD || payment != NULL);
 
+restart:;
 	Iterator it(this->packets.begin());
 	while (it != this->packets.end() && max_move > 0) {
 		CargoPacket *cp = *it;
-		if (cp->source == data && mta == MTA_FINAL_DELIVERY) {
-			/* Skip cargo that originated from this station. */
+		MoveToAction cp_mta = mta;
+		OrderID current_next_order = cp->NextHop();
+		StationID current_next_unload = cp->NextStation();
+
+		if (cp_mta == MTA_CARGO_LOAD) {
+			/* Loading and not for the current vehicle? Skip. */
+			if (current_next_order != cur_order) {
+				++it;
+				continue;
+			}
+		}
+
+		/* Has this packet a destination and are we unloading to a station (not autoreplace)? */
+		if (cp->DestinationID() != INVALID_SOURCE && cp_mta != MTA_CARGO_LOAD && payment != NULL) {
+			/* Not forced unload and not for unloading at this station? Skip the packet. */
+			if (cp_mta != MTA_UNLOAD && cp->NextStation() != INVALID_STATION && cp->NextStation() != data) {
+				++it;
+				continue;
+			}
+
+			Station *st = Station::Get(data);
+
+			bool found;
+			StationID next_unload;
+			RouteLink *link = FindRouteLinkForCargo(st, payment->ct, cp, &next_unload, cur_order, &found);
+			if (!found) {
+				/* Sorry, link to destination vanished, make cargo disappear. */
+				static_cast<Tinst *>(this)->RemoveFromCache(cp);
+				delete cp;
+				it = this->packets.erase(it);
+				continue;
+			}
+
+			if (link != NULL) {
+				/* Not final destination. */
+				if (link->GetOriginOrderId() == cur_order && cp_mta != MTA_UNLOAD) {
+					/* Cargo should stay on the vehicle and not forced unloading? Skip. */
+					++it;
+					continue;
+				}
+				/* Force transfer and update next hop. */
+				cp_mta = MTA_TRANSFER;
+				current_next_order = link->GetOriginOrderId();
+				current_next_unload = next_unload;
+			} else {
+				/* Final destination, deliver. */
+				cp_mta = MTA_FINAL_DELIVERY;
+			}
+		} else if (cp_mta == MTA_NO_ACTION || (cp->source == data && cp_mta == MTA_FINAL_DELIVERY)) {
+			/* Skip cargo that is not accepted or originated from this station. */
 			++it;
 			continue;
 		}
+
+		if (did_transfer != NULL && cp_mta == MTA_TRANSFER) *did_transfer = true;
 
 		if (cp->count <= max_move) {
 			/* Can move the complete packet */
 			max_move -= cp->count;
 			this->packets.erase(it++);
 			static_cast<Tinst *>(this)->RemoveFromCache(cp);
-			switch (mta) {
+			cp->next_order = current_next_order;
+			cp->next_station = current_next_unload;
+			switch (cp_mta) {
 				case MTA_FINAL_DELIVERY:
 					payment->PayFinalDelivery(cp, cp->count);
 					delete cp;
@@ -340,7 +397,7 @@ bool CargoList<Tinst>::MoveTo(Tother_inst *dest, uint max_move, MoveToAction mta
 		}
 
 		/* Can move only part of the packet */
-		if (mta == MTA_FINAL_DELIVERY) {
+		if (cp_mta == MTA_FINAL_DELIVERY) {
 			/* Final delivery doesn't need package splitting. */
 			payment->PayFinalDelivery(cp, max_move);
 
@@ -361,11 +418,13 @@ bool CargoList<Tinst>::MoveTo(Tother_inst *dest, uint max_move, MoveToAction mta
 			if (cp_new == NULL) return false;
 
 			static_cast<Tinst *>(this)->RemoveFromCache(cp_new); // this reflects the changes in cp.
+			cp_new->next_order = current_next_order;
+			cp_new->next_station = current_next_unload;
 
-			if (mta == MTA_TRANSFER) {
+			if (cp_mta == MTA_TRANSFER) {
 				/* Add the feeder share before inserting in dest. */
 				cp_new->feeder_share += payment->PayTransfer(cp_new, max_move);
-			} else if (mta == MTA_CARGO_LOAD) {
+			} else if (cp_mta == MTA_CARGO_LOAD) {
 				cp_new->loaded_at_xy = data;
 			}
 
@@ -373,6 +432,12 @@ bool CargoList<Tinst>::MoveTo(Tother_inst *dest, uint max_move, MoveToAction mta
 		}
 
 		max_move = 0;
+	}
+
+	if (max_move > 0 && mta == MTA_CARGO_LOAD && cur_order != INVALID_ORDER) {
+		/* We loaded all packets for the next hop, now load all packets without destination. */
+		cur_order = INVALID_ORDER;
+		goto restart;
 	}
 
 	return it != packets.end();
@@ -565,8 +630,8 @@ template class CargoList<VehicleCargoList>;
 template class CargoList<StationCargoList>;
 
 /** Autoreplace Vehicle -> Vehicle 'transfer'. */
-template bool CargoList<VehicleCargoList>::MoveTo(VehicleCargoList *, uint max_move, MoveToAction mta, CargoPayment *payment, uint data);
+template bool CargoList<VehicleCargoList>::MoveTo(VehicleCargoList *, uint max_move, MoveToAction mta, CargoPayment *payment, uint data, OrderID cur_order, bool *did_transfer);
 /** Cargo unloading at a station. */
-template bool CargoList<VehicleCargoList>::MoveTo(StationCargoList *, uint max_move, MoveToAction mta, CargoPayment *payment, uint data);
+template bool CargoList<VehicleCargoList>::MoveTo(StationCargoList *, uint max_move, MoveToAction mta, CargoPayment *payment, uint data, OrderID cur_order, bool *did_transfer);
 /** Cargo loading at a station. */
-template bool CargoList<StationCargoList>::MoveTo(VehicleCargoList *, uint max_move, MoveToAction mta, CargoPayment *payment, uint data);
+template bool CargoList<StationCargoList>::MoveTo(VehicleCargoList *, uint max_move, MoveToAction mta, CargoPayment *payment, uint data, OrderID cur_order, bool *did_transfer);
