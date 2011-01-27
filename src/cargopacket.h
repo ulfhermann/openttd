@@ -18,6 +18,7 @@
 #include "cargo_type.h"
 #include "vehicle_type.h"
 #include "order_type.h"
+#include "cargotype.h"
 #include <list>
 #include <map>
 
@@ -231,6 +232,7 @@ public:
 		MTA_CARGO_LOAD,     ///< Load the packet onto a vehicle, i.e. set the last loaded station ID.
 		MTA_TRANSFER,       ///< The cargo is moved as part of a transfer.
 		MTA_UNLOAD,         ///< The cargo is moved as part of a forced unload.
+		MTA_NO_ACTION,      ///< The station doesn't accept the cargo, so do nothing (only applicable to cargo without destination)
 	};
 
 	friend bool CargodestModeChanged(int32 p1);
@@ -247,11 +249,16 @@ protected:
 
 	void RemoveFromCacheLocal(const CargoPacket *cp, uint amount) {}
 
+	virtual bool UpdateCargoNextHop(CargoPacket *cp, Station *st, CargoID cid)
+	{
+		return true;
+	}
+
 public:
 	/** Create the cargo list. */
 	CargoList() {}
 
-	~CargoList();
+	virtual ~CargoList();
 
 	void OnCleanPool();
 
@@ -305,7 +312,7 @@ public:
 	void Truncate(uint max_remaining);
 
 	template <class Tother_inst>
-	bool MoveTo(Tother_inst *dest, uint count, MoveToAction mta, CargoPayment *payment, uint data = 0);
+	bool MoveTo(Tother_inst *dest, uint count, MoveToAction mta, CargoPayment *payment, StationID st = INVALID_STATION, OrderID cur_order = INVALID_ORDER, CargoID cid = INVALID_CARGO, bool *did_transfer = NULL);
 
 	void InvalidateCache();
 };
@@ -384,7 +391,7 @@ protected:
 	void RemoveFromCache(const CargoPacket *cp);
 	void RemoveFromCacheLocal(const CargoPacket *cp, uint amount);
 
-	bool UpdateCargoNextHop(CargoPacket *cp, Station *st, CargoID cid);
+	/* virtual */ bool UpdateCargoNextHop(CargoPacket *cp, Station *st, CargoID cid);
 
 public:
 	/** The super class ought to know what it's doing. */

@@ -46,6 +46,7 @@
 #include "core/pool_func.hpp"
 #include "newgrf.h"
 #include "core/backup_type.hpp"
+#include "cargodest_func.h"
 
 #include "table/strings.h"
 #include "table/pricebase.h"
@@ -1149,9 +1150,11 @@ void PrepareUnload(Vehicle *front_v)
  *                   picked up by another vehicle when all
  *                   previous vehicles have loaded.
  */
-static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
+static void LoadUnloadVehicle(Vehicle *v, StationCargoList::OrderMap (&cargo_left)[NUM_CARGO])
 {
 	assert(v->current_order.IsType(OT_LOADING));
+
+	OrderID last_order = v->last_order_id;
 
 	/* We have not waited enough time till the next round of loading/unloading */
 	if (v->load_unload_ticks != 0) {
@@ -1159,7 +1162,15 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 			/* 'Reserve' this cargo for this vehicle, because we were first. */
 			for (; v != NULL; v = v->Next()) {
 				int cap_left = v->cargo_cap - v->cargo.Count();
-				if (cap_left > 0) cargo_left[v->cargo_type] -= cap_left;
+				if (cap_left > 0) {
+					/* Try the bucket for our next destination first. */
+					int loaded = min(cap_left, cargo_left[v->cargo_type][last_order]);
+					cargo_left[v->cargo_type][last_order] -= loaded;
+
+					/* Reserve from the common bucket if still space left. */
+					loaded = min(cap_left - loaded, cargo_left[v->cargo_type][INVALID_ORDER]);
+					cargo_left[v->cargo_type][INVALID_ORDER] -= loaded;
+				}
 			}
 		}
 		return;
@@ -1213,31 +1224,56 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 			uint amount_unloaded = _settings_game.order.gradual_loading ? min(cargo_count, load_amount) : cargo_count;
 			bool remaining = false; // Are there cargo entities in this vehicle that can still be unloaded here?
 			bool accepted  = false; // Is the cargo accepted by the station?
+			bool did_transfer = false;
 
 			payment->SetCargo(v->cargo_type);
 
-			if (HasBit(ge->acceptance_pickup, GoodsEntry::ACCEPTANCE) && !(u->current_order.GetUnloadType() & OUFB_TRANSFER)) {
-				/* The cargo has reached its final destination, the packets may now be destroyed */
-				remaining = v->cargo.MoveTo<StationCargoList>(NULL, amount_unloaded, VehicleCargoList::MTA_FINAL_DELIVERY, payment, last_visited);
+			if (CargoHasDestinations(v->cargo_type)) {
+				/* This cargo type has destinations enabled, this means explicit transfer
+				 * orders are overridden for cargo packets with destination.
+				 * Default action for destination-less cargo packets is final delivery when
+				 * accepted, otherwise no action. If the current order is forced unload,
+				 * always unload all cargo. */
+				VehicleCargoList::MoveToAction mta = HasBit(ge->acceptance_pickup, GoodsEntry::ACCEPTANCE) ? VehicleCargoList::MTA_FINAL_DELIVERY : VehicleCargoList::MTA_NO_ACTION;
+				if (u->current_order.GetUnloadType() & OUFB_UNLOAD) mta = VehicleCargoList::MTA_UNLOAD;
+				remaining = v->cargo.MoveTo(&ge->cargo, amount_unloaded, mta, payment, last_visited, last_order, v->cargo_type, &did_transfer);
 
 				dirty_vehicle = true;
 				accepted = true;
+			} else {
+				/* Cargo destinations are not enabled, handle transfer orders. */
+				if (HasBit(ge->acceptance_pickup, GoodsEntry::ACCEPTANCE) && !(u->current_order.GetUnloadType() & OUFB_TRANSFER)) {
+					/* The cargo has reached its final destination, the packets may now be destroyed */
+					remaining = v->cargo.MoveTo<StationCargoList>(NULL, amount_unloaded, VehicleCargoList::MTA_FINAL_DELIVERY, payment, last_visited, v->cargo_type);
+
+					dirty_vehicle = true;
+					accepted = true;
+				}
+
+				/* The !accepted || v->cargo.Count == cargo_count clause is there
+				 * to make it possible to force unload vehicles at the station where
+				 * they were loaded, but to not force unload the vehicle when the
+				 * station is still accepting the cargo in the vehicle. It doesn't
+				 * accept cargo that was loaded at the same station. */
+				if ((u->current_order.GetUnloadType() & (OUFB_UNLOAD | OUFB_TRANSFER)) && (!accepted || v->cargo.Count() == cargo_count)) {
+					remaining = v->cargo.MoveTo(&ge->cargo, amount_unloaded, u->current_order.GetUnloadType() & OUFB_TRANSFER ? VehicleCargoList::MTA_TRANSFER : VehicleCargoList::MTA_UNLOAD, payment, last_visited, v->cargo_type);
+
+					did_transfer = true;
+					dirty_vehicle = true;
+					accepted = true;
+				}
 			}
 
-			/* The !accepted || v->cargo.Count == cargo_count clause is there
-			 * to make it possible to force unload vehicles at the station where
-			 * they were loaded, but to not force unload the vehicle when the
-			 * station is still accepting the cargo in the vehicle. It doesn't
-			 * accept cargo that was loaded at the same station. */
-			if ((u->current_order.GetUnloadType() & (OUFB_UNLOAD | OUFB_TRANSFER)) && (!accepted || v->cargo.Count() == cargo_count)) {
-				remaining = v->cargo.MoveTo(&ge->cargo, amount_unloaded, u->current_order.GetUnloadType() & OUFB_TRANSFER ? VehicleCargoList::MTA_TRANSFER : VehicleCargoList::MTA_UNLOAD, payment);
+			if (did_transfer) {
+				/* Update station information. */
 				if (!HasBit(ge->acceptance_pickup, GoodsEntry::PICKUP)) {
 					InvalidateWindowData(WC_STATION_LIST, last_visited);
 					SetBit(ge->acceptance_pickup, GoodsEntry::PICKUP);
 				}
+				dirty_station = true;
+			}
 
-				dirty_vehicle = dirty_station = true;
-			} else if (!accepted) {
+			if (!accepted) {
 				/* The order changed while unloading (unset unload/transfer) or the
 				 * station does not accept our goods. */
 				ClrBit(v->vehicle_flags, VF_CARGO_UNLOADING);
@@ -1298,11 +1334,12 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 		int cap_left = v->cargo_cap - v->cargo.Count();
 		if (!ge->cargo.Empty() && cap_left > 0) {
 			uint cap = cap_left;
-			uint count = ge->cargo.Count();
+			uint count = ge->cargo.CountForNextHop(last_order) + ge->cargo.CountForNextHop(INVALID_ORDER);
 
 			/* Skip loading this vehicle if another train/vehicle is already handling
-			 * the same cargo type at this station */
-			if (_settings_game.order.improved_load && cargo_left[v->cargo_type] <= 0) {
+			 * the same cargo type at this station. Check the buckets for or next
+			 * destination and the general bucket. */
+			if (_settings_game.order.improved_load && cargo_left[v->cargo_type][last_order] <= 0 && cargo_left[v->cargo_type][INVALID_ORDER] <= 0) {
 				SetBit(cargo_not_full, v->cargo_type);
 				continue;
 			}
@@ -1314,9 +1351,17 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 			}
 			if (_settings_game.order.improved_load) {
 				/* Don't load stuff that is already 'reserved' for other vehicles */
-				cap = min((uint)cargo_left[v->cargo_type], cap);
-				count = cargo_left[v->cargo_type];
-				cargo_left[v->cargo_type] -= cap;
+				count = cargo_left[v->cargo_type][last_order] + cargo_left[v->cargo_type][INVALID_ORDER];
+
+				/* Try the bucket for our next destination first. */
+				int load_next = min<uint>(cap, cargo_left[v->cargo_type][last_order]);
+				cargo_left[v->cargo_type][last_order] -= load_next;
+
+				/* Reserve from the common bucket if still space left. */
+				int load_common = min<uint>(cap - load_next, cargo_left[v->cargo_type][INVALID_ORDER]);
+				cargo_left[v->cargo_type][INVALID_ORDER] -= load_common;
+
+				cap = load_next + load_common;
 			}
 
 			/* Store whether the maximum possible load amount was loaded or not.*/
@@ -1338,7 +1383,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 			completely_emptied = false;
 			anything_loaded = true;
 
-			ge->cargo.MoveTo(&v->cargo, cap, StationCargoList::MTA_CARGO_LOAD, NULL, st->xy);
+			ge->cargo.MoveTo(&v->cargo, cap, StationCargoList::MTA_CARGO_LOAD, NULL, last_visited, last_order, v->cargo_type);
 
 			st->time_since_load = 0;
 			st->last_vehicle_type = v->type;
@@ -1369,7 +1414,15 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 		/* Update left cargo */
 		for (v = u; v != NULL; v = v->Next()) {
 			int cap_left = v->cargo_cap - v->cargo.Count();
-			if (cap_left > 0) cargo_left[v->cargo_type] -= cap_left;
+			if (cap_left > 0) {
+				/* Try the bucket for our next destination first. */
+				int loaded = min(cap_left, cargo_left[v->cargo_type][last_order]);
+				cargo_left[v->cargo_type][last_order] -= loaded;
+
+				/* Reserve from the common bucket if still space left. */
+				loaded = min(cap_left - loaded, cargo_left[v->cargo_type][INVALID_ORDER]);
+				cargo_left[v->cargo_type][INVALID_ORDER] -= loaded;
+			}
 		}
 	}
 
@@ -1486,9 +1539,10 @@ void LoadUnloadStation(Station *st)
 	 */
 	if (last_loading == NULL) return;
 
-	int cargo_left[NUM_CARGO];
-
-	for (uint i = 0; i < NUM_CARGO; i++) cargo_left[i] = st->goods[i].cargo.Count();
+	StationCargoList::OrderMap cargo_left[NUM_CARGO];
+	for (CargoID i = 0; i < NUM_CARGO; i++) {
+		cargo_left[i] = st->goods[i].cargo.CountForNextHop();
+	}
 
 	for (iter = st->loading_vehicles.begin(); iter != st->loading_vehicles.end(); ++iter) {
 		Vehicle *v = *iter;
