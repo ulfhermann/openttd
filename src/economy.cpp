@@ -867,6 +867,33 @@ Money GetTransportedGoodsIncome(uint num_pieces, uint dist, byte transit_days, C
 static SmallIndustryList _cargo_delivery_destinations;
 
 /**
+ * Deliver goods to an industry. Cargo acceptance by the industry is checked.
+ * @param ind The industry to deliver to.
+ * @param cargo_type Type of cargo delivered.
+ * @param num_pieces Amount of cargo delivered.
+ * @return Accepted pieces of cargo.
+ */
+static uint DeliverGoodsToIndustry(Industry *ind, CargoID cargo_type, uint num_pieces)
+{
+	uint cargo_index;
+	for (cargo_index = 0; cargo_index < lengthof(ind->accepts_cargo); cargo_index++) {
+		if (cargo_type == ind->accepts_cargo[cargo_index]) break;
+	}
+	/* Check if matching cargo has been found */
+	if (cargo_index >= lengthof(ind->accepts_cargo)) return 0;
+
+	/* Check if industry temporarily refuses acceptance */
+	if (IndustryTemporarilyRefusesCargo(ind, cargo_type)) return 0;
+
+	/* Insert the industry into _cargo_delivery_destinations, if not yet contained */
+	_cargo_delivery_destinations.Include(ind);
+
+	uint amount = min(num_pieces, 0xFFFFU - ind->incoming_cargo_waiting[cargo_index]);
+	ind->incoming_cargo_waiting[cargo_index] += amount;
+	return amount;
+}
+
+/**
  * Transfer goods from station to industry.
  * All cargo is delivered to the nearest (Manhattan) industry to the station sign, which is inside the acceptance rectangle and actually accepts the cargo.
  * @param st The station that accepted the cargo
@@ -890,21 +917,7 @@ static uint DeliverGoodsToIndustry(const Station *st, CargoID cargo_type, uint n
 		Industry *ind = st->industries_near[i];
 		if (ind->index == source) continue;
 
-		uint cargo_index;
-		for (cargo_index = 0; cargo_index < lengthof(ind->accepts_cargo); cargo_index++) {
-			if (cargo_type == ind->accepts_cargo[cargo_index]) break;
-		}
-		/* Check if matching cargo has been found */
-		if (cargo_index >= lengthof(ind->accepts_cargo)) continue;
-
-		/* Check if industry temporarily refuses acceptance */
-		if (IndustryTemporarilyRefusesCargo(ind, cargo_type)) continue;
-
-		/* Insert the industry into _cargo_delivery_destinations, if not yet contained */
-		_cargo_delivery_destinations.Include(ind);
-
-		uint amount = min(num_pieces, 0xFFFFU - ind->incoming_cargo_waiting[cargo_index]);
-		ind->incoming_cargo_waiting[cargo_index] += amount;
+		uint amount = DeliverGoodsToIndustry(ind, cargo_type, num_pieces);
 		num_pieces -= amount;
 		accepted += amount;
 	}
@@ -922,17 +935,25 @@ static uint DeliverGoodsToIndustry(const Station *st, CargoID cargo_type, uint n
  * @param company The company delivering the cargo
  * @param src_type Type of source of cargo (industry, town, headquarters)
  * @param src Index of source of cargo
+ * @param cp_dest_type Type of destination of cargo
+ * @param cp_dest Index of the destination of cargo
  * @return Revenue for delivering cargo
  * @note The cargo is just added to the stockpile of the industry. It is due to the caller to trigger the industry's production machinery
  */
-static Money DeliverGoods(int num_pieces, CargoID cargo_type, StationID dest, TileIndex source_tile, byte days_in_transit, Company *company, SourceType src_type, SourceID src)
+static Money DeliverGoods(int num_pieces, CargoID cargo_type, StationID dest, TileIndex source_tile, byte days_in_transit, Company *company, SourceType src_type, SourceID src, SourceType cp_dest_type, SourceID cp_dest)
 {
 	assert(num_pieces > 0);
 
 	const Station *st = Station::Get(dest);
 
-	/* Give the goods to the industry. */
-	uint accepted = DeliverGoodsToIndustry(st, cargo_type, num_pieces, src_type == ST_INDUSTRY ? src : INVALID_INDUSTRY);
+	uint accepted = 0;
+	if (cp_dest != INVALID_SOURCE) {
+		/* If this cargo has an industry as destination, deliver the cargo to it. */
+		if (cp_dest_type == ST_INDUSTRY) accepted = DeliverGoodsToIndustry(Industry::Get(cp_dest), cargo_type, num_pieces);
+	} else {
+		/* Give the goods to any accepting industry. */
+		accepted = DeliverGoodsToIndustry(st, cargo_type, num_pieces, src_type == ST_INDUSTRY ? src : INVALID_INDUSTRY);
+	}
 
 	/* If this cargo type is always accepted, accept all */
 	if (HasBit(st->always_accepted, cargo_type)) accepted = num_pieces;
@@ -1053,7 +1074,7 @@ void CargoPayment::PayFinalDelivery(const CargoPacket *cp, uint count)
 	}
 
 	/* Handle end of route payment */
-	Money profit = DeliverGoods(count, this->ct, this->current_station, cp->SourceStationXY(), cp->DaysInTransit(), this->owner, cp->SourceSubsidyType(), cp->SourceSubsidyID());
+	Money profit = DeliverGoods(count, this->ct, this->current_station, cp->SourceStationXY(), cp->DaysInTransit(), this->owner, cp->SourceSubsidyType(), cp->SourceSubsidyID(), cp->DestinationType(), cp->DestinationID());
 	this->route_profit += profit;
 
 	/* The vehicle's profit is whatever route profit there is minus feeder shares. */
