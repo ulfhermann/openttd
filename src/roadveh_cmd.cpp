@@ -650,42 +650,16 @@ static void RoadVehArrivesAt(const RoadVehicle *v, Station *st)
  * the distance to drive before moving a step on the map.
  * @return distance to drive.
  */
-static int RoadVehAccelerate(RoadVehicle *v)
+int RoadVehicle::UpdateSpeed()
 {
-	uint oldspeed = v->cur_speed;
-	uint accel = v->overtaking != 0 ? 256 : 0;
-	accel += (_settings_game.vehicle.roadveh_acceleration_model == AM_ORIGINAL) ? 256 : v->GetAcceleration();
-	uint spd = v->subspeed + accel;
+	switch (_settings_game.vehicle.roadveh_acceleration_model) {
+		default: NOT_REACHED();
+		case AM_ORIGINAL:
+			return this->DoUpdateSpeed(this->overtaking != 0 ? 512 : 256, 0, this->GetCurrentMaxSpeed());
 
-	v->subspeed = (uint8)spd;
-
-	int tempmax = v->GetCurrentMaxSpeed();
-	if (v->cur_speed > tempmax) {
-		tempmax = v->cur_speed - (v->cur_speed / 10) - 1;
+		case AM_REALISTIC:
+			return this->DoUpdateSpeed(this->GetAcceleration() + (this->overtaking != 0 ? 256 : 0), this->GetAccelerationStatus() == AS_BRAKE ? 0 : 4, this->GetCurrentMaxSpeed());
 	}
-
-	/* Force a minimum speed of 1 km/h when realistic acceleration is on. */
-	int min_speed = (_settings_game.vehicle.roadveh_acceleration_model == AM_ORIGINAL) ? 0 : 4;
-	v->cur_speed = spd = Clamp(v->cur_speed + ((int)spd >> 8), min_speed, tempmax);
-
-	/* Apply bridge speed limit */
-	if (v->state == RVSB_WORMHOLE && !(v->vehstatus & VS_HIDDEN)) {
-		RoadVehicle *first = v->First();
-		first->cur_speed = min(first->cur_speed, GetBridgeSpec(GetBridgeType(v->tile))->speed * 2);
-	}
-
-	/* Update statusbar only if speed has changed to save CPU time */
-	if (oldspeed != v->cur_speed) {
-		if (_settings_client.gui.vehicle_speed) {
-			SetWindowWidgetDirty(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
-		}
-	}
-
-	int scaled_spd = v->GetAdvanceSpeed(spd);
-
-	scaled_spd += v->progress;
-	v->progress = 0;
-	return scaled_spd;
 }
 
 static Direction RoadVehGetNewDirection(const RoadVehicle *v, int x, int y)
@@ -1079,6 +1053,12 @@ static bool IndividualRoadVehicleController(RoadVehicle *v, const RoadVehicle *p
 	if (v->state == RVSB_WORMHOLE) {
 		/* Vehicle is entering a depot or is on a bridge or in a tunnel */
 		GetNewVehiclePosResult gp = GetNewVehiclePos(v);
+
+		/* Apply bridge speed limit */
+		if (!(v->vehstatus & VS_HIDDEN)) {
+			RoadVehicle *first = v->First();
+			first->cur_speed = min(first->cur_speed, GetBridgeSpec(GetBridgeType(v->tile))->speed * 2);
+		}
 
 		if (v->IsFrontEngine()) {
 			const Vehicle *u = RoadVehFindCloseTo(v, gp.x, gp.y, v->direction);
@@ -1475,7 +1455,7 @@ static bool RoadVehController(RoadVehicle *v)
 	v->ShowVisualEffect();
 
 	/* Check how far the vehicle needs to proceed */
-	int j = RoadVehAccelerate(v);
+	int j = v->UpdateSpeed();
 
 	int adv_spd = v->GetAdvanceDistance();
 	bool blocked = false;
@@ -1497,6 +1477,8 @@ static bool RoadVehController(RoadVehicle *v)
 		/* Test for a collision, but only if another movement will occur. */
 		if (j >= adv_spd && RoadVehCheckTrainCrash(v)) break;
 	}
+
+	v->SetLastSpeed();
 
 	for (RoadVehicle *u = v; u != NULL; u = u->Next()) {
 		if ((u->vehstatus & VS_HIDDEN) != 0) continue;
