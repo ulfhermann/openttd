@@ -2293,7 +2293,7 @@ void Vehicle::RemoveFromShared()
 Order *Vehicle::GetNextManualOrder(int index) const
 {
 	Order *order = this->GetOrder(index);
-	while(order != NULL && order->IsType(OT_AUTOMATIC)) {
+	while (order != NULL && order->IsType(OT_AUTOMATIC)) {
 		order = order->next;
 	}
 	return order;

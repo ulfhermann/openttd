@@ -1396,17 +1396,6 @@ void Train::UpdateDeltaXY(Direction direction)
 	this->z_extent      = 6;
 }
 
-static inline void SetLastSpeed(Train *v, int spd)
-{
-	int old = v->tcache.last_speed;
-	if (spd != old) {
-		v->tcache.last_speed = spd;
-		if (_settings_client.gui.vehicle_speed || (old == 0) != (spd == 0)) {
-			SetWindowWidgetDirty(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
-		}
-	}
-}
-
 /** Mark a train as stuck and stop it if it isn't stopped right now. */
 static void MarkTrainAsStuck(Train *v)
 {
@@ -1419,7 +1408,7 @@ static void MarkTrainAsStuck(Train *v)
 		/* Stop train */
 		v->cur_speed = 0;
 		v->subspeed = 0;
-		SetLastSpeed(v, 0);
+		v->SetLastSpeed();
 
 		SetWindowWidgetDirty(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
 	}
@@ -1844,7 +1833,7 @@ CommandCost CmdReverseTrainDirection(TileIndex tile, DoCommandFlag flags, uint32
 				ToggleBit(v->flags, VRF_REVERSING);
 			} else {
 				v->cur_speed = 0;
-				SetLastSpeed(v, 0);
+				v->SetLastSpeed();
 				HideFillingPercent(&v->fill_percent_te_id);
 				ReverseTrainDirection(v);
 			}
@@ -2642,38 +2631,14 @@ void Train::MarkDirty()
  */
 int Train::UpdateSpeed()
 {
-	uint accel;
-	uint16 max_speed;
-
 	switch (_settings_game.vehicle.train_acceleration_model) {
 		default: NOT_REACHED();
 		case AM_ORIGINAL:
-			max_speed = this->gcache.cached_max_track_speed;
-			accel = this->acceleration * (this->GetAccelerationStatus() == AS_BRAKE ? -4 : 2);
-			break;
+			return this->DoUpdateSpeed(this->acceleration * (this->GetAccelerationStatus() == AS_BRAKE ? -4 : 2), 0, this->gcache.cached_max_track_speed);
+
 		case AM_REALISTIC:
-			max_speed = this->GetCurrentMaxSpeed();
-			accel = this->GetAcceleration();
-			break;
+			return this->DoUpdateSpeed(this->GetAcceleration(), this->GetAccelerationStatus() == AS_BRAKE ? 0 : 2, this->GetCurrentMaxSpeed());
 	}
-
-	uint spd = this->subspeed + accel;
-	this->subspeed = (byte)spd;
-	{
-		int tempmax = max_speed;
-		if (this->cur_speed > max_speed) {
-			tempmax = max(this->cur_speed - (this->cur_speed / 10) - 1, tempmax);
-		}
-		/* Force a minimum speed of 1 km/h when realistic acceleration is on and the train is not braking. */
-		int min_speed = (_settings_game.vehicle.train_acceleration_model == AM_ORIGINAL || this->GetAccelerationStatus() == AS_BRAKE) ? 0 : 2;
-		this->cur_speed = spd = Clamp(this->cur_speed + ((int)spd >> 8), min_speed, tempmax);
-	}
-
-	int scaled_spd = this->GetAdvanceSpeed(spd);
-
-	scaled_spd += this->progress;
-	this->progress = 0; // set later in TrainLocoHandler or TrainController
-	return scaled_spd;
 }
 
 /**
@@ -3660,7 +3625,7 @@ static bool TrainLocoHandler(Train *v, bool mode)
 	int adv_spd = v->GetAdvanceDistance();
 	if (j < adv_spd) {
 		/* if the vehicle has speed 0, update the last_speed field. */
-		if (v->cur_speed == 0) SetLastSpeed(v, v->cur_speed);
+		if (v->cur_speed == 0) v->SetLastSpeed();
 	} else {
 		TrainCheckIfLineEnds(v);
 		/* Loop until the train has finished moving. */
@@ -3684,7 +3649,7 @@ static bool TrainLocoHandler(Train *v, bool mode)
 				ProcessOrders(v);
 			}
 		}
-		SetLastSpeed(v, v->cur_speed);
+		v->SetLastSpeed();
 	}
 
 	for (Train *u = v; u != NULL; u = u->Next()) {
