@@ -595,7 +595,7 @@ uint StationCargoList::TakeFrom(VehicleCargoList *source, uint max_unload, Order
 			action = this->WillUnloadOld(flags, cargo_source);
 		}
 
-		switch(action) {
+		switch (action) {
 			case UL_DELIVER:
 				unloaded = source->DeliverPacket(c, remaining_unload, payment);
 				if (via != INVALID_STATION) {
