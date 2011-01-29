@@ -50,6 +50,7 @@ private:
 	TileIndex dest_xy;          ///< Destination tile or INVALID_TILE if no specific destination
 	SourceID dest_id;           ///< Index of the destination.
 	SourceTypeByte dest_type;   ///< Type of #dest_id.
+	byte flags;                 ///< Flags influencing the routing decision of this packet, see #RouteFlags.
 	OrderID next_order;         ///< Next desired hop.
 	StationID next_station;     ///< Unload at this station next.
 
@@ -65,8 +66,8 @@ public:
 	static const uint16 MAX_COUNT = UINT16_MAX;
 
 	CargoPacket();
-	CargoPacket(StationID source, TileIndex source_xy, uint16 count, SourceType source_type, SourceID source_id, TileIndex dest_xy = INVALID_TILE, SourceType dest_type = ST_INDUSTRY, SourceID dest_id = INVALID_SOURCE, OrderID next_order = INVALID_ORDER, StationID next_station = INVALID_STATION);
-	CargoPacket(uint16 count, byte days_in_transit, StationID source, TileIndex source_xy, TileIndex loaded_at_xy, Money feeder_share = 0, SourceType source_type = ST_INDUSTRY, SourceID source_id = INVALID_SOURCE, TileIndex dest_xy = INVALID_TILE, SourceType dest_type = ST_INDUSTRY, SourceID dest_id = INVALID_SOURCE, OrderID next_order = INVALID_ORDER, StationID next_station = INVALID_STATION);
+	CargoPacket(StationID source, TileIndex source_xy, uint16 count, SourceType source_type, SourceID source_id, TileIndex dest_xy = INVALID_TILE, SourceType dest_type = ST_INDUSTRY, SourceID dest_id = INVALID_SOURCE, OrderID next_order = INVALID_ORDER, StationID next_station = INVALID_STATION, byte flags = 0);
+	CargoPacket(uint16 count, byte days_in_transit, StationID source, TileIndex source_xy, TileIndex loaded_at_xy, Money feeder_share = 0, SourceType source_type = ST_INDUSTRY, SourceID source_id = INVALID_SOURCE, TileIndex dest_xy = INVALID_TILE, SourceType dest_type = ST_INDUSTRY, SourceID dest_id = INVALID_SOURCE, OrderID next_order = INVALID_ORDER, StationID next_station = INVALID_STATION, byte flags = 0);
 
 	/** Destroy the packet. */
 	~CargoPacket() { }
@@ -174,6 +175,15 @@ public:
 	FORCEINLINE SourceType DestinationType() const
 	{
 		return this->dest_type;
+	}
+
+	/**
+	 * Gets the routing behaviour flags of this packet.
+	 * @return The routing flags.
+	 */
+	FORCEINLINE byte Flags() const
+	{
+		return this->flags;
 	}
 
 	/**
@@ -369,7 +379,8 @@ public:
 				cp1->dest_type       == cp2->dest_type &&
 				cp1->dest_id         == cp2->dest_id &&
 				cp1->next_order      == cp2->next_order &&
-				cp1->next_station    == cp2->next_station;
+				cp1->next_station    == cp2->next_station &&
+				cp1->flags           == cp2->flags;
 	}
 };
 
@@ -440,7 +451,8 @@ public:
 				cp1->dest_type       == cp2->dest_type &&
 				cp1->dest_id         == cp2->dest_id &&
 				cp1->next_order      == cp2->next_order &&
-				cp1->next_station    == cp2->next_station;
+				cp1->next_station    == cp2->next_station &&
+				cp1->flags           == cp2->flags;
 	}
 
 	static void InvalidateAllTo(OrderID order, StationID st_unload);

@@ -94,6 +94,8 @@ class CYapfCostRouteLinkT {
 
 	static const int PENALTY_DIVISOR      = 16;          ///< Penalty factor divisor for fixed-point arithmetics.
 	static const int LOCAL_PENALTY_FACTOR = 16;          ///< Penalty factor for source-local delivery.
+	static const int RF_DISTANCE_FACTOR   = 2;           ///< Vehicle modifier for "cheap" cargo packets.
+	static const int RF_TIME_FACTOR       = 3;           ///< Time modifier for "fast" cargo packets.
 
 	/** To access inherited path finder. */
 	FORCEINLINE Tpf& Yapf() { return *static_cast<Tpf*>(this); }
@@ -133,23 +135,29 @@ class CYapfCostRouteLinkT {
 		cost = DistanceManhattan(from->xy, to->xy) * this->Yapf().PfGetSettings().route_distance_factor;
 
 		/* Modulate the distance by a vehicle-type specific factor to
-		 * simulate the different costs. */
+		 * simulate the different costs. Cost is doubled if the cargo
+		 * wants to go cheap. */
 		assert_compile(lengthof(_settings_game.pf.yapf.route_mode_cost_factor) == VEH_AIRCRAFT + 1);
-		cost *= this->Yapf().PfGetSettings().route_mode_cost_factor[link->GetVehicleType()];
+		byte dfactor = this->Yapf().PfGetSettings().route_mode_cost_factor[link->GetVehicleType()];
+		if (HasBit(this->Yapf().GetFlags(), RF_WANT_CHEAP)) dfactor *= RF_DISTANCE_FACTOR;
+		cost *= dfactor;
+
+		/* Factor for the time penalties based on whether the cargo wants to go fast. */
+		uint time_factor = HasBit(this->Yapf().GetFlags(), RF_WANT_FAST) ? RF_TIME_FACTOR : 1;
 
 		/* Transfer penalty when switching vehicles or forced unloading. */
 		if (link->GetOriginOrderId() != parent->GetDestOrderId() || (Order::Get(link->GetOriginOrderId())->GetUnloadType() & OUFB_UNLOAD) != 0) {
 			cost += this->Yapf().PfGetSettings().route_transfer_cost;
 
 			/* Penalty for time since the last vehicle arrived. */
-			cost += link->GetWaitTime() * this->Yapf().PfGetSettings().route_station_last_veh_factor / PENALTY_DIVISOR;
+			cost += link->GetWaitTime() * this->Yapf().PfGetSettings().route_station_last_veh_factor * time_factor / PENALTY_DIVISOR;
 
 			/* Penalty for cargo waiting on our link. */
 			cost += (from->goods[this->Yapf().GetCargoID()].cargo.CountForNextHop(link->GetOriginOrderId()) * this->Yapf().PfGetSettings().route_station_waiting_factor) / PENALTY_DIVISOR;
 		}
 
 		/* Penalty for travel time. */
-		cost += (link->GetTravelTime() * this->Yapf().PfGetSettings().route_travel_time_factor) / PENALTY_DIVISOR;
+		cost += (link->GetTravelTime() * this->Yapf().PfGetSettings().route_travel_time_factor * time_factor) / PENALTY_DIVISOR;
 
 		return cost;
 	}
@@ -195,6 +203,7 @@ class CYapfOriginRouteLinkT {
 	CargoID   m_cid;
 	TileIndex m_src;
 	OrderID   m_order;
+	byte      m_flags;
 	SmallVector<RouteLink, 2> m_origin;
 
 	/** To access inherited path finder. */
@@ -207,12 +216,19 @@ public:
 		return this->m_cid;
 	}
 
+	/** Get the cargo routing flags. */
+	FORCEINLINE byte GetFlags() const
+	{
+		return this->m_flags;
+	}
+
 	/** Set origin. */
-	void SetOrigin(CargoID cid, TileIndex src, const StationList *stations, bool cargo_creation, OrderID order)
+	void SetOrigin(CargoID cid, TileIndex src, const StationList *stations, bool cargo_creation, OrderID order, byte flags)
 	{
 		this->m_cid = cid;
 		this->m_src = src;
 		this->m_order = order;
+		this->m_flags = flags;
 		/* Create fake links for the origin stations. */
 		for (const Station * const *st = stations->Begin(); st != stations->End(); st++) {
 			if (cargo_creation) {
@@ -351,11 +367,11 @@ public:
 	}
 
 	/** Find the best cargo routing from a station to a destination. */
-	static RouteLink *ChooseRouteLink(CargoID cid, const StationList *stations, TileIndex src, const TileArea &dest, StationID *start_station, StationID *next_unload, bool *found, OrderID order, int max_cost)
+	static RouteLink *ChooseRouteLink(CargoID cid, const StationList *stations, TileIndex src, const TileArea &dest, StationID *start_station, StationID *next_unload, byte flags, bool *found, OrderID order, int max_cost)
 	{
 		/* Initialize pathfinder instance. */
 		Tpf pf;
-		pf.SetOrigin(cid, src, stations, start_station != NULL, order);
+		pf.SetOrigin(cid, src, stations, start_station != NULL, order, flags);
 		pf.SetDestination(dest, max_cost);
 
 		*next_unload = INVALID_STATION;
@@ -414,12 +430,13 @@ struct CYapfRouteLink : CYapfT<CYapfRouteLink_TypesT<CYapfRouteLink> > {};
  * @param dest     Destination tile area.
  * @param[out] start_station Station the best route link originates from.
  * @param[out] next_unload Next station the cargo should be unloaded from the vehicle.
+ * @param flags    Routing flags of the cargo.
  * @param[out] found True if a link was found.
  * @param order    Order the vehicle arrived at the origin station.
  * @param max_cost Maxmimum allowed node cost.
  * @return The best RouteLink to the target or NULL if either no link found or one of the origin stations is the best destination.
  */
-RouteLink *YapfChooseRouteLink(CargoID cid, const StationList *stations, TileIndex src, const TileArea &dest, StationID *start_station, StationID *next_unload, bool *found, OrderID order, int max_cost)
+RouteLink *YapfChooseRouteLink(CargoID cid, const StationList *stations, TileIndex src, const TileArea &dest, StationID *start_station, StationID *next_unload, byte flags, bool *found, OrderID order, int max_cost)
 {
-	return CYapfRouteLink::ChooseRouteLink(cid, stations, src, dest, start_station, next_unload, found, order, max_cost);
+	return CYapfRouteLink::ChooseRouteLink(cid, stations, src, dest, start_station, next_unload, flags, found, order, max_cost);
 }

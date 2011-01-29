@@ -18,6 +18,12 @@ enum CargoRoutingMode {
 	CRM_FIXED_DEST,      ///< Fixed destinations
 };
 
+/** Flags specifying how cargo should be routed. */
+enum RoutingFlags {
+	RF_WANT_FAST,    ///< Cargo wants to travel as fast as possible.
+	RF_WANT_CHEAP,   ///< Cargo wants to travel as cheap as possible.
+};
+
 /** Unique identifier for a routing link. */
 typedef uint32 RouteLinkID;
 struct RouteLink;

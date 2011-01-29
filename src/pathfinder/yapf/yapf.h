@@ -92,6 +92,6 @@ bool YapfTrainCheckReverse(const Train *v);
  */
 bool YapfTrainFindNearestSafeTile(const Train *v, TileIndex tile, Trackdir td, bool override_railtype);
 
-RouteLink *YapfChooseRouteLink(CargoID cid, const StationList *stations, TileIndex src, const TileArea &dest, StationID *start_station, StationID *next_unload, bool *found = NULL, OrderID order = INVALID_ORDER, int max_cost = INT_MAX);
+RouteLink *YapfChooseRouteLink(CargoID cid, const StationList *stations, TileIndex src, const TileArea &dest, StationID *start_station, StationID *next_unload, byte flags, bool *found = NULL, OrderID order = INVALID_ORDER, int max_cost = INT_MAX);
 
 #endif /* YAPF_H */

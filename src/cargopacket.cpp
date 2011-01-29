@@ -31,6 +31,7 @@ CargoPacket::CargoPacket()
 	this->dest_xy     = INVALID_TILE;
 	this->dest_id     = INVALID_SOURCE;
 	this->dest_type   = ST_INDUSTRY;
+	this->flags       = 0;
 	this->next_order  = INVALID_ORDER;
 	this->next_station = INVALID_STATION;
 }
@@ -47,11 +48,12 @@ CargoPacket::CargoPacket()
  * @param dest_id     Actual destination of the packet.
  * @param next_order  Desired next hop of the packet.
  * @param next_station Station to unload the packet next.
+ * @param flags       Routing flags of the packet.
  * @pre count != 0
  * @note We have to zero memory ourselves here because we are using a 'new'
  * that, in contrary to all other pools, does not memset to 0.
  */
-CargoPacket::CargoPacket(StationID source, TileIndex source_xy, uint16 count, SourceType source_type, SourceID source_id, TileIndex dest_xy, SourceType dest_type, SourceID dest_id, OrderID next_order, StationID next_station) :
+CargoPacket::CargoPacket(StationID source, TileIndex source_xy, uint16 count, SourceType source_type, SourceID source_id, TileIndex dest_xy, SourceType dest_type, SourceID dest_id, OrderID next_order, StationID next_station, byte flags) :
 	feeder_share(0),
 	count(count),
 	days_in_transit(0),
@@ -61,6 +63,7 @@ CargoPacket::CargoPacket(StationID source, TileIndex source_xy, uint16 count, So
 	loaded_at_xy(0),
 	dest_xy(dest_xy),
 	dest_id(dest_id),
+	flags(flags),
 	next_order(next_order),
 	next_station(next_station)
 {
@@ -85,10 +88,11 @@ CargoPacket::CargoPacket(StationID source, TileIndex source_xy, uint16 count, So
  * @param dest_id         Actual destination of the packet.
  * @param next_order      Desired next hop of the packet.
  * @param next_station Station to unload the packet next.
+ * @param flags           Routing flags of the packet.
  * @note We have to zero memory ourselves here because we are using a 'new'
  * that, in contrary to all other pools, does not memset to 0.
  */
-CargoPacket::CargoPacket(uint16 count, byte days_in_transit, StationID source, TileIndex source_xy, TileIndex loaded_at_xy, Money feeder_share, SourceType source_type, SourceID source_id, TileIndex dest_xy, SourceType dest_type, SourceID dest_id, OrderID next_order, StationID next_station) :
+CargoPacket::CargoPacket(uint16 count, byte days_in_transit, StationID source, TileIndex source_xy, TileIndex loaded_at_xy, Money feeder_share, SourceType source_type, SourceID source_id, TileIndex dest_xy, SourceType dest_type, SourceID dest_id, OrderID next_order, StationID next_station, byte flags) :
 		feeder_share(feeder_share),
 		count(count),
 		days_in_transit(days_in_transit),
@@ -98,6 +102,7 @@ CargoPacket::CargoPacket(uint16 count, byte days_in_transit, StationID source, T
 		loaded_at_xy(loaded_at_xy),
 		dest_xy(dest_xy),
 		dest_id(dest_id),
+		flags(flags),
 		next_order(next_order),
 		next_station(next_station)
 {
@@ -116,7 +121,7 @@ FORCEINLINE CargoPacket *CargoPacket::Split(uint new_size)
 	if (!CargoPacket::CanAllocateItem()) return NULL;
 
 	Money fs = this->feeder_share * new_size / static_cast<uint>(this->count);
-	CargoPacket *cp_new = new CargoPacket(new_size, this->days_in_transit, this->source, this->source_xy, this->loaded_at_xy, fs, this->source_type, this->source_id, this->dest_xy, this->dest_type, this->dest_id, this->next_order, this->next_station);
+	CargoPacket *cp_new = new CargoPacket(new_size, this->days_in_transit, this->source, this->source_xy, this->loaded_at_xy, fs, this->source_type, this->source_id, this->dest_xy, this->dest_type, this->dest_id, this->next_order, this->next_station, this->flags);
 	this->feeder_share -= fs;
 	this->count -= new_size;
 	return cp_new;

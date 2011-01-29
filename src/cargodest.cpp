@@ -785,7 +785,7 @@ RouteLink *FindRouteLinkForCargo(Station *st, CargoID cid, const CargoPacket *cp
 	*sl.Append() = st;
 
 	TileArea area = (cp->DestinationType() == ST_INDUSTRY) ? Industry::Get(cp->DestinationID())->location : TileArea(cp->DestinationXY(), 2, 2);
-	return YapfChooseRouteLink(cid, &sl, st->xy, area, NULL, next_unload, found, order);
+	return YapfChooseRouteLink(cid, &sl, st->xy, area, NULL, next_unload, cp->Flags(), found, order);
 }
 
 
