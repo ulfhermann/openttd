@@ -84,6 +84,20 @@ enum VisualEffect {
 	VE_DEFAULT = 0xFF,          ///< Default value to indicate that visual effect should be based on engine class
 };
 
+/**
+ * Enum to handle ground vehicle subtypes.
+ * This is defined here instead of at #GroundVehicle because some common function require access to these flags.
+ * Do not access it directly unless you have to. Use the subtype access functions.
+ */
+enum GroundVehicleSubtypeFlags {
+	GVSF_FRONT            = 0, ///< Leading engine of a consist.
+	GVSF_ARTICULATED_PART = 1, ///< Articulated part of an engine.
+	GVSF_WAGON            = 2, ///< Wagon (not used for road vehicles).
+	GVSF_ENGINE           = 3, ///< Engine that can be front engine, but might be placed behind another engine (not used for road vehicles).
+	GVSF_FREE_WAGON       = 4, ///< First in a wagon chain (in depot) (not used for road vehicles).
+	GVSF_MULTIHEADED      = 5, ///< Engine is multiheaded (not used for road vehicles).
+};
+
 /** Cached often queried values common to all vehicles. */
 struct VehicleCache {
 	uint16 cached_max_speed; ///< Maximum speed of the consist (minimum of the max speed of all vehicles in the consist).
@@ -104,7 +118,7 @@ extern bool LoadOldVehicle(LoadgameState *ls, int num);
 extern bool AfterLoadGame();
 extern void FixOldVehicles();
 
-/** Vehicle data structure. */
+/** %Vehicle data structure. */
 struct Vehicle : VehiclePool::PoolItem<&_vehicle_pool>, BaseVehicle {
 private:
 	Vehicle *next;                      ///< pointer to the next vehicle in the chain
@@ -129,7 +143,7 @@ public:
 	/**
 	 * Heading for this tile.
 	 * For airports and train stations this tile does not necessarily belong to the destination station,
-	 * but it can be used for heuristical purposes to estimate the distance.
+	 * but it can be used for heuristic purposes to estimate the distance.
 	 */
 	TileIndex dest_tile;
 
@@ -247,12 +261,6 @@ public:
 	void DeleteUnreachedAutoOrders();
 
 	void HandleLoading(bool mode = false);
-
-	/**
-	 * Get a string 'representation' of the vehicle type.
-	 * @return the string representation.
-	 */
-	virtual const char *GetTypeString() const { return "base vehicle"; }
 
 	/**
 	 * Marks the vehicles to be redrawn and updates cached variables
@@ -634,6 +642,102 @@ public:
 	bool IsEngineCountable() const;
 	bool HasDepotOrder() const;
 	void HandlePathfindingResult(bool path_found);
+
+	/**
+	 * Check if the vehicle is a front engine.
+	 * @return Returns true if the vehicle is a front engine.
+	 */
+	FORCEINLINE bool IsFrontEngine() const
+	{
+		return this->IsGroundVehicle() && HasBit(this->subtype, GVSF_FRONT);
+	}
+
+	/**
+	 * Check if the vehicle is an articulated part of an engine.
+	 * @return Returns true if the vehicle is an articulated part.
+	 */
+	FORCEINLINE bool IsArticulatedPart() const
+	{
+		return this->IsGroundVehicle() && HasBit(this->subtype, GVSF_ARTICULATED_PART);
+	}
+
+	/**
+	 * Check if an engine has an articulated part.
+	 * @return True if the engine has an articulated part.
+	 */
+	FORCEINLINE bool HasArticulatedPart() const
+	{
+		return this->Next() != NULL && this->Next()->IsArticulatedPart();
+	}
+
+	/**
+	 * Get the next part of an articulated engine.
+	 * @return Next part of the articulated engine.
+	 * @pre The vehicle is an articulated engine.
+	 */
+	FORCEINLINE Vehicle *GetNextArticulatedPart() const
+	{
+		assert(this->HasArticulatedPart());
+		return this->Next();
+	}
+
+	/**
+	 * Get the first part of an articulated engine.
+	 * @return First part of the engine.
+	 */
+	FORCEINLINE Vehicle *GetFirstEnginePart()
+	{
+		Vehicle *v = this;
+		while (v->IsArticulatedPart()) v = v->Previous();
+		return v;
+	}
+
+	/**
+	 * Get the first part of an articulated engine.
+	 * @return First part of the engine.
+	 */
+	FORCEINLINE const Vehicle *GetFirstEnginePart() const
+	{
+		const Vehicle *v = this;
+		while (v->IsArticulatedPart()) v = v->Previous();
+		return v;
+	}
+
+	/**
+	 * Get the last part of an articulated engine.
+	 * @return Last part of the engine.
+	 */
+	FORCEINLINE Vehicle *GetLastEnginePart()
+	{
+		Vehicle *v = this;
+		while (v->HasArticulatedPart()) v = v->GetNextArticulatedPart();
+		return v;
+	}
+
+	/**
+	 * Get the next real (non-articulated part) vehicle in the consist.
+	 * @return Next vehicle in the consist.
+	 */
+	FORCEINLINE Vehicle *GetNextVehicle() const
+	{
+		const Vehicle *v = this;
+		while (v->HasArticulatedPart()) v = v->GetNextArticulatedPart();
+
+		/* v now contains the last articulated part in the engine */
+		return v->Next();
+	}
+
+	/**
+	 * Get the previous real (non-articulated part) vehicle in the consist.
+	 * @return Previous vehicle in the consist.
+	 */
+	FORCEINLINE Vehicle *GetPrevVehicle() const
+	{
+		Vehicle *v = this->Previous();
+		while (v != NULL && v->IsArticulatedPart()) v = v->Previous();
+
+		return v;
+	}
 };
 
 #define FOR_ALL_VEHICLES_FROM(var, start) FOR_ALL_ITEMS_FROM(Vehicle, vehicle_index, var, start)
@@ -684,6 +788,49 @@ struct SpecializedVehicle : public Vehicle {
 	 */
 	FORCEINLINE T *Previous() const { return (T *)this->Vehicle::Previous(); }
 
+	/**
+	 * Get the next part of an articulated engine.
+	 * @return Next part of the articulated engine.
+	 * @pre The vehicle is an articulated engine.
+	 */
+	FORCEINLINE T *GetNextArticulatedPart() { return (T *)this->Vehicle::GetNextArticulatedPart(); }
+
+	/**
+	 * Get the next part of an articulated engine.
+	 * @return Next part of the articulated engine.
+	 * @pre The vehicle is an articulated engine.
+	 */
+	FORCEINLINE T *GetNextArticulatedPart() const { return (T *)this->Vehicle::GetNextArticulatedPart(); }
+
+	/**
+	 * Get the first part of an articulated engine.
+	 * @return First part of the engine.
+	 */
+	FORCEINLINE T *GetFirstEnginePart() { return (T *)this->Vehicle::GetFirstEnginePart(); }
+
+	/**
+	 * Get the first part of an articulated engine.
+	 * @return First part of the engine.
+	 */
+	FORCEINLINE const T *GetFirstEnginePart() const { return (const T *)this->Vehicle::GetFirstEnginePart(); }
+
+	/**
+	 * Get the last part of an articulated engine.
+	 * @return Last part of the engine.
+	 */
+	FORCEINLINE T *GetLastEnginePart() { return (T *)this->Vehicle::GetLastEnginePart(); }
+
+	/**
+	 * Get the next real (non-articulated part) vehicle in the consist.
+	 * @return Next vehicle in the consist.
+	 */
+	FORCEINLINE T *GetNextVehicle() const { return (T *)this->Vehicle::GetNextVehicle(); }
+
+	/**
+	 * Get the previous real (non-articulated part) vehicle in the consist.
+	 * @return Previous vehicle in the consist.
+	 */
+	FORCEINLINE T *GetPrevVehicle() const { return (T *)this->Vehicle::GetPrevVehicle(); }
 
 	/**
 	 * Tests whether given index is a valid index for vehicle of this type
@@ -767,7 +914,6 @@ struct DisasterVehicle : public SpecializedVehicle<DisasterVehicle, VEH_DISASTER
 	/** We want to 'destruct' the right class. */
 	virtual ~DisasterVehicle() {}
 
-	const char *GetTypeString() const { return "disaster vehicle"; }
 	void UpdateDeltaXY(Direction direction);
 	bool Tick();
 };
