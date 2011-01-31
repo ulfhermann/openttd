@@ -179,7 +179,7 @@ public:
 
 		/* Apply it. */
 		n.m_cost = n.m_parent->m_cost + segment_cost;
-		return true;
+		return n.m_cost <= this->Yapf().GetMaxCost();
 	}
 };
 
@@ -243,15 +243,23 @@ class CYapfDestinationRouteLinkT {
 	typedef typename Types::NodeList::Titem Node;        ///< This will be our node type.
 
 	TileArea m_dest;
+	int m_max_cost;            ///< Maximum node cost.
 
 	/** To access inherited path finder. */
 	FORCEINLINE Tpf& Yapf() { return *static_cast<Tpf*>(this); }
 
 public:
+	/** Get the maximum allowed node cost. */
+	FORCEINLINE int GetMaxCost() const
+	{
+		return this->m_max_cost;
+	}
+
 	/** Set destination. */
-	void SetDestination(const TileArea &dest)
+	void SetDestination(const TileArea &dest, uint max_cost)
 	{
 		this->m_dest = dest;
+		this->m_max_cost = max_cost;
 	}
 
 	/** Cost for delivering the cargo to the final destination tile. */
@@ -340,12 +348,12 @@ public:
 	}
 
 	/** Find the best cargo routing from a station to a destination. */
-	static RouteLink *ChooseRouteLink(CargoID cid, const StationList *stations, TileIndex src, const TileArea &dest, StationID *start_station, bool *found, OrderID order)
+	static RouteLink *ChooseRouteLink(CargoID cid, const StationList *stations, TileIndex src, const TileArea &dest, StationID *start_station, bool *found, OrderID order, int max_cost)
 	{
 		/* Initialize pathfinder instance. */
 		Tpf pf;
 		pf.SetOrigin(cid, src, stations, start_station != NULL, order);
-		pf.SetDestination(dest);
+		pf.SetDestination(dest, max_cost);
 
 		/* Do it. Exit if we didn't find a path. */
 		bool res = pf.FindPath(NULL);
@@ -397,9 +405,10 @@ struct CYapfRouteLink : CYapfT<CYapfRouteLink_TypesT<CYapfRouteLink> > {};
  * @param[out] start_station Station the best route link originates from.
  * @param[out] found True if a link was found.
  * @param order    Order the vehicle arrived at the origin station.
+ * @param max_cost Maxmimum allowed node cost.
  * @return The best RouteLink to the target or NULL if either no link found or one of the origin stations is the best destination.
  */
-RouteLink *YapfChooseRouteLink(CargoID cid, const StationList *stations, TileIndex src, const TileArea &dest, StationID *start_station, bool *found, OrderID order)
+RouteLink *YapfChooseRouteLink(CargoID cid, const StationList *stations, TileIndex src, const TileArea &dest, StationID *start_station, bool *found, OrderID order, int max_cost)
 {
-	return CYapfRouteLink::ChooseRouteLink(cid, stations, src, dest, start_station, found, order);
+	return CYapfRouteLink::ChooseRouteLink(cid, stations, src, dest, start_station, found, order, max_cost);
 }
