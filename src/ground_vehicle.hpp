@@ -243,19 +243,6 @@ struct GroundVehicle : public SpecializedVehicle<T, Type> {
 	}
 
 	/**
-	 * Enum to handle ground vehicle subtypes.
-	 * Do not access it directly unless you have to. Use the subtype access functions.
-	 */
-	enum GroundVehicleSubtypeFlags {
-		GVSF_FRONT            = 0, ///< Leading engine of a consist.
-		GVSF_ARTICULATED_PART = 1, ///< Articulated part of an engine.
-		GVSF_WAGON            = 2, ///< Wagon (not used for road vehicles).
-		GVSF_ENGINE           = 3, ///< Engine that can be front engine, but might be placed behind another engine (not used for road vehicles).
-		GVSF_FREE_WAGON       = 4, ///< First in a wagon chain (in depot) (not used for road vehicles).
-		GVSF_MULTIHEADED      = 5, ///< Engine is multiheaded (not used for road vehicles).
-	};
-
-	/**
 	 * Set front engine state.
 	 */
 	FORCEINLINE void SetFrontEngine() { SetBit(this->subtype, GVSF_FRONT); }
@@ -316,12 +303,6 @@ struct GroundVehicle : public SpecializedVehicle<T, Type> {
 	FORCEINLINE void ClearMultiheaded() { ClrBit(this->subtype, GVSF_MULTIHEADED); }
 
 	/**
-	 * Check if the vehicle is a front engine.
-	 * @return Returns true if the vehicle is a front engine.
-	 */
-	FORCEINLINE bool IsFrontEngine() const { return HasBit(this->subtype, GVSF_FRONT); }
-
-	/**
 	 * Check if the vehicle is a free wagon (got no engine in front of it).
 	 * @return Returns true if the vehicle is a free wagon.
 	 */
@@ -350,18 +331,6 @@ struct GroundVehicle : public SpecializedVehicle<T, Type> {
 	 * @return True if the engine is the rear part of a dualheaded engine.
 	 */
 	FORCEINLINE bool IsRearDualheaded() const { return this->IsMultiheaded() && !this->IsEngine(); }
-
-	/**
-	 * Check if the vehicle is an articulated part of an engine.
-	 * @return Returns true if the vehicle is an articulated part.
-	 */
-	FORCEINLINE bool IsArticulatedPart() const { return HasBit(this->subtype, GVSF_ARTICULATED_PART); }
-
-	/**
-	 * Check if an engine has an articulated part.
-	 * @return True if the engine has an articulated part.
-	 */
-	FORCEINLINE bool HasArticulatedPart() const { return this->Next() != NULL && this->Next()->IsArticulatedPart(); }
 
 	/**
 	 * Update the GUI variant of the current speed of the vehicle.
