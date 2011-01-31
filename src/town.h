@@ -55,6 +55,7 @@ struct TownCache {
 /** Town data structure. */
 struct Town : TownPool::PoolItem<&_town_pool>, CargoSourceSink {
 	TileIndex xy;                  ///< town center tile
+	TileIndex xy_aligned; ///< NOSAVE: Town centre aligned to the #AcceptanceMatrix grid.
 
 	TownCache cache; ///< Container for all cacheable data.
 
@@ -100,6 +101,10 @@ struct Town : TownPool::PoolItem<&_town_pool>, CargoSourceSink {
 
 	bool larger_town;              ///< if this is a larger town and should grow more quickly
 	TownLayoutByte layout;         ///< town specific road layout
+
+	/* Current cargo acceptance and production. */
+	uint32 cargo_accepted_weights[NUM_CARGO]; ///< NOSAVE: Weight sum of accepting squares per cargo.
+	uint32 cargo_accepted_max_weight; ///< NOSAVE: Cached maximum weight for an accepting square.
 
 	std::list<PersistentStorage *> psa_list;
 
