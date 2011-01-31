@@ -703,11 +703,27 @@ static void ChangeTileOwner_Town(TileIndex tile, Owner old_owner, Owner new_owne
 void UpdateTownCargoTotal(Town *t)
 {
 	t->cargo_accepted_total = 0;
+	MemSetT(t->cargo_accepted_weights, 0, lengthof(t->cargo_accepted_weights));
 
+	/* Calculate the maximum weight based on the grid square furthest
+	 * from the town centre. The maximum weight is two times the L-inf
+	 * norm plus 1 so that max weight - furthest square weight == 1. */
 	const TileArea &area = t->cargo_accepted.GetArea();
+	uint max_dist = max(DistanceMax(t->xy_aligned, area.tile), DistanceMax(t->xy_aligned, TILE_ADDXY(area.tile, area.w - 1, area.h - 1))) / AcceptanceMatrix::GRID;
+	t->cargo_accepted_max_weight = max_dist * 2 + 1;
+
+	/* Collect acceptance from all grid squares. */
 	TILE_AREA_LOOP(tile, area) {
 		if (TileX(tile) % AcceptanceMatrix::GRID == 0 && TileY(tile) % AcceptanceMatrix::GRID == 0) {
-			t->cargo_accepted_total |= t->cargo_accepted[tile];
+			uint32 acc = t->cargo_accepted[tile];
+			t->cargo_accepted_total |= acc;
+
+			CargoID cid;
+			FOR_EACH_SET_CARGO_ID(cid, acc) {
+				/* For each accepted cargo, the grid square weight is the maximum weight
+				 * minus two times the L-inf norm between this square and the centre square. */
+				t->cargo_accepted_weights[cid] += t->cargo_accepted_max_weight - (DistanceMax(t->xy_aligned, tile) / AcceptanceMatrix::GRID) * 2;
+			}
 		}
 	}
 }
@@ -1533,6 +1549,11 @@ static void DoCreateTown(Town *t, TileIndex tile, uint32 townnameparts, TownSize
 	t->InitializeLayout(layout);
 
 	t->larger_town = city;
+
+	/* Cache the aligned tile index of the centre tile. */
+	uint town_x = (TileX(t->xy) / AcceptanceMatrix::GRID) * AcceptanceMatrix::GRID;
+	uint town_y = (TileY(t->xy) / AcceptanceMatrix::GRID) * AcceptanceMatrix::GRID;
+	t->xy_aligned= TileXY(town_x, town_y);
 
 	int x = (int)size * 16 + 3;
 	if (size == TSZ_RANDOM) x = (Random() & 0xF) + 8;

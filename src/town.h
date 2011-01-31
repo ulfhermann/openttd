@@ -39,6 +39,7 @@ extern TownPool _town_pool;
 /** Town data structure. */
 struct Town : TownPool::PoolItem<&_town_pool>, CargoSourceSink {
 	TileIndex xy;
+	TileIndex xy_aligned; ///< NOSAVE: Town centre aligned to the #AcceptanceMatrix grid.
 
 	/* Current population of people and amount of houses. */
 	uint32 num_houses;
@@ -107,6 +108,8 @@ struct Town : TownPool::PoolItem<&_town_pool>, CargoSourceSink {
 	uint32 cargo_produced;           ///< Bitmap of all cargos produced by houses in this town.
 	AcceptanceMatrix cargo_accepted; ///< Bitmap of cargos accepted by houses for each 4*4 map square of the town.
 	uint32 cargo_accepted_total;     ///< NOSAVE: Bitmap of all cargos accepted by houses in this town.
+	uint32 cargo_accepted_weights[NUM_CARGO]; ///< NOSAVE: Weight sum of accepting squares per cargo.
+	uint32 cargo_accepted_max_weight; ///< NOSAVE: Cached maximum weight for an accepting square.
 
 	PartOfSubsidyByte part_of_subsidy; ///< NOSAVE: is this town a source/destination of a subsidy?
 
