@@ -300,6 +300,11 @@ static void Load_TOWN()
 			/* Rebuild total cargo acceptance. */
 			UpdateTownCargoTotal(t);
 		}
+
+		/* Cache the aligned tile index of the centre tile. */
+		uint town_x = (TileX(t->xy) / AcceptanceMatrix::GRID) * AcceptanceMatrix::GRID;
+		uint town_y = (TileY(t->xy) / AcceptanceMatrix::GRID) * AcceptanceMatrix::GRID;
+		t->xy_aligned= TileXY(town_x, town_y);
 	}
 }
 
