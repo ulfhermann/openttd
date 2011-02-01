@@ -1184,7 +1184,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 	StationID next_station = INVALID_STATION;
 	OrderList *orders = v->orders.list;
 	if (orders != NULL) {
-		next_station = orders->GetNextStoppingStation(v->cur_order_index, last_visited);
+		next_station = orders->GetNextStoppingStation(v->cur_auto_order_index, last_visited);
 	}
 
 	/* We have not waited enough time till the next round of loading/unloading */
