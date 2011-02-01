@@ -473,6 +473,11 @@ static uint FixVehicleInclination(Vehicle *v, Direction dir)
 	return 1U << GVF_GOINGUP_BIT;
 }
 
+/**
+ * Perform a (large) amount of savegame conversion *magic* in order to
+ * load older savegames and to fill the caches for various purposes.
+ * @return True iff conversion went without a problem.
+ */
 bool AfterLoadGame()
 {
 	SetSignalHandlers();
@@ -2530,6 +2535,14 @@ bool AfterLoadGame()
 			/* If the vehicle is really above v->tile (not in a wormhole),
 			 * it should have set v->z_pos correctly. */
 			assert(v->tile != TileVirtXY(v->x_pos, v->y_pos) || v->z_pos == GetSlopeZ(v->x_pos, v->y_pos));
+		}
+
+		/* Fill Vehicle::cur_real_order_index */
+		FOR_ALL_VEHICLES(v) {
+			if (!v->IsPrimaryVehicle()) continue;
+
+			v->cur_real_order_index = v->cur_auto_order_index;
+			v->UpdateRealOrderIndex();
 		}
 	}
 
