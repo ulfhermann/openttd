@@ -828,10 +828,10 @@ static CommandCost CheckFlatLandRailStation(TileArea tile_area, DoCommandFlag fl
  * @param is_truck_stop True when building a truck stop, false otherwise.
  * @param axis Axis of a drive-through road stop.
  * @param station StationID to be queried and returned if available.
- * @param rts Road types to build. Bits already built at the tile will be removed.
+ * @param rts Road types to build.
  * @return The cost in case of success, or an error code if it failed.
  */
-static CommandCost CheckFlatLandRoadStop(TileArea tile_area, DoCommandFlag flags, uint invalid_dirs, bool is_drive_through, bool is_truck_stop, Axis axis, StationID *station, RoadTypes &rts)
+static CommandCost CheckFlatLandRoadStop(TileArea tile_area, DoCommandFlag flags, uint invalid_dirs, bool is_drive_through, bool is_truck_stop, Axis axis, StationID *station, RoadTypes rts)
 {
 	CommandCost cost(EXPENSES_CONSTRUCTION);
 	int allowed_z = -1;
@@ -849,8 +849,7 @@ static CommandCost CheckFlatLandRoadStop(TileArea tile_area, DoCommandFlag flags
 				return ClearTile_Station(cur_tile, DC_AUTO); // Get error message.
 			} else {
 				if (is_truck_stop != IsTruckStop(cur_tile) ||
-						is_drive_through != IsDriveThroughStopTile(cur_tile) ||
-						HasBit(rts, ROADTYPE_TRAM) != HasBit(GetRoadTypes(cur_tile), ROADTYPE_TRAM)) {
+						is_drive_through != IsDriveThroughStopTile(cur_tile)) {
 					return ClearTile_Station(cur_tile, DC_AUTO); // Get error message.
 				}
 				/* Drive-through station in the wrong direction. */
@@ -908,7 +907,7 @@ static CommandCost CheckFlatLandRoadStop(TileArea tile_area, DoCommandFlag flags
 					num_roadbits += CountBits(GetRoadBits(cur_tile, ROADTYPE_TRAM));
 				}
 
-				/* Do not remove roadtypes! */
+				/* Take into account existing roadbits. */
 				rts |= cur_rts;
 			} else {
 				ret = DoCommand(cur_tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
@@ -1789,6 +1788,8 @@ CommandCost CmdBuildRoadStop(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 	if (flags & DC_EXEC) {
 		/* Check every tile in the area. */
 		TILE_AREA_LOOP(cur_tile, roadstop_area) {
+			RoadTypes cur_rts = GetRoadTypes(cur_tile);
+
 			if (IsTileType(cur_tile, MP_STATION) && IsRoadStop(cur_tile)) {
 				RemoveRoadStop(cur_tile, flags);
 			}
@@ -1811,10 +1812,9 @@ CommandCost CmdBuildRoadStop(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 
 			RoadStopType rs_type = type ? ROADSTOP_TRUCK : ROADSTOP_BUS;
 			if (is_drive_through) {
-				RoadTypes cur_rts = IsNormalRoadTile(cur_tile) ? GetRoadTypes(cur_tile) : ROADTYPES_NONE;
 				Owner road_owner = HasBit(cur_rts, ROADTYPE_ROAD) ? GetRoadOwner(cur_tile, ROADTYPE_ROAD) : _current_company;
 				Owner tram_owner = HasBit(cur_rts, ROADTYPE_TRAM) ? GetRoadOwner(cur_tile, ROADTYPE_TRAM) : _current_company;
-				MakeDriveThroughRoadStop(cur_tile, st->owner, road_owner, tram_owner, st->index, rs_type, rts, DiagDirToAxis(ddir));
+				MakeDriveThroughRoadStop(cur_tile, st->owner, road_owner, tram_owner, st->index, rs_type, rts | cur_rts, DiagDirToAxis(ddir));
 				road_stop->MakeDriveThrough();
 			} else {
 				MakeRoadStop(cur_tile, st->owner, st->index, rs_type, rts, ddir);
@@ -3216,7 +3216,7 @@ void RecalcFrozen(Station *st)
 		const Vehicle *front = *v_it;
 		OrderList *orders = front->orders.list;
 		if (orders != NULL) {
-			StationID next_station_id = orders->GetNextStoppingStation(front->cur_order_index, st->index);
+			StationID next_station_id = orders->GetNextStoppingStation(front->cur_auto_order_index, st->index);
 			if (next_station_id != INVALID_STATION && next_station_id != st->index) {
 				IncreaseStats(st, front, next_station_id, true);
 			}
