@@ -158,27 +158,29 @@ public:
 	int32 lateness_counter;             ///< How many ticks late (or early if negative) this vehicle is.
 	Date timetable_start;               ///< When the vehicle is supposed to start the timetable.
 
-	/* Boundaries for the current position in the world and a next hash link.
-	 * NOSAVE: All of those can be updated with VehiclePositionChanged() */
-	Rect coord;
-	Vehicle *next_hash, **prev_hash;
-	Vehicle *next_new_hash, **prev_new_hash;
-	Vehicle **old_new_hash;
+	Rect coord;                         ///< NOSAVE: Graphical bounding box of the vehicle, i.e. what to redraw on moves.
+
+	Vehicle *next_hash;                 ///< NOSAVE: Next vehicle in the visual location hash.
+	Vehicle **prev_hash;                ///< NOSAVE: Previous vehicle in the visual location hash.
+
+	Vehicle *next_new_hash;             ///< NOSAVE: Next vehicle in the tile location hash.
+	Vehicle **prev_new_hash;            ///< NOSAVE: Previous vehicle in the tile location hash.
+	Vehicle **old_new_hash;             ///< NOSAVE: Cache of the current hash chain.
 
 	SpriteID colourmap;                 ///< NOSAVE: cached colour mapping
 
 	/* Related to age and service time */
-	Year build_year;
+	Year build_year;                    ///< Year the vehicle has been built.
 	Date age;                           ///< Age in days
 	Date max_age;                       ///< Maximum age
-	Date date_of_last_service;
-	Date service_interval;
+	Date date_of_last_service;          ///< Last date the vehicle had a service at a depot.
+	Date service_interval;              ///< The interval for (automatic) servicing; either in days or %.
 	uint16 reliability;                 ///< Reliability.
 	uint16 reliability_spd_dec;         ///< Reliability decrease speed.
 	byte breakdown_ctr;                 ///< Counter for managing breakdown events. @see Vehicle::HandleBreakdown
 	byte breakdown_delay;               ///< Counter for managing breakdown length.
-	byte breakdowns_since_last_service;
-	byte breakdown_chance;
+	byte breakdowns_since_last_service; ///< Counter for the amount of breakdowns.
+	byte breakdown_chance;              ///< Current chance of breakdowns.
 
 	int32 x_pos;                        ///< x coordinate.
 	int32 y_pos;                        ///< y coordinate.
@@ -195,7 +197,7 @@ public:
 	byte z_extent;                      ///< z-extent of vehicle bounding box
 	int8 x_offs;                        ///< x offset for vehicle sprite
 	int8 y_offs;                        ///< y offset for vehicle sprite
-	EngineID engine_type;
+	EngineID engine_type;               ///< The type of engine used for this vehicle.
 
 	TextEffectID fill_percent_te_id;    ///< a text-effect id to a loading indicator object
 	UnitID unitnumber;                  ///< unit number, for display purposes only
@@ -203,16 +205,13 @@ public:
 	uint16 cur_speed;                   ///< current speed
 	byte subspeed;                      ///< fractional speed
 	byte acceleration;                  ///< used by train & aircraft
-	uint32 motion_counter;
-	byte progress;
+	uint32 motion_counter;              ///< counter to occasionally play a vehicle sound.
+	byte progress;                      ///< The percentage (if divided by 256) this vehicle already crossed the tile unit.
 
-	/* for randomized variational spritegroups
-	 * bitmask used to resolve them; parts of it get reseeded when triggers
-	 * of corresponding spritegroups get matched */
-	byte random_bits;
-	byte waiting_triggers;              ///< triggers to be yet matched
+	byte random_bits;                   ///< Bits used for determining which randomized variational spritegroups to use when drawing.
+	byte waiting_triggers;              ///< Triggers to be yet matched before rerandomizing the random bits.
 
-	StationID last_station_visited;     ///< Last station the vehicle has visited, possibly without even stopping.
+	StationID last_station_visited;     ///< The last station we stopped at.
 	StationID last_loading_station;     ///< Last station the vehicle has stopped at and could possibly leave from with any cargo loaded.
 
 	CargoID cargo_type;                 ///< type of cargo this vehicle is carrying
@@ -226,20 +225,18 @@ public:
 
 	byte vehstatus;                     ///< Status
 	Order current_order;                ///< The current order (+ status, like: loading)
-	VehicleOrderID cur_order_index;     ///< The index to the current order
+	VehicleOrderID cur_real_order_index;///< The index to the current real (non-automatic) order
+	VehicleOrderID cur_auto_order_index;///< The index to the current automatic order
 
 	union {
 		OrderList *list;            ///< Pointer to the order list for this vehicle
 		Order     *old;             ///< Only used during conversion of old save games
-	} orders;
+	} orders;                           ///< The orders currently assigned to the vehicle.
 
 	byte vehicle_flags;                 ///< Used for gradual loading and other miscellaneous things (@see VehicleFlags enum)
 
-	/** Ticks to wait before starting next cycle. */
-	uint16 load_unload_ticks;
-
+	uint16 load_unload_ticks;	          ///< Ticks to wait before starting next cycle.
 	GroupID group_id;                   ///< Index of group Pool array
-
 	byte subtype;                       ///< subtype (Filled with values from #EffectVehicles/#TrainSubTypes/#AircraftSubTypes)
 
 	NewGRFCache grf_cache;              ///< Cache of often used calculated NewGRF values
@@ -557,7 +554,8 @@ public:
 	{
 		this->unitnumber = src->unitnumber;
 
-		this->cur_order_index = src->cur_order_index;
+		this->cur_real_order_index = src->cur_real_order_index;
+		this->cur_auto_order_index = src->cur_auto_order_index;
 		this->current_order = src->current_order;
 		this->dest_tile  = src->dest_tile;
 
@@ -607,15 +605,83 @@ public:
 	void UpdateVisualEffect(bool allow_power_change = true);
 	void ShowVisualEffect() const;
 
+private:
 	/**
-	 * Increments cur_order_index, keeps care of the wrap-around and invalidates the GUI.
+	 * Advance cur_real_order_index to the next real order.
+	 * cur_auto_order_index is not touched.
+	 */
+	void SkipToNextRealOrderIndex()
+	{
+		if (this->GetNumManualOrders() > 0) {
+			/* Advance to next real order */
+			do {
+				this->cur_real_order_index++;
+				if (this->cur_real_order_index >= this->GetNumOrders()) this->cur_real_order_index = 0;
+			} while (this->GetOrder(this->cur_real_order_index)->IsType(OT_AUTOMATIC));
+		} else {
+			this->cur_real_order_index = 0;
+		}
+	}
+
+public:
+	/**
+	 * Increments cur_auto_order_index, keeps care of the wrap-around and invalidates the GUI.
+	 * cur_real_order_index is incremented as well, if needed.
 	 * Note: current_order is not invalidated.
 	 */
-	void IncrementOrderIndex()
+	void IncrementAutoOrderIndex()
 	{
-		this->cur_order_index++;
-		if (this->cur_order_index >= this->GetNumOrders()) this->cur_order_index = 0;
+		if (this->cur_auto_order_index == this->cur_real_order_index) {
+			/* Increment real order index as well */
+			this->SkipToNextRealOrderIndex();
+		}
+
+		assert(this->cur_real_order_index == 0 || this->cur_real_order_index < this->GetNumOrders());
+
+		/* Advance to next automatic order */
+		do {
+			this->cur_auto_order_index++;
+			if (this->cur_auto_order_index >= this->GetNumOrders()) this->cur_auto_order_index = 0;
+		} while (this->cur_auto_order_index != this->cur_real_order_index && !this->GetOrder(this->cur_auto_order_index)->IsType(OT_AUTOMATIC));
+
 		InvalidateVehicleOrder(this, 0);
+	}
+
+	/**
+	 * Advanced cur_real_order_index to the next real order, keeps care of the wrap-around and invalidates the GUI.
+	 * cur_auto_order_index is incremented as well, if it was equal to cur_real_order_index, i.e. cur_real_order_index is skipped
+	 * but not any automatic orders.
+	 * Note: current_order is not invalidated.
+	 */
+	void IncrementRealOrderIndex()
+	{
+		if (this->cur_auto_order_index == this->cur_real_order_index) {
+			/* Increment both real and auto order */
+			this->IncrementAutoOrderIndex();
+		} else {
+			/* Increment real order only */
+			this->SkipToNextRealOrderIndex();
+			InvalidateVehicleOrder(this, 0);
+		}
+	}
+
+	/**
+	 * Skip automatic orders until cur_real_order_index is a non-automatic order.
+	 */
+	void UpdateRealOrderIndex()
+	{
+		/* Make sure the index is valid */
+		if (this->cur_real_order_index >= this->GetNumOrders()) this->cur_real_order_index = 0;
+
+		if (this->GetNumManualOrders() > 0) {
+			/* Advance to next real order */
+			while (this->GetOrder(this->cur_real_order_index)->IsType(OT_AUTOMATIC)) {
+				this->cur_real_order_index++;
+				if (this->cur_real_order_index >= this->GetNumOrders()) this->cur_real_order_index = 0;
+			}
+		} else {
+			this->cur_real_order_index = 0;
+		}
 	}
 
 	/**
@@ -627,8 +693,6 @@ public:
 	{
 		return (this->orders.list == NULL) ? NULL : this->orders.list->GetOrderAt(index);
 	}
-
-	Order *GetNextManualOrder(int index) const;
 
 	/**
 	 * Returns the last order of a vehicle, or NULL if it doesn't exists
@@ -740,7 +804,17 @@ public:
 	}
 };
 
+/**
+ * Iterate over all vehicles from a given point.
+ * @param var   The variable used to iterate over.
+ * @param start The vehicle to start the iteration at.
+ */
 #define FOR_ALL_VEHICLES_FROM(var, start) FOR_ALL_ITEMS_FROM(Vehicle, vehicle_index, var, start)
+
+/**
+ * Iterate over all vehicles.
+ * @param var The variable used to iterate over.
+ */
 #define FOR_ALL_VEHICLES(var) FOR_ALL_VEHICLES_FROM(var, 0)
 
 /**
@@ -900,14 +974,19 @@ struct SpecializedVehicle : public Vehicle {
 	}
 };
 
+/**
+ * Iterate over all vehicles of a particular type.
+ * @param name The type of vehicle to iterate over.
+ * @param var  The variable used to iterate over.
+ */
 #define FOR_ALL_VEHICLES_OF_TYPE(name, var) FOR_ALL_ITEMS_FROM(name, vehicle_index, var, 0) if (var->type == name::EXPECTED_TYPE)
 
 /**
  * Disasters, like submarines, skyrangers and their shadows, belong to this class.
  */
 struct DisasterVehicle : public SpecializedVehicle<DisasterVehicle, VEH_DISASTER> {
-	uint16 image_override;
-	VehicleID big_ufo_destroyer_target;
+	SpriteID image_override;            ///< Override for the default disaster vehicle sprite.
+	VehicleID big_ufo_destroyer_target; ///< The big UFO that this destroyer is supposed to bomb.
 
 	/** We don't want GCC to zero our struct! It already is zeroed and has an index! */
 	DisasterVehicle() : SpecializedVehicleBase() {}
@@ -918,6 +997,10 @@ struct DisasterVehicle : public SpecializedVehicle<DisasterVehicle, VEH_DISASTER
 	bool Tick();
 };
 
+/**
+ * Iterate over disaster vehicles.
+ * @param var The variable used to iterate over.
+ */
 #define FOR_ALL_DISASTERVEHICLES(var) FOR_ALL_VEHICLES_OF_TYPE(DisasterVehicle, var)
 
 /** Generates sequence of free UnitID numbers */
@@ -933,6 +1016,7 @@ struct FreeUnitIDGenerator {
 	~FreeUnitIDGenerator() { free(this->cache); }
 };
 
+/** Sentinel for an invalid coordinate. */
 static const int32 INVALID_COORD = 0x7fffffff;
 
 #endif /* VEHICLE_BASE_H */
