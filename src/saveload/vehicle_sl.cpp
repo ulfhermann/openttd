@@ -22,7 +22,7 @@
 
 #include <map>
 
-/*
+/**
  * Link front and rear multiheaded engines to each other
  * This is done when loading a savegame
  */
@@ -489,7 +489,8 @@ const SaveLoad *GetVehicleDescription(VehicleType vt)
 		     SLE_VAR(Vehicle, tick_counter,          SLE_UINT8),
 		 SLE_CONDVAR(Vehicle, running_ticks,         SLE_UINT8,                   88, SL_MAX_VERSION),
 
-		     SLE_VAR(Vehicle, cur_order_index,       SLE_UINT8),
+		     SLE_VAR(Vehicle, cur_auto_order_index,  SLE_UINT8),
+		 SLE_CONDVAR(Vehicle, cur_real_order_index,  SLE_UINT8,                  158, SL_MAX_VERSION),
 		/* num_orders is now part of OrderList and is not saved but counted */
 		SLE_CONDNULL(1,                                                            0, 104),
 
