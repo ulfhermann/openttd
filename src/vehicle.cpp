@@ -1905,7 +1905,7 @@ void Vehicle::CancelReservation(Station *st)
 	}
 }
 
-/*
+/**
  * A vehicle can leave the current station with cargo if:
  * 1. it can load cargo here OR
  * 2a. it could leave the last station with cargo AND
