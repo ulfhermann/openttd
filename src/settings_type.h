@@ -44,12 +44,10 @@ struct DifficultySettings {
 
 /** Settings related to the GUI and other stuff that is not saved in the savegame. */
 struct GUISettings {
-	bool   vehicle_speed;                    ///< show vehicle speed
 	bool   sg_full_load_any;                 ///< new full load calculation, any cargo must be full read from pre v93 savegames
 	bool   lost_vehicle_warn;                ///< if a vehicle can't find its destination, show a warning
 	uint8  order_review_system;              ///< perform order reviews on vehicles
 	bool   vehicle_income_warn;              ///< if a vehicle isn't generating income, show a warning
-	bool   status_long_date;                 ///< always show long date in status bar
 	bool   show_finances;                    ///< show finances at end of year
 	bool   sg_new_nonstop;                   ///< ttdpatch compatible nonstop handling read from pre v93 savegames
 	bool   new_nonstop;                      ///< ttdpatch compatible nonstop handling
@@ -89,7 +87,6 @@ struct GUISettings {
 	Year   coloured_news_year;               ///< when does newspaper become coloured?
 	bool   timetable_in_ticks;               ///< whether to show the timetable in ticks rather than days
 	bool   quick_goto;                       ///< Allow quick access to 'goto button' in vehicle orders window
-	bool   bridge_pillars;                   ///< show bridge pillars for high bridges
 	bool   auto_euro;                        ///< automatically switch to euro in 2002
 	byte   drag_signals_density;             ///< many signals density
 	Year   semaphore_build_before;           ///< build semaphore signals automatically before this year
@@ -206,7 +203,8 @@ struct GameCreationSettings {
 struct ConstructionSettings {
 	bool   build_on_slopes;                  ///< allow building on slopes
 	bool   autoslope;                        ///< allow terraforming under things
-	bool   longbridges;                      ///< allow 100 tile long bridges
+	uint16 max_bridge_length;                ///< maximum length of bridges
+	uint16 max_tunnel_length;                ///< maximum length of tunnels
 	bool   signal_side;                      ///< show signals on right side
 	bool   extra_dynamite;                   ///< extra dynamite
 	bool   road_stop_on_town_road;           ///< allow building of drive-through road stops on town owned roads
@@ -317,6 +315,7 @@ struct PathfinderSettings {
 	bool   roadveh_queue;                    ///< buggy road vehicle queueing
 	bool   forbid_90_deg;                    ///< forbid trains to make 90 deg turns
 
+	bool   reverse_at_signals;               ///< whether to reverse at signals at all
 	byte   wait_oneway_signal;               ///< waitingtime in days before a oneway signal
 	byte   wait_twoway_signal;               ///< waitingtime in days before a twoway signal
 
@@ -334,15 +333,13 @@ struct OrderSettings {
 	bool   improved_load;                    ///< improved loading algorithm
 	bool   gradual_loading;                  ///< load vehicles gradually
 	bool   selectgoods;                      ///< only send the goods to station if a train has been there
-	bool   gotodepot;                        ///< allow goto depot in orders
 	bool   no_servicing_if_no_breakdowns;    ///< dont send vehicles to depot when breakdowns are disabled
-	bool   timetabling;                      ///< whether to allow timetabling
 	bool   serviceathelipad;                 ///< service helicopters at helipads automatically (no need to send to depot)
 };
 
 /** Settings related to vehicles. */
 struct VehicleSettings {
-	bool   mammoth_trains;                   ///< allow very long trains
+	uint8  max_train_length;                 ///< maximum length for trains
 	uint8  smoke_amount;                     ///< amount of smoke/sparks locomotives produce
 	uint8  train_acceleration_model;         ///< realistic acceleration for trains
 	uint8  roadveh_acceleration_model;       ///< realistic acceleration for road vehicles
@@ -415,8 +412,6 @@ struct LinkGraphSettings {
 /** Settings related to stations. */
 struct StationSettings {
 	bool   modified_catchment;               ///< different-size catchment areas
-	bool   join_stations;                    ///< allow joining of train stations
-	bool   nonuniform_stations;              ///< allow nonuniform train stations
 	bool   adjacent_stations;                ///< allow stations to be built directly adjacent to other stations
 	bool   distant_join_stations;            ///< allow to join non-adjacent stations
 	bool   never_expire_airports;            ///< never expire airports
