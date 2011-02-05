@@ -52,6 +52,8 @@ enum RoadVehicleStates {
 	RVSB_IN_DT_ROAD_STOP         = 1 << RVS_IN_DT_ROAD_STOP,  ///< The vehicle is in a drive-through road stop
 	RVSB_IN_DT_ROAD_STOP_END     = RVSB_IN_DT_ROAD_STOP + TRACKDIR_END,
 
+	RVSB_DRIVE_SIDE              = 1 << RVS_DRIVE_SIDE,       ///< The vehicle is at the opposite side of the road
+
 	RVSB_TRACKDIR_MASK           = 0x0F,                      ///< The mask used to extract track dirs
 	RVSB_ROAD_STOP_TRACKDIR_MASK = 0x09                       ///< Only bits 0 and 3 are used to encode the trackdir for road stops
 };
@@ -74,6 +76,9 @@ static const uint RVC_TURN_AROUND_START_FRAME_SHORT_TRAM = 16;
 static const uint RVC_DRIVE_THROUGH_STOP_FRAME           = 11;
 static const uint RVC_DEPOT_STOP_FRAME                   = 11;
 
+/** The number of ticks a vehicle has for overtaking. */
+static const byte RV_OVERTAKE_TIMEOUT = 35;
+
 void RoadVehUpdateCache(RoadVehicle *v);
 
 /**
@@ -83,8 +88,8 @@ struct RoadVehicle : public GroundVehicle<RoadVehicle, VEH_ROAD> {
 	byte state;             ///< @see RoadVehicleStates
 	byte frame;
 	uint16 blocked_ctr;
-	byte overtaking;
-	byte overtaking_ctr;
+	byte overtaking;        ///< Set to #RVSB_DRIVE_SIDE when overtaking, otherwise 0.
+	byte overtaking_ctr;    ///< The length of the current overtake attempt.
 	uint16 crashed_ctr;
 	byte reverse_ctr;
 
