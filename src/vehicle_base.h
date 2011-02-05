@@ -115,7 +115,6 @@ struct GroundVehicleCache;
 extern const SaveLoad *GetVehicleDescription(VehicleType vt);
 struct LoadgameState;
 extern bool LoadOldVehicle(LoadgameState *ls, int num);
-extern bool AfterLoadGame();
 extern void FixOldVehicles();
 
 /** %Vehicle data structure. */
@@ -131,7 +130,6 @@ private:
 	bool CanLeaveWithCargo();
 public:
 	friend const SaveLoad *GetVehicleDescription(VehicleType vt); ///< So we can use private/protected variables in the saveload code
-	friend bool AfterLoadGame();
 	friend void FixOldVehicles();
 	friend void AfterLoadVehicles(bool part_of_load);             ///< So we can set the previous and first pointers while loading
 	friend bool LoadOldVehicle(LoadgameState *ls, int num);       ///< So we can set the proper next pointer while loading
@@ -235,7 +233,7 @@ public:
 
 	byte vehicle_flags;                 ///< Used for gradual loading and other miscellaneous things (@see VehicleFlags enum)
 
-	uint16 load_unload_ticks;	          ///< Ticks to wait before starting next cycle.
+	uint16 load_unload_ticks;           ///< Ticks to wait before starting next cycle.
 	GroupID group_id;                   ///< Index of group Pool array
 	byte subtype;                       ///< subtype (Filled with values from #EffectVehicles/#TrainSubTypes/#AircraftSubTypes)
 

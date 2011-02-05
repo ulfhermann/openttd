@@ -438,7 +438,7 @@ static void RoadVehSetRandomDirection(RoadVehicle *v)
 		uint32 r = Random();
 
 		v->direction = ChangeDir(v->direction, delta[r & 3]);
-		v->UpdateInclination(false, true);
+		v->UpdateViewport(true, true);
 	} while ((v = v->Next()) != NULL);
 }
 
@@ -774,14 +774,10 @@ static void RoadVehCheckOvertake(RoadVehicle *v, RoadVehicle *u)
 	od.tile = v->tile + TileOffsByDiagDir(DirToDiagDir(v->direction));
 	if (CheckRoadBlockedForOvertaking(&od)) return;
 
-	if (od.u->cur_speed == 0 || (od.u->vehstatus & VS_STOPPED)) {
-		v->overtaking_ctr = 0x11;
-		v->overtaking = 0x10;
-	} else {
-//		if (CheckRoadBlockedForOvertaking(&od)) return;
-		v->overtaking_ctr = 0;
-		v->overtaking = 0x10;
-	}
+	/* When the vehicle in front of us is stopped we may only take
+	 * half the time to pass it than when the vehicle is moving. */
+	v->overtaking_ctr = (od.u->cur_speed == 0 || (od.u->vehstatus & VS_STOPPED)) ? RV_OVERTAKE_TIMEOUT / 2 : 0;
+	v->overtaking = RVSB_DRIVE_SIDE;
 }
 
 static void RoadZPosAffectSpeed(RoadVehicle *v, byte old_z)
@@ -1045,7 +1041,7 @@ static bool IndividualRoadVehicleController(RoadVehicle *v, const RoadVehicle *p
 		if (IsTileType(v->tile, MP_STATION)) {
 			/* Force us to be not overtaking! */
 			v->overtaking = 0;
-		} else if (++v->overtaking_ctr >= 35) {
+		} else if (++v->overtaking_ctr >= RV_OVERTAKE_TIMEOUT) {
 			/* If overtaking just aborts at a random moment, we can have a out-of-bound problem,
 			 *  if the vehicle started a corner. To protect that, only allow an abort of
 			 *  overtake if we are on straight roads */
@@ -1119,6 +1115,9 @@ static bool IndividualRoadVehicleController(RoadVehicle *v, const RoadVehicle *p
 again:
 		uint start_frame = RVC_DEFAULT_START_FRAME;
 		if (IsReversingRoadTrackdir(dir)) {
+			/* When turning around we can't be overtaking. */
+			v->overtaking = 0;
+
 			/* Turning around */
 			if (v->roadtype == ROADTYPE_TRAM) {
 				/* Determine the road bits the tram needs to be able to turn around

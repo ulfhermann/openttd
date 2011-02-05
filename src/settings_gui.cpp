@@ -1263,8 +1263,6 @@ uint SettingsPage::Draw(GameSettings *settings_ptr, int left, int right, int bas
 
 
 static SettingEntry _settings_ui_display[] = {
-	SettingEntry("gui.vehicle_speed"),
-	SettingEntry("gui.status_long_date"),
 	SettingEntry("gui.date_format_in_default_names"),
 	SettingEntry("gui.population_in_label"),
 	SettingEntry("gui.measure_tooltip"),
@@ -1336,7 +1334,8 @@ static SettingEntry _settings_construction[] = {
 	SettingEntry("construction.build_on_slopes"),
 	SettingEntry("construction.autoslope"),
 	SettingEntry("construction.extra_dynamite"),
-	SettingEntry("construction.longbridges"),
+	SettingEntry("construction.max_bridge_length"),
+	SettingEntry("construction.max_tunnel_length"),
 	SettingEntry("station.never_expire_airports"),
 	SettingEntry("construction.freeform_edges"),
 	SettingEntry("construction.extra_tree_placement"),
@@ -1355,8 +1354,6 @@ static SettingsPage _settings_stations_cargo_page = {_settings_stations_cargo, l
 
 static SettingEntry _settings_stations[] = {
 	SettingEntry(&_settings_stations_cargo_page, STR_CONFIG_SETTING_STATIONS_CARGOHANDLING),
-	SettingEntry("station.join_stations"),
-	SettingEntry("station.nonuniform_stations"),
 	SettingEntry("station.adjacent_stations"),
 	SettingEntry("station.distant_join_stations"),
 	SettingEntry("station.station_spread"),
@@ -1463,9 +1460,10 @@ static SettingEntry _settings_vehicles_servicing[] = {
 static SettingsPage _settings_vehicles_servicing_page = {_settings_vehicles_servicing, lengthof(_settings_vehicles_servicing)};
 
 static SettingEntry _settings_vehicles_trains[] = {
+	SettingEntry("pf.reverse_at_signals"),
 	SettingEntry("vehicle.train_acceleration_model"),
 	SettingEntry("vehicle.train_slope_steepness"),
-	SettingEntry("vehicle.mammoth_trains"),
+	SettingEntry("vehicle.max_train_length"),
 	SettingEntry("vehicle.wagon_speed_limits"),
 	SettingEntry("vehicle.disable_elrails"),
 	SettingEntry("vehicle.freight_trains"),
@@ -1479,7 +1477,6 @@ static SettingEntry _settings_vehicles[] = {
 	SettingEntry(&_settings_vehicles_autorenew_page, STR_CONFIG_SETTING_VEHICLES_AUTORENEW),
 	SettingEntry(&_settings_vehicles_servicing_page, STR_CONFIG_SETTING_VEHICLES_SERVICING),
 	SettingEntry(&_settings_vehicles_trains_page, STR_CONFIG_SETTING_VEHICLES_TRAINS),
-	SettingEntry("order.gotodepot"),
 	SettingEntry("gui.new_nonstop"),
 	SettingEntry("gui.order_review_system"),
 	SettingEntry("gui.vehicle_income_warn"),
@@ -1491,7 +1488,6 @@ static SettingEntry _settings_vehicles[] = {
 	SettingEntry("vehicle.max_ships"),
 	SettingEntry("vehicle.plane_speed"),
 	SettingEntry("vehicle.plane_crashes"),
-	SettingEntry("order.timetabling"),
 	SettingEntry("vehicle.dynamic_engines"),
 	SettingEntry("vehicle.roadveh_acceleration_model"),
 	SettingEntry("vehicle.roadveh_slope_steepness"),
