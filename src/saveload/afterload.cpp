@@ -2242,20 +2242,6 @@ bool AfterLoadGame()
 		}
 	}
 
-	if (IsSavegameVersionBefore(139)) {
-		Train *t;
-		FOR_ALL_TRAINS(t) {
-			/* Copy old GOINGUP / GOINGDOWN flags. */
-			if (HasBit(t->flags, 1)) {
-				ClrBit(t->flags, 1);
-				SetBit(t->gv_flags, GVF_GOINGUP_BIT);
-			} else if (HasBit(t->flags, 2)) {
-				ClrBit(t->flags, 2);
-				SetBit(t->gv_flags, GVF_GOINGDOWN_BIT);
-			}
-		}
-	}
-
 	if (IsSavegameVersionBefore(140)) {
 		Station *st;
 		FOR_ALL_STATIONS(st) {
@@ -2377,6 +2363,10 @@ bool AfterLoadGame()
 		 * get messed up just after loading the savegame. This fixes that. */
 		Vehicle *v;
 		FOR_ALL_VEHICLES(v) {
+			/* Not all vehicle types can be inside a tunnel. Furthermore,
+			 * testing IsTunnelTile() for invalid tiles causes a crash. */
+			if (!v->IsGroundVehicle()) continue;
+
 			/* Is the vehicle in a tunnel? */
 			if (!IsTunnelTile(v->tile)) continue;
 
@@ -2400,12 +2390,19 @@ bool AfterLoadGame()
 			bool hidden;
 			if (dir == vdir) { // Entering tunnel
 				hidden = frame >= _tunnel_visibility_frame[dir];
+				v->tile = vtile;
 			} else if (dir == ReverseDiagDir(vdir)) { // Leaving tunnel
 				hidden = frame < TILE_SIZE - _tunnel_visibility_frame[dir];
-			} else { // Something freaky going on?
-				NOT_REACHED();
+				/* v->tile changes at the moment when the vehicle leaves the tunnel. */
+				v->tile = hidden ? GetOtherTunnelBridgeEnd(vtile) : vtile;
+			} else {
+				/* We could get here in two cases:
+				 * - for road vehicles, it is reversing at the end of the tunnel
+				 * - it is crashed in the tunnel entry (both train or RV destroyed by UFO)
+				 * Whatever case it is, do not change anything and use the old values.
+				 * Especially changing RV's state would break its reversing in the middle. */
+				continue;
 			}
-			v->tile = vtile;
 
 			if (hidden) {
 				v->vehstatus |= VS_HIDDEN;
@@ -2466,6 +2463,14 @@ bool AfterLoadGame()
 			switch (v->type) {
 				case VEH_TRAIN: {
 					Train *t = Train::From(v);
+
+					/* Clear old GOINGUP / GOINGDOWN flags.
+					 * It was changed in savegame version 139, but savegame
+					 * version 158 doesn't use these bits, so it doesn't hurt
+					 * to clear them unconditionally. */
+					ClrBit(t->flags, 1);
+					ClrBit(t->flags, 2);
+
 					/* Clear both bits first. */
 					ClrBit(t->gv_flags, GVF_GOINGUP_BIT);
 					ClrBit(t->gv_flags, GVF_GOINGDOWN_BIT);
@@ -2543,6 +2548,24 @@ bool AfterLoadGame()
 
 			v->cur_real_order_index = v->cur_auto_order_index;
 			v->UpdateRealOrderIndex();
+		}
+	}
+
+	if (IsSavegameVersionBefore(159)) {
+		/* If the savegame is old (before version 100), then the value of 255
+		 * for these settings did not mean "disabled". As such everything
+		 * before then did reverse.
+		 * To simplify stuff we disable all turning around or we do not
+		 * disable anything at all. So, if some reversing was disabled we
+		 * will keep reversing disabled, otherwise it'll be turned on. */
+		_settings_game.pf.reverse_at_signals = IsSavegameVersionBefore(100) || (_settings_game.pf.wait_oneway_signal != 255 && _settings_game.pf.wait_twoway_signal != 255 && _settings_game.pf.wait_for_pbs_path != 255);
+	}
+
+	if (IsSavegameVersionBefore(160)) {
+		/* Setting difficulty number_industries other than zero get bumped to +1
+		 * since a new option (very low at position1) has been added */
+		if (_settings_game.difficulty.number_industries > 0) {
+			_settings_game.difficulty.number_industries++;
 		}
 	}
 
