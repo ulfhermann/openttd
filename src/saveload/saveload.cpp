@@ -223,6 +223,8 @@
  *  156   21728
  *  157   21862
  *  158   21933
+ *  159   21962
+ *  160   21969
  */
 extern const uint16 SAVEGAME_VERSION = SL_MCF; ///< Current savegame version of OpenTTD.
 
