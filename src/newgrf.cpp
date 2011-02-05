@@ -1426,6 +1426,7 @@ static ChangeInfoResult BridgeChangeInfo(uint brid, int numinfo, int prop, ByteR
 
 			case 0x0A: // Maximum length
 				bridge->max_length = buf->ReadByte();
+				if (bridge->max_length > 16) bridge->max_length = 0xFFFF;
 				break;
 
 			case 0x0B: // Cost factor
@@ -5129,7 +5130,7 @@ static void CfgApply(ByteReader *buf)
 			uint32 value = GetParamVal(param_num + i / 4, NULL);
 			/* Reset carry flag for each iteration of the variable (only really
 			 * matters if param_size is greater than 4) */
-			if (i == 0) carry = false;
+			if (i % 4 == 0) carry = false;
 
 			if (add_value) {
 				uint new_value = preload_sprite[offset + i] + GB(value, (i % 4) * 8, 8) + (carry ? 1 : 0);
@@ -6901,7 +6902,7 @@ static void InitializeGRFSpecial()
 	_ttdpatch_flags[0] = ((_settings_game.station.never_expire_airports ? 1 : 0) << 0x0C)  // keepsmallairport
 	                   |                                                      (1 << 0x0D)  // newairports
 	                   |                                                      (1 << 0x0E)  // largestations
-	                   |      ((_settings_game.construction.longbridges ? 1 : 0) << 0x0F)  // longbridges
+	                   | ((_settings_game.construction.max_bridge_length > 16 ? 1 : 0) << 0x0F)  // longbridges
 	                   |                                                      (0 << 0x10)  // loadtime
 	                   |                                                      (1 << 0x12)  // presignals
 	                   |                                                      (1 << 0x13)  // extpresignals
@@ -6911,7 +6912,7 @@ static void InitializeGRFSpecial()
 	                   |                                                      (1 << 0x1E); // generalfixes
 
 	_ttdpatch_flags[1] =   ((_settings_game.economy.station_noise_level ? 1 : 0) << 0x07)  // moreairports - based on units of noise
-	                   |        ((_settings_game.vehicle.mammoth_trains ? 1 : 0) << 0x08)  // mammothtrains
+	                   |  ((_settings_game.vehicle.max_train_length > 5 ? 1 : 0) << 0x08)  // mammothtrains
 	                   |                                                      (1 << 0x09)  // trainrefit
 	                   |                                                      (0 << 0x0B)  // subsidiaries
 	                   |         ((_settings_game.order.gradual_loading ? 1 : 0) << 0x0C)  // gradualloading
@@ -6965,7 +6966,7 @@ static void InitializeGRFSpecial()
 	                   |                                                      (1 << 0x0B)  // newcargo
 	                   |                                                      (1 << 0x0C)  // enhancemultiplayer
 	                   |                                                      (1 << 0x0D)  // onewayroads
-	                   |   ((_settings_game.station.nonuniform_stations ? 1 : 0) << 0x0E)  // irregularstations
+	                   |                                                      (1 << 0x0E)  // irregularstations
 	                   |                                                      (1 << 0x0F)  // statistics
 	                   |                                                      (1 << 0x10)  // newsounds
 	                   |                                                      (1 << 0x11)  // autoreplace

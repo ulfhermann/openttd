@@ -285,13 +285,16 @@ int UpdateCompanyRatingAndValue(Company *c, bool update)
 /*  use INVALID_OWNER as new_owner to delete the company. */
 void ChangeOwnershipOfCompanyItems(Owner old_owner, Owner new_owner)
 {
+	/* We need to set _current_company to old_owner before we try to move
+	 * the client. This is needed as it needs to know whether "you" really
+	 * are the current local company. */
+	Backup<CompanyByte> cur_company(_current_company, old_owner, FILE_LINE);
 #ifdef ENABLE_NETWORK
 	/* In all cases, make spectators of clients connected to that company */
 	if (_networking) NetworkClientsToSpectators(old_owner);
 #endif /* ENABLE_NETWORK */
 
 	Town *t;
-	Backup<CompanyByte> cur_company(_current_company, old_owner, FILE_LINE);
 
 	assert(old_owner != new_owner);
 
@@ -481,22 +484,22 @@ static void CompanyCheckBankrupt(Company *c)
 
 	c->quarters_of_bankruptcy++;
 
-	CompanyNewsInformation *cni = MallocT<CompanyNewsInformation>(1);
-	cni->FillData(c);
-
 	switch (c->quarters_of_bankruptcy) {
 		case 0:
 		case 1:
-			free(cni);
 			break;
 
-		case 2:
+		case 2: {
+			CompanyNewsInformation *cni = MallocT<CompanyNewsInformation>(1);
+			cni->FillData(c);
 			SetDParam(0, STR_NEWS_COMPANY_IN_TROUBLE_TITLE);
 			SetDParam(1, STR_NEWS_COMPANY_IN_TROUBLE_DESCRIPTION);
 			SetDParamStr(2, cni->company_name);
 			AddCompanyNewsItem(STR_MESSAGE_NEWS_FORMAT, NS_COMPANY_TROUBLE, cni);
 			AI::BroadcastNewEvent(new AIEventCompanyInTrouble(c->index));
 			break;
+		}
+
 		case 3: {
 			/* Check if the company has any value.. if not, declare it bankrupt
 			 *  right now */
@@ -505,7 +508,6 @@ static void CompanyCheckBankrupt(Company *c)
 				c->bankrupt_value = val;
 				c->bankrupt_asked = 1 << c->index; // Don't ask the owner
 				c->bankrupt_timeout = 0;
-				free(cni);
 				break;
 			}
 			/* FALL THROUGH to case 4... */
@@ -518,27 +520,20 @@ static void CompanyCheckBankrupt(Company *c)
 				 * he/she is no long in control of this company. However... when you
 				 * join another company (cheat) the "unowned" company can bankrupt. */
 				c->bankrupt_asked = MAX_UVALUE(CompanyMask);
-				free(cni);
 				break;
 			}
 
-			/* Close everything the owner has open */
-			DeleteCompanyWindows(c->index);
-
-			/* Show bankrupt news */
-			SetDParam(0, STR_NEWS_COMPANY_BANKRUPT_TITLE);
-			SetDParam(1, STR_NEWS_COMPANY_BANKRUPT_DESCRIPTION);
-			SetDParamStr(2, cni->company_name);
-			AddCompanyNewsItem(STR_MESSAGE_NEWS_FORMAT, NS_COMPANY_BANKRUPT, cni);
-
-			ChangeOwnershipOfCompanyItems(c->index, INVALID_OWNER);
-
-			if (c->is_ai) AI::Stop(c->index);
-
-			CompanyID c_index = c->index;
-			delete c;
-			AI::BroadcastNewEvent(new AIEventCompanyBankrupt(c_index));
-			CompanyAdminBankrupt(c_index);
+			/* Actually remove the company, but not when we're a network client.
+			 * In case of network clients we will be getting a command from the
+			 * server. It is done in this way as we are called from the
+			 * StateGameLoop which can't change the current company, and thus
+			 * updating the local company triggers an assert later on. In the
+			 * case of a network game the command will be processed at a time
+			 * that changing the current company is okay. In case of single
+			 * player we are sure (the above check) that we are not the local
+			 * company and thus we won't be moved. */
+			if (!_networking || _network_server) DoCommandP(0, 2 | (c->index << 16), 0, CMD_COMPANY_CTRL);
+			break;
 	}
 }
 
@@ -1350,7 +1345,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 		/* We loaded less cargo than possible for all cargo types and it's not full
 		 * load and we're not supposed to wait any longer: stop loading. */
 		if (!anything_unloaded && full_load_amount == 0 && !(v->current_order.GetLoadType() & OLFB_FULL_LOAD) &&
-				(!_settings_game.order.timetabling || v->current_order_time >= (uint)max(v->current_order.wait_time - v->lateness_counter, 0))) {
+				v->current_order_time >= (uint)max(v->current_order.wait_time - v->lateness_counter, 0)) {
 			SetBit(v->vehicle_flags, VF_STOP_LOADING);
 		}
 	} else {
