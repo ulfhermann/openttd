@@ -61,6 +61,7 @@ struct Engine : EnginePool::PoolItem<&_engine_pool> {
 	Engine();
 	Engine(VehicleType type, EngineID base);
 	~Engine();
+	bool IsEnabled() const;
 
 	/**
 	 * Determines the default cargo type of an engine.
@@ -114,6 +115,8 @@ struct EngineOverrideManager : SmallVector<EngineIDMapping, 256> {
 
 	void ResetToDefaultMapping();
 	EngineID GetID(VehicleType type, uint16 grf_local_id, uint32 grfid);
+
+	static bool ResetToCurrentNewGRFConfig();
 };
 
 extern EngineOverrideManager _engine_mngr;
