@@ -21,11 +21,23 @@
 #include "linkgraph/linkgraph_type.h"
 #include "openttd.h"
 
+/** Available industry map generation densities. */
+enum IndustryDensity {
+	ID_FUND_ONLY, ///< The game does not build industries.
+	ID_MINIMAL,   ///< Start with just the industries that must be present.
+	ID_VERY_LOW,  ///< Very few industries at game start.
+	ID_LOW,       ///< Few industries at game start.
+	ID_NORMAL,    ///< Normal amount of industries at game start.
+	ID_HIGH,      ///< Many industries at game start.
+
+	ID_END,       ///< Number of industry density settings.
+};
+
 /** Settings related to the difficulty of the game */
 struct DifficultySettings {
 	byte   max_no_competitors;               ///< the number of competitors (AIs)
 	byte   number_towns;                     ///< the amount of towns
-	byte   number_industries;                ///< the amount of industries
+	byte   industry_density;                 ///< The industry density. @see IndustryDensity
 	uint32 max_loan;                         ///< the maximum initial loan
 	byte   initial_interest;                 ///< amount of interest (to pay over the loan)
 	byte   vehicle_costs;                    ///< amount of money spent on vehicle running cost
@@ -373,6 +385,7 @@ struct EconomySettings {
 	uint8  feeder_payment_share;             ///< percentage of leg payment to virtually pay in feeder systems
 	byte   dist_local_authority;             ///< distance for town local authority, default 20
 	bool   exclusive_rights;                 ///< allow buying exclusive rights
+	bool   fund_roads;                       ///< allow funding local road reconstruction
 	bool   give_money;                       ///< allow giving other companies money
 	bool   mod_road_rebuild;                 ///< roadworks remove unneccesary RoadBits
 	bool   multiple_industry_per_town;       ///< allow many industries of the same type per town

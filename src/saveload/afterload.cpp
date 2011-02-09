@@ -18,7 +18,7 @@
 #include "../gamelog_internal.h"
 #include "../network/network.h"
 #include "../gfxinit.h"
-#include "../functions.h"
+#include "../viewport_func.h"
 #include "../industry.h"
 #include "../clear_map.h"
 #include "../vehicle_func.h"
@@ -51,6 +51,7 @@
 #include "../rail_gui.h"
 #include "../core/backup_type.hpp"
 #include "../smallmap_gui.h"
+#include "../news_func.h"
 
 #include "table/strings.h"
 
@@ -781,11 +782,18 @@ bool AfterLoadGame()
 					case STATION_TRUCK:
 					case STATION_BUS:
 						if (IsSavegameVersionBefore(6)) {
+							/* Before version 5 you could not have more than 250 stations.
+							 * Version 6 adds large maps, so you could only place 253*253
+							 * road stops on a map (no freeform edges) = 64009. So, yes
+							 * someone could in theory create such a full map to trigger
+							 * this assertion, it's safe to assume that's only something
+							 * theoretical and does not happen in normal games. */
+							assert(RoadStop::CanAllocateItem());
+
 							/* From this version on there can be multiple road stops of the
 							 * same type per station. Convert the existing stops to the new
 							 * internal data structure. */
 							RoadStop *rs = new RoadStop(t);
-							if (rs == NULL) error("Too many road stops in savegame");
 
 							RoadStop **head =
 								IsTruckStop(t) ? &st->truck_stops : &st->bus_stops;
@@ -1447,10 +1455,10 @@ bool AfterLoadGame()
 	}
 
 	if (IsSavegameVersionBefore(58)) {
-		/* Setting difficulty number_industries other than zero get bumped to +1
-		 * since a new option (very low at position1) has been added */
-		if (_settings_game.difficulty.number_industries > 0) {
-			_settings_game.difficulty.number_industries++;
+		/* Setting difficulty industry_density other than zero get bumped to +1
+		 * since a new option (very low at position 1) has been added */
+		if (_settings_game.difficulty.industry_density > 0) {
+			_settings_game.difficulty.industry_density++;
 		}
 
 		/* Same goes for number of towns, although no test is needed, just an increment */
@@ -1927,6 +1935,12 @@ bool AfterLoadGame()
 					ObjectType type = GetObjectType(t);
 					int size = type == OBJECT_HQ ? 2 : 1;
 
+					if (!Object::CanAllocateItem()) {
+						/* Nice... you managed to place 64k lighthouses and
+						 * antennae on the map... boohoo. */
+						SlError(STR_ERROR_TOO_MANY_OBJECTS);
+					}
+
 					Object *o = new Object();
 					o->location.tile = t;
 					o->location.w    = size;
@@ -2023,6 +2037,10 @@ bool AfterLoadGame()
 		FOR_ALL_STATIONS(st) {
 			std::list<Vehicle *>::iterator iter;
 			for (iter = st->loading_vehicles.begin(); iter != st->loading_vehicles.end(); ++iter) {
+				/* There are always as many CargoPayments as Vehicles. We need to make the
+				 * assert() in Pool::GetNew() happy by calling CanAllocateItem(). */
+				assert_compile(CargoPaymentPool::MAX_SIZE == VehiclePool::MAX_SIZE);
+				assert(CargoPayment::CanAllocateItem());
 				Vehicle *v = *iter;
 				if (v->cargo_payment == NULL) v->cargo_payment = new CargoPayment(v);
 			}
@@ -2562,10 +2580,10 @@ bool AfterLoadGame()
 	}
 
 	if (IsSavegameVersionBefore(160)) {
-		/* Setting difficulty number_industries other than zero get bumped to +1
-		 * since a new option (very low at position1) has been added */
-		if (_settings_game.difficulty.number_industries > 0) {
-			_settings_game.difficulty.number_industries++;
+		/* Setting difficulty industry_density other than zero get bumped to +1
+		 * since a new option (minimal at position 1) has been added */
+		if (_settings_game.difficulty.industry_density > 0) {
+			_settings_game.difficulty.industry_density++;
 		}
 	}
 
@@ -2606,6 +2624,8 @@ void ReloadNewGRFData()
 	AfterLoadStations();
 	/* Check and update house and town values */
 	UpdateHousesAndTowns();
+	/* Delete news referring to no longer existing entities */
+	DeleteInvalidEngineNews();
 	/* Update livery selection windows */
 	for (CompanyID i = COMPANY_FIRST; i < MAX_COMPANIES; i++) InvalidateWindowData(WC_COMPANY_COLOUR, i);
 	/* redraw the whole screen */
