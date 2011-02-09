@@ -31,7 +31,6 @@
 #include "object.h"
 #include "group.h"
 #include "strings_func.h"
-#include "functions.h"
 #include "window_func.h"
 #include "date_func.h"
 #include "vehicle_func.h"
@@ -1113,6 +1112,10 @@ void PrepareUnload(Station *curr_station, Vehicle *front_v, StationID next_stati
 	}
 
 	assert(front_v->cargo_payment == NULL);
+	/* One CargoPayment per vehicle and the vehicle limit equals the
+	 * limit in number of CargoPayments. Can't go wrong. */
+	assert_compile(CargoPaymentPool::MAX_SIZE == VehiclePool::MAX_SIZE);
+	assert(CargoPayment::CanAllocateItem());
 	front_v->cargo_payment = new CargoPayment(front_v);
 }
 

@@ -19,7 +19,6 @@
 #include "viewport_func.h"
 #include "command_func.h"
 #include "signs_func.h"
-#include "functions.h"
 #include "sound_func.h"
 #include "base_station_base.h"
 #include "textbuf_gui.h"
@@ -31,6 +30,7 @@
 #include "newgrf_object.h"
 #include "object.h"
 #include "hotkeys.h"
+#include "engine_base.h"
 
 #include "table/strings.h"
 
@@ -559,6 +559,9 @@ static void ResetLandscapeConfirmationCallback(Window *w, bool confirmed)
 			if (IsBuoyTile(st->xy)) DoCommand(st->xy, 0, 0, DC_EXEC | DC_BANKRUPT, CMD_LANDSCAPE_CLEAR);
 			if (!st->IsInUse()) delete st;
 		}
+
+		/* Now that all vehicles are gone, we can reset the engine pool. Maybe it reduces some NewGRF changing-mess */
+		EngineOverrideManager::ResetToCurrentNewGRFConfig();
 
 		MarkWholeScreenDirty();
 	}
