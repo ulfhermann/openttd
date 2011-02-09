@@ -36,7 +36,6 @@
 #include "train.h"
 #include "news_func.h"
 #include "window_func.h"
-#include "vehicle_func.h"
 #include "sound_func.h"
 #include "company_func.h"
 #include "rev.h"
@@ -58,7 +57,6 @@
 #include "ini_type.h"
 #include "ai/ai_config.hpp"
 #include "ai/ai.hpp"
-#include "newgrf.h"
 #include "ship.h"
 #include "smallmap_gui.h"
 #include "roadveh.h"
@@ -921,6 +919,17 @@ static bool InvalidateIndustryViewWindow(int32 p1)
 	return true;
 }
 
+/**
+ * Update the town authority window after a town authority setting change.
+ * @param p1 Unused.
+ * @return Always true.
+ */
+static bool RedrawTownAuthority(int32 p1)
+{
+	SetWindowClassesDirty(WC_TOWN_AUTHORITY);
+	return true;
+}
+
 /*
  * A: competitors
  * B: competitor start time. Deprecated since savegame version 110.
@@ -1122,17 +1131,10 @@ static bool ChangeDynamicEngines(int32 p1)
 {
 	if (_game_mode == GM_MENU) return true;
 
-	const Vehicle *v;
-	FOR_ALL_VEHICLES(v) {
-		if (IsCompanyBuildableVehicleType(v)) {
-			ShowErrorMessage(STR_CONFIG_SETTING_DYNAMIC_ENGINES_EXISTING_VEHICLES, INVALID_STRING_ID, WL_ERROR);
-			return false;
-		}
+	if (!EngineOverrideManager::ResetToCurrentNewGRFConfig()) {
+		ShowErrorMessage(STR_CONFIG_SETTING_DYNAMIC_ENGINES_EXISTING_VEHICLES, INVALID_STRING_ID, WL_ERROR);
+		return false;
 	}
-
-	/* Reset the engines, they will get new EngineIDs */
-	_engine_mngr.ResetToDefaultMapping();
-	ReloadNewGRFData();
 
 	return true;
 }
