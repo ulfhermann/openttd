@@ -1105,9 +1105,17 @@ static inline void ChangeVehicleWindow(WindowClass window_class, VehicleID from_
 {
 	Window *w = FindWindowById(window_class, from_index);
 	if (w != NULL) {
+		/* Update window_number */
 		w->window_number = to_index;
 		if (w->viewport != NULL) w->viewport->follow_vehicle = to_index;
-		if (to_index != INVALID_VEHICLE) w->InvalidateData();
+
+		/* Update vehicle drag data */
+		if (_thd.window_class == window_class && _thd.window_number == (WindowNumber)from_index) {
+			_thd.window_number = to_index;
+		}
+
+		/* Notify the window */
+		w->InvalidateData();
 	}
 }
 
@@ -2424,7 +2432,15 @@ public:
 					SetDParam(0, v->type);
 					SetDParam(1, v->current_order.GetDestination());
 					SetDParam(2, v->GetDisplaySpeed());
-					if (v->current_order.GetDepotActionType() & ODATFB_HALT) {
+					if (v->current_order.GetDepotActionType() & ODATFB_NEAREST_DEPOT) {
+						/* This case *only* happens when multiple nearest depot orders
+						 * follow eachother (including an order list only one order: a
+						 * nearest depot order) and there are no reachable depots.
+						 * It is primarily to guard for the case that there is no
+						 * depot with index 0, which would be used as fallback for
+						 * evaluating the string in the status bar. */
+						str = STR_EMPTY;
+					} else if (v->current_order.GetDepotActionType() & ODATFB_HALT) {
 						str = STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_VEL;
 					} else {
 						str = STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_SERVICE_VEL;
