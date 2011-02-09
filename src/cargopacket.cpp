@@ -281,7 +281,7 @@ bool VehicleCargoList::LoadReserved(uint max_move)
 			this->reserved.erase(it++);
 			this->reserved_count -= cp->count;
 			this->Append(cp, false);
-		} else {
+		} else if (CargoPacket::CanAllocateItem()) {
 			cp->count -= max_move;
 			CargoPacket *cp_new = new CargoPacket(max_move, cp->days_in_transit, cp->source, cp->source_xy, cp->loaded_at_xy, 0, cp->source_type, cp->source_id);
 			this->Append(cp_new, false);
