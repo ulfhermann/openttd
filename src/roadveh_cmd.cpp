@@ -22,7 +22,6 @@
 #include "pathfinder/yapf/yapf.h"
 #include "strings_func.h"
 #include "tunnelbridge_map.h"
-#include "functions.h"
 #include "window_func.h"
 #include "date_func.h"
 #include "vehicle_func.h"
@@ -415,6 +414,10 @@ FORCEINLINE int RoadVehicle::GetCurrentMaxSpeed() const
 	return max_speed;
 }
 
+/**
+ * Delete last vehicle of a chain road vehicles.
+ * @param v First roadvehicle.
+ */
 static void DeleteLastRoadVeh(RoadVehicle *v)
 {
 	Vehicle *u = v;
@@ -441,6 +444,11 @@ static void RoadVehSetRandomDirection(RoadVehicle *v)
 	} while ((v = v->Next()) != NULL);
 }
 
+/**
+ * Road vehicle chain has crashed.
+ * @param v First roadvehicle.
+ * @return whether the chain still exists.
+ */
 static bool RoadVehIsCrashed(RoadVehicle *v)
 {
 	v->crashed_ctr++;
@@ -457,6 +465,12 @@ static bool RoadVehIsCrashed(RoadVehicle *v)
 	return true;
 }
 
+/**
+ * Check routine whether a road and a train vehicle have collided.
+ * @param v    %Train vehicle to test.
+ * @param data Road vehicle to test.
+ * @return %Train vehicle if the vehicles collided, else \c NULL.
+ */
 static Vehicle *EnumCheckRoadVehCrashTrain(Vehicle *v, void *data)
 {
 	const Vehicle *u = (Vehicle*)data;
