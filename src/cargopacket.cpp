@@ -90,10 +90,12 @@ CargoPacket::CargoPacket(uint16 count, byte days_in_transit, StationID source, T
 /**
  * Split this packet in two and return the split off part.
  * @param new_size Size of the remaining part.
- * @return Split off part.
+ * @return Split off part, or NULL if no packet could be allocated!
  */
 FORCEINLINE CargoPacket *CargoPacket::Split(uint new_size)
 {
+	if (!CargoPacket::CanAllocateItem()) return NULL;
+
 	Money fs = this->feeder_share * new_size / static_cast<uint>(this->count);
 	CargoPacket *cp_new = new CargoPacket(new_size, this->days_in_transit, this->source, this->source_xy, this->loaded_at_xy, fs, this->source_type, this->source_id);
 	this->feeder_share -= fs;
@@ -351,8 +353,21 @@ CargoPacket *CargoList<Tinst, Tcont>::RemovePacket(Iterator &it, uint cap, TileI
 	if (packet->count > cap) {
 		/* packet needs to be split */
 		packet = packet->Split(cap);
-		assert(packet->count == cap);
-		++it;
+
+		/* We could not allocate a CargoPacket? Is the map that full?
+		 * Just remove the whole packet and drop some cargo then.
+		 */
+		if (packet == NULL) {
+			packet = *it;
+			uint dropped = packet->count - cap;
+			this->count -= dropped;
+			this->cargo_days_in_transit -= dropped * packet->days_in_transit; 
+			packet->count = cap;
+			this->packets.erase(it++);
+		} else {
+			assert(packet->count == cap);
+			++it;
+		}
 	} else {
 		this->packets.erase(it++);
 	}

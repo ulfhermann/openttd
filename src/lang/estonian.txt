@@ -1084,6 +1084,8 @@ STR_DIFFICULTY_LEVEL_SETTING_CITY_APPROVAL                      :{LTBLUE}Linnan�
 ############ range for difficulty settings ends
 
 STR_NONE                                                        :Pole
+STR_FUNDING_ONLY                                                :Ainult rahastamine
+STR_MINIMAL                                                     :Minimaalne
 STR_NUM_VERY_LOW                                                :Väga madal
 STR_NUM_LOW                                                     :Madal
 STR_NUM_NORMAL                                                  :Harilik
@@ -1151,6 +1153,7 @@ STR_CONFIG_SETTING_BUILDONSLOPES                                :{LTBLUE}Nõlvad
 STR_CONFIG_SETTING_AUTOSLOPE                                    :{LTBLUE}Maastikukujundus majade, rööbaste jms. all (autoslope): {ORANGE}{STRING}
 STR_CONFIG_SETTING_CATCHMENT                                    :{LTBLUE}Reaalsemad veekogud: {ORANGE}{STRING}
 STR_CONFIG_SETTING_EXTRADYNAMITE                                :{LTBLUE}Linnateede, -sildade, -tunnelite jne lammutamine: {ORANGE}{STRING}
+STR_CONFIG_SETTING_TRAIN_LENGTH                                 :{LTBLUE}Rongide maksimaalne pikkus: {ORANGE}{STRING} ruut{P 0:1 "" u}
 STR_CONFIG_SETTING_SMOKE_AMOUNT                                 :{LTBLUE}Vedurisuitsu ja -sädemete hulk: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOKE_AMOUNT_NONE                            :Pole
 STR_CONFIG_SETTING_SMOKE_AMOUNT_ORIGINAL                        :Originaal
@@ -1169,6 +1172,8 @@ STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Täiust
 STR_CONFIG_SETTING_GRADUAL_LOADING                              :{LTBLUE}Veovahendite järkjärguline laadimine: {ORANGE}{STRING}
 STR_CONFIG_SETTING_INFLATION                                    :{LTBLUE}Inflatsioon: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SELECTGOODS                                  :{LTBLUE}Kauba toimetamine jaama ainult nõudluse korral: {ORANGE}{STRING}
+STR_CONFIG_SETTING_MAX_BRIDGE_LENGTH                            :{LTBLUE}Silla maksimaalne pikkus: {ORANGE}{STRING} ruut{P 0:1 "" u}
+STR_CONFIG_SETTING_MAX_TUNNEL_LENGTH                            :{LTBLUE}Tunneli maksimaalne pikkus: {ORANGE}{STRING} ruut{P 0:1 "" u}
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD             :{LTBLUE}Põhitööstuse rajamismeetod: {ORANGE}{STRING}
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NONE        :pole
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NORMAL      :nagu muud tööstused
@@ -1186,6 +1191,7 @@ STR_CONFIG_SETTING_ROAD_VEHICLE_QUEUEING                        :{LTBLUE}Mootors
 STR_CONFIG_SETTING_AUTOSCROLL                                   :{LTBLUE}Vaate kerimine osutiga ekraaniserva puudutamisel: {ORANGE}{STRING}
 STR_CONFIG_SETTING_BRIBE                                        :{LTBLUE}Altkäemaksud kohalikele omavalitsustele: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_EXCLUSIVE                              :{LTBLUE}Ainuveoõiguste ostmine: {ORANGE}{STRING}
+STR_CONFIG_SETTING_ALLOW_FUND_ROAD                              :{LTBLUE}Kohaliku omavalitsuse teede rekonstrueerimise rahastamine: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_GIVE_MONEY                             :{LTBLUE}Raha saatmine teistele ettevõtetele: {ORANGE}{STRING}
 STR_CONFIG_SETTING_FREIGHT_TRAINS                               :{LTBLUE}Raskete rongide simuleerimiseks kasutatav raskustegur: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PLANE_SPEED                                  :{LTBLUE}Lennukite kiirustegur: {ORANGE}1 / {STRING}
@@ -1410,6 +1416,7 @@ STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS                         :{LTBLUE}Laevade
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_OPF                     :Algne {BLUE}(soovitatud)
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_NPF                     :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_YAPF                    :YAPF {RED}(ebasoovitatav)
+STR_CONFIG_SETTING_REVERSE_AT_SIGNALS                           :{LTBLUE}Automaatne tagasipööre signaalide juures: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_QUERY_CAPTION                                :{WHITE}Muuda seadete väärtusi
 
@@ -3308,6 +3315,7 @@ STR_ORDER_TRANSFER_NO_LOAD                                      :(Laaditakse üm
 STR_ORDER_NO_UNLOAD                                             :(Maha ei laadita ja laadung võetakse peale)
 STR_ORDER_NO_UNLOAD_FULL_LOAD                                   :(Maha ei laadita ja oodatakse täislaadungit)
 STR_ORDER_NO_UNLOAD_FULL_LOAD_ANY                               :(Maha ei laadita ja oodatakse suvalist täislaadungit)
+STR_ORDER_NO_UNLOAD_NO_LOAD                                     :(Maha ei laadita ja peale ei laadita)
 
 STR_ORDER_STOP_LOCATION_NEAR_END                                :[lõpu lähedal]
 STR_ORDER_STOP_LOCATION_MIDDLE                                  :[keskel]
@@ -3649,7 +3657,7 @@ STR_ERROR_AIRCRAFT_MUST_BE_STOPPED_INSIDE_HANGAR                :{WHITE}... peab
 STR_ERROR_TRAINS_CAN_ONLY_BE_ALTERED_INSIDE_A_DEPOT             :{WHITE}Ainult depoos peatunud ronge saab muuta
 STR_ERROR_TRAIN_TOO_LONG                                        :{WHITE}Rong on liiga pikk
 STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE                  :{WHITE}Sõidusuunda ei saa pöörata...
-STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE_MULTIPLE_UNITS   :{WHITE}Mitmest osast koosnevaid veovahendeid ei saa ümber pöörata
+STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE_MULTIPLE_UNITS   :{WHITE}... koosneb mitmest osast
 STR_ERROR_INCOMPATIBLE_RAIL_TYPES                               :Ühildamatud rööbasteetüübid
 
 STR_ERROR_CAN_T_MOVE_VEHICLE                                    :{WHITE}Transpordivahendit ei saa liigutada...
@@ -3723,6 +3731,7 @@ STR_ERROR_MUST_DEMOLISH_TUNNEL_FIRST                            :{WHITE}Tunnel t
 STR_ERROR_ANOTHER_TUNNEL_IN_THE_WAY                             :{WHITE}Teine tunnel on ees
 STR_ERROR_TUNNEL_THROUGH_MAP_BORDER                             :{WHITE}Tunnel lõpeks väljaspool kaarti
 STR_ERROR_UNABLE_TO_EXCAVATE_LAND                               :{WHITE}Ei saa tunneli teise otsa jaoks maad parajaks kaevata
+STR_ERROR_TUNNEL_TOO_LONG                                       :{WHITE}... tunnel on liiga pikk
 
 # Object related errors
 STR_ERROR_TOO_MANY_OBJECTS                                      :{WHITE}... liiga palju objekte
