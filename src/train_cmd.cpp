@@ -22,7 +22,7 @@
 #include "newgrf_text.h"
 #include "group.h"
 #include "strings_func.h"
-#include "functions.h"
+#include "viewport_func.h"
 #include "window_func.h"
 #include "vehicle_func.h"
 #include "sound_func.h"
@@ -1332,6 +1332,10 @@ CommandCost CmdSellRailWagon(DoCommandFlag flags, Vehicle *t, uint16 data, uint3
 	CommandCost cost(EXPENSES_NEW_VEHICLES);
 	for (Train *t = sell_head; t != NULL; t = t->Next()) cost.AddCost(-t->value);
 
+	if (first->orders.list == NULL && !OrderList::CanAllocateItem()) {
+		return_cmd_error(STR_ERROR_NO_MORE_SPACE_FOR_ORDERS);
+	}
+
 	/* do it? */
 	if (flags & DC_EXEC) {
 		/* First normalise the sub types of the chain. */
@@ -1802,11 +1806,12 @@ CommandCost CmdReverseTrainDirection(TileIndex tile, DoCommandFlag flags, uint32
 
 		if (flags & DC_EXEC) {
 			ToggleBit(v->flags, VRF_REVERSE_DIRECTION);
-			SetWindowDirty(WC_VEHICLE_DEPOT, v->tile);
-			SetWindowDirty(WC_VEHICLE_DETAILS, v->index);
-			/* We cancel any 'skip signal at dangers' here */
-			v->force_proceed = TFP_NONE;
-			SetWindowDirty(WC_VEHICLE_VIEW, v->index);
+
+			front->ConsistChanged(false);
+			SetWindowDirty(WC_VEHICLE_DEPOT, front->tile);
+			SetWindowDirty(WC_VEHICLE_DETAILS, front->index);
+			SetWindowDirty(WC_VEHICLE_VIEW, front->index);
+			SetWindowClassesDirty(WC_TRAINS_LIST);
 		}
 	} else {
 		/* turn the whole train around */
@@ -3299,6 +3304,10 @@ static void DeleteLastWagon(Train *v)
 	}
 }
 
+/**
+ * Rotate all vehicles of a (crashed) train chain randomly to animate the crash.
+ * @param v First crashed vehicle.
+ */
 static void ChangeTrainDirRandomly(Train *v)
 {
 	static const DirDiff delta[] = {
@@ -3319,6 +3328,11 @@ static void ChangeTrainDirRandomly(Train *v)
 	} while ((v = v->Next()) != NULL);
 }
 
+/**
+ * Handle a crashed train.
+ * @param v First train vehicle.
+ * @return %Vehicle chain still exists.
+ */
 static bool HandleCrashedTrain(Train *v)
 {
 	int state = ++v->crash_anim_pos;
