@@ -387,6 +387,9 @@
     <ClInclude Include="..\src\cheat_type.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\clear_func.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="..\src\cmd_helper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -508,9 +511,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\fontcache.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\functions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\gamelog.h">

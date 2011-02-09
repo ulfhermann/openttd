@@ -177,7 +177,7 @@ struct IConsoleWindow : Window
 	IConsoleWindow() : Window()
 	{
 		_iconsole_mode = ICONSOLE_OPENED;
-		this->line_height = FONT_HEIGHT_NORMAL;
+		this->line_height = FONT_HEIGHT_NORMAL + ICON_LINE_SPACING;
 		this->line_offset = GetStringBoundingBox("] ").width + 5;
 
 		this->InitNested(&_console_window_desc, 0);
@@ -189,16 +189,27 @@ struct IConsoleWindow : Window
 		_iconsole_mode = ICONSOLE_CLOSED;
 	}
 
+	/**
+	 * Scroll the content of the console.
+	 * @param amount Number of lines to scroll back.
+	 */
+	void Scroll(int amount)
+	{
+		int max_scroll = max<int>(0, IConsoleLine::size + 1 - this->height / this->line_height);
+		IConsoleWindow::scroll = Clamp<int>(IConsoleWindow::scroll + amount, 0, max_scroll);
+		this->SetDirty();
+	}
+
 	virtual void OnPaint()
 	{
 		const int right = this->width - 5;
 
-		GfxFillRect(this->left, this->top, this->width, this->height - 1, 0);
-		int ypos = this->height - this->line_height - ICON_LINE_SPACING;
+		GfxFillRect(0, 0, this->width - 1, this->height - 1, 0);
+		int ypos = this->height - this->line_height;
 		for (const IConsoleLine *print = IConsoleLine::Get(IConsoleWindow::scroll); print != NULL; print = print->previous) {
 			SetDParamStr(0, print->buffer);
-			ypos = DrawStringMultiLine(5, right, top, ypos, STR_JUST_RAW_STRING, print->colour, SA_LEFT | SA_BOTTOM | SA_FORCE) - ICON_LINE_SPACING;
-			if (ypos <= top) break;
+			ypos = DrawStringMultiLine(5, right, -this->line_height, ypos, STR_JUST_RAW_STRING, print->colour, SA_LEFT | SA_BOTTOM | SA_FORCE) - ICON_LINE_SPACING;
+			if (ypos < 0) break;
 		}
 		/* If the text is longer than the window, don't show the starting ']' */
 		int delta = this->width - this->line_offset - _iconsole_cmdline.pixels - ICON_RIGHT_BORDERWIDTH;
@@ -245,39 +256,19 @@ struct IConsoleWindow : Window
 				break;
 
 			case WKC_SHIFT | WKC_PAGEDOWN:
-				if (IConsoleWindow::scroll - scroll_height < 0) {
-					IConsoleWindow::scroll = 0;
-				} else {
-					IConsoleWindow::scroll -= scroll_height;
-				}
-				this->SetDirty();
+				this->Scroll(-scroll_height);
 				break;
 
 			case WKC_SHIFT | WKC_PAGEUP:
-				if (IConsoleWindow::scroll + scroll_height > IConsoleLine::size - scroll_height) {
-					IConsoleWindow::scroll = IConsoleLine::size - scroll_height;
-				} else {
-					IConsoleWindow::scroll += scroll_height;
-				}
-				this->SetDirty();
+				this->Scroll(scroll_height);
 				break;
 
 			case WKC_SHIFT | WKC_DOWN:
-				if (IConsoleWindow::scroll <= 0) {
-					IConsoleWindow::scroll = 0;
-				} else {
-					--IConsoleWindow::scroll;
-				}
-				this->SetDirty();
+				this->Scroll(-1);
 				break;
 
 			case WKC_SHIFT | WKC_UP:
-				if (IConsoleWindow::scroll >= IConsoleLine::size) {
-					IConsoleWindow::scroll = IConsoleLine::size;
-				} else {
-					++IConsoleWindow::scroll;
-				}
-				this->SetDirty();
+				this->Scroll(1);
 				break;
 
 			case WKC_BACKQUOTE:
@@ -350,6 +341,11 @@ struct IConsoleWindow : Window
 				break;
 		}
 		return ES_HANDLED;
+	}
+
+	virtual void OnMouseWheel(int wheel)
+	{
+		this->Scroll(-wheel);
 	}
 };
 

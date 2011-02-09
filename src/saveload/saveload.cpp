@@ -224,7 +224,7 @@
  *  157   21862
  *  158   21933
  *  159   21962
- *  160   21969
+ *  160   21974
  */
 extern const uint16 SAVEGAME_VERSION = SL_CAPACITIES; ///< Current savegame version of OpenTTD.
 
@@ -474,7 +474,7 @@ static void SlNullPointers()
  * @note This function does never return as it throws an exception to
  *       break out of all the saveload code.
  */
-static void NORETURN SlError(StringID string, const char *extra_msg = NULL)
+void NORETURN SlError(StringID string, const char *extra_msg)
 {
 	/* Distinguish between loading into _load_check_data vs. normal save/load. */
 	if (_sl.action == SLA_LOAD_CHECK) {
