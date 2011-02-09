@@ -27,7 +27,6 @@
 #include "autoslope.h"
 #include "water.h"
 #include "strings_func.h"
-#include "functions.h"
 #include "window_func.h"
 #include "date_func.h"
 #include "vehicle_func.h"
@@ -1759,6 +1758,8 @@ CommandCost CmdBuildIndustry(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 	randomizer.SetSeed(p2);
 	uint16 random_initial_bits = GB(p2, 0, 16);
 	uint32 random_var8f = randomizer.Next();
+	int num_layouts = indspec->num_table;
+	CommandCost ret = CommandCost(STR_ERROR_SITE_UNSUITABLE);
 
 	Industry *ind = NULL;
 	if (_game_mode != GM_EDITOR && _settings_game.construction.raw_industry_construction == 2 && indspec->IsRawIndustry()) {
@@ -1774,28 +1775,31 @@ CommandCost CmdBuildIndustry(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 					 * because parameter evaluation order is not guaranteed in the c++ standard
 					 */
 					tile = RandomTile();
-					CommandCost ret = CreateNewIndustryHelper(tile, it, flags, indspec, RandomRange(indspec->num_table), random_var8f, random_initial_bits, cur_company.GetOriginalValue(), IACT_PROSPECTCREATION, &ind);
+					/* Start with a random layout */
+					int layout = RandomRange(num_layouts);
+					/* Check now each layout, starting with the random one */
+					for (int j = 0; j < num_layouts; j++) {
+						layout = (layout + 1) % num_layouts;
+						ret = CreateNewIndustryHelper(tile, it, flags, indspec, layout, random_var8f, random_initial_bits, cur_company.GetOriginalValue(), IACT_PROSPECTCREATION, &ind);
+						if (ret.Succeeded()) break;
+					}
 					if (ret.Succeeded()) break;
 				}
 			}
 			cur_company.Restore();
 		}
 	} else {
-		int count = indspec->num_table;
-		const IndustryTileTable * const *itt = indspec->table;
-		int num = GB(p1, 8, 8);
-		if (num >= count) return CMD_ERROR;
+		int layout = GB(p1, 8, 8);
+		if (layout >= num_layouts) return CMD_ERROR;
 
-		CommandCost ret = CommandCost(STR_ERROR_SITE_UNSUITABLE);
-		SmallVector<ClearedObjectArea, 1> object_areas(_cleared_object_areas);
-		do {
-			if (--count < 0) return ret;
-			if (--num < 0) num = indspec->num_table - 1;
-			ret = CheckIfIndustryTilesAreFree(tile, itt[num], num, it, random_initial_bits, _current_company, IACT_USERCREATION);
-			_cleared_object_areas = object_areas;
-		} while (ret.Failed());
+		/* Check subsequently each layout, starting with the given layout in p1 */
+		for (int i = 0; i < num_layouts; i++) {
+			layout = (layout + 1) % num_layouts;
+			ret = CreateNewIndustryHelper(tile, it, flags, indspec, layout, random_var8f, random_initial_bits, _current_company, IACT_USERCREATION, &ind);
+			if (ret.Succeeded()) break;
+		}
 
-		ret = CreateNewIndustryHelper(tile, it, flags, indspec, num, random_var8f, random_initial_bits, _current_company, IACT_USERCREATION, &ind);
+		/* If it still failed, there's no suitable layout to build here, return the error */
 		if (ret.Failed()) return ret;
 	}
 
@@ -1847,7 +1851,7 @@ static uint32 GetScaledIndustryGenerationProbability(IndustryType it, bool *forc
 	uint32 chance = ind_spc->appear_creation[_settings_game.game_creation.landscape] * 16; // * 16 to increase precision
 	if (!ind_spc->enabled || chance == 0 || ind_spc->num_table == 0 ||
 			!CheckIfCallBackAllowsAvailability(it, IACT_MAPGENERATION) ||
-			(_game_mode != GM_EDITOR && _settings_game.difficulty.number_industries == 0)) {
+			(_game_mode != GM_EDITOR && _settings_game.difficulty.industry_density == ID_FUND_ONLY)) {
 		*force_at_least_one = false;
 		return 0;
 	} else {
@@ -1868,7 +1872,7 @@ static uint32 GetScaledIndustryGenerationProbability(IndustryType it, bool *forc
  */
 static uint16 GetIndustryGamePlayProbability(IndustryType it, byte *min_number)
 {
-	if (_settings_game.difficulty.number_industries == 0) {
+	if (_settings_game.difficulty.industry_density == ID_FUND_ONLY) {
 		*min_number = 0;
 		return 0;
 	}
@@ -1902,8 +1906,8 @@ static uint GetNumberOfIndustries()
 		80,   // high
 	};
 
-	assert(_settings_game.difficulty.number_industries < lengthof(numof_industry_table));
-	uint difficulty = (_game_mode != GM_EDITOR) ? _settings_game.difficulty.number_industries : 1;
+	assert(lengthof(numof_industry_table) == ID_END);
+	uint difficulty = (_game_mode != GM_EDITOR) ? _settings_game.difficulty.industry_density : (uint)ID_VERY_LOW;
 	return ScaleByMapSize(numof_industry_table[difficulty]);
 }
 
@@ -1994,7 +1998,7 @@ void IndustryBuildData::Reset()
 void IndustryBuildData::MonthlyLoop()
 {
 	static const int NEWINDS_PER_MONTH = 0x38000 / (10 * 12); // lower 16 bits is a float fraction, 3.5 industries per decade, divided by 10 * 12 months.
-	if (_settings_game.difficulty.number_industries == 0) return; // 'no industries' setting,
+	if (_settings_game.difficulty.industry_density == ID_FUND_ONLY) return; // 'no industries' setting,
 
 	/* To prevent running out of unused industries for the player to connect,
 	 * add a fraction of new industries each month, but only if the manager can keep up. */
@@ -2010,7 +2014,7 @@ void IndustryBuildData::MonthlyLoop()
  */
 void GenerateIndustries()
 {
-	if (_settings_game.difficulty.number_industries == 0) return; // No industries.
+	if (_game_mode != GM_EDITOR && _settings_game.difficulty.industry_density == ID_FUND_ONLY) return; // No industries in the game.
 
 	uint32 industry_probs[NUM_INDUSTRYTYPES];
 	bool force_at_least_one[NUM_INDUSTRYTYPES];

@@ -339,6 +339,8 @@ static const StringID _num_towns[]   = {STR_NUM_VERY_LOW, STR_NUM_LOW, STR_NUM_N
 static const StringID _num_inds[]    = {STR_FUNDING_ONLY, STR_MINIMAL, STR_NUM_VERY_LOW, STR_NUM_LOW, STR_NUM_NORMAL, STR_NUM_HIGH, INVALID_STRING_ID};
 static const StringID _variety[]     = {STR_VARIETY_NONE, STR_VARIETY_VERY_LOW, STR_VARIETY_LOW, STR_VARIETY_MEDIUM, STR_VARIETY_HIGH, STR_VARIETY_VERY_HIGH, INVALID_STRING_ID};
 
+assert_compile(lengthof(_num_inds) == ID_END + 1);
+
 struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 	uint widget_id;
 	uint x;
@@ -388,7 +390,7 @@ struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 				}
 				break;
 
-			case GLAND_INDUSTRY_PULLDOWN:   SetDParam(0, _game_mode == GM_EDITOR ? STR_DISASTERS_OFF : _num_inds[_settings_newgame.difficulty.number_industries]); break;
+			case GLAND_INDUSTRY_PULLDOWN:   SetDParam(0, _game_mode == GM_EDITOR ? STR_DISASTERS_OFF : _num_inds[_settings_newgame.difficulty.industry_density]); break;
 			case GLAND_LANDSCAPE_PULLDOWN:  SetDParam(0, _landscape[_settings_newgame.game_creation.land_generator]); break;
 			case GLAND_TREE_PULLDOWN:       SetDParam(0, _tree_placer[_settings_newgame.game_creation.tree_placer]); break;
 			case GLAND_TERRAIN_PULLDOWN:    SetDParam(0, _elevations[_settings_newgame.difficulty.terrain_type]); break;
@@ -584,7 +586,7 @@ struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 				break;
 
 			case GLAND_INDUSTRY_PULLDOWN: // Number of industries
-				ShowDropDownMenu(this, _num_inds, _settings_newgame.difficulty.number_industries, GLAND_INDUSTRY_PULLDOWN, 0, 0);
+				ShowDropDownMenu(this, _num_inds, _settings_newgame.difficulty.industry_density, GLAND_INDUSTRY_PULLDOWN, 0, 0);
 				break;
 
 			case GLAND_RANDOM_BUTTON: // Random seed
@@ -759,7 +761,7 @@ struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 				break;
 
 			case GLAND_INDUSTRY_PULLDOWN:
-				IConsoleSetSetting("difficulty.number_industries", index);
+				IConsoleSetSetting("difficulty.industry_density", index);
 				break;
 
 			case GLAND_TERRAIN_PULLDOWN: {
