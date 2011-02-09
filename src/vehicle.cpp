@@ -29,7 +29,6 @@
 #include "group_gui.h"
 #include "strings_func.h"
 #include "zoom_func.h"
-#include "functions.h"
 #include "date_func.h"
 #include "window_func.h"
 #include "vehicle_func.h"
@@ -50,6 +49,7 @@
 #include "effectvehicle_func.h"
 #include "effectvehicle_base.h"
 #include "vehiclelist.h"
+#include "bridge_map.h"
 #include "tunnel_map.h"
 #include "depot_map.h"
 
@@ -1849,7 +1849,8 @@ void Vehicle::BeginLoading()
 		Order *in_list = this->GetOrder(this->cur_auto_order_index);
 		if (in_list != NULL && this->orders.list->GetNumOrders() < MAX_VEH_ORDER_ID &&
 				(!in_list->IsType(OT_AUTOMATIC) ||
-				in_list->GetDestination() != this->last_station_visited)) {
+				in_list->GetDestination() != this->last_station_visited) &&
+				Order::CanAllocateItem()) {
 			Order *auto_order = new Order();
 			auto_order->MakeAutomatic(this->last_station_visited);
 			InsertOrder(this, auto_order, this->cur_auto_order_index);
@@ -2108,11 +2109,13 @@ void Vehicle::ShowVisualEffect() const
 		/* Show no smoke when:
 		 * - Smoke has been disabled for this vehicle
 		 * - The vehicle is not visible
+		 * - The vehicle is under a bridge
 		 * - The vehicle is on a depot tile
 		 * - The vehicle is on a tunnel tile
 		 * - The vehicle is a train engine that is currently unpowered */
 		if (disable_effect ||
 				v->vehstatus & VS_HIDDEN ||
+				(MayHaveBridgeAbove(v->tile) && IsBridgeAbove(v->tile)) ||
 				IsDepotTile(v->tile) ||
 				IsTunnelTile(v->tile) ||
 				(v->type == VEH_TRAIN &&
@@ -2224,7 +2227,7 @@ void Vehicle::AddToShared(Vehicle *shared_chain)
 {
 	assert(this->previous_shared == NULL && this->next_shared == NULL);
 
-	if (!shared_chain->orders.list) {
+	if (shared_chain->orders.list == NULL) {
 		assert(shared_chain->previous_shared == NULL);
 		assert(shared_chain->next_shared == NULL);
 		this->orders.list = shared_chain->orders.list = new OrderList(NULL, shared_chain);
