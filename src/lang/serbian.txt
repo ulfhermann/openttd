@@ -1222,6 +1222,8 @@ STR_DIFFICULTY_LEVEL_SETTING_CITY_APPROVAL                      :{LTBLUE}Stav vl
 ############ range for difficulty settings ends
 
 STR_NONE                                                        :Nijedan
+STR_FUNDING_ONLY                                                :Samo finansiranje
+STR_MINIMAL                                                     :Najmanji
 STR_NUM_VERY_LOW                                                :Veoma mali
 STR_NUM_LOW                                                     :Mali
 STR_NUM_NORMAL                                                  :Normalan
@@ -1289,6 +1291,7 @@ STR_CONFIG_SETTING_BUILDONSLOPES                                :{LTBLUE}Dozvolj
 STR_CONFIG_SETTING_AUTOSLOPE                                    :{LTBLUE}Dozvoljena izmena nagiba ispod zgrada, koloseka, itd. (autoslope): {ORANGE}{STRING}
 STR_CONFIG_SETTING_CATCHMENT                                    :{LTBLUE}Realističnije veličine prihvatnih površina: {ORANGE}{STRING}
 STR_CONFIG_SETTING_EXTRADYNAMITE                                :{LTBLUE}Dozvoljeno uklanjanje više gradskih kolovoza, mostova i tunela: {ORANGE}{STRING}
+STR_CONFIG_SETTING_TRAIN_LENGTH                                 :{LTBLUE}Najveća dužina vozova: {ORANGE}{STRING} pločic{P 0:1 a e a}
 STR_CONFIG_SETTING_SMOKE_AMOUNT                                 :{LTBLUE}Količina dima/varnica vozila: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOKE_AMOUNT_NONE                            :Nema
 STR_CONFIG_SETTING_SMOKE_AMOUNT_ORIGINAL                        :Originalna
@@ -1307,6 +1310,8 @@ STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Koristi
 STR_CONFIG_SETTING_GRADUAL_LOADING                              :{LTBLUE}Postepeno utovarivanje u vozilo: {ORANGE}{STRING}
 STR_CONFIG_SETTING_INFLATION                                    :{LTBLUE}Inflacija: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SELECTGOODS                                  :{LTBLUE}Dostavljanje tovara na stanicu samo ako ima potražnje: {ORANGE}{STRING}
+STR_CONFIG_SETTING_MAX_BRIDGE_LENGTH                            :{LTBLUE}Najveća dužina mosta: {ORANGE}{STRING} pločic{P 0:1 a e a}
+STR_CONFIG_SETTING_MAX_TUNNEL_LENGTH                            :{LTBLUE}Najveća dužina tunela: {ORANGE}{STRING} pločic{P 0:1 a e a}
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD             :{LTBLUE}Metod izgradnje finansiranih primarnih industrija: {ORANGE}{STRING}
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NONE        :nikakav
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NORMAL      :uobičajan
@@ -1324,6 +1329,7 @@ STR_CONFIG_SETTING_ROAD_VEHICLE_QUEUEING                        :{LTBLUE}Vozila 
 STR_CONFIG_SETTING_AUTOSCROLL                                   :{LTBLUE}Pomeranje prozora kada miš priđe ivicama: {ORANGE}{STRING}
 STR_CONFIG_SETTING_BRIBE                                        :{LTBLUE}Dozvoljeno podmićivanje lokalnih vlasti: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_EXCLUSIVE                              :{LTBLUE}Dozvoljena kupovina ekskluzivnih prava prevoza: {ORANGE}{STRING}
+STR_CONFIG_SETTING_ALLOW_FUND_ROAD                              :{LTBLUE}Dozvoljeno finansiranje rekonstrukcije lokalnih puteva: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_GIVE_MONEY                             :{LTBLUE}Dozvoljeno slanje novca drugim preduzećima: {ORANGE}{STRING}
 STR_CONFIG_SETTING_FREIGHT_TRAINS                               :{LTBLUE}Množilac težine tovara za simulaciju opterećenja vozova: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PLANE_SPEED                                  :{LTBLUE}Delitelj brzine leta aviona: {ORANGE}1 / {STRING}
@@ -1548,6 +1554,7 @@ STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS                         :{LTBLUE}Pretra�
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_OPF                     :Originalno {BLUE}(Preporučuje se)
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_NPF                     :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_YAPF                    :YAPF {RED}(Nepreporučuje se)
+STR_CONFIG_SETTING_REVERSE_AT_SIGNALS                           :{LTBLUE}Automatska promena smera kod signalizacije: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_QUERY_CAPTION                                :{WHITE}Promena vrednosti
 
@@ -2768,7 +2775,7 @@ STR_LOCAL_AUTHORITY_ACTION_BRIBE                                :Podmićivanje l
 STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{YELLOW}Ulaganje u malu reklamnu kampanju će doneti preduzeću više putnika i robe iz ovog naselja.{} Trošak: {CURRENCY}
 STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{YELLOW}Ulaganje u reklamnu kampanju srednje veličine će doneti preduzeću više putnika i robe iz ovog naselja.{} Trošak: {CURRENCY}
 STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{YELLOW}Ulaganje u veliku reklamnu kampanju će doneti preduzeću više putnika i robe iz ovog naselja.{} Trošak: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{YELLOW} Finansiranje rekonstrukcije lokalne mreže puteva. Može prouzrokovati kolaps u drumskom saobraćaju u trajanju do 6 meseci.{} Trošak: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{YELLOW}Finansiranje rekonstrukcije lokalne mreže puteva. Može prouzrokovati kolaps u drumskom saobraćaju u trajanju do 6 meseci.{} Trošak: {CURRENCY}
 STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{YELLOW}Otkrivanje spomenika preduzeća.{} Trošak: {CURRENCY}
 STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{YELLOW} Finansiranje izgradnje novih komercijalnih objekata u naselju.{} Trošak: {CURRENCY}
 STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{YELLOW}Kupovina ekskluzivnih prava prevoza od lokalne vlasti na godinu dana, osigurava da će lokalni korisnici prevoza koristiti isključivo usluge vašeg preduzeća.{} Trošak: {CURRENCY}
@@ -3459,9 +3466,10 @@ STR_ORDER_TRANSFER                                              :(Prevoz i utova
 STR_ORDER_TRANSFER_FULL_LOAD                                    :(Prevoz i pun utovar svega)
 STR_ORDER_TRANSFER_FULL_LOAD_ANY                                :(Prevoz i pun utovar bilo kog)
 STR_ORDER_TRANSFER_NO_LOAD                                      :(Prevoz bez utovara)
-STR_ORDER_NO_UNLOAD                                             :(Bez istovara utovar)
-STR_ORDER_NO_UNLOAD_FULL_LOAD                                   :(Bez istovara i pun utovar svega)
+STR_ORDER_NO_UNLOAD                                             :(Bez istovara i utovar)
+STR_ORDER_NO_UNLOAD_FULL_LOAD                                   :(Bez istovara i pun utovar)
 STR_ORDER_NO_UNLOAD_FULL_LOAD_ANY                               :(Bez istovara i pun utovar bilo kog)
+STR_ORDER_NO_UNLOAD_NO_LOAD                                     :(Bez istovara i bez utovara)
 
 STR_ORDER_STOP_LOCATION_NEAR_END                                :[pri početku]
 STR_ORDER_STOP_LOCATION_MIDDLE                                  :[na sredini]
@@ -3803,7 +3811,7 @@ STR_ERROR_AIRCRAFT_MUST_BE_STOPPED_INSIDE_HANGAR                :{WHITE}... mora
 STR_ERROR_TRAINS_CAN_ONLY_BE_ALTERED_INSIDE_A_DEPOT             :{WHITE}Vozovi se mogu izmeniti samo kada su zaustavljeni u depou
 STR_ERROR_TRAIN_TOO_LONG                                        :{WHITE}Voz je predugačak
 STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE                  :{WHITE}Voz ne može da promeni smer...
-STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE_MULTIPLE_UNITS   :{WHITE}Ne može se okrenuti vozilo od više delova
+STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE_MULTIPLE_UNITS   :{WHITE}... sastoji se od više jedinica
 STR_ERROR_INCOMPATIBLE_RAIL_TYPES                               :Različite vrste železnice
 
 STR_ERROR_CAN_T_MOVE_VEHICLE                                    :{WHITE}Ne može se ukloniti vozilo...
@@ -3877,6 +3885,7 @@ STR_ERROR_MUST_DEMOLISH_TUNNEL_FIRST                            :{WHITE}Potrebno
 STR_ERROR_ANOTHER_TUNNEL_IN_THE_WAY                             :{WHITE}Drugi tunel je na putu
 STR_ERROR_TUNNEL_THROUGH_MAP_BORDER                             :{WHITE}Tunel bi završio van okvira terena
 STR_ERROR_UNABLE_TO_EXCAVATE_LAND                               :{WHITE}Nije moguće iskopati drugi kraj tunela
+STR_ERROR_TUNNEL_TOO_LONG                                       :{WHITE}... tunel je predugačak
 
 # Object related errors
 STR_ERROR_TOO_MANY_OBJECTS                                      :{WHITE}... ima previše objekata
@@ -4032,7 +4041,7 @@ STR_INDUSTRY_NAME_OIL_REFINERY                                  :{G=ženski}Rafi
 STR_INDUSTRY_NAME_OIL_RIG                                       :{G=ženski}Naftna platforma
 STR_INDUSTRY_NAME_FACTORY                                       :{G=ženski}Fabrika
 STR_INDUSTRY_NAME_PRINTING_WORKS                                :{G=ženski}Štamparija
-STR_INDUSTRY_NAME_STEEL_MILL                                    :{G=ženski}Železara
+STR_INDUSTRY_NAME_STEEL_MILL                                    :{G=ženski}Čeličana
 STR_INDUSTRY_NAME_FARM                                          :{G=ženski}Farma
 STR_INDUSTRY_NAME_COPPER_ORE_MINE                               :{G=muški}Rudnik bakra
 STR_INDUSTRY_NAME_OIL_WELLS                                     :{G=ženski}Naftna bušotina

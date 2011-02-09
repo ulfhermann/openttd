@@ -17,7 +17,6 @@
 #include "news_func.h"
 #include "vehicle_gui.h"
 #include "strings_func.h"
-#include "functions.h"
 #include "window_func.h"
 #include "timetable.h"
 #include "vehicle_func.h"
@@ -1454,6 +1453,10 @@ CommandCost CmdCloneOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32
 						!CanVehicleUseStation(dst, Station::Get(order->GetDestination()))) {
 					return_cmd_error(STR_ERROR_CAN_T_COPY_SHARE_ORDER);
 				}
+			}
+
+			if (src->orders.list == NULL && !OrderList::CanAllocateItem()) {
+				return_cmd_error(STR_ERROR_NO_MORE_SPACE_FOR_ORDERS);
 			}
 
 			if (flags & DC_EXEC) {

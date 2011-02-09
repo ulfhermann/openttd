@@ -42,6 +42,7 @@ static bool InvalidateVehTimetableWindow(int32 p1);
 static bool InvalidateCompanyLiveryWindow(int32 p1);
 static bool InvalidateNewGRFChangeWindows(int32 p1);
 static bool InvalidateIndustryViewWindow(int32 p1);
+static bool RedrawTownAuthority(int32 p1);
 
 #ifdef ENABLE_NETWORK
 static bool UpdateClientName(int32 p1);
@@ -347,7 +348,7 @@ const SettingDesc _settings[] = {
 	 SDT_CONDVAR(GameSettings, difficulty.max_no_competitors,        SLE_UINT8, 97, SL_MAX_VERSION, 0, 0,     0,0,MAX_COMPANIES-1,1,STR_NULL,                                  MaxNoAIsChange),
 	SDT_CONDNULL(                                                            1, 97, 109),
 	 SDT_CONDVAR(GameSettings, difficulty.number_towns,              SLE_UINT8, 97, SL_MAX_VERSION, 0,NG,     2,     0,      4,  1, STR_NUM_VERY_LOW,                          DifficultyChange),
-	 SDT_CONDVAR(GameSettings, difficulty.number_industries,         SLE_UINT8, 97, SL_MAX_VERSION, 0,NG,     5,     0,      5,  1, STR_FUNDING_ONLY,                          DifficultyChange),
+	 SDT_CONDVAR(GameSettings, difficulty.industry_density,          SLE_UINT8, 97, SL_MAX_VERSION, 0,NG, ID_END-1,  0,ID_END-1, 1, STR_FUNDING_ONLY,                          DifficultyChange),
 	 SDT_CONDVAR(GameSettings, difficulty.max_loan,                 SLE_UINT32, 97, SL_MAX_VERSION, 0,NS|CR,300000,100000,500000,50000,STR_NULL,                               DifficultyChange),
 	 SDT_CONDVAR(GameSettings, difficulty.initial_interest,          SLE_UINT8, 97, SL_MAX_VERSION, 0,NS,     2,     2,      4,  1, STR_NULL,                                  DifficultyChange),
 	 SDT_CONDVAR(GameSettings, difficulty.vehicle_costs,             SLE_UINT8, 97, SL_MAX_VERSION, 0,NS,     0,     0,      2,  1, STR_SEA_LEVEL_LOW,                         DifficultyChange),
@@ -361,7 +362,7 @@ const SettingDesc _settings[] = {
 	 SDT_CONDVAR(GameSettings, difficulty.economy,                   SLE_UINT8, 97, SL_MAX_VERSION, 0, 0,     0,     0,      1,  1, STR_ECONOMY_STEADY,                        DifficultyChange),
 	 SDT_CONDVAR(GameSettings, difficulty.line_reverse_mode,         SLE_UINT8, 97, SL_MAX_VERSION, 0, 0,     0,     0,      1,  1, STR_REVERSE_AT_END_OF_LINE_AND_AT_STATIONS,DifficultyChange),
 	 SDT_CONDVAR(GameSettings, difficulty.disasters,                 SLE_UINT8, 97, SL_MAX_VERSION, 0, 0,     0,     0,      1,  1, STR_DISASTERS_OFF,                         DifficultyChange),
-	 SDT_CONDVAR(GameSettings, difficulty.town_council_tolerance,    SLE_UINT8, 97, SL_MAX_VERSION, 0, 0,     0,     0,      2,  1, STR_CITY_APPROVAL_PERMISSIVE,                            DifficultyNoiseChange),
+	 SDT_CONDVAR(GameSettings, difficulty.town_council_tolerance,    SLE_UINT8, 97, SL_MAX_VERSION, 0, 0,     0,     0,      2,  1, STR_CITY_APPROVAL_PERMISSIVE,              DifficultyNoiseChange),
 	 SDT_CONDVAR(GameSettings, difficulty.diff_level,                SLE_UINT8, 97, SL_MAX_VERSION, 0, 0,     3,     0,      3,  0, STR_NULL,                                  DifficultyReset),
 
 	/* There are only 21 predefined town_name values (0-20), but you can have more with newgrf action F so allow these bigger values (21-255). Invalid values will fallback to english on use and (undefined string) in GUI. */
@@ -393,7 +394,7 @@ const SettingDesc _settings[] = {
 	 SDT_CONDVAR(GameSettings, vehicle.train_slope_steepness,        SLE_UINT8,133, SL_MAX_VERSION, 0, 0,     3,     0,      10, 1, STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS,  TrainSlopeSteepnessChanged),
 	 SDT_CONDVAR(GameSettings, vehicle.roadveh_slope_steepness,      SLE_UINT8,139, SL_MAX_VERSION, 0, 0,     7,     0,      10, 1, STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS,  RoadVehSlopeSteepnessChanged),
 	    SDT_BOOL(GameSettings, pf.forbid_90_deg,                                                    0, 0, false,                    STR_CONFIG_SETTING_FORBID_90_DEG,          NULL),
-	 SDT_CONDVAR(GameSettings, vehicle.max_train_length,             SLE_UINT8,159, SL_MAX_VERSION, 0,NN,     7,     1,      64, 1, STR_CONFIG_SETTING_TRAIN_LENGTH,           NULL),
+	 SDT_CONDVAR(GameSettings, vehicle.max_train_length,             SLE_UINT8,159, SL_MAX_VERSION, 0, 0,     7,     1,      64, 1, STR_CONFIG_SETTING_TRAIN_LENGTH,           NULL),
 	SDT_CONDNULL(                                                          1,  0,   158), // vehicle.mammoth_trains
 	 SDT_CONDVAR(GameSettings, vehicle.smoke_amount,                 SLE_UINT8,145, SL_MAX_VERSION, 0,MS,     1,     0,       2, 0, STR_CONFIG_SETTING_SMOKE_AMOUNT,           NULL),
 	SDT_CONDNULL(                                                            1,  0, 158), // order.gotodepot
@@ -448,8 +449,9 @@ const SettingDesc _settings[] = {
 	 SDT_CONDVAR(GameSettings, construction.industry_platform,       SLE_UINT8,148, SL_MAX_VERSION, 0, 0,     1,     0,       4, 0, STR_CONFIG_SETTING_INDUSTRY_PLATFORM,      NULL),
 	    SDT_BOOL(GameSettings, economy.multiple_industry_per_town,                                  0, 0, false,                    STR_CONFIG_SETTING_MULTIPINDTOWN,          NULL),
 	SDT_CONDNULL(                                                            1,  0, 140),
-	    SDT_BOOL(GameSettings, economy.bribe,                                                       0, 0,  true,                    STR_CONFIG_SETTING_BRIBE,                  NULL),
-	SDT_CONDBOOL(GameSettings, economy.exclusive_rights,                        79, SL_MAX_VERSION, 0, 0,  true,                    STR_CONFIG_SETTING_ALLOW_EXCLUSIVE,        NULL),
+	    SDT_BOOL(GameSettings, economy.bribe,                                                       0, 0,  true,                    STR_CONFIG_SETTING_BRIBE,                  RedrawTownAuthority),
+	SDT_CONDBOOL(GameSettings, economy.exclusive_rights,                        79, SL_MAX_VERSION, 0, 0,  true,                    STR_CONFIG_SETTING_ALLOW_EXCLUSIVE,        RedrawTownAuthority),
+	SDT_CONDBOOL(GameSettings, economy.fund_roads,                             160, SL_MAX_VERSION, 0, 0,  true,                    STR_CONFIG_SETTING_ALLOW_FUND_ROAD,        RedrawTownAuthority),
 	SDT_CONDBOOL(GameSettings, economy.give_money,                              79, SL_MAX_VERSION, 0, 0,  true,                    STR_CONFIG_SETTING_ALLOW_GIVE_MONEY,       NULL),
 	     SDT_VAR(GameSettings, game_creation.snow_line_height,       SLE_UINT8,                     0, 0, DEF_SNOWLINE_HEIGHT, MIN_SNOWLINE_HEIGHT, MAX_SNOWLINE_HEIGHT, 0, STR_CONFIG_SETTING_SNOWLINE_HEIGHT, NULL),
 	SDT_CONDNULL(                                                            4,  0, 143),
