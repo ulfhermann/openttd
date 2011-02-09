@@ -34,7 +34,6 @@
 #include "string_func.h"
 #include "newgrf_cargo.h"
 #include "cheat_type.h"
-#include "functions.h"
 #include "animated_tile_func.h"
 #include "date_func.h"
 #include "subsidy_func.h"
@@ -2469,6 +2468,9 @@ static CommandCost TownActionAdvertiseLarge(Town *t, DoCommandFlag flags)
 
 static CommandCost TownActionRoadRebuild(Town *t, DoCommandFlag flags)
 {
+	/* Check if the company is allowed to fund new roads. */
+	if (!_settings_game.economy.fund_roads) return CMD_ERROR;
+
 	if (flags & DC_EXEC) {
 		t->road_build_months = 6;
 
@@ -2638,6 +2640,9 @@ uint GetMaskOfTownActions(int *nump, CompanyID cid, const Town *t)
 
 			/* Is the company not able to buy exclusive rights ? */
 			if (cur == TACT_BUY_RIGHTS && !_settings_game.economy.exclusive_rights) continue;
+
+			/* Is the company not able to fund local road reconstruction? */
+			if (cur == TACT_ROAD_REBUILD && !_settings_game.economy.fund_roads) continue;
 
 			/* Is the company not able to build a statue ? */
 			if (cur == TACT_BUILD_STATUE && HasBit(t->statues, cid)) continue;
