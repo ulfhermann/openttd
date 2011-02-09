@@ -1177,6 +1177,8 @@ STR_DIFFICULTY_LEVEL_SETTING_CITY_APPROVAL                      :{LTBLUE}Отн�
 ############ range for difficulty settings ends
 
 STR_NONE                                                        :Нет
+STR_FUNDING_ONLY                                                :Строить самому
+STR_MINIMAL                                                     :Минимальное
 STR_NUM_VERY_LOW                                                :Очень малое
 STR_NUM_LOW                                                     :Малое
 STR_NUM_NORMAL                                                  :Среднее
@@ -1286,6 +1288,7 @@ STR_CONFIG_SETTING_ROAD_VEHICLE_QUEUEING                        :{LTBLUE}Авт�
 STR_CONFIG_SETTING_AUTOSCROLL                                   :{LTBLUE}Смещать обзор, когда курсор находится у края экрана: {ORANGE}{STRING}
 STR_CONFIG_SETTING_BRIBE                                        :{LTBLUE}Разрешить подкупать местные власти: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_EXCLUSIVE                              :{LTBLUE}Разрешить покупать эксклюзивные трансп. права: {ORANGE}{STRING}
+STR_CONFIG_SETTING_ALLOW_FUND_ROAD                              :{LTBLUE}Разрешить финансирование реконструкции дорог: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_GIVE_MONEY                             :{LTBLUE}Разрешить передачу денег другим компаниям: {ORANGE}{STRING}
 STR_CONFIG_SETTING_FREIGHT_TRAINS                               :{LTBLUE}Множитель увеличения веса груза для товарных поездов: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PLANE_SPEED                                  :{LTBLUE}Коэффициент скорости авиатранспорта: {ORANGE}1/{STRING}
@@ -2087,7 +2090,7 @@ STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_SIGNALS                 :{BLACK}Уста
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_BRIDGE                  :{BLACK}Строительство ж/д мостов. При нажатом Shift - оценка стоимости строительства.
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TUNNEL                  :{BLACK}Строительство ж/д туннелей. При нажатом Shift - оценка стоимости строительства.
 STR_RAIL_TOOLBAR_TOOLTIP_TOGGLE_BUILD_REMOVE_FOR                :{BLACK}Переключение между строительством и удалением ж/д путей, сигналов, станций. При нажатом Ctrl убирает станции с рельсами.
-STR_RAIL_TOOLBAR_TOOLTIP_CONVERT_RAIL                           :{BLACK}Преобразовать/модернизировать тип рельсов. При нажатом Shift - оценка стоимости преобразования.
+STR_RAIL_TOOLBAR_TOOLTIP_CONVERT_RAIL                           :{BLACK}Преобразовать/модернизировать рельсы. При нажатом Shift - оценка стоимости преобразования.
 
 # Rail depot construction window
 STR_BUILD_DEPOT_TRAIN_ORIENTATION_CAPTION                       :{WHITE}Направление депо
@@ -3641,8 +3644,8 @@ STR_ERROR_SITE_UNSUITABLE                                       :{WHITE}... не
 STR_ERROR_ALREADY_BUILT                                         :{WHITE}... уже построено
 STR_ERROR_OWNED_BY                                              :{WHITE}... принадлежит {STRING}
 STR_ERROR_AREA_IS_OWNED_BY_ANOTHER                              :{WHITE}... участок принадлежит другой компании
-STR_ERROR_TERRAFORM_LIMIT_REACHED                               :{WHITE}... количество ландшафтных изменений ограничено
-STR_ERROR_CLEARING_LIMIT_REACHED                                :{WHITE}... количество очищаемых клеток ограничено
+STR_ERROR_TERRAFORM_LIMIT_REACHED                               :{WHITE}... достигнуто ограничение по изменению ландшафта
+STR_ERROR_CLEARING_LIMIT_REACHED                                :{WHITE}... достигнуто ограничение по количеству очищаемых клеток
 STR_ERROR_NAME_MUST_BE_UNIQUE                                   :{WHITE}Имя должно быть уникальным
 STR_ERROR_GENERIC_OBJECT_IN_THE_WAY                             :{WHITE}{1:STRING} на пути
 STR_ERROR_NOT_ALLOWED_WHILE_PAUSED                              :{WHITE}Запрещено во время паузы
@@ -3781,10 +3784,10 @@ STR_ERROR_AIRCRAFT_MUST_BE_STOPPED_INSIDE_HANGAR                :{WHITE}... до
 STR_ERROR_TRAINS_CAN_ONLY_BE_ALTERED_INSIDE_A_DEPOT             :{WHITE}Структуру поезда можно менять только в депо
 STR_ERROR_TRAIN_TOO_LONG                                        :{WHITE}Поезд слишком длинный
 STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE                  :{WHITE}Не удалось развернуть поезд...
-STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE_MULTIPLE_UNITS   :{WHITE}Невозможно развернуть многосоставный транспорт
+STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE_MULTIPLE_UNITS   :{WHITE}... состоит из нескольких элементов
 STR_ERROR_INCOMPATIBLE_RAIL_TYPES                               :Несовместимый тип рельс
 
-STR_ERROR_CAN_T_MOVE_VEHICLE                                    :{WHITE}Невозможно переместить трансп. средство...
+STR_ERROR_CAN_T_MOVE_VEHICLE                                    :{WHITE}Невозможно переместить транспортное средство...
 STR_ERROR_REAR_ENGINE_FOLLOW_FRONT                              :{WHITE}Тыловой локомотив всегда следует за его передней частью
 STR_ERROR_UNABLE_TO_FIND_ROUTE_TO                               :{WHITE}Невозможно найти маршрут к депо
 STR_ERROR_UNABLE_TO_FIND_LOCAL_DEPOT                            :{WHITE}Невозможно найти гараж
@@ -3793,7 +3796,7 @@ STR_ERROR_DEPOT_WRONG_DEPOT_TYPE                                :Неверны�
 
 # Autoreplace related errors
 STR_ERROR_TRAIN_TOO_LONG_AFTER_REPLACEMENT                      :{WHITE}ТС «{VEHICLE}» слишком длинное после замены
-STR_ERROR_AUTOREPLACE_NOTHING_TO_DO                             :{WHITE}Не к чему применить правила автозамены/обновления
+STR_ERROR_AUTOREPLACE_NOTHING_TO_DO                             :{WHITE}Правила автозамены/обновления не были применены
 STR_ERROR_AUTOREPLACE_MONEY_LIMIT                               :(денег мало)
 
 # Rail construction errors
