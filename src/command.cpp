@@ -19,7 +19,7 @@
 #include "newgrf_storage.h"
 #include "strings_func.h"
 #include "gfx_func.h"
-#include "functions.h"
+#include "texteff.hpp"
 #include "town.h"
 #include "date_func.h"
 #include "company_func.h"
@@ -272,7 +272,7 @@ static const Command _command_proc_table[] = {
 
 	DEF_CMD(CmdClearArea,                            CMD_NO_TEST, CMDT_LANDSCAPE_CONSTRUCTION), // CMD_CLEAR_AREA; destroying multi-tile houses makes town rating differ between test and execution
 
-	DEF_CMD(CmdMoneyCheat,                           CMD_OFFLINE, CMDT_MONEY_MANAGEMENT      ), // CMD_MONEY_CHEAT
+	DEF_CMD(CmdMoneyCheat,                           CMD_OFFLINE, CMDT_CHEAT                 ), // CMD_MONEY_CHEAT
 	DEF_CMD(CmdBuildCanal,                              CMD_AUTO, CMDT_LANDSCAPE_CONSTRUCTION), // CMD_BUILD_CANAL
 	DEF_CMD(CmdCompanyCtrl,        CMD_SPECTATOR | CMD_CLIENT_ID, CMDT_SERVER_SETTING        ), // CMD_COMPANY_CTRL
 
@@ -365,6 +365,7 @@ bool IsCommandAllowedWhilePaused(uint32 cmd)
 		CMDPL_NO_CONSTRUCTION, ///< CMDT_OTHER_MANAGEMENT
 		CMDPL_NO_CONSTRUCTION, ///< CMDT_COMPANY_SETTING
 		CMDPL_NO_ACTIONS,      ///< CMDT_SERVER_SETTING
+		CMDPL_NO_ACTIONS,      ///< CMDT_CHEAT
 	};
 	assert_compile(lengthof(command_type_lookup) == CMDT_END);
 

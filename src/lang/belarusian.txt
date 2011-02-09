@@ -1344,6 +1344,8 @@ STR_DIFFICULTY_LEVEL_SETTING_CITY_APPROVAL                      :{LTBLUE}Ста�
 ############ range for difficulty settings ends
 
 STR_NONE                                                        :Няма
+STR_FUNDING_ONLY                                                :Будаваць самому
+STR_MINIMAL                                                     :Мінімальнае
 STR_NUM_VERY_LOW                                                :Вельмі мала
 STR_NUM_LOW                                                     :Мала
 STR_NUM_NORMAL                                                  :Звычайна
@@ -1411,6 +1413,7 @@ STR_CONFIG_SETTING_BUILDONSLOPES                                :{LTBLUE}Даз�
 STR_CONFIG_SETTING_AUTOSLOPE                                    :{LTBLUE}Дазволіць зьмену ляндшафту пад будынкамі, дарогамі й г. д. (аўтаспускі): {ORANGE}{STRING}
 STR_CONFIG_SETTING_CATCHMENT                                    :{LTBLUE}Зона пакрыцьця залежыць ад тыпу станцыі: {ORANGE}{STRING}
 STR_CONFIG_SETTING_EXTRADYNAMITE                                :{LTBLUE}Дазволіць знос амаль усіх гарадзкіх аб'ектаў: {ORANGE}{STRING}
+STR_CONFIG_SETTING_TRAIN_LENGTH                                 :{LTBLUE}Макс. даўжыня цягнiкоў: {ORANGE}{STRING} клет{P 0:1 ка кi ак}
 STR_CONFIG_SETTING_SMOKE_AMOUNT                                 :{LTBLUE}Колькасць дыму/іскраў у лакаматываў: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOKE_AMOUNT_NONE                            :няма
 STR_CONFIG_SETTING_SMOKE_AMOUNT_ORIGINAL                        :арыгiнальная
@@ -1429,6 +1432,8 @@ STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Вык�
 STR_CONFIG_SETTING_GRADUAL_LOADING                              :{LTBLUE}Паступовая загрузка транспарту: {ORANGE}{STRING}
 STR_CONFIG_SETTING_INFLATION                                    :{LTBLUE}Уключыць інфляцыю: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SELECTGOODS                                  :{LTBLUE}Пастаўляць груз на станцыю, толькі калі на яго быў попыт: {ORANGE}{STRING}
+STR_CONFIG_SETTING_MAX_BRIDGE_LENGTH                            :{LTBLUE}Макс. даўжыня мастоў: {ORANGE}{STRING} клет{P 0:1 ка кi ак}
+STR_CONFIG_SETTING_MAX_TUNNEL_LENGTH                            :{LTBLUE}Макс. даўжыня тунэляў: {ORANGE}{STRING} клет{P 0:1 ка кi ак}
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD             :{LTBLUE}Мэтад стварэньня сыравінных прадпрыемстваў: {ORANGE}{STRING}
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NONE        :не ствараць
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NORMAL      :як i iншыя
@@ -1446,6 +1451,7 @@ STR_CONFIG_SETTING_ROAD_VEHICLE_QUEUEING                        :{LTBLUE}Аўт�
 STR_CONFIG_SETTING_AUTOSCROLL                                   :{LTBLUE}Перамяшчаць агляд, калі курсор знаходзіцца на краі экрана: {ORANGE}{STRING}
 STR_CONFIG_SETTING_BRIBE                                        :{LTBLUE}Дазволіць падкупляць мясцовыя ўлады: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_EXCLUSIVE                              :{LTBLUE}Дазволіць купляць эксклюзыўныя трансп. правы: {ORANGE}{STRING}
+STR_CONFIG_SETTING_ALLOW_FUND_ROAD                              :{LTBLUE}Дазволіць фінансаваньне рэканструкцыі дарогаў: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_GIVE_MONEY                             :{LTBLUE}Дазволіць перадачу грошай іншым кампаніям: {ORANGE}{STRING}
 STR_CONFIG_SETTING_FREIGHT_TRAINS                               :{LTBLUE}Множнік вагі для сымуляцыі цяжкіх таварных цягнікоў: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PLANE_SPEED                                  :{LTBLUE}Каэфіцыент хуткасьці для самалётаў: {ORANGE}1 / {STRING}
@@ -1670,6 +1676,7 @@ STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS                         :{LTBLUE}Аль�
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_OPF                     :арыгінальны {BLUE}(рэкамендуецца)
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_NPF                     :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_YAPF                    :YAPF {RED}(не рэкамэндуецца)
+STR_CONFIG_SETTING_REVERSE_AT_SIGNALS                           :{LTBLUE}Аўтаматычны разварот перад сыгналамi: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_QUERY_CAPTION                                :{WHITE}Зьмяніць значэньне
 
@@ -3608,6 +3615,7 @@ STR_ORDER_TRANSFER_NO_LOAD                                      :(Перадац
 STR_ORDER_NO_UNLOAD                                             :(Не разгружацца й забраць груз)
 STR_ORDER_NO_UNLOAD_FULL_LOAD                                   :(Не разгружацца й чакаць поўнай загрузкі)
 STR_ORDER_NO_UNLOAD_FULL_LOAD_ANY                               :(Не разгружацца й чакаць поўнай загрузкі любым грузам)
+STR_ORDER_NO_UNLOAD_NO_LOAD                                     :(Не разгружацца й не грузiцца)
 
 STR_ORDER_STOP_LOCATION_NEAR_END                                :[пачатак станцыi]
 STR_ORDER_STOP_LOCATION_MIDDLE                                  :[сярэдзiна станцыi]
@@ -3810,7 +3818,7 @@ STR_ERROR_ALREADY_BUILT                                         :{WHITE}... уж
 STR_ERROR_OWNED_BY                                              :{WHITE}... належыць {STRING}
 STR_ERROR_AREA_IS_OWNED_BY_ANOTHER                              :{WHITE}... участак належыць іншай кампаніі
 STR_ERROR_TERRAFORM_LIMIT_REACHED                               :{WHITE}... дасягнуты лiмiт ляндшафтных зьменаў
-STR_ERROR_CLEARING_LIMIT_REACHED                                :{WHITE}... лiмiт ачышчаных клетак дасягнуты
+STR_ERROR_CLEARING_LIMIT_REACHED                                :{WHITE}... дасягнута абмежаваньне па колькасці ачышчаных клетак
 STR_ERROR_NAME_MUST_BE_UNIQUE                                   :{WHITE}Імя павінна быць унікальным
 STR_ERROR_GENERIC_OBJECT_IN_THE_WAY                             :{WHITE}{1:STRING} на шляху
 STR_ERROR_NOT_ALLOWED_WHILE_PAUSED                              :{WHITE}Забаронена падчас паўзы
@@ -3949,7 +3957,7 @@ STR_ERROR_AIRCRAFT_MUST_BE_STOPPED_INSIDE_HANGAR                :{WHITE}... па
 STR_ERROR_TRAINS_CAN_ONLY_BE_ALTERED_INSIDE_A_DEPOT             :{WHITE}Склад цягніка можна мяняць толькі ў дэпо
 STR_ERROR_TRAIN_TOO_LONG                                        :{WHITE}Цягнiк занадта доўгi
 STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE                  :{WHITE}Не атрымалася разьвярнуць цягнік...
-STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE_MULTIPLE_UNITS   :{WHITE}Немагчыма разьвярнуць шматскладовы транспарт
+STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE_MULTIPLE_UNITS   :{WHITE}... складаецца з некалькіх частак
 STR_ERROR_INCOMPATIBLE_RAIL_TYPES                               :Несумяшчальны тып рэйкаў
 
 STR_ERROR_CAN_T_MOVE_VEHICLE                                    :{WHITE}Немагчыма перамясьціць трансп. сродак...
@@ -3961,7 +3969,7 @@ STR_ERROR_DEPOT_WRONG_DEPOT_TYPE                                :Няправі�
 
 # Autoreplace related errors
 STR_ERROR_TRAIN_TOO_LONG_AFTER_REPLACEMENT                      :{WHITE}ТС «{VEHICLE}» занадта доўгі пасьля замены
-STR_ERROR_AUTOREPLACE_NOTHING_TO_DO                             :{WHITE}Няма да чаго ўжыць правілы аўтазамены/абнаўленьня
+STR_ERROR_AUTOREPLACE_NOTHING_TO_DO                             :{WHITE}Правілы аўтазамены/абнаўленьня не былі ўжыты
 STR_ERROR_AUTOREPLACE_MONEY_LIMIT                               :(мала грошай)
 
 # Rail construction errors
@@ -4023,6 +4031,7 @@ STR_ERROR_MUST_DEMOLISH_TUNNEL_FIRST                            :{WHITE}Спач
 STR_ERROR_ANOTHER_TUNNEL_IN_THE_WAY                             :{WHITE}Іншы тунэль на шляху
 STR_ERROR_TUNNEL_THROUGH_MAP_BORDER                             :{WHITE}Тунэль заканчваецца па-за межамі мапы
 STR_ERROR_UNABLE_TO_EXCAVATE_LAND                               :{WHITE}Немагчыма падняць/апусьціць зямлю для іншага канца тунэля
+STR_ERROR_TUNNEL_TOO_LONG                                       :{WHITE}... тунэль занадта доўгi
 
 # Object related errors
 STR_ERROR_TOO_MANY_OBJECTS                                      :{WHITE}... занадта шмат аб'ектаў

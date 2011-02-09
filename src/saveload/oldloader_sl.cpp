@@ -710,7 +710,7 @@ static bool LoadOldGood(LoadgameState *ls, int num)
 
 	SB(ge->acceptance_pickup, GoodsEntry::ACCEPTANCE, 1, HasBit(_waiting_acceptance, 15));
 	SB(ge->acceptance_pickup, GoodsEntry::PICKUP, 1, _cargo_source != 0xFF);
-	if (GB(_waiting_acceptance, 0, 12) != 0) {
+	if (GB(_waiting_acceptance, 0, 12) != 0 && CargoPacket::CanAllocateItem()) {
 		ge->cargo.Append(INVALID_STATION, new CargoPacket(GB(_waiting_acceptance, 0, 12), _cargo_days, (_cargo_source == 0xFF) ? INVALID_STATION : _cargo_source, 0, 0));
 	}
 
@@ -1347,7 +1347,7 @@ bool LoadOldVehicle(LoadgameState *ls, int num)
 
 		v->next = (Vehicle *)(size_t)_old_next_ptr;
 
-		if (_cargo_count != 0) {
+		if (_cargo_count != 0 && CargoPacket::CanAllocateItem()) {
 			StationID source =    (_cargo_source == 0xFF) ? INVALID_STATION : _cargo_source;
 			TileIndex source_xy = (source != INVALID_STATION) ? Station::Get(source)->xy : 0;
 			v->cargo.Append(new CargoPacket(_cargo_count, _cargo_days, source, source_xy, source_xy));
@@ -1444,7 +1444,7 @@ static const OldChunks game_difficulty_chunk[] = {
 	OCL_SVAR( OC_FILE_U16 |  OC_VAR_U8, DifficultySettings, max_no_competitors ),
 	OCL_NULL( 2), // competitor_start_time
 	OCL_SVAR( OC_FILE_U16 |  OC_VAR_U8, DifficultySettings, number_towns ),
-	OCL_SVAR( OC_FILE_U16 |  OC_VAR_U8, DifficultySettings, number_industries ),
+	OCL_SVAR( OC_FILE_U16 |  OC_VAR_U8, DifficultySettings, industry_density ),
 	OCL_SVAR( OC_FILE_U16 | OC_VAR_U32, DifficultySettings, max_loan ),
 	OCL_SVAR( OC_FILE_U16 |  OC_VAR_U8, DifficultySettings, initial_interest ),
 	OCL_SVAR( OC_FILE_U16 |  OC_VAR_U8, DifficultySettings, vehicle_costs ),
