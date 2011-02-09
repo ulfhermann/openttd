@@ -22,7 +22,6 @@
 #include "industry_map.h"
 #include "newgrf_canal.h"
 #include "strings_func.h"
-#include "functions.h"
 #include "vehicle_func.h"
 #include "sound_func.h"
 #include "company_func.h"
@@ -219,7 +218,7 @@ static CommandCost DoBuildLock(TileIndex tile, DiagDirection dir, DoCommandFlag 
 		ret = DoCommand(tile - delta, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
 		if (ret.Failed()) return ret;
 		cost.AddCost(ret);
-		cost.AddCost(_price[PR_CLEAR_WATER]);
+		cost.AddCost(_price[PR_BUILD_CANAL]);
 	}
 	if (GetTileSlope(tile - delta, NULL) != SLOPE_FLAT) {
 		return_cmd_error(STR_ERROR_LAND_SLOPED_IN_WRONG_DIRECTION);
@@ -232,7 +231,7 @@ static CommandCost DoBuildLock(TileIndex tile, DiagDirection dir, DoCommandFlag 
 		ret = DoCommand(tile + delta, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
 		if (ret.Failed()) return ret;
 		cost.AddCost(ret);
-		cost.AddCost(_price[PR_CLEAR_WATER]);
+		cost.AddCost(_price[PR_BUILD_CANAL]);
 	}
 	if (GetTileSlope(tile + delta, NULL) != SLOPE_FLAT) {
 		return_cmd_error(STR_ERROR_LAND_SLOPED_IN_WRONG_DIRECTION);
