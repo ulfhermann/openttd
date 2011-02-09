@@ -35,6 +35,7 @@
 
 #include "table/sprites.h"
 #include "table/strings.h"
+#include <map>
 
 static const StringID _units_dropdown[] = {
 	STR_GAME_OPTIONS_MEASURING_UNITS_IMPERIAL,
@@ -1368,6 +1369,7 @@ static SettingsPage _settings_stations_page = {_settings_stations, lengthof(_set
 static SettingEntry _settings_economy_towns[] = {
 	SettingEntry("economy.bribe"),
 	SettingEntry("economy.exclusive_rights"),
+	SettingEntry("economy.fund_roads"),
 	SettingEntry("economy.town_layout"),
 	SettingEntry("economy.allow_town_roads"),
 	SettingEntry("economy.allow_town_level_crossings"),

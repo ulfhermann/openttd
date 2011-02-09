@@ -18,7 +18,7 @@
 #include "bridge_map.h"
 #include "genworld.h"
 #include "autoslope.h"
-#include "functions.h"
+#include "clear_func.h"
 #include "water.h"
 #include "window_func.h"
 #include "company_gui.h"
@@ -619,7 +619,7 @@ void GenerateObjects()
 
 	SetGeneratingWorldProgress(GWP_OBJECT, radiotower_to_build + lighthouses_to_build);
 
-	for (uint i = ScaleByMapSize(1000); i != 0; i--) {
+	for (uint i = ScaleByMapSize(1000); i != 0 && Object::CanAllocateItem(); i--) {
 		TileIndex tile = RandomTile();
 
 		uint h;
@@ -636,7 +636,7 @@ void GenerateObjects()
 	/* add lighthouses */
 	uint maxx = MapMaxX();
 	uint maxy = MapMaxY();
-	for (int loop_count = 0; loop_count < 1000 && lighthouses_to_build != 0; loop_count++) {
+	for (int loop_count = 0; loop_count < 1000 && lighthouses_to_build != 0 && Object::CanAllocateItem(); loop_count++) {
 		uint r = Random();
 
 		/* Scatter the lighthouses more evenly around the perimeter */
