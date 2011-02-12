@@ -967,6 +967,21 @@ CommandCost CmdDeleteOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 }
 
 /**
+ * Cancel the current loading order of the vehicle as the order was deleted.
+ * @param v the vehicle
+ */
+static void CancelLoadingDueToDeletedOrder(Vehicle *v)
+{
+	assert(v->current_order.IsType(OT_LOADING));
+	/* NON-stop flag is misused to see if a train is in a station that is
+	 * on his order list or not */
+	v->current_order.SetNonStopType(ONSF_STOP_EVERYWHERE);
+	/* When full loading, "cancel" that order so the vehicle doesn't
+	 * stay indefinitely at this station anymore. */
+	if (v->current_order.GetLoadType() & OLFB_FULL_LOAD) v->current_order.SetLoadType(OLF_LOAD_IF_POSSIBLE);
+}
+
+/**
  * Delete an order but skip the parameter validation.
  * @param v       The vehicle to delete the order from.
  * @param sel_ord The id of the order to be deleted.
@@ -980,13 +995,8 @@ void DeleteOrder(Vehicle *v, VehicleOrderID sel_ord)
 	for (; u != NULL; u = u->NextShared()) {
 		assert(v->orders.list == u->orders.list);
 
-		/* NON-stop flag is misused to see if a train is in a station that is
-		 * on his order list or not */
 		if (sel_ord == u->cur_real_order_index && u->current_order.IsType(OT_LOADING)) {
-			u->current_order.SetNonStopType(ONSF_STOP_EVERYWHERE);
-			/* When full loading, "cancel" that order so the vehicle doesn't
-			 * stay indefinitely at this station anymore. */
-			if (u->current_order.GetLoadType() & OLFB_FULL_LOAD) u->current_order.SetLoadType(OLF_LOAD_IF_POSSIBLE);
+			CancelLoadingDueToDeletedOrder(u);
 		}
 
 		if (sel_ord < u->cur_real_order_index) {
@@ -1460,8 +1470,10 @@ CommandCost CmdCloneOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32
 			}
 
 			if (flags & DC_EXEC) {
-				/* If the destination vehicle had a OrderList, destroy it */
-				DeleteVehicleOrders(dst);
+				/* If the destination vehicle had a OrderList, destroy it.
+				 * We only reset the order indices, if the new orders are obviously different.
+				 * (We mainly do this to keep the order indices valid and in range.) */
+				DeleteVehicleOrders(dst, false, dst->GetNumOrders() != src->GetNumOrders());
 
 				dst->orders.list = src->orders.list;
 
@@ -1507,8 +1519,10 @@ CommandCost CmdCloneOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32
 				Order *first = NULL;
 				Order **order_dst;
 
-				/* If the destination vehicle had an order list, destroy the chain but keep the OrderList */
-				DeleteVehicleOrders(dst, true);
+				/* If the destination vehicle had an order list, destroy the chain but keep the OrderList.
+				 * We only reset the order indices, if the new orders are obviously different.
+				 * (We mainly do this to keep the order indices valid and in range.) */
+				DeleteVehicleOrders(dst, true, dst->GetNumOrders() != src->GetNumOrders());
 
 				order_dst = &first;
 				FOR_VEHICLE_ORDERS(src, order) {
@@ -1734,11 +1748,15 @@ bool Vehicle::HasDepotOrder() const
 }
 
 /**
- *
  * Delete all orders from a vehicle
- *
+ * @param v                   Vehicle whose orders to reset
+ * @param keep_orderlist      If true, do not free the order list, only empty it.
+ * @param reset_order_indices If true, reset cur_auto_order_index and cur_real_order_index
+ *                            and cancel the current full load order (if the vehicle is loading).
+ *                            If false, _you_ have to make sure the order indices are valid after
+ *                            your messing with them!
  */
-void DeleteVehicleOrders(Vehicle *v, bool keep_orderlist)
+void DeleteVehicleOrders(Vehicle *v, bool keep_orderlist, bool reset_order_indices)
 {
 	DeleteOrderWarnings(v);
 
@@ -1752,6 +1770,12 @@ void DeleteVehicleOrders(Vehicle *v, bool keep_orderlist)
 		if (!keep_orderlist) v->orders.list = NULL;
 	}
 
+	if (reset_order_indices) {
+		v->cur_auto_order_index = v->cur_real_order_index = 0;
+		if (v->current_order.IsType(OT_LOADING)) {
+			CancelLoadingDueToDeletedOrder(v);
+		}
+	}
 	RecalcFrozenIfLoading(v);
 }
 
@@ -1989,6 +2013,7 @@ bool ProcessOrders(Vehicle *v)
 	}
 
 	/* Get the current order */
+	assert(v->cur_auto_order_index == 0 || v->cur_auto_order_index < v->GetNumOrders());
 	v->UpdateRealOrderIndex();
 
 	const Order *order = v->GetOrder(v->cur_real_order_index);
