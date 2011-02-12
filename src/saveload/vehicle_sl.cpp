@@ -330,6 +330,16 @@ void AfterLoadVehicles(bool part_of_load)
 				}
 			}
 		}
+
+		if (IsSavegameVersionBefore(160)) {
+			/* In some old savegames there might be some "crap" stored. */
+			FOR_ALL_VEHICLES(v) {
+				if (!v->IsPrimaryVehicle()) {
+					v->current_order.Free();
+					v->unitnumber = 0;
+				}
+			}
+		}
 	}
 
 	CheckValidVehicles();

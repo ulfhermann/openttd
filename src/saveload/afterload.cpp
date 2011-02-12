@@ -2564,6 +2564,9 @@ bool AfterLoadGame()
 		FOR_ALL_VEHICLES(v) {
 			if (!v->IsPrimaryVehicle()) continue;
 
+			/* Older versions are less strict with indices being in range and fix them on the fly */
+			if (v->cur_auto_order_index >= v->GetNumOrders()) v->cur_auto_order_index = 0;
+
 			v->cur_real_order_index = v->cur_auto_order_index;
 			v->UpdateRealOrderIndex();
 		}
@@ -2577,6 +2580,11 @@ bool AfterLoadGame()
 		 * disable anything at all. So, if some reversing was disabled we
 		 * will keep reversing disabled, otherwise it'll be turned on. */
 		_settings_game.pf.reverse_at_signals = IsSavegameVersionBefore(100) || (_settings_game.pf.wait_oneway_signal != 255 && _settings_game.pf.wait_twoway_signal != 255 && _settings_game.pf.wait_for_pbs_path != 255);
+
+		Train *t;
+		FOR_ALL_TRAINS(t) {
+			_settings_game.vehicle.max_train_length = max<uint8>(_settings_game.vehicle.max_train_length, CeilDiv(t->gcache.cached_total_length, TILE_SIZE));
+		}
 	}
 
 	if (IsSavegameVersionBefore(160)) {
