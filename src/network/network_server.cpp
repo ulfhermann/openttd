@@ -178,13 +178,21 @@ ServerNetworkGameSocketHandler::~ServerNetworkGameSocketHandler()
 	OrderBackup::ResetUser(this->client_id);
 
 	if (this->savegame_mutex != NULL) this->savegame_mutex->BeginCritical();
-	delete this->savegame_packets;
 	if (this->savegame != NULL) this->savegame->cs = NULL;
-
 	if (this->savegame_mutex != NULL) this->savegame_mutex->EndCritical();
 
-	/* Make sure the saving is completely cancelled. */
-	if (this->savegame != NULL) WaitTillSaved();
+	/* Make sure the saving is completely cancelled.
+	 * Yes, we need to handle the save finish as well
+	 * as the next connection in this "loop" might
+	 * just be requesting the map and such. */
+	WaitTillSaved();
+	ProcessAsyncSaveFinish();
+
+	while (this->savegame_packets != NULL) {
+		Packet *p = this->savegame_packets->next;
+		delete this->savegame_packets;
+		this->savegame_packets = p;
+	}
 
 	delete this->savegame_mutex;
 }
@@ -267,7 +275,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::CloseConnection(NetworkRecvSta
 	/* We can't go over the MAX_CLIENTS limit here. However, the
 	 * pool must have place for all clients and ourself. */
 	assert_compile(NetworkClientSocketPool::MAX_SIZE == MAX_CLIENTS + 1);
-	assert(ServerNetworkGameSocketHandler::CanAllocateItem());
+	assert(!accept || ServerNetworkGameSocketHandler::CanAllocateItem());
 	return accept;
 }
 
@@ -277,7 +285,7 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::CloseConnection(NetworkRecvSta
 	NetworkClientSocket *cs;
 	FOR_ALL_CLIENT_SOCKETS(cs) {
 		if (cs->writable) {
-			if (cs->SendPackets() && cs->status == STATUS_MAP) {
+			if (cs->SendPackets() != SPS_CLOSED && cs->status == STATUS_MAP) {
 				/* This client is in the middle of a map-send, call the function for that */
 				cs->SendMap();
 			}
@@ -571,16 +579,26 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::SendMap()
 			}
 		}
 
-		/* Send all packets (forced) and check if we have send it all */
-		if (this->SendPackets() && this->IsPacketQueueEmpty()) {
-			/* All are sent, increase the sent_packets */
-			if (this->savegame_packets != NULL) sent_packets *= 2;
-		} else {
-			/* Not everything is sent, decrease the sent_packets */
-			if (sent_packets > 1) sent_packets /= 2;
-		}
-
 		if (this->savegame_mutex != NULL) this->savegame_mutex->EndCritical();
+
+		switch (this->SendPackets()) {
+			case SPS_CLOSED:
+				return NETWORK_RECV_STATUS_CONN_LOST;
+
+			case SPS_ALL_SENT:
+				/* All are sent, increase the sent_packets */
+				if (this->savegame_packets != NULL) sent_packets *= 2;
+				break;
+
+			case SPS_PARTLY_SENT:
+				/* Only a part is sent; leave the transmission state. */
+				break;
+
+			case SPS_NONE_SENT:
+				/* Not everything is sent, decrease the sent_packets */
+				if (sent_packets > 1) sent_packets /= 2;
+				break;
+		}
 	}
 	return NETWORK_RECV_STATUS_OKAY;
 }

@@ -1783,6 +1783,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\core\pool_func.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\core\pool_func.hpp"
 				>
 			</File>
@@ -3468,6 +3472,14 @@
 			</File>
 			<File
 				RelativePath=".\..\src\misc\fixedsizearray.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\misc\getoptdata.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\misc\getoptdata.h"
 				>
 			</File>
 			<File

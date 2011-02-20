@@ -376,6 +376,7 @@ core/math_func.cpp
 core/math_func.hpp
 core/mem_func.hpp
 core/overflowsafe_type.hpp
+core/pool_func.cpp
 core/pool_func.hpp
 core/pool_type.hpp
 core/random_func.cpp
@@ -823,6 +824,8 @@ misc/countedptr.hpp
 misc/dbg_helpers.cpp
 misc/dbg_helpers.h
 misc/fixedsizearray.hpp
+misc/getoptdata.cpp
+misc/getoptdata.h
 misc/hashtable.hpp
 misc/str.hpp
 

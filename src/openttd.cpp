@@ -59,6 +59,7 @@
 #include "core/backup_type.hpp"
 #include "hotkeys.h"
 #include "newgrf.h"
+#include "misc/getoptdata.h"
 
 
 #include "town.h"
@@ -77,7 +78,6 @@ void IncreaseDate();
 void DoPaletteAnimations();
 void MusicLoop();
 void ResetMusic();
-void ProcessAsyncSaveFinish();
 void CallWindowTickEvent();
 
 extern void SetDifficultyLevel(int mode, DifficultySettings *gm_opt);
@@ -218,73 +218,6 @@ static void ShowHelp()
 }
 
 
-struct MyGetOptData {
-	char *opt;
-	int numleft;
-	char **argv;
-	const char *options;
-	char *cont;
-
-	MyGetOptData(int argc, char **argv, const char *options)
-	{
-		opt = NULL;
-		numleft = argc;
-		this->argv = argv;
-		this->options = options;
-		cont = NULL;
-	}
-};
-
-static int MyGetOpt(MyGetOptData *md)
-{
-	char *s = md->cont;
-	if (s != NULL) {
-		goto md_continue_here;
-	}
-
-	for (;;) {
-		if (--md->numleft < 0) return -1;
-
-		s = *md->argv++;
-		if (*s == '-') {
-md_continue_here:;
-			s++;
-			if (*s != 0) {
-				const char *r;
-				/* Found argument, try to locate it in options. */
-				if (*s == ':' || (r = strchr(md->options, *s)) == NULL) {
-					/* ERROR! */
-					return -2;
-				}
-				if (r[1] == ':') {
-					char *t;
-					/* Item wants an argument. Check if the argument follows, or if it comes as a separate arg. */
-					if (!*(t = s + 1)) {
-						/* It comes as a separate arg. Check if out of args? */
-						if (--md->numleft < 0 || *(t = *md->argv) == '-') {
-							/* Check if item is optional? */
-							if (r[2] != ':') return -2;
-							md->numleft++;
-							t = NULL;
-						} else {
-							md->argv++;
-						}
-					}
-					md->opt = t;
-					md->cont = NULL;
-					return *s;
-				}
-				md->opt = NULL;
-				md->cont = s;
-				return *s;
-			}
-		} else {
-			/* This is currently not supported. */
-			return -2;
-		}
-	}
-}
-
 /**
  * Extract the resolution from the given string and store
  * it in the 'res' parameter.
@@ -341,21 +274,11 @@ static void ShutdownGame()
 	 */
 	InitializeLinkGraphs();
 
-	_town_pool.CleanPool();
-	_industry_pool.CleanPool();
-	_station_pool.CleanPool();
-	_roadstop_pool.CleanPool();
-	_vehicle_pool.CleanPool();
-	_sign_pool.CleanPool();
-	_order_pool.CleanPool();
-	_group_pool.CleanPool();
-	_cargopacket_pool.CleanPool();
-	_engine_pool.CleanPool();
-	_company_pool.CleanPool();
-
 #ifdef ENABLE_NETWORK
 	free(_config_file);
 #endif
+
+	PoolBase::Clean(PT_ALL);
 
 	ResetNewGRFData();
 
@@ -418,10 +341,41 @@ void MakeNewgameSettingsLive()
 extern void DedicatedFork();
 #endif
 
+/** Options of OpenTTD. */
+static const OptionData _options[] = {
+	 GETOPT_SHORT_VALUE('I'),
+	 GETOPT_SHORT_VALUE('S'),
+	 GETOPT_SHORT_VALUE('M'),
+	 GETOPT_SHORT_VALUE('m'),
+	 GETOPT_SHORT_VALUE('s'),
+	 GETOPT_SHORT_VALUE('v'),
+	 GETOPT_SHORT_VALUE('b'),
+#if defined(ENABLE_NETWORK)
+	GETOPT_SHORT_OPTVAL('D'),
+	GETOPT_SHORT_OPTVAL('n'),
+	 GETOPT_SHORT_VALUE('l'),
+	 GETOPT_SHORT_VALUE('p'),
+	 GETOPT_SHORT_VALUE('P'),
+#if !defined(__MORPHOS__) && !defined(__AMIGA__) && !defined(WIN32)
+	 GETOPT_SHORT_NOVAL('f'),
+#endif
+#endif /* ENABLE_NETWORK */
+	 GETOPT_SHORT_VALUE('r'),
+	 GETOPT_SHORT_VALUE('t'),
+	GETOPT_SHORT_OPTVAL('d'),
+	 GETOPT_SHORT_NOVAL('e'),
+	GETOPT_SHORT_OPTVAL('i'),
+	GETOPT_SHORT_OPTVAL('g'),
+	 GETOPT_SHORT_VALUE('G'),
+	 GETOPT_SHORT_VALUE('c'),
+	 GETOPT_SHORT_NOVAL('x'),
+	 GETOPT_SHORT_NOVAL('h'),
+	GETOPT_END()
+};
+
+
 int ttd_main(int argc, char *argv[])
 {
-	int i;
-	const char *optformat;
 	char *musicdriver = NULL;
 	char *sounddriver = NULL;
 	char *videodriver = NULL;
@@ -452,19 +406,10 @@ int ttd_main(int argc, char *argv[])
 	_switch_mode_errorstr = INVALID_STRING_ID;
 	_config_file = NULL;
 
-	/* The last param of the following function means this:
-	 *   a letter means: it accepts that param (e.g.: -h)
-	 *   a ':' behind it means: it need a param (e.g.: -m<driver>)
-	 *   a '::' behind it means: it can optional have a param (e.g.: -d<debug>) */
-	optformat = "m:s:v:b:hD::n::ei::I:S:M:t:d::r:g::G:c:xl:p:P:"
-#if !defined(__MORPHOS__) && !defined(__AMIGA__) && !defined(WIN32)
-		"f"
-#endif
-	;
+	GetOptData mgo(argc - 1, argv + 1, _options);
 
-	MyGetOptData mgo(argc - 1, argv + 1, optformat);
-
-	while ((i = MyGetOpt(&mgo)) != -1) {
+	int i;
+	while ((i = mgo.GetOpt()) != -1) {
 		switch (i) {
 		case 'I': free(graphics_set); graphics_set = strdup(mgo.opt); break;
 		case 'S': free(sounds_set); sounds_set = strdup(mgo.opt); break;
@@ -552,18 +497,25 @@ int ttd_main(int argc, char *argv[])
 		case 'G': generation_seed = atoi(mgo.opt); break;
 		case 'c': _config_file = strdup(mgo.opt); break;
 		case 'x': save_config = false; break;
-		case -2:
 		case 'h':
-			/* The next two functions are needed to list the graphics sets.
-			 * We can't do them earlier because then we can't show it on
-			 * the debug console as that hasn't been configured yet. */
-			DeterminePaths(argv[0]);
-			BaseGraphics::FindSets();
-			BaseSounds::FindSets();
-			BaseMusic::FindSets();
-			ShowHelp();
-			return 0;
+			i = -2; // Force printing of help.
+			break;
 		}
+		if (i == -2) break;
+	}
+
+	if (i == -2 || mgo.numleft > 0) {
+		/* Either the user typed '-h', he made an error, or he added unrecognized command line arguments.
+		 * In all cases, print the help, and exit.
+		 *
+		 * The next two functions are needed to list the graphics sets. We can't do them earlier
+		 * because then we cannot show it on the debug console as that hasn't been configured yet. */
+		DeterminePaths(argv[0]);
+		BaseGraphics::FindSets();
+		BaseSounds::FindSets();
+		BaseMusic::FindSets();
+		ShowHelp();
+		return 0;
 	}
 
 #if defined(WINCE) && defined(_DEBUG)
