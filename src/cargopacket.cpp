@@ -152,8 +152,8 @@ CargoList<Tinst, Tcont>::~CargoList()
  * Empty the cargo list, but don't free the cargo packets;
  * the cargo packets are cleaned by CargoPacket's CleanPool.
  */
-template <class Tinst>
-void CargoList<Tinst>::OnCleanPool()
+template <class Tinst, class Tcont>
+void CargoList<Tinst, Tcont>::OnCleanPool()
 {
 	this->packets.clear();
 }
@@ -650,6 +650,15 @@ uint StationCargoList::TakeFrom(VehicleCargoList *source, uint max_unload, Order
 		}
 	}
 	return max_unload - remaining_unload;
+}
+
+/**
+ * Additionally empty the reservation list for vehicle cargo lists.
+ */
+void VehicleCargoList::OnCleanPool()
+{
+	this->reserved.clear();
+	this->Parent::OnCleanPool();
 }
 
 /**
