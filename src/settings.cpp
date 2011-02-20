@@ -1146,6 +1146,7 @@ static bool StationCatchmentChanged(int32 p1)
 	return true;
 }
 
+
 #ifdef ENABLE_NETWORK
 
 static bool UpdateClientName(int32 p1)
