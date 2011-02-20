@@ -415,6 +415,16 @@ bool CargoList<Tinst>::MoveTo(Tother_inst *dest, uint max_move, MoveToAction mta
 	return it != packets.end();
 }
 
+/**
+ * Additionally empty the reservation list for vehicle cargo lists.
+ */
+void VehicleCargoList::OnCleanPool()
+{
+	this->reserved.clear();
+	this->Parent::OnCleanPool();
+}
+
+
 /** Invalidates the cached data and rebuilds it. */
 template <class Tinst>
 void CargoList<Tinst>::InvalidateCache()
