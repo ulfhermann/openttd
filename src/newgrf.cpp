@@ -189,6 +189,7 @@ struct GRFTempEngineData {
 	uint16 cargo_disallowed;
 	RailTypeLabel railtypelabel;
 	bool refitmask_valid;    ///< Did the newgrf set any refittability property? If not, default refittability will be applied.
+	bool prop27_set;         ///< Did the NewGRF set property 27 (misc flags)?
 	uint8 rv_max_speed;      ///< Temporary storage of RV prop 15, maximum speed in mph/0.8
 };
 
@@ -753,6 +754,7 @@ static ChangeInfoResult RailVehicleChangeInfo(uint engine, int numinfo, int prop
 			case 0x27: // Miscellaneous flags
 				ei->misc_flags = buf->ReadByte();
 				_loaded_newgrf_features.has_2CC |= HasBit(ei->misc_flags, EF_USES_2CC);
+				_gted[e->index].prop27_set = true;
 				break;
 
 			case 0x28: // Cargo classes allowed
@@ -1221,7 +1223,7 @@ static ChangeInfoResult StationChangeInfo(uint stid, int numinfo, int prop, Byte
 						DrawTileSeqStruct *dtss = const_cast<DrawTileSeqStruct *>(&dts->seq[seq_count - 1]);
 
 						dtss->delta_x = buf->ReadByte();
-						if ((byte) dtss->delta_x == 0x80) break;
+						if (dtss->IsTerminator()) break;
 						dtss->delta_y = buf->ReadByte();
 						dtss->delta_z = buf->ReadByte();
 						dtss->size_x = buf->ReadByte();
@@ -3953,7 +3955,7 @@ static void NewSpriteGroup(ByteReader *buf)
 
 						if (type > 0) {
 							seq->delta_z = buf->ReadByte();
-							if ((byte)seq->delta_z == 0x80) continue;
+							if (!seq->IsParentSprite()) continue;
 						}
 
 						seq->size_x = buf->ReadByte();
@@ -3962,7 +3964,7 @@ static void NewSpriteGroup(ByteReader *buf)
 					}
 
 					/* Set the terminator value. */
-					const_cast<DrawTileSeqStruct *>(group->dts->seq)[i].delta_x = (int8)0x80;
+					const_cast<DrawTileSeqStruct *>(group->dts->seq)[i].MakeTerminator();
 
 					break;
 				}
@@ -5372,8 +5374,7 @@ static void ScanInfo(ByteReader *buf)
 
 	_cur_grfconfig->ident.grfid = grfid;
 
-	/* TODO We are incompatible to grf_version < 2 as well, but due to broken GRFs out there, we accept these till the next stable */
-	if (/*grf_version < 2 || */grf_version > 7) {
+	if (grf_version < 2 || grf_version > 7) {
 		SetBit(_cur_grfconfig->flags, GCF_INVALID);
 		DEBUG(grf, 0, "%s: NewGRF \"%s\" (GRFID %08X) uses GRF version %d, which is incompatible with this version of OpenTTD.", _cur_grfconfig->filename, name, BSWAP32(grfid), grf_version);
 	}
@@ -7478,6 +7479,13 @@ static void FinaliseEngineArray()
 			}
 		}
 
+		/* When the train does not set property 27 (misc flags), but it
+		 * is overridden by a NewGRF graphically we want to disable the
+		 * flipping possibility. */
+		if (e->type == VEH_TRAIN && !_gted[e->index].prop27_set && e->grf_prop.grffile != NULL && is_custom_sprite(e->u.rail.image_index)) {
+			ClrBit(e->info.misc_flags, EF_RAIL_FLIPS);
+		}
+
 		/* Skip wagons, there livery is defined via the engine */
 		if (e->type != VEH_TRAIN || e->u.rail.railveh_type != RAILVEH_WAGON) {
 			LiveryScheme ls = GetEngineLiveryScheme(e->index, INVALID_ENGINE, NULL);
@@ -7619,7 +7627,16 @@ static void FinaliseHouseArray()
 
 		/* We need to check all houses again to we are sure that multitile houses
 		 * did get consecutive IDs and none of the parts are missing. */
-		IsHouseSpecValid(hs, next1, next2, next3, NULL);
+		if (!IsHouseSpecValid(hs, next1, next2, next3, NULL)) {
+			/* GetHouseNorthPart checks 3 houses that are directly before
+			 * it in the house pool. If any of those houses have multi-tile
+			 * flags set it assumes it's part of a multitile house. Since
+			 * we can have invalid houses in the pool marked as disabled, we
+			 * don't want to have them influencing valid tiles. As such set
+			 * building_flags to zero here to make sure any house following
+			 * this one in the pool is properly handled as 1x1 house. */
+			hs->building_flags = TILE_NO_FLAG;
+		}
 	}
 
 	if (min_year != 0) {
