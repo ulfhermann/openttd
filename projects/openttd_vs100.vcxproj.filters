@@ -1113,6 +1113,9 @@
     <ClInclude Include="..\src\core\overflowsafe_type.hpp">
       <Filter>Core Source Code</Filter>
     </ClInclude>
+    <ClCompile Include="..\src\core\pool_func.cpp">
+      <Filter>Core Source Code</Filter>
+    </ClCompile>
     <ClInclude Include="..\src\core\pool_func.hpp">
       <Filter>Core Source Code</Filter>
     </ClInclude>
@@ -2323,6 +2326,12 @@
       <Filter>Misc</Filter>
     </ClInclude>
     <ClInclude Include="..\src\misc\fixedsizearray.hpp">
+      <Filter>Misc</Filter>
+    </ClInclude>
+    <ClCompile Include="..\src\misc\getoptdata.cpp">
+      <Filter>Misc</Filter>
+    </ClCompile>
+    <ClInclude Include="..\src\misc\getoptdata.h">
       <Filter>Misc</Filter>
     </ClInclude>
     <ClInclude Include="..\src\misc\hashtable.hpp">

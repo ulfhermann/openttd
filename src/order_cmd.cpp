@@ -1536,6 +1536,7 @@ CommandCost CmdCloneOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32
 					assert(dst->orders.list->GetFirstOrder() == NULL);
 					assert(!dst->orders.list->IsShared());
 					delete dst->orders.list;
+					assert(OrderList::CanAllocateItem());
 					dst->orders.list = new OrderList(first, dst);
 				}
 
@@ -2078,10 +2079,4 @@ bool Order::ShouldStopAtStation(const Vehicle *v, StationID station) const
 			v->last_station_visited != station && // Do stop only when we've not just been there
 			/* Finally do stop when there is no non-stop flag set for this type of station. */
 			!(this->GetNonStopType() & (is_dest_station ? ONSF_NO_STOP_AT_DESTINATION_STATION : ONSF_NO_STOP_AT_INTERMEDIATE_STATIONS));
-}
-
-void InitializeOrders()
-{
-	_order_pool.CleanPool();
-	_orderlist_pool.CleanPool();
 }
