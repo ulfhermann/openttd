@@ -269,6 +269,8 @@ public:
 	/** The vehicles have a cargo list (and we want that saved). */
 	friend const struct SaveLoad *GetVehicleDescription(VehicleType vt);
 
+	void OnCleanPool();
+
 	/**
 	 * Returns total sum of the feeder share for all packets.
 	 * @return The before mentioned number.
