@@ -586,9 +586,6 @@ static AutoreplaceMap _vehicles_to_autoreplace;
 
 void InitializeVehicles()
 {
-	_vehicle_pool.CleanPool();
-	_cargo_payment_pool.CleanPool();
-
 	_age_cargo_skip_counter = 1;
 
 	_vehicles_to_autoreplace.Reset();
@@ -736,7 +733,10 @@ Vehicle::~Vehicle()
 {
 	free(this->name);
 
-	if (CleaningPool()) return;
+	if (CleaningPool()) {
+		this->cargo.OnCleanPool();
+		return;
+	}
 
 	/* sometimes, eg. for disaster vehicles, when company bankrupts, when removing crashed/flooded vehicles,
 	 * it may happen that vehicle chain is deleted when visible */
