@@ -284,6 +284,8 @@ public:
 
 	~VehicleCargoList();
 
+	void OnCleanPool();
+
 	/**
 	 * Returns total sum of the feeder share for all packets.
 	 * @return The before mentioned number.
