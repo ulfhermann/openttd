@@ -1756,6 +1756,12 @@ static Town *CreateRandomTown(uint attempts, uint32 townnameparts, TownSize size
 		 * placement is so bad it couldn't grow at all */
 		if (t->population > 0) return t;
 		DoCommand(t->xy, t->index, 0, DC_EXEC, CMD_DELETE_TOWN);
+
+		/* We already know that we can allocate a single town when
+		 * entering this function. However, we create and delete
+		 * a town which "resets" the allocation checks. As such we
+		 * need to check again when assertions are enabled. */
+		assert(Town::CanAllocateItem());
 	} while (--attempts != 0);
 
 	return NULL;
@@ -2413,7 +2419,7 @@ CommandCost CmdDeleteTown(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32
 							try_clear = true;
 						} else {
 							/* Tell to find a new town. */
-							o->town = NULL;
+							if (flags & DC_EXEC) o->town = NULL;
 						}
 					}
 				}
@@ -2524,6 +2530,8 @@ static bool SearchTileForStatue(TileIndex tile, void *user_data)
  */
 static CommandCost TownActionBuildStatue(Town *t, DoCommandFlag flags)
 {
+	if (!Object::CanAllocateItem()) return_cmd_error(STR_ERROR_TOO_MANY_OBJECTS);
+
 	TileIndex tile = t->xy;
 	if (CircularTileSearch(&tile, 9, SearchTileForStatue, NULL)) {
 		if (flags & DC_EXEC) {
@@ -3018,11 +3026,6 @@ void TownsYearlyLoop()
 		if (!IsTileType(t, MP_HOUSE)) continue;
 		IncrementHouseAge(t);
 	}
-}
-
-void InitializeTowns()
-{
-	_town_pool.CleanPool();
 }
 
 static CommandCost TerraformTile_Town(TileIndex tile, DoCommandFlag flags, uint z_new, Slope tileh_new)
