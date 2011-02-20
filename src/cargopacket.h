@@ -24,7 +24,7 @@ typedef uint32 CargoPacketID;
 struct CargoPacket;
 
 /** Type of the pool for cargo packets for a little over 16 million packets. */
-typedef Pool<CargoPacket, CargoPacketID, 1024, 0xFFF000, true, false> CargoPacketPool;
+typedef Pool<CargoPacket, CargoPacketID, 1024, 0xFFF000, PT_NORMAL, true, false> CargoPacketPool;
 /** The actual pool with cargo packets. */
 extern CargoPacketPool _cargopacket_pool;
 
@@ -196,6 +196,8 @@ public:
 	CargoList() {}
 
 	~CargoList();
+
+	void OnCleanPool();
 
 	/**
 	 * Returns a pointer to the cargo packet list (so you can iterate over it etc).
