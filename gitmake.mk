@@ -6,6 +6,7 @@ gitmake-all: cd smallmap-overlay viewport-overlay
 	touch gitmake-all
 	git checkout patches
 	mv patches/current/*.diff current/
+	mv patches/current/TRUNK_VERSION.txt current/
 	mv patches/current/incremental/* current/incremental
 	mv patches/incremental/* incremental/
 	mv patches/*.diff .
