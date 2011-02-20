@@ -20,14 +20,6 @@ CargoPacketPool _cargopacket_pool("CargoPacket");
 INSTANTIATE_POOL_METHODS(CargoPacket)
 
 /**
- * Initialize, i.e. clean, the pool with cargo packets.
- */
-void InitializeCargoPackets()
-{
-	_cargopacket_pool.CleanPool();
-}
-
-/**
  * Create a new packet for savegame loading.
  */
 CargoPacket::CargoPacket()
@@ -154,6 +146,16 @@ CargoList<Tinst, Tcont>::~CargoList()
 	for (Iterator it(this->packets.begin()); it != this->packets.end(); ++it) {
 		delete *it;
 	}
+}
+
+/**
+ * Empty the cargo list, but don't free the cargo packets;
+ * the cargo packets are cleaned by CargoPacket's CleanPool.
+ */
+template <class Tinst>
+void CargoList<Tinst>::OnCleanPool()
+{
+	this->packets.clear();
 }
 
 /**
