@@ -363,7 +363,7 @@ CargoPacket *CargoList<Tinst, Tcont>::RemovePacket(Iterator &it, uint cap, TileI
 			packet = *it;
 			uint dropped = packet->count - cap;
 			this->count -= dropped;
-			this->cargo_days_in_transit -= dropped * packet->days_in_transit; 
+			this->cargo_days_in_transit -= dropped * packet->days_in_transit;
 			packet->count = cap;
 			this->packets.erase(it++);
 		} else {
