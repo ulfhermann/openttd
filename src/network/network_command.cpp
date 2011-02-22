@@ -81,13 +81,16 @@ CommandPacket *CommandQueue::Pop(bool ignore_paused)
 {
 	CommandPacket **prev = &this->first;
 	CommandPacket *ret = this->first;
+	CommandPacket *prev_item = NULL;
 	if (ignore_paused && _pause_mode != PM_UNPAUSED) {
 		while (ret != NULL && !IsCommandAllowedWhilePaused(ret->cmd)) {
+			prev_item = ret;
 			prev = &ret->next;
 			ret = ret->next;
 		}
 	}
 	if (ret != NULL) {
+		if (ret == this->last) this->last = prev_item;
 		*prev = ret->next;
 		this->count--;
 	}
@@ -221,10 +224,11 @@ void NetworkExecuteLocalCommandQueue()
 }
 
 /**
- * Free the local command queue.
+ * Free the local command queues.
  */
 void NetworkFreeLocalCommandQueue()
 {
+	_local_wait_queue.Free();
 	_local_execution_queue.Free();
 }
 
