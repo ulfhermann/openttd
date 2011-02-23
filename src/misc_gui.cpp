@@ -120,7 +120,8 @@ public:
 		}
 	}
 
-	LandInfoWindow(TileIndex tile) : Window(), tile(tile) {
+	LandInfoWindow(TileIndex tile) : Window(), tile(tile)
+	{
 		this->InitNested(&_land_info_desc);
 
 #if defined(_DEBUG)
@@ -198,6 +199,7 @@ public:
 		if (c != NULL) {
 			Money old_money = c->money;
 			c->money = INT64_MAX;
+			assert(_current_company == _local_company);
 			CommandCost costclear = DoCommand(tile, 0, 0, DC_NONE, CMD_LANDSCAPE_CLEAR);
 			c->money = old_money;
 			if (costclear.Succeeded()) {
@@ -328,6 +330,16 @@ public:
 	virtual void ShowNewGRFInspectWindow() const
 	{
 		::ShowNewGRFInspectWindow(GetGrfSpecFeature(this->tile), this->tile);
+	}
+
+	virtual void OnInvalidateData(int data)
+	{
+		switch (data) {
+			case 1:
+				/* ReInit, "debug" sprite might have changed */
+				this->ReInit();
+				break;
+		}
 	}
 };
 
