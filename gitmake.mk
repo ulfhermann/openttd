@@ -76,7 +76,7 @@ multimap: gitmake
 
 moving-average: gitmake 
 
-cd: viewport-overlay smallmap-overlay ext-rating
+cd: viewport-overlay smallmap-overlay ext-rating station-gui
 
 linkgraph-overlay: cargomap
 
