@@ -870,7 +870,7 @@ class SmallMapWindow : public Window {
 	 */
 	void DrawVehicles(const DrawPixelInfo *dpi, Blitter *blitter) const
 	{
-		for(VehicleList::const_iterator i = this->vehicles_on_map.begin(); i != this->vehicles_on_map.end(); ++i) {
+		for (VehicleList::const_iterator i = this->vehicles_on_map.begin(); i != this->vehicles_on_map.end(); ++i) {
 			const Vehicle *v = Vehicle::GetIfValid(i->vehicle);
 			if (v == NULL) continue;
 
@@ -1063,8 +1063,7 @@ class SmallMapWindow : public Window {
 
 			/* Check if rhombus is inside bounds */
 			if (IsInsideMM(pos.x, -2 * scale, wi->current_x + 2 * scale) &&
-				IsInsideMM(pos.y, -2 * scale, wi->current_y + 2 * scale)) {
-
+					IsInsideMM(pos.y, -2 * scale, wi->current_y + 2 * scale)) {
 				this->vehicles_on_map.push_back(VehicleAndPosition(v));
 			}
 		}
