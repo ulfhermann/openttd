@@ -15,6 +15,7 @@
 #include "cargodest_func.h"
 #include "core/bitmath_func.hpp"
 #include "core/random_func.hpp"
+#include "core/pool_func.hpp"
 #include "cargotype.h"
 #include "settings_type.h"
 #include "town.h"
@@ -679,3 +680,8 @@ void UpdateCargoLinks()
 	InvalidateWindowClassesData(WC_TOWN_VIEW, 1);
 	InvalidateWindowClassesData(WC_INDUSTRY_VIEW, 1);
 }
+
+
+/* Initialize the RouteLink-pool */
+RouteLinkPool _routelink_pool("RouteLink");
+INSTANTIATE_POOL_METHODS(RouteLink)

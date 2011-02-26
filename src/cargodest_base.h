@@ -12,9 +12,14 @@
 #ifndef CARGODEST_BASE_H
 #define CARGODEST_BASE_H
 
+#include "cargodest_type.h"
 #include "cargo_type.h"
 #include "town_type.h"
 #include "core/smallvec_type.hpp"
+#include "core/pool_type.hpp"
+#include "order_type.h"
+#include "station_type.h"
+#include "company_type.h"
 
 struct CargoSourceSink;
 
@@ -80,5 +85,57 @@ struct CargoSourceSink {
 	void LoadCargoSourceSink();
 	void PtrsCargoSourceSink();
 };
+
+
+/** Pool of route links. */
+typedef Pool<RouteLink, RouteLinkID, 512, 262144> RouteLinkPool;
+extern RouteLinkPool _routelink_pool;
+
+/** Holds information about a route service between two stations. */
+struct RouteLink : public RouteLinkPool::PoolItem<&_routelink_pool> {
+private:
+	friend const struct SaveLoad *GetRouteLinkDescription(); ///< Saving and loading of route links.
+
+	StationID       dest;            ///< Destination station id.
+	OrderID         prev_order;      ///< Id of the order the vehicle had when arriving at the origin.
+	OrderID         next_order;      ///< Id of the order the vehicle will leave the station with.
+	OwnerByte       owner;           ///< Owner of the vehicle of the link.
+
+public:
+	/** Constructor */
+	RouteLink(StationID dest = INVALID_STATION, OrderID prev_order = INVALID_ORDER, OrderID next_order = INVALID_ORDER, Owner owner = INVALID_OWNER)
+		: dest(dest), prev_order(prev_order), next_order(next_order)
+	{
+		this->owner = owner;
+	}
+
+	~RouteLink() {}
+
+	/** Get the target station of this link. */
+	inline StationID GetDestination() const { return this->dest; }
+
+	/** Get the order id that lead to the origin station. */
+	inline OrderID GetOriginOrderId() const { return this->prev_order; }
+
+	/** Get the order id that lead to the destination station. */
+	inline OrderID GetDestOrderId() const { return this->next_order; }
+
+	/** Get the owner of this link. */
+	inline Owner GetOwner() const { return this->owner; }
+};
+
+
+/**
+ * Iterate over all valid route links from a given start.
+ * @param var   The variable to use as the "iterator".
+ * @param start The #RouteLinkID to start the iteration from.
+ */
+#define FOR_ALL_ROUTELINKS_FROM(var, start) FOR_ALL_ITEMS_FROM(RouteLink, routelink_index, var, start)
+
+/**
+ * Iterate over all valid route links.
+ * @param var   The variable to use as the "iterator".
+ */
+#define FOR_ALL_ROUTELINKS(var) FOR_ALL_ROUTELINKS_FROM(var, 0)
 
 #endif /* CARGODEST_BASE_H */
