@@ -326,6 +326,7 @@ struct YAPFSettings {
 	uint32 rail_shorter_platform_penalty;          ///< penalty for shorter station platform than train
 	uint32 rail_shorter_platform_per_tile_penalty; ///< penalty for shorter station platform than train (per tile)
 
+	uint32 route_transfer_cost;              ///< penalty for transferring to a different vehicle
 	uint16 route_distance_factor;            ///< factor for the link length
 };
 
