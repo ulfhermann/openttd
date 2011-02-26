@@ -97,6 +97,7 @@ void UpdateHousesAndTowns()
 	/* Update the population and num_house dependant values */
 	FOR_ALL_TOWNS(town) {
 		UpdateTownRadius(town);
+		UpdateTownCargos(town);
 	}
 }
 
@@ -171,6 +172,8 @@ static const SaveLoad _town_desc[] = {
 	SLE_CONDVAR(Town, larger_town,           SLE_BOOL,                  56, SL_MAX_VERSION),
 	SLE_CONDVAR(Town, layout,                SLE_UINT8,                113, SL_MAX_VERSION),
 
+	SLE_CONDVAR(Town, cargo_produced,        SLE_UINT32,               161, SL_MAX_VERSION),
+
 	/* reserve extra space in savegame here. (currently 30 bytes) */
 	SLE_CONDNULL(30, 2, SL_MAX_VERSION),
 
@@ -187,10 +190,31 @@ static void Load_HIDS()
 	Load_NewGRFMapping(_house_mngr);
 }
 
-static void RealSave_TOWN(Town *t)
+const SaveLoad *GetTileMatrixDesc()
+{
+	/* Here due to private member vars. */
+	static const SaveLoad _tilematrix_desc[] = {
+		SLE_VAR(AcceptanceMatrix, area.tile, SLE_UINT32),
+		SLE_VAR(AcceptanceMatrix, area.w,    SLE_UINT16),
+		SLE_VAR(AcceptanceMatrix, area.h,    SLE_UINT16),
+		SLE_END()
+	};
+
+	return _tilematrix_desc;
+}
+
+void RealSave_TOWN(Town *t)
 {
 	SlObject(t, _town_desc);
 	t->SaveCargoSourceSink();
+
+	if (IsSavegameVersionBefore(161)) return;
+
+	SlObject(&t->cargo_accepted, GetTileMatrixDesc());
+	if (t->cargo_accepted.area.w != 0) {
+		uint arr_len = t->cargo_accepted.area.w / AcceptanceMatrix::GRID * t->cargo_accepted.area.h / AcceptanceMatrix::GRID;
+		SlArray(t->cargo_accepted.data, arr_len, SLE_UINT32);
+	}
 }
 
 static void Save_TOWN()
@@ -203,7 +227,7 @@ static void Save_TOWN()
 	}
 }
 
-static void Load_TOWN()
+void Load_TOWN()
 {
 	int index;
 
@@ -211,6 +235,18 @@ static void Load_TOWN()
 		Town *t = new (index) Town();
 		SlObject(t, _town_desc);
 		t->LoadCargoSourceSink();
+
+		if (IsSavegameVersionBefore(161)) continue;
+
+		SlObject(&t->cargo_accepted, GetTileMatrixDesc());
+		if (t->cargo_accepted.area.w != 0) {
+			uint arr_len = t->cargo_accepted.area.w / AcceptanceMatrix::GRID * t->cargo_accepted.area.h / AcceptanceMatrix::GRID;
+			t->cargo_accepted.data = MallocT<uint32>(arr_len);
+			SlArray(t->cargo_accepted.data, arr_len, SLE_UINT32);
+
+			/* Rebuild total cargo acceptance. */
+			UpdateTownCargoTotal(t);
+		}
 	}
 }
 
