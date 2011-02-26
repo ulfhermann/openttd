@@ -175,6 +175,8 @@ public:
 	uint32 Pack() const;
 	uint16 MapOldOrder() const;
 	void ConvertFromOldSavegame();
+
+	static void PostDestructor(size_t index);
 };
 
 void InsertOrder(Vehicle *v, Order *new_o, VehicleOrderID sel_ord);
