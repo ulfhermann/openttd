@@ -245,6 +245,9 @@ Vehicle::Vehicle(VehicleType type)
 	this->fill_percent_te_id = INVALID_TE_ID;
 	this->first              = this;
 	this->colourmap          = PAL_NONE;
+	this->last_station_loaded = INVALID_STATION;
+	this->current_order.index = INVALID_ORDER;
+	this->last_order_id      = INVALID_ORDER;
 }
 
 /**
@@ -1931,6 +1934,7 @@ void Vehicle::BeginLoading(StationID station)
 					implicit_order->MakeImplicit(this->last_station_visited);
 					InsertOrder(this, implicit_order, this->cur_implicit_order_index);
 					if (this->cur_implicit_order_index > 0) --this->cur_implicit_order_index;
+					this->current_order.index = implicit_order->index;
 
 					/* InsertOrder disabled creation of implicit orders for all vehicles with the same implicit order.
 					 * Reenable it for this vehicle */
@@ -1941,6 +1945,11 @@ void Vehicle::BeginLoading(StationID station)
 		}
 		this->current_order.MakeLoading(false);
 	}
+
+	/* Save the id of the order which made us arrive here. MakeLoading
+	 * does not overwrite the index so it is still valid here. */
+	this->last_order_id = this->current_order.index;
+	this->last_station_loaded = station;
 
 	Station::Get(this->last_station_visited)->loading_vehicles.push_back(this);
 

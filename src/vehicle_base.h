@@ -208,6 +208,8 @@ public:
 	byte waiting_triggers;              ///< Triggers to be yet matched before rerandomizing the random bits.
 
 	StationID last_station_visited;     ///< The last station we stopped at.
+	StationID last_station_loaded;      ///< Last station the vehicle loaded cargo at.
+	OrderID   last_order_id;            ///< Order id which caused the vehicle to arrive at the last loading station.
 
 	CargoID cargo_type;                 ///< type of cargo this vehicle is carrying
 	byte cargo_subtype;                 ///< Used for livery refits (NewGRF variations)
