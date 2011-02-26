@@ -122,3 +122,57 @@ void CargoSourceSink::PtrsCargoSourceSink()
 		}
 	}
 }
+
+/**
+ * Wrapper function to get the RouteLinks's internal structure while
+ * some of the variables itself are private.
+ * @return The SaveLoad description for RouteLinks.
+ */
+const SaveLoad *GetRouteLinkDescription()
+{
+	static const SaveLoad _routelink_desc[] = {
+		SLE_VAR(RouteLink, dest,         SLE_UINT16),
+		SLE_VAR(RouteLink, prev_order,   SLE_UINT16),
+		SLE_VAR(RouteLink, next_order,   SLE_UINT16),
+		SLE_VAR(RouteLink, owner,        SLE_UINT8),
+
+		SLE_END()
+	};
+	return _routelink_desc;
+}
+
+/** Save the RouteLink chunk. */
+static void Save_RTLN()
+{
+	RouteLink *link;
+
+	FOR_ALL_ROUTELINKS(link) {
+		SlSetArrayIndex(link->index);
+		SlObject(link, GetRouteLinkDescription());
+	}
+}
+
+/** Load the RouteLink chunk. */
+static void Load_RTLN()
+{
+	int index;
+
+	while ((index = SlIterateArray()) != -1) {
+		RouteLink *link = new (index) RouteLink();
+		SlObject(link, GetRouteLinkDescription());
+	}
+}
+
+/** Resolve references after loading the RouteLink chunk. */
+static void Ptrs_RTLN()
+{
+	RouteLink *link;
+
+	FOR_ALL_ROUTELINKS(link) {
+		SlObject(link, GetRouteLinkDescription());
+	}
+}
+
+extern const ChunkHandler _routelink_chunk_handlers[] = {
+	{ 'RTLN', Save_RTLN, Load_RTLN, Ptrs_RTLN, NULL, CH_ARRAY | CH_LAST},
+};

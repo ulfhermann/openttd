@@ -18,4 +18,8 @@ enum CargoRoutingMode {
 	CRM_FIXED_DEST,      ///< Fixed destinations
 };
 
+/** Unique identifier for a routing link. */
+typedef uint32 RouteLinkID;
+struct RouteLink;
+
 #endif /* CARGODEST_TYPE_H */

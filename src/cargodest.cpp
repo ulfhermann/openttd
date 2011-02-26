@@ -15,6 +15,7 @@
 #include "cargodest_func.h"
 #include "core/bitmath_func.hpp"
 #include "core/random_func.hpp"
+#include "core/pool_func.hpp"
 #include "cargotype.h"
 #include "settings_type.h"
 #include "town.h"
@@ -762,3 +763,8 @@ CargoLink *CargoSourceSink::GetRandomLink(CargoID cid, bool allow_self)
 
 	return l;
 }
+
+
+/* Initialize the RouteLink-pool */
+RouteLinkPool _routelink_pool("RouteLink");
+INSTANTIATE_POOL_METHODS(RouteLink)
