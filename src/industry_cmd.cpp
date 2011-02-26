@@ -2102,6 +2102,9 @@ static void UpdateIndustryStatistics(Industry *i)
 
 			i->last_month_transported[j] = i->this_month_transported[j];
 			i->this_month_transported[j] = 0;
+
+			/* Average production over the last eight months. */
+			i->average_production[j] = (i->average_production[j] * 7 + i->last_month_production[j]) / 8;
 		}
 	}
 }

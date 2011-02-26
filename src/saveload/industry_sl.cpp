@@ -35,6 +35,7 @@ static const SaveLoad _industry_desc[] = {
 	    SLE_ARR(Industry, last_month_pct_transported, SLE_UINT8,  2),
 	    SLE_ARR(Industry, last_month_production,      SLE_UINT16, 2),
 	    SLE_ARR(Industry, last_month_transported,     SLE_UINT16, 2),
+	SLE_CONDARR(Industry, average_production,         SLE_UINT16, 2,             161, SL_MAX_VERSION),
 
 	    SLE_VAR(Industry, counter,                    SLE_UINT16),
 
