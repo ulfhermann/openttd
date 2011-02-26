@@ -15,6 +15,8 @@
 #include "../../direction_type.h"
 #include "../../track_type.h"
 #include "../../vehicle_type.h"
+#include "../../cargodest_type.h"
+#include "../../order_type.h"
 #include "../pathfinder_type.h"
 
 /**
@@ -89,5 +91,7 @@ bool YapfTrainCheckReverse(const Train *v);
  * @return True if the path could be extended to a safe tile.
  */
 bool YapfTrainFindNearestSafeTile(const Train *v, TileIndex tile, Trackdir td, bool override_railtype);
+
+RouteLink *YapfChooseRouteLink(CargoID cid, const StationList *stations, TileIndex src, const TileArea &dest, StationID *start_station, bool *found = NULL);
 
 #endif /* YAPF_H */

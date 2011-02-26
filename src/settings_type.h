@@ -325,6 +325,8 @@ struct YAPFSettings {
 	uint32 rail_longer_platform_per_tile_penalty;  ///< penalty for longer  station platform than train (per tile)
 	uint32 rail_shorter_platform_penalty;          ///< penalty for shorter station platform than train
 	uint32 rail_shorter_platform_per_tile_penalty; ///< penalty for shorter station platform than train (per tile)
+
+	uint16 route_distance_factor;            ///< factor for the link length
 };
 
 /** Settings related to all pathfinders. */
