@@ -67,6 +67,8 @@ static const SaveLoad _cargopayment_desc[] = {
 	SLE_VAR(CargoPayment, route_profit,  SLE_INT64),
 	SLE_VAR(CargoPayment, visual_profit, SLE_INT64),
 
+	SLE_CONDVAR(CargoPayment, transfer_profit, SLE_INT64, 161, SL_MAX_VERSION),
+
 	SLE_END()
 };
 
