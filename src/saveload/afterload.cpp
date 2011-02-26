@@ -2606,6 +2606,12 @@ bool AfterLoadGame()
 		FOR_ALL_TOWNS(town) {
 			UpdateTownCargos(town);
 		}
+
+		/* Update cargo acceptance of industries. */
+		Industry *ind;
+		FOR_ALL_INDUSTRIES(ind) {
+			UpdateIndustryAcceptance(ind);
+		}
 	}
 
 	/* Road stops is 'only' updating some caches */
