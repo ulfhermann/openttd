@@ -18,12 +18,15 @@
 #include "town_map.h"
 #include "subsidy_type.h"
 #include "cargodest_base.h"
+#include "tilematrix_type.hpp"
 
 template <typename T>
 struct BuildingCounts {
 	T id_count[HOUSE_MAX];
 	T class_count[HOUSE_CLASS_MAX];
 };
+
+typedef TileMatrix<uint32, 4> AcceptanceMatrix;
 
 static const uint CUSTOM_TOWN_NUMBER_DIFFICULTY  = 4; ///< value for custom town number in difficulty settings
 static const uint CUSTOM_TOWN_MAX_NUMBER = 5000;  ///< this is the maximum number of towns a user can specify in customisation
@@ -99,6 +102,11 @@ struct Town : TownPool::PoolItem<&_town_pool>, CargoSourceSink {
 	/* If this is a larger town, and should grow more quickly. */
 	bool larger_town;
 	TownLayoutByte layout; ///< town specific road layout
+
+	/* Current cargo acceptance and production. */
+	uint32 cargo_produced;           ///< Bitmap of all cargos produced by houses in this town.
+	AcceptanceMatrix cargo_accepted; ///< Bitmap of cargos accepted by houses for each 4*4 map square of the town.
+	uint32 cargo_accepted_total;     ///< NOSAVE: Bitmap of all cargos accepted by houses in this town.
 
 	PartOfSubsidyByte part_of_subsidy; ///< NOSAVE: is this town a source/destination of a subsidy?
 
@@ -196,6 +204,8 @@ void ResetHouses();
 void ClearTownHouse(Town *t, TileIndex tile);
 void UpdateTownMaxPass(Town *t);
 void UpdateTownRadius(Town *t);
+void UpdateTownCargos(Town *t);
+void UpdateTownCargoTotal(Town *t);
 CommandCost CheckIfAuthorityAllowsNewStation(TileIndex tile, DoCommandFlag flags);
 Town *ClosestTownFromTile(TileIndex tile, uint threshold);
 void ChangeTownRating(Town *t, int add, int max, DoCommandFlag flags);

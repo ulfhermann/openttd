@@ -678,6 +678,71 @@ static void ChangeTileOwner_Town(TileIndex tile, Owner old_owner, Owner new_owne
 	/* not used */
 }
 
+/** Update the total cargo acceptance of the whole town. */
+void UpdateTownCargoTotal(Town *t)
+{
+	t->cargo_accepted_total = 0;
+
+	const TileArea &area = t->cargo_accepted.GetArea();
+	TILE_AREA_LOOP(tile, area) {
+		if (TileX(tile) % AcceptanceMatrix::GRID == 0 && TileY(tile) % AcceptanceMatrix::GRID == 0) {
+			t->cargo_accepted_total |= t->cargo_accepted[tile];
+		}
+	}
+}
+
+/**
+ * Update accepted and produced town cargos around a specific tile.
+ * @param t The town to update.
+ * @param start Update the values around this tile.
+ * @param update_total Set to true if the total cargo acceptance should be updated.
+ */
+static void UpdateTownCargos(Town *t, TileIndex start, bool update_total = true)
+{
+	CargoArray accepted, produced;
+	uint32 dummy;
+
+	/* Gather acceptance and production for all houses in an area around the start tile.
+	 * The area is composed of the square the tile is in, extended one square in all
+	 * directions as the coverage area of a single station is bigger than just one square. */
+	TileArea area = AcceptanceMatrix::GetAreaForTile(start, 1);
+	TILE_AREA_LOOP(tile, area) {
+		if (!IsTileType(tile, MP_HOUSE) || GetTownIndex(tile) != t->index) continue;
+
+		AddAcceptedCargo_Town(tile, accepted, &dummy);
+		AddProducedCargo_Town(tile, produced);
+	}
+
+	/* Create bitmask of accepted/produced cargos. */
+	uint32 acc = 0;
+	for (uint cid = 0; cid < NUM_CARGO; cid++) {
+		if (accepted[cid] >= 8) SetBit(acc, cid);
+		if (produced[cid] > 0) SetBit(t->cargo_produced, cid);
+	}
+	t->cargo_accepted[start] = acc;
+
+	if (update_total) UpdateTownCargoTotal(t);
+}
+
+/** Update cargo production and acceptance for the complete town. */
+void UpdateTownCargos(Town *t)
+{
+	t->cargo_produced = 0;
+
+	const TileArea &area = t->cargo_accepted.GetArea();
+	if (area.tile == INVALID_TILE) return;
+
+	/* Update acceptance for each grid square. */
+	TILE_AREA_LOOP(tile, area) {
+		if (TileX(tile) % AcceptanceMatrix::GRID == 0 && TileY(tile) % AcceptanceMatrix::GRID == 0) {
+			UpdateTownCargos(t, tile, false);
+		}
+	}
+
+	/* Update the total acceptance. */
+	UpdateTownCargoTotal(t);
+}
+
 static bool GrowTown(Town *t);
 
 static void TownTickHandler(Town *t)
@@ -2206,6 +2271,7 @@ static bool BuildTownHouse(Town *t, TileIndex tile)
 		}
 
 		MakeTownHouse(tile, t, construction_counter, construction_stage, house, random_bits);
+		UpdateTownCargos(t, tile);
 
 		return true;
 	}
@@ -2287,6 +2353,9 @@ void ClearTownHouse(Town *t, TileIndex tile)
 	if (eflags & BUILDING_2_TILES_Y)   DoClearTownHouseHelper(tile + TileDiffXY(0, 1), t, ++house);
 	if (eflags & BUILDING_2_TILES_X)   DoClearTownHouseHelper(tile + TileDiffXY(1, 0), t, ++house);
 	if (eflags & BUILDING_HAS_4_TILES) DoClearTownHouseHelper(tile + TileDiffXY(1, 1), t, ++house);
+
+	/* Update cargo acceptance. */
+	UpdateTownCargos(t, tile);
 }
 
 /**
@@ -3014,6 +3083,7 @@ void TownsMonthlyLoop()
 		UpdateTownGrowRate(t);
 		UpdateTownAmounts(t);
 		UpdateTownUnwanted(t);
+		UpdateTownCargos(t);
 	}
 }
 

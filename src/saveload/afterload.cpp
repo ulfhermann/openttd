@@ -2595,6 +2595,19 @@ bool AfterLoadGame()
 		}
 	}
 
+	if (IsSavegameVersionBefore(161)) {
+		/* Update cargo acceptance map of towns. */
+		for (TileIndex t = 0; t < map_size; t++) {
+			if (!IsTileType(t, MP_HOUSE)) continue;
+			Town::Get(GetTownIndex(t))->cargo_accepted.Add(t);
+		}
+
+		Town *town;
+		FOR_ALL_TOWNS(town) {
+			UpdateTownCargos(town);
+		}
+	}
+
 	/* Road stops is 'only' updating some caches */
 	AfterLoadRoadStops();
 	AfterLoadLabelMaps();
