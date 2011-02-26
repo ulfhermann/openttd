@@ -44,6 +44,9 @@ private:
 	StationID source;           ///< The station where the cargo came from first.
 	TileIndex source_xy;        ///< The origin of the cargo (first station in feeder chain).
 	TileIndex loaded_at_xy;     ///< Location where this cargo has been loaded into the vehicle.
+	TileIndex dest_xy;          ///< Destination tile or INVALID_TILE if no specific destination
+	SourceID dest_id;           ///< Index of the destination.
+	SourceTypeByte dest_type;   ///< Type of #dest_id.
 
 	/** The CargoList caches, thus needs to know about it. */
 	template <class Tinst> friend class CargoList;
@@ -56,8 +59,8 @@ public:
 	static const uint16 MAX_COUNT = UINT16_MAX;
 
 	CargoPacket();
-	CargoPacket(StationID source, TileIndex source_xy, uint16 count, SourceType source_type, SourceID source_id);
-	CargoPacket(uint16 count, byte days_in_transit, StationID source, TileIndex source_xy, TileIndex loaded_at_xy, Money feeder_share = 0, SourceType source_type = ST_INDUSTRY, SourceID source_id = INVALID_SOURCE);
+	CargoPacket(StationID source, TileIndex source_xy, uint16 count, SourceType source_type, SourceID source_id, TileIndex dest_xy = INVALID_TILE, SourceType dest_type = ST_INDUSTRY, SourceID dest_id = INVALID_SOURCE);
+	CargoPacket(uint16 count, byte days_in_transit, StationID source, TileIndex source_xy, TileIndex loaded_at_xy, Money feeder_share = 0, SourceType source_type = ST_INDUSTRY, SourceID source_id = INVALID_SOURCE, TileIndex dest_xy = INVALID_TILE, SourceType dest_type = ST_INDUSTRY, SourceID dest_id = INVALID_SOURCE);
 
 	/** Destroy the packet. */
 	~CargoPacket() { }
@@ -138,6 +141,33 @@ public:
 	FORCEINLINE TileIndex LoadedAtXY() const
 	{
 		return this->loaded_at_xy;
+	}
+
+	/**
+	 * Gets the coordinates of the cargo's destination.
+	 * @return The destination tile.
+	 */
+	FORCEINLINE TileIndex DestinationXY() const
+	{
+		return this->dest_xy;
+	}
+
+	/**
+	 * Gets the ID of the destination of the cargo.
+	 * @return The destination ID.
+	 */
+	FORCEINLINE SourceID DestinationID() const
+	{
+		return this->dest_id;
+	}
+
+	/**
+	 * Gets the type of the destination of the cargo.
+	 * @return The destination type.
+	 */
+	FORCEINLINE SourceType DestinationType() const
+	{
+		return this->dest_type;
 	}
 
 
@@ -299,7 +329,10 @@ public:
 				cp1->days_in_transit == cp2->days_in_transit &&
 				cp1->source_type     == cp2->source_type &&
 				cp1->source_id       == cp2->source_id &&
-				cp1->loaded_at_xy    == cp2->loaded_at_xy;
+				cp1->loaded_at_xy    == cp2->loaded_at_xy &&
+				cp1->dest_xy         == cp2->dest_xy &&
+				cp1->dest_type       == cp2->dest_type &&
+				cp1->dest_id         == cp2->dest_id;
 	}
 };
 
@@ -325,7 +358,10 @@ public:
 		return cp1->source_xy    == cp2->source_xy &&
 				cp1->days_in_transit == cp2->days_in_transit &&
 				cp1->source_type     == cp2->source_type &&
-				cp1->source_id       == cp2->source_id;
+				cp1->source_id       == cp2->source_id &&
+				cp1->dest_xy         == cp2->dest_xy &&
+				cp1->dest_type       == cp2->dest_type &&
+				cp1->dest_id         == cp2->dest_id;
 	}
 };
 
