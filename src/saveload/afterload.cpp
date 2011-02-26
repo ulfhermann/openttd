@@ -2808,6 +2808,12 @@ bool AfterLoadGame()
 				SetRailStationReservation(t, false);
 			}
 		}
+
+		/* Update cargo acceptance of industries. */
+		Industry *ind;
+		FOR_ALL_INDUSTRIES(ind) {
+			UpdateIndustryAcceptance(ind);
+		}
 	}
 
 	if (IsSavegameVersionBefore(184)) {
