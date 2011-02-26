@@ -49,6 +49,7 @@ struct Industry : IndustryPool::PoolItem<&_industry_pool>, CargoSourceSink {
 	byte production_rate[2];            ///< production rate for each cargo
 	byte prod_level;                    ///< general production level
 	CargoID accepts_cargo[3];           ///< 3 input cargo slots
+	uint32 produced_accepted_mask;      ///< Bit mask of all cargos that are always accepted and also produced
 	uint16 this_month_production[2];    ///< stats of this month's production per cargo
 	uint16 this_month_transported[2];   ///< stats of this month's transport per cargo
 	byte last_month_pct_transported[2]; ///< percentage transported per cargo in the last full month
@@ -150,6 +151,8 @@ protected:
 void PlantRandomFarmField(const Industry *i);
 
 void ReleaseDisastersTargetingIndustry(IndustryID);
+
+void UpdateIndustryAcceptance(Industry *ind);
 
 #define FOR_ALL_INDUSTRIES_FROM(var, start) FOR_ALL_ITEMS_FROM(Industry, industry_index, var, start)
 #define FOR_ALL_INDUSTRIES(var) FOR_ALL_INDUSTRIES_FROM(var, 0)

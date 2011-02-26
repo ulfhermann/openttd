@@ -28,6 +28,7 @@ static const SaveLoad _industry_desc[] = {
 	    SLE_ARR(Industry, production_rate,            SLE_UINT8,  2),
 	SLE_CONDNULL( 3, 0, 60),       ///< used to be industry's accepts_cargo
 	SLE_CONDARR(Industry, accepts_cargo,              SLE_UINT8,  3,              78, SL_MAX_VERSION),
+	SLE_CONDVAR(Industry, produced_accepted_mask,     SLE_UINT32,                161, SL_MAX_VERSION),
 	    SLE_VAR(Industry, prod_level,                 SLE_UINT8),
 	    SLE_ARR(Industry, this_month_production,      SLE_UINT16, 2),
 	    SLE_ARR(Industry, this_month_transported,     SLE_UINT16, 2),
