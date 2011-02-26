@@ -12,6 +12,7 @@
 #include "../../stdafx.h"
 #include "../../cargodest_base.h"
 #include "../../station_base.h"
+#include "../../town.h"
 #include "yapf.hpp"
 
 
@@ -85,15 +86,72 @@ class CYapfCostRouteLinkT {
 	typedef typename Types::TrackFollower Follower;      ///< The route follower.
 	typedef typename Types::NodeList::Titem Node;        ///< This will be our node type.
 
+	static const int LOCAL_PENALTY_FACTOR = 20;          ///< Penalty factor for source-local delivery.
+
 	/** To access inherited path finder. */
 	FORCEINLINE Tpf& Yapf() { return *static_cast<Tpf*>(this); }
+
+	/** Check if this is a valid connection. */
+	FORCEINLINE bool ValidLink(const RouteLink *link, const RouteLink *parent) const
+	{
+		/* If the parent link has an owner, and the owner is different to
+		 * the new owner, discard the node. Otherwise cargo could switch
+		 * companies at oil rigs, which would mess up payment. */
+		if (parent->GetOwner() != INVALID_OWNER && link->GetOwner() != parent->GetOwner()) return false;
+
+		/* Check for no loading/no unloading when transferring. */
+		if (link->GetOriginOrderId() != parent->GetDestOrderId() || (Order::Get(link->GetOriginOrderId())->GetUnloadType() & OUFB_UNLOAD) != 0) {
+			/* Can't transfer if the current order prohibits loading. */
+			if ((Order::Get(link->GetOriginOrderId())->GetLoadType() & OLFB_NO_LOAD) != 0) return false;
+
+			/* Can't transfer if the last order prohibits unloading. */
+			if (parent->GetDestOrderId() != INVALID_ORDER && (Order::Get(parent->GetDestOrderId())->GetUnloadType() & OUFB_NO_UNLOAD) != 0) return false;
+		}
+
+		return true;
+	}
+
+	/** Cost of a single route link. */
+	FORCEINLINE int RouteLinkCost(const RouteLink *link, const RouteLink *parent) const
+	{
+		int cost = 0;
+
+		/* Distance cost. */
+		const Station *from = Station::Get(parent->GetDestination());
+		const Station *to = Station::Get(link->GetDestination());
+		cost = DistanceManhattan(from->xy, to->xy) * this->Yapf().PfGetSettings().route_distance_factor;
+
+		return cost;
+	}
 
 public:
 	/** Called by YAPF to calculate the cost from the origin to the given node. */
 	inline bool PfCalcCost(Node& n, const Follower *follow)
 	{
+		int segment_cost = 0;
+
+		if (this->Yapf().PfDetectDestination(n)) {
+			Station *st = Station::Get(n.m_parent->GetRouteLink()->GetDestination());
+			/* Discard node if the station doesn't accept the cargo type. */
+			if (!HasBit(st->goods[follow->m_cid].acceptance_pickup, GoodsEntry::ACCEPTANCE)) return false;
+			/* Destination node, get delivery cost. Parent has the station. */
+			segment_cost += this->Yapf().DeliveryCost(st);
+			/* If this link comes from an origin station, penalize it to encourage
+			 * delivery using other stations. */
+			if (n.m_parent->GetRouteLink()->GetDestOrderId() == INVALID_ORDER) segment_cost *= LOCAL_PENALTY_FACTOR;
+		} else {
+			RouteLink *link = n.GetRouteLink();
+			RouteLink *parent = n.m_parent->GetRouteLink();
+
+			/* Check if the link is a valid connection. */
+			if (!this->ValidLink(link, parent)) return false;
+
+			/* Cost of the single route link. */
+			segment_cost += this->RouteLinkCost(link, parent);
+		}
+
 		/* Apply it. */
-		n.m_cost = n.m_parent->m_cost;
+		n.m_cost = n.m_parent->m_cost + segment_cost;
 		return true;
 	}
 };
@@ -106,6 +164,7 @@ class CYapfOriginRouteLinkT {
 
 	CargoID   m_cid;
 	TileIndex m_src;
+	SmallVector<RouteLink, 2> m_origin;
 
 	/** To access inherited path finder. */
 	FORCEINLINE Tpf& Yapf() { return *static_cast<Tpf*>(this); }
@@ -122,11 +181,27 @@ public:
 	{
 		this->m_cid = cid;
 		this->m_src = src;
+		/* Create fake links for the origin stations. */
+		for (const Station * const *st = stations->Begin(); st != stations->End(); st++) {
+			/* Exclusive rights in effect? Only serve those stations. */
+			if ((*st)->town->exclusive_counter > 0 && (*st)->town->exclusivity != (*st)->owner) continue;
+			/* Selectively servicing stations, and not this one. */
+			if (_settings_game.order.selectgoods && (*st)->goods[cid].last_speed == 0) continue;
+
+			*this->m_origin.Append() = RouteLink((*st)->index);
+		}
 	}
 
 	/** Called when YAPF needs to place origin nodes into the open list. */
 	void PfSetStartupNodes()
 	{
+		for (RouteLink *link = this->m_origin.Begin(); link != this->m_origin.End(); link++) {
+			Node &n = this->Yapf().CreateNewNode();
+			n.Set(NULL, link);
+			/* Prefer stations closer to the source tile. */
+			n.m_cost = DistanceSquare(this->m_src, Station::Get(link->GetDestination())->xy) * this->Yapf().PfGetSettings().route_distance_factor;
+			this->Yapf().AddStartupNode(n);
+		}
 	}
 };
 
@@ -148,16 +223,38 @@ public:
 		this->m_dest = dest;
 	}
 
+	/** Cost for delivering the cargo to the final destination tile. */
+	FORCEINLINE int DeliveryCost(Station *st)
+	{
+		return DistanceSquare(st->xy, this->m_dest.tile) * this->Yapf().PfGetSettings().route_distance_factor;
+	}
+
+	/** Called by YAPF to detect if the station reaches the destination. */
+	FORCEINLINE bool PfDetectDestination(StationID st_id) const
+	{
+		const Station *st = Station::Get(st_id);
+		return st->rect.AreaInExtendedRect(this->m_dest, st->GetCatchmentRadius());
+	}
+
 	/** Called by YAPF to detect if the node reaches the destination. */
 	FORCEINLINE bool PfDetectDestination(const Node& n) const
 	{
-		return false;
+		return n.GetRouteLink() == NULL;
 	}
 
 	/** Called by YAPF to calculate the estimated cost to the destination. */
 	FORCEINLINE bool PfCalcEstimate(Node& n)
 	{
-		n.m_estimate = n.m_cost;
+		if (this->PfDetectDestination(n)) {
+			n.m_estimate = n.m_cost;
+			return true;
+		}
+
+		/* Estimate based on Manhattan distance to destination. */
+		Station *from = Station::Get(n.GetRouteLink()->GetDestination());
+		int d = DistanceManhattan(from->xy, this->m_dest.tile) * this->Yapf().PfGetSettings().route_distance_factor;
+
+		n.m_estimate = n.m_cost + d;
 		assert(n.m_estimate >= n.m_parent->m_estimate);
 		return true;
 	}
@@ -177,12 +274,53 @@ public:
 	/** Called by YAPF to move from the given node to the next nodes. */
 	inline void PfFollowNode(Node& old_node)
 	{
+		Follower f(this->Yapf().GetCargoID());
+
+		if (this->Yapf().PfDetectDestination(old_node.GetRouteLink()->GetDestination()) && (old_node.GetRouteLink()->GetDestOrderId() == INVALID_ORDER || Order::Get(old_node.GetRouteLink()->GetDestOrderId())->GetUnloadType() & OUFB_NO_UNLOAD) == 0) {
+			/* Possible destination? Add sentinel node for final delivery. */
+			Node &n = this->Yapf().CreateNewNode();
+			n.Set(&old_node, NULL);
+			this->Yapf().AddNewNode(n, f);
+		}
+
+		if (f.Follow(old_node.GetRouteLink())) {
+			for (RouteLinkList::iterator link = f.m_new_links->begin(); link != f.m_new_links->end(); ++link) {
+				/* Add new node. */
+				Node &n = this->Yapf().CreateNewNode();
+				n.Set(&old_node, *link);
+				this->Yapf().AddNewNode(n, f);
+			}
+		}
 	}
 
 	/** Return debug report character to identify the transportation type. */
 	FORCEINLINE char TransportTypeChar() const
 	{
 		return 'c';
+	}
+
+	/** Find the best cargo routing from a station to a destination. */
+	static RouteLink *ChooseRouteLink(CargoID cid, const StationList *stations, TileIndex src, const TileArea &dest, StationID *start_station, bool *found)
+	{
+		/* Initialize pathfinder instance. */
+		Tpf pf;
+		pf.SetOrigin(cid, src, stations);
+		pf.SetDestination(dest);
+
+		/* Do it. Exit if we didn't find a path. */
+		bool res = pf.FindPath(NULL);
+		if (found != NULL) *found = res;
+		if (!res) return NULL;
+
+		/* Walk back to find the start node. */
+		Node *node = pf.GetBestNode();
+		while (node->m_parent->m_parent != NULL) {
+			node = node->m_parent;
+		}
+
+		/* Save result. */
+		if (start_station != NULL) *start_station = node->m_parent->GetRouteLink()->GetDestination();
+		return node->GetRouteLink();
 	}
 };
 
@@ -205,3 +343,18 @@ struct CYapfRouteLink_TypesT {
 };
 
 struct CYapfRouteLink : CYapfT<CYapfRouteLink_TypesT<CYapfRouteLink> > {};
+
+
+/**
+ * Find the best cargo routing from a station to a destination.
+ * @param cid      Cargo type to route.
+ * @param stations Set of possible originating stations.
+ * @param dest     Destination tile area.
+ * @param[out] start_station Station the best route link originates from.
+ * @param[out] found True if a link was found.
+ * @return The best RouteLink to the target or NULL if either no link found or one of the origin stations is the best destination.
+ */
+RouteLink *YapfChooseRouteLink(CargoID cid, const StationList *stations, TileIndex src, const TileArea &dest, StationID *start_station, bool *found)
+{
+	return CYapfRouteLink::ChooseRouteLink(cid, stations, src, dest, start_station, found);
+}
