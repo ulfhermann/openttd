@@ -55,6 +55,7 @@ struct Industry : IndustryPool::PoolItem<&_industry_pool>, CargoSourceSink {
 	byte last_month_pct_transported[2]; ///< percentage transported per cargo in the last full month
 	uint16 last_month_production[2];    ///< total units produced per cargo in the last full month
 	uint16 last_month_transported[2];   ///< total units transported per cargo in the last full month
+	uint16 average_production[2];       ///< average production during the last months
 	uint16 counter;                     ///< used for animation and/or production (if available cargo)
 
 	IndustryType type;                  ///< type of industry.

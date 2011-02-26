@@ -2611,6 +2611,8 @@ bool AfterLoadGame()
 		Industry *ind;
 		FOR_ALL_INDUSTRIES(ind) {
 			UpdateIndustryAcceptance(ind);
+			ind->average_production[0] = ind->last_month_production[0];
+			ind->average_production[1] = ind->last_month_production[1];
 		}
 	}
 
