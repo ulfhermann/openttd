@@ -675,7 +675,7 @@ static char *FormatString(char *buff, const char *str_arg, int64 *argv, const in
 	std::stack<const char *> str_stack;
 	str_stack.push(str_arg);
 
-	while (true) {
+	for (;;) {
 		while (!str_stack.empty() && (b = Utf8Consume(&str_stack.top())) == '\0') {
 			str_stack.pop();
 		}
@@ -1457,7 +1457,7 @@ bool ReadLanguagePack(const LanguageMetadata *lang)
 {
 	/* Current language pack */
 	size_t len;
-	LanguagePack *lang_pack = (LanguagePack *)ReadFileToMem(lang->file, &len, 200000);
+	LanguagePack *lang_pack = (LanguagePack *)ReadFileToMem(lang->file, &len, 1U << 20);
 	if (lang_pack == NULL) return false;
 
 	/* End of read data (+ terminating zero added in ReadFileToMem()) */
