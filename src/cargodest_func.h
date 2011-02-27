@@ -20,6 +20,7 @@
 bool CargoHasDestinations(CargoID cid);
 
 void UpdateVehicleRouteLinks(const Vehicle *v, StationID arrived_at);
+void PrefillRouteLinks(const Vehicle *v);
 void InvalidateStationRouteLinks(Station *station);
 void InvalidateOrderRouteLinks(OrderID order);
 void AgeRouteLinks(Station *st);

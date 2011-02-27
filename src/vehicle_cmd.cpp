@@ -31,6 +31,7 @@
 #include "company_base.h"
 #include "order_backup.h"
 #include "ship.h"
+#include "cargodest_func.h"
 
 #include "table/strings.h"
 
@@ -386,6 +387,8 @@ CommandCost CmdRefitVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 
 			default: NOT_REACHED();
 		}
+
+		PrefillRouteLinks(v);
 
 		InvalidateWindowData(WC_VEHICLE_DETAILS, front->index);
 		SetWindowDirty(WC_VEHICLE_DEPOT, front->tile);

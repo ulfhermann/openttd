@@ -36,6 +36,7 @@
 #include "company_base.h"
 #include "newgrf.h"
 #include "order_backup.h"
+#include "cargodest_func.h"
 
 #include "table/strings.h"
 #include "table/train_cmd.h"
@@ -1095,6 +1096,8 @@ static void NormaliseTrainHead(Train *head)
 
 	/* Not a front engine, i.e. a free wagon chain. No need to do more. */
 	if (!head->IsFrontEngine()) return;
+
+	PrefillRouteLinks(head);
 
 	/* Update the refit button and window */
 	InvalidateWindowData(WC_VEHICLE_REFIT, head->index);
