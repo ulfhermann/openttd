@@ -1166,6 +1166,11 @@ static bool CargodestModeChanged(int32 p1)
 		}
 	}
 
+	Vehicle *v;
+	FOR_ALL_VEHICLES(v) {
+		if (v->IsFrontEngine()) PrefillRouteLinks(v);
+	}
+
 	/* Clear all links for cargoes that aren't routed anymore. */
 	CargoSourceSink *css;
 	FOR_ALL_TOWNS(css) {

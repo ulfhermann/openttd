@@ -2624,6 +2624,9 @@ bool AfterLoadGame()
 			/* Set the current order index from the order list. */
 			Order *o = v->GetOrder(v->cur_implicit_order_index);
 			if (o != NULL) v->current_order.index = o->index;
+
+			/* Pre-fill route links from orders. */
+			if (v->IsFrontEngine()) PrefillRouteLinks(v);
 		}
 	}
 

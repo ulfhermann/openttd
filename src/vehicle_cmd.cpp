@@ -31,6 +31,7 @@
 #include "company_base.h"
 #include "order_backup.h"
 #include "ship.h"
+#include "cargodest_func.h"
 
 #include "table/strings.h"
 
@@ -144,7 +145,10 @@ CommandCost CmdBuildVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 
 		Company::Get(_current_company)->num_engines[eid]++;
 
-		if (v->IsPrimaryVehicle()) OrderBackup::Restore(v, p2);
+		if (v->IsPrimaryVehicle()) {
+			OrderBackup::Restore(v, p2);
+			PrefillRouteLinks(v);
+		}
 	}
 
 	return value;
@@ -386,6 +390,8 @@ CommandCost CmdRefitVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 
 			default: NOT_REACHED();
 		}
+
+		if (front->IsPrimaryVehicle()) PrefillRouteLinks(front);
 
 		InvalidateWindowData(WC_VEHICLE_DETAILS, front->index);
 		SetWindowDirty(WC_VEHICLE_DEPOT, front->tile);

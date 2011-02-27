@@ -880,6 +880,8 @@ void InsertOrder(Vehicle *v, Order *new_o, VehicleOrderID sel_ord)
 		cur_order_id++;
 	}
 
+	PrefillRouteLinks(v);
+
 	/* Make sure to rebuild the whole list */
 	InvalidateWindowClassesData(GetWindowClassForVehicleType(v->type), 0);
 }
@@ -955,6 +957,7 @@ void DeleteOrder(Vehicle *v, VehicleOrderID sel_ord)
 
 	Vehicle *u = v->FirstShared();
 	DeleteOrderWarnings(u);
+	PrefillRouteLinks(u);
 	for (; u != NULL; u = u->NextShared()) {
 		assert(v->orders.list == u->orders.list);
 
@@ -1273,6 +1276,7 @@ CommandCost CmdModifyOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 			case MOF_NON_STOP:
 				order->SetNonStopType((OrderNonStopFlags)data);
 				if (data & ONSF_NO_STOP_AT_DESTINATION_STATION) InvalidateOrderRouteLinks(order->index);
+				PrefillRouteLinks(v);
 				break;
 
 			case MOF_STOP_LOCATION:
@@ -1438,6 +1442,7 @@ CommandCost CmdCloneOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32
 
 				/* Link this vehicle in the shared-list */
 				dst->AddToShared(src);
+				PrefillRouteLinks(dst);
 
 				InvalidateVehicleOrder(dst, -1);
 				InvalidateVehicleOrder(src, -2);
@@ -1499,6 +1504,7 @@ CommandCost CmdCloneOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32
 					dst->orders.list = new OrderList(first, dst);
 				}
 
+				PrefillRouteLinks(dst);
 				InvalidateVehicleOrder(dst, -1);
 
 				InvalidateWindowClassesData(GetWindowClassForVehicleType(dst->type), 0);

@@ -36,6 +36,7 @@
 #include "company_base.h"
 #include "newgrf.h"
 #include "order_backup.h"
+#include "cargodest_func.h"
 
 #include "table/strings.h"
 #include "table/train_cmd.h"
@@ -1096,6 +1097,8 @@ static void NormaliseTrainHead(Train *head)
 	/* Not a front engine, i.e. a free wagon chain. No need to do more. */
 	if (!head->IsFrontEngine()) return;
 
+	PrefillRouteLinks(head);
+
 	/* Update the refit button and window */
 	InvalidateWindowData(WC_VEHICLE_REFIT, head->index);
 	SetWindowWidgetDirty(WC_VEHICLE_VIEW, head->index, VVW_WIDGET_REFIT_VEH);
@@ -1280,6 +1283,9 @@ CommandCost CmdMoveRailVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, u
 		/* Handle 'new engine' part of cases #1b, #2b, #3b, #4b and #5 in NormaliseTrainHead. */
 		NormaliseTrainHead(src_head);
 		NormaliseTrainHead(dst_head);
+
+		/* Pre-fill route links after adding a vehicle. */
+		if (dst_head != NULL && dst_head->IsFrontEngine()) PrefillRouteLinks(dst_head);
 
 		/* We are undoubtedly changing something in the depot and train list. */
 		InvalidateWindowData(WC_VEHICLE_DEPOT, src->tile);
