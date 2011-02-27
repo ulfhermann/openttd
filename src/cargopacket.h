@@ -54,6 +54,7 @@ private:
 	friend class StationCargoList;
 	/** We want this to be saved, right? */
 	friend const struct SaveLoad *GetCargoPacketDesc();
+	friend bool CargodestModeChanged(int32 p1);
 public:
 	/** Maximum number of items in a single cargo packet. */
 	static const uint16 MAX_COUNT = UINT16_MAX;
@@ -210,6 +211,8 @@ public:
 		MTA_TRANSFER,       ///< The cargo is moved as part of a transfer.
 		MTA_UNLOAD,         ///< The cargo is moved as part of a forced unload.
 	};
+
+	friend bool CargodestModeChanged(int32 p1);
 
 protected:
 	uint count;                 ///< Cache for the number of cargo entities.
