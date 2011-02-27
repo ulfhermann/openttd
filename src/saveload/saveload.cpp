@@ -452,6 +452,11 @@ static void SlNullPointers()
 {
 	_sl.action = SLA_NULL;
 
+	/* We don't want any savegame conversion code to run
+	 * during NULLing; especially those that try to get
+	 * pointers from other pools. */
+	_sl_version = SAVEGAME_VERSION;
+
 	DEBUG(sl, 1, "Nulling pointers");
 
 	FOR_ALL_CHUNK_HANDLERS(ch) {
@@ -763,7 +768,7 @@ int SlIterateArray()
 	 * we must have read in all the data, so we must be at end of current block. */
 	if (_next_offs != 0 && _sl.reader->GetSize() != _next_offs) SlErrorCorrupt("Invalid chunk size");
 
-	while (true) {
+	for (;;) {
 		uint length = SlReadArrayLength();
 		if (length == 0) {
 			_next_offs = 0;
