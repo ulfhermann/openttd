@@ -122,6 +122,13 @@ public:
 
 	/** Get the owner of this link. */
 	inline Owner GetOwner() const { return this->owner; }
+
+	/** Update the destination of the route link. */
+	inline void SetDestination(StationID dest_id, OrderID dest_order_id)
+	{
+		this->dest = dest_id;
+		this->next_order = dest_order_id;
+	}
 };
 
 

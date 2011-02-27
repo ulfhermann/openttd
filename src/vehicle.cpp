@@ -52,6 +52,7 @@
 #include "bridge_map.h"
 #include "tunnel_map.h"
 #include "depot_map.h"
+#include "cargodest_func.h"
 
 #include "table/strings.h"
 
@@ -1935,6 +1936,8 @@ void Vehicle::BeginLoading(StationID station)
 		}
 		this->current_order.MakeLoading(false);
 	}
+
+	UpdateVehicleRouteLinks(this, station);
 
 	/* Save the id of the order which made us arrive here. MakeLoading
 	 * does not overwrite the index so it is still valid here. */
