@@ -14,8 +14,9 @@
 
 /** Types of groups */
 enum IniGroupType {
-	IGT_VARIABLES = 0, ///< values of the form "landscape = hilly"
-	IGT_LIST      = 1, ///< a list of values, seperated by \n and terminated by the next group block
+	IGT_VARIABLES = 0, ///< Values of the form "landscape = hilly".
+	IGT_LIST      = 1, ///< A list of values, separated by \n and terminated by the next group block.
+	IGT_SEQUENCE  = 2, ///< A list of uninterpreted lines, terminated by the next group block.
 };
 
 /** A single "line" in an ini file. */
@@ -40,28 +41,54 @@ struct IniGroup {
 	char *name;          ///< name of group
 	char *comment;       ///< comment for group
 
-	IniGroup(struct IniFile *parent, const char *name, size_t len = 0);
+	IniGroup(struct IniLoadFile *parent, const char *name, size_t len = 0);
 	~IniGroup();
 
 	IniItem *GetItem(const char *name, bool create);
 	void Clear();
 };
 
-/** The complete ini file. */
-struct IniFile {
+/** Ini file that only supports loading. */
+struct IniLoadFile {
 	IniGroup *group;                      ///< the first group in the ini
 	IniGroup **last_group;                ///< the last group in the ini
 	char *comment;                        ///< last comment in file
 	const char * const *list_group_names; ///< NULL terminated list with group names that are lists
+	const char * const *seq_group_names;  ///< NULL terminated list with group names that are sequences.
 
-	IniFile(const char * const *list_group_names = NULL);
-	~IniFile();
+	IniLoadFile(const char * const *list_group_names = NULL, const char * const *seq_group_names = NULL);
+	virtual ~IniLoadFile();
 
-	IniGroup *GetGroup(const char *name, size_t len = 0);
+	IniGroup *GetGroup(const char *name, size_t len = 0, bool create_new = true);
 	void RemoveGroup(const char *name);
 
 	void LoadFromDisk(const char *filename);
+
+	/**
+	 * Open the INI file.
+	 * @param filename Name of the INI file.
+	 * @param size [out] Size of the opened file.
+	 * @return File handle of the opened file, or \c NULL.
+	 */
+	virtual FILE *OpenFile(const char *filename, size_t *size) = 0;
+
+	/**
+	 * Report an error about the file contents.
+	 * @param pre    Prefix text of the \a buffer part.
+	 * @param buffer Part of the file with the error.
+	 * @param post   Suffix text of the \a buffer part.
+	 */
+	virtual void ReportFileError(const char * const pre, const char * const buffer, const char * const post) = 0;
+};
+
+/** Ini file that supports both loading and saving. */
+struct IniFile : IniLoadFile {
+	IniFile(const char * const *list_group_names = NULL);
+
 	bool SaveToDisk(const char *filename);
+
+	virtual FILE *OpenFile(const char *filename, size_t *size);
+	virtual void ReportFileError(const char * const pre, const char * const buffer, const char * const post);
 };
 
 #endif /* INI_TYPE_H */
