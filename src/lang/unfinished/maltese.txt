@@ -372,8 +372,11 @@ STR_GAME_OPTIONS_RESOLUTION_OTHER                               :oħrajn
 
 
 
-
 # Advanced settings window
+
+
+
+
 
 
 
@@ -394,9 +397,7 @@ STR_CONFIG_SETTING_COMMAND_PAUSE_LEVEL_ALL_ACTIONS              :l-azzjonijiet k
 
 
 
-STR_CONFIG_SETTING_STATUSBAR_POS_LEFT                           :Xellug
-STR_CONFIG_SETTING_STATUSBAR_POS_CENTER                         :Centru
-STR_CONFIG_SETTING_STATUSBAR_POS_RIGHT                          :Lemin
+
 
 
 
