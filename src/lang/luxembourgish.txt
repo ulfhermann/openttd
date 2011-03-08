@@ -1076,9 +1076,6 @@ STR_ECONOMY_FLUCTUATING                                         :Variabel
 STR_REVERSE_AT_END_OF_LINE_AND_AT_STATIONS                      :Um Enn vun der Streck, an an den Statiounen
 STR_REVERSE_AT_END_OF_LINE_ONLY                                 :Um Enn vun der Streck nëmmen
 
-STR_DISASTERS_OFF                                               :Aus
-STR_DISASTERS_ON                                                :Un
-
 STR_CITY_APPROVAL_PERMISSIVE                                    :Erlaabend
 STR_CITY_APPROVAL_TOLERANT                                      :Tolerant
 STR_CITY_APPROVAL_HOSTILE                                       :Ofleenend
@@ -1092,21 +1089,27 @@ STR_CONFIG_SETTING_CAPTION                                      :{WHITE}Erweider
 STR_CONFIG_SETTING_OFF                                          :Aus
 STR_CONFIG_SETTING_ON                                           :Un
 STR_CONFIG_SETTING_DISABLED                                     :ausgeschalt
+
+STR_CONFIG_SETTING_COMPANIES_OFF                                :Aus
+STR_CONFIG_SETTING_COMPANIES_OWN                                :Eegen Firma
+STR_CONFIG_SETTING_COMPANIES_ALL                                :All Firmen
+
+STR_CONFIG_SETTING_NONE                                         :Keen
+STR_CONFIG_SETTING_ORIGINAL                                     :Original
+STR_CONFIG_SETTING_REALISTIC                                    :Realistësch
+
+STR_CONFIG_SETTING_HORIZONTAL_POS_LEFT                          :Lénks
+STR_CONFIG_SETTING_HORIZONTAL_POS_CENTER                        :Zentréiert
+STR_CONFIG_SETTING_HORIZONTAL_POS_RIGHT                         :Riets
+
 STR_CONFIG_SETTING_BUILDONSLOPES                                :{LTBLUE}Erlaabt d'Bauen op Küsten an op Ofhäng: {ORANGE}{STRING}
 STR_CONFIG_SETTING_AUTOSLOPE                                    :{LTBLUE}Erlaabt Landforumung ënnert Gebaier, Stroossen, etc. (autoslope): {ORANGE}{STRING}
 STR_CONFIG_SETTING_CATCHMENT                                    :{LTBLUE}Erlaabt méi realistësch Staugréisstplazen: {ORANGE}{STRING}
 STR_CONFIG_SETTING_EXTRADYNAMITE                                :{LTBLUE}Erlaabt d'Ewechhuelen vun méi Stroosen, Brécken, etc. vun der Stad: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TRAIN_LENGTH                                 :{LTBLUE}Maximal Längt vun Zich: {ORANGE}{STRING} Feld{P 0:1 "" er}
 STR_CONFIG_SETTING_SMOKE_AMOUNT                                 :{LTBLUE}Unzuel vun Gefiererdamp/partikel: {ORANGE}{STRING}
-STR_CONFIG_SETTING_SMOKE_AMOUNT_NONE                            :Keen
-STR_CONFIG_SETTING_SMOKE_AMOUNT_ORIGINAL                        :Original
-STR_CONFIG_SETTING_SMOKE_AMOUNT_REALISTIC                       :Realistësch
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL                     :{LTBLUE}Zuchbeschleunegung: {ORANGE}{STRING}
-STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_ORIGINAL            :Original
-STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_REALISTIC           :Realistesch
 STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL              :{LTBLUE}Stroossengefier Beschleunigungsmodell: {ORANGE}{STRING}
-STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_ORIGINAL     :Original
-STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_REALISTIC    :Realistësch
 STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Neigungsstärkt fir Zich{ORANGE}{STRING}%
 STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}Steigung fir Stroossengefierer {ORANGE}{STRING}%
 STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Verbidd Zich an Schëffer fir 90 Grad Kéieren ze maachen: {ORANGE}{STRING}
@@ -1227,13 +1230,7 @@ STR_CONFIG_SETTING_COMMAND_PAUSE_LEVEL_ALL_NON_CONSTRUCTION     :all Net-Bauakti
 STR_CONFIG_SETTING_COMMAND_PAUSE_LEVEL_ALL_NON_LANDSCAPING      :all ausser Landëmformungen
 STR_CONFIG_SETTING_COMMAND_PAUSE_LEVEL_ALL_ACTIONS              :all Aktiounen
 STR_CONFIG_SETTING_ADVANCED_VEHICLE_LISTS                       :{LTBLUE}Benotzt d'erweidert Gefiererlëscht: {ORANGE}{STRING}
-STR_CONFIG_SETTING_ADVANCED_VEHICLE_LISTS_OFF                   :Aus
-STR_CONFIG_SETTING_ADVANCED_VEHICLE_LISTS_OWN                   :Eegen Firma
-STR_CONFIG_SETTING_ADVANCED_VEHICLE_LISTS_ALL                   :All Firmen
 STR_CONFIG_SETTING_LOADING_INDICATORS                           :{LTBLUE}Weist den Luedstatus un: {ORANGE}{STRING}
-STR_CONFIG_SETTING_LOADING_INDICATORS_OFF                       :Aus
-STR_CONFIG_SETTING_LOADING_INDICATORS_OWN                       :Eegen Firma
-STR_CONFIG_SETTING_LOADING_INDICATORS_ALL                       :All Firmen
 STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Weis de Zäitplang an Intervallen amplaz vun Deeg: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}Weis Arrivée an Départ am Zaitplang un: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Schnellkreatiounvun Gefieropträg: {ORANGE}{STRING}
@@ -1309,13 +1306,7 @@ STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_RAINFOREST              :nëmmen am Reeb
 STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_ALL                     :iwwerall
 
 STR_CONFIG_SETTING_TOOLBAR_POS                                  :{LTBLUE}Positioun vun der Haapt-Toolbar: {ORANGE}{STRING}
-STR_CONFIG_SETTING_TOOLBAR_POS_LEFT                             :Lénks
-STR_CONFIG_SETTING_TOOLBAR_POS_CENTER                           :Zentréiert
-STR_CONFIG_SETTING_TOOLBAR_POS_RIGHT                            :Riets
 STR_CONFIG_SETTING_STATUSBAR_POS                                :{LTBLUE}Positioun vun der Statusbar: {ORANGE}{STRING}
-STR_CONFIG_SETTING_STATUSBAR_POS_LEFT                           :Lenks
-STR_CONFIG_SETTING_STATUSBAR_POS_CENTER                         :Mëtt
-STR_CONFIG_SETTING_STATUSBAR_POS_RIGHT                          :Riets
 STR_CONFIG_SETTING_SNAP_RADIUS                                  :{LTBLUE}Fënsteren rasten bei {ORANGE}{STRING} pixel an
 STR_CONFIG_SETTING_SNAP_RADIUS_DISABLED                         :{LTBLUE}Fënsteren rasten bei: {ORANGE}ausgeschalt
 STR_CONFIG_SETTING_SOFT_LIMIT                                   :{LTBLUE}Maximal Unzuel vun non-sticky Fënster: {ORANGE}{STRING}
@@ -1349,12 +1340,11 @@ STR_CONFIG_SETTING_VEHICLES_TRAINS                              :{ORANGE}Zich
 STR_CONFIG_SETTING_ECONOMY_TOWNS                                :{ORANGE}Stied
 STR_CONFIG_SETTING_ECONOMY_INDUSTRIES                           :{ORANGE}Industrien
 
+STR_CONFIG_SETTING_PATHFINDER_NPF                               :NPF
+STR_CONFIG_SETTING_PATHFINDER_YAPF_RECOMMENDED                  :YAPF {BLUE}(recommandéiert)
+
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS                        :{LTBLUE}Pfadfinder fir Zich: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NPF                    :NPF
-STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_YAPF                   :YAPF {BLUE}(recommandéiert)
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES                 :{LTBLUE}Pfadfinder fir Stroossengefierer: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_NPF             :NPF
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_YAPF            :YAPF {BLUE}(recommandéiert)
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS                         :{LTBLUE}Pfadfinder fir Schëffer: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_OPF                     :Original {BLUE}(recommandéiert)
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_NPF                     :NPF
