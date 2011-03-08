@@ -138,6 +138,17 @@ struct GUISettings {
 	}
 };
 
+/** Settings related to music. */
+struct MusicSettings {
+	byte playlist;     ///< The playlist (number) to play
+	byte music_vol;    ///< The requested music volume
+	byte effect_vol;   ///< The requested effects volume
+	byte custom_1[33]; ///< The order of the first custom playlist
+	byte custom_2[33]; ///< The order of the second custom playlist
+	bool playing;      ///< Whether music is playing
+	bool shuffle;      ///< Whether to shuffle the music
+};
+
 /** Settings related to currency/unit systems. */
 struct LocaleSettings {
 	byte   currency;                         ///< currency we currently use
@@ -400,7 +411,6 @@ struct LinkGraphSettings {
 	uint16 recalc_interval;                     ///< minimum interval (in days) between subsequent calculations of components in the same link graph
 	DistributionTypeByte distribution_pax;      ///< distribution type for passengers
 	DistributionTypeByte distribution_mail;     ///< distribution type for mail
-	DistributionTypeByte distribution_express;  ///< distribution type for express cargo class
 	DistributionTypeByte distribution_armoured; ///< distribution type for armoured cargo class
 	DistributionTypeByte distribution_default;  ///< distribution type for all other goods
 
@@ -409,8 +419,6 @@ struct LinkGraphSettings {
 			return this->distribution_pax;
 		} else if (IsCargoInClass(cargo, CC_MAIL)) {
 			return this->distribution_mail;
-		} else if (IsCargoInClass(cargo, CC_EXPRESS)) {
-			return this->distribution_express;
 		} else if (IsCargoInClass(cargo, CC_ARMOURED)) {
 			return this->distribution_armoured;
 		} else {
@@ -467,6 +475,7 @@ struct ClientSettings {
 	GUISettings          gui;                ///< settings related to the GUI
 	NetworkSettings      network;            ///< settings related to the network
 	CompanySettings      company;            ///< default values for per-company settings
+	MusicSettings        music;              ///< settings related to music/sound
 };
 
 /** The current settings for this game. */

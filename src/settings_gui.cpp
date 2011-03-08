@@ -615,7 +615,7 @@ public:
 		uint i;
 		const SettingDesc *sd = GetSettingFromName("difficulty.max_no_competitors", &i) + widget;
 		int32 value = (int32)ReadValue(GetVariableAddress(&this->opt_mod_temp, &sd->save), sd->save.conv);
-		SetDParam(0, sd->desc.str + value);
+		SetDParam(0, sd->desc.val_str + value);
 	}
 
 	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
@@ -633,7 +633,7 @@ public:
 		/* Get the string and try all strings from the smallest to the highest value */
 		StringID str = this->GetWidget<NWidgetCore>(widget)->widget_data;
 		for (int32 value = sdb->min; (uint32)value <= sdb->max; value += sdb->interval) {
-			SetDParam(0, sdb->str + value);
+			SetDParam(0, sdb->val_str + value);
 			*size = maxdim(*size, GetStringBoundingBox(str));
 		}
 	}
@@ -1145,7 +1145,7 @@ void SettingEntry::DrawSetting(GameSettings *settings_ptr, const SettingDesc *sd
 	uint button_y = y + (SETTING_HEIGHT - 11) / 2;
 
 	/* We do not allow changes of some items when we are a client in a networkgame */
-	if (!(sd->save.conv & SLF_NETWORK_NO) && _networking && !_network_server && !(sdb->flags & SGF_PER_COMPANY)) editable = false;
+	if (!(sd->save.conv & SLF_NO_NETWORK_SYNC) && _networking && !_network_server && !(sdb->flags & SGF_PER_COMPANY)) editable = false;
 	if ((sdb->flags & SGF_NETWORK_ONLY) && !_networking) editable = false;
 	if ((sdb->flags & SGF_NO_NETWORK) && _networking) editable = false;
 
@@ -1171,7 +1171,7 @@ void SettingEntry::DrawSetting(GameSettings *settings_ptr, const SettingDesc *sd
 			if (sdb->flags & SGF_CURRENCY) {
 				SetDParam(0, STR_JUST_CURRENCY);
 			} else if (sdb->flags & SGF_MULTISTRING) {
-				SetDParam(0, sdb->str - sdb->min + value + 1);
+				SetDParam(0, sdb->val_str - sdb->min + value);
 			} else {
 				SetDParam(0, (sdb->flags & SGF_NOCOMMA) ? STR_JUST_INT : STR_JUST_COMMA);
 			}
@@ -1405,7 +1405,6 @@ static SettingEntry _settings_linkgraph[] = {
 	SettingEntry("linkgraph.recalc_interval"),
 	SettingEntry("linkgraph.distribution_pax"),
 	SettingEntry("linkgraph.distribution_mail"),
-	SettingEntry("linkgraph.distribution_express"),
 	SettingEntry("linkgraph.distribution_armoured"),
 	SettingEntry("linkgraph.distribution_default"),
 };
@@ -1599,7 +1598,7 @@ struct GameSettingsWindow : Window {
 		const SettingDesc *sd = pe->d.entry.setting;
 
 		/* return if action is only active in network, or only settable by server */
-		if (!(sd->save.conv & SLF_NETWORK_NO) && _networking && !_network_server && !(sd->desc.flags & SGF_PER_COMPANY)) return;
+		if (!(sd->save.conv & SLF_NO_NETWORK_SYNC) && _networking && !_network_server && !(sd->desc.flags & SGF_PER_COMPANY)) return;
 		if ((sd->desc.flags & SGF_NETWORK_ONLY) && !_networking) return;
 		if ((sd->desc.flags & SGF_NO_NETWORK) && _networking) return;
 
