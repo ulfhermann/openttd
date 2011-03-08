@@ -574,8 +574,11 @@ STR_SEA_LEVEL_CUSTOM_PERCENTAGE                                 :Custom ({NUM}%)
 
 
 
-
 # Advanced settings window
+
+
+
+
 
 STR_CONFIG_SETTING_TRAIN_LENGTH                                 :{LTBLUE}ரயில் வண்டியின் அதிகபட்ச நீளம்: {ORANGE}{STRING} tile{P 0:1 "" கள்}
 STR_CONFIG_SETTING_MAX_BRIDGE_LENGTH                            :{LTBLUE}பாலத்தின் அதிகபட்ச நீளம்: {ORANGE}{STRING} tile{P 0:1 "" கள்}
@@ -599,9 +602,7 @@ STR_CONFIG_SETTING_DISABLE_UNSUITABLE_BUILDING                  :{LTBLUE}தக�
 
 
 
-STR_CONFIG_SETTING_STATUSBAR_POS_LEFT                           :இடது
-STR_CONFIG_SETTING_STATUSBAR_POS_CENTER                         :மத்திய
-STR_CONFIG_SETTING_STATUSBAR_POS_RIGHT                          :வலது
+
 
 
 STR_CONFIG_SETTING_REVERSE_AT_SIGNALS                           :{LTBLUE}சிக்னல்களில் தானியங்கி மீட்சி: {ORANGE}{STRING}

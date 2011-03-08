@@ -195,6 +195,9 @@
     <ClCompile Include="..\src\ini.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\ini_load.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\landscape.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -822,9 +825,6 @@
     <ClInclude Include="..\src\sdl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\smallmap_gui.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\sound\sdl_s.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -862,6 +862,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\slope_type.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\smallmap_gui.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\sortlist_type.h">
@@ -933,13 +936,13 @@
     <ClInclude Include="..\src\tgp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\tilearea_type.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\tile_cmd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\tile_type.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tilearea_type.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\tilehighlight_func.h">
@@ -1479,13 +1482,13 @@
     <ClInclude Include="..\src\table\airport_defaults.h">
       <Filter>Tables</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\table\airport_movement.h">
+      <Filter>Tables</Filter>
+    </ClInclude>
     <ClInclude Include="..\src\table\airporttile_ids.h">
       <Filter>Tables</Filter>
     </ClInclude>
     <ClInclude Include="..\src\table\airporttiles.h">
-      <Filter>Tables</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\table\airport_movement.h">
       <Filter>Tables</Filter>
     </ClInclude>
     <ClInclude Include="..\src\table\animcursors.h">
@@ -1548,7 +1551,7 @@
     <ClInclude Include="..\src\table\roadveh_movement.h">
       <Filter>Tables</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\table\settings.h">
+    <ClInclude Include="..\src\..\objs\settings\table\settings.h">
       <Filter>Tables</Filter>
     </ClInclude>
     <ClInclude Include="..\src\table\sprites.h">
@@ -2364,6 +2367,12 @@
     <ClInclude Include="..\src\network\core\tcp.h">
       <Filter>Network Core</Filter>
     </ClInclude>
+    <ClCompile Include="..\src\network\core\tcp_admin.cpp">
+      <Filter>Network Core</Filter>
+    </ClCompile>
+    <ClInclude Include="..\src\network\core\tcp_admin.h">
+      <Filter>Network Core</Filter>
+    </ClInclude>
     <ClCompile Include="..\src\network\core\tcp_connect.cpp">
       <Filter>Network Core</Filter>
     </ClCompile>
@@ -2377,12 +2386,6 @@
       <Filter>Network Core</Filter>
     </ClCompile>
     <ClInclude Include="..\src\network\core\tcp_game.h">
-      <Filter>Network Core</Filter>
-    </ClInclude>
-    <ClCompile Include="..\src\network\core\tcp_admin.cpp">
-      <Filter>Network Core</Filter>
-    </ClCompile>
-    <ClInclude Include="..\src\network\core\tcp_admin.h">
       <Filter>Network Core</Filter>
     </ClInclude>
     <ClCompile Include="..\src\network\core\tcp_http.cpp">
