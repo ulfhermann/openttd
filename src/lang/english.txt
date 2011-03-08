@@ -1323,26 +1323,13 @@ STR_CONFIG_SETTING_CITY_SIZE_MULTIPLIER                         :{LTBLUE}Initial
 STR_CONFIG_SETTING_MODIFIED_ROAD_REBUILD                        :{LTBLUE}Remove absurd road-elements during the road construction: {ORANGE}{STRING1}
 
 STR_CONFIG_SETTING_LINKGRAPH_INTERVAL                           :{LTBLUE}Link graph recalculation interval: {ORANGE}{STRING1} days
+STR_CONFIG_SETTING_DISTRIBUTION_SYMMETRIC                       :symmetric
+STR_CONFIG_SETTING_DISTRIBUTION_ASYMMETRIC                      :asymmetric
+STR_CONFIG_SETTING_DISTRIBUTION_MANUAL                          :manual
 STR_CONFIG_SETTING_DISTRIBUTION_PAX                             :{LTBLUE}Distribution for passengers: {ORANGE}{STRING1}
-STR_CONFIG_SETTING_DISTRIBUTION_PAX_SYMMETRIC                   :symmetric
-STR_CONFIG_SETTING_DISTRIBUTION_PAX_ASYMMETRIC                  :asymmetric
-STR_CONFIG_SETTING_DISTRIBUTION_PAX_MANUAL                      :manual
 STR_CONFIG_SETTING_DISTRIBUTION_MAIL                            :{LTBLUE}Distribution for mail: {ORANGE}{STRING1}
-STR_CONFIG_SETTING_DISTRIBUTION_MAIL_SYMMETRIC                  :symmetric
-STR_CONFIG_SETTING_DISTRIBUTION_MAIL_ASYMMETRIC                 :asymmetric
-STR_CONFIG_SETTING_DISTRIBUTION_MAIL_MANUAL                     :manual
-STR_CONFIG_SETTING_DISTRIBUTION_EXPRESS                         :{LTBLUE}Distribution for the EXPRESS cargo class: {ORANGE}{STRING1}
-STR_CONFIG_SETTING_DISTRIBUTION_EXPRESS_SYMMETRIC               :symmetric
-STR_CONFIG_SETTING_DISTRIBUTION_EXPRESS_ASYMMETRIC              :asymmetric
-STR_CONFIG_SETTING_DISTRIBUTION_EXPRESS_MANUAL                  :manual
 STR_CONFIG_SETTING_DISTRIBUTION_ARMOURED                        :{LTBLUE}Distribution for the ARMOURED cargo class: {ORANGE}{STRING1}
-STR_CONFIG_SETTING_DISTRIBUTION_ARMOURED_SYMMETRIC              :symmetric
-STR_CONFIG_SETTING_DISTRIBUTION_ARMOURED_ASYMMETRIC             :asymmetric
-STR_CONFIG_SETTING_DISTRIBUTION_ARMOURED_MANUAL                 :manual
 STR_CONFIG_SETTING_DISTRIBUTION_DEFAULT                         :{LTBLUE}Distribution for other cargo classes: {ORANGE}{STRING1}
-STR_CONFIG_SETTING_DISTRIBUTION_DEFAULT_SYMMETRIC               :symmetric
-STR_CONFIG_SETTING_DISTRIBUTION_DEFAULT_ASYMMETRIC              :asymmetric
-STR_CONFIG_SETTING_DISTRIBUTION_DEFAULT_MANUAL                  :manual
 
 STR_CONFIG_SETTING_GUI                                          :{ORANGE}Interface
 STR_CONFIG_SETTING_CONSTRUCTION                                 :{ORANGE}Construction
