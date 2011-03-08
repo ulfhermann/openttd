@@ -1077,9 +1077,6 @@ STR_ECONOMY_FLUCTUATING                                         :Schwankend
 STR_REVERSE_AT_END_OF_LINE_AND_AT_STATIONS                      :Am Streckenende und in Bahnhöfen
 STR_REVERSE_AT_END_OF_LINE_ONLY                                 :Nur am Streckenende
 
-STR_DISASTERS_OFF                                               :Aus
-STR_DISASTERS_ON                                                :An
-
 STR_CITY_APPROVAL_PERMISSIVE                                    :Hoch
 STR_CITY_APPROVAL_TOLERANT                                      :Mäßig
 STR_CITY_APPROVAL_HOSTILE                                       :Gering
@@ -1093,21 +1090,27 @@ STR_CONFIG_SETTING_CAPTION                                      :{WHITE}Erweiter
 STR_CONFIG_SETTING_OFF                                          :Aus
 STR_CONFIG_SETTING_ON                                           :An
 STR_CONFIG_SETTING_DISABLED                                     :ausgeschaltet
+
+STR_CONFIG_SETTING_COMPANIES_OFF                                :Aus
+STR_CONFIG_SETTING_COMPANIES_OWN                                :Eigene Firma
+STR_CONFIG_SETTING_COMPANIES_ALL                                :Alle Firmen
+
+STR_CONFIG_SETTING_NONE                                         :Keine
+STR_CONFIG_SETTING_ORIGINAL                                     :Original
+STR_CONFIG_SETTING_REALISTIC                                    :Realistisch
+
+STR_CONFIG_SETTING_HORIZONTAL_POS_LEFT                          :Links
+STR_CONFIG_SETTING_HORIZONTAL_POS_CENTER                        :Mitte
+STR_CONFIG_SETTING_HORIZONTAL_POS_RIGHT                         :Rechts
+
 STR_CONFIG_SETTING_BUILDONSLOPES                                :{LTBLUE}Das Bauen an Hängen und Küsten erlauben: {ORANGE}{STRING}
 STR_CONFIG_SETTING_AUTOSLOPE                                    :{LTBLUE}Landschaftsbau unter Gebäuden, Gleisen, usw. erlauben: {ORANGE}{STRING}
 STR_CONFIG_SETTING_CATCHMENT                                    :{LTBLUE}Verschiedene Stationstypen haben unterschiedlich große Einzugsgebiete: {ORANGE}{STRING}
 STR_CONFIG_SETTING_EXTRADYNAMITE                                :{LTBLUE}Entfernung von weiteren Straßen, Brücken, usw. erlauben: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TRAIN_LENGTH                                 :{LTBLUE}Maximale Länge von Zügen: {ORANGE}{STRING} Feld{P 0:1 "" er}
 STR_CONFIG_SETTING_SMOKE_AMOUNT                                 :{LTBLUE}Menge an Rauch / Funken von Lokomotiven: {ORANGE}{STRING}
-STR_CONFIG_SETTING_SMOKE_AMOUNT_NONE                            :Keine
-STR_CONFIG_SETTING_SMOKE_AMOUNT_ORIGINAL                        :Original
-STR_CONFIG_SETTING_SMOKE_AMOUNT_REALISTIC                       :Realistisch
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL                     :{LTBLUE}Beschleunigungsmodell für Züge: {ORANGE}{STRING}
-STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_ORIGINAL            :Original
-STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_REALISTIC           :Realistisch
 STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL              :{LTBLUE}Beschleunigungsmodell für Straßenfahrzeuge: {ORANGE}{STRING}
-STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_ORIGINAL     :Original
-STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_REALISTIC    :Realistisch
 STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Stärke von Steigungen für Züge: {ORANGE}{STRING}%
 STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}Stärke von Steigungen für Straßenfahrzeuge: {ORANGE}{STRING}%
 STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Zügen und Schiffen 90°-Kurven verbieten: {ORANGE}{STRING}
@@ -1228,13 +1231,7 @@ STR_CONFIG_SETTING_COMMAND_PAUSE_LEVEL_ALL_NON_CONSTRUCTION     :Alle Tätigkeit
 STR_CONFIG_SETTING_COMMAND_PAUSE_LEVEL_ALL_NON_LANDSCAPING      :Alle Tätigkeiten außer Landschaftsbau
 STR_CONFIG_SETTING_COMMAND_PAUSE_LEVEL_ALL_ACTIONS              :Alle Tätigkeiten
 STR_CONFIG_SETTING_ADVANCED_VEHICLE_LISTS                       :{LTBLUE}Erweiterte Fahrzeugliste benutzen: {ORANGE}{STRING}
-STR_CONFIG_SETTING_ADVANCED_VEHICLE_LISTS_OFF                   :Aus
-STR_CONFIG_SETTING_ADVANCED_VEHICLE_LISTS_OWN                   :Eigene Firma
-STR_CONFIG_SETTING_ADVANCED_VEHICLE_LISTS_ALL                   :Alle Firmen
 STR_CONFIG_SETTING_LOADING_INDICATORS                           :{LTBLUE}Ladestandanzeiger verwenden: {ORANGE}{STRING}
-STR_CONFIG_SETTING_LOADING_INDICATORS_OFF                       :Aus
-STR_CONFIG_SETTING_LOADING_INDICATORS_OWN                       :Eigene Firma
-STR_CONFIG_SETTING_LOADING_INDICATORS_ALL                       :Alle Firmen
 STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Zeitpläne in Ticks anstatt in Tagen anzeigen: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}Zeige Ankunft und Abfahrt im Fahrplan: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Schnelle Erzeugung von Aufträgen für Fahrzeuge: {ORANGE}{STRING}
@@ -1310,13 +1307,7 @@ STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_RAINFOREST              :nur im Regenwal
 STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_ALL                     :überall
 
 STR_CONFIG_SETTING_TOOLBAR_POS                                  :{LTBLUE}Position der Werkzeugleiste: {ORANGE}{STRING}
-STR_CONFIG_SETTING_TOOLBAR_POS_LEFT                             :Links
-STR_CONFIG_SETTING_TOOLBAR_POS_CENTER                           :Mitte
-STR_CONFIG_SETTING_TOOLBAR_POS_RIGHT                            :Rechts
 STR_CONFIG_SETTING_STATUSBAR_POS                                :{LTBLUE}Position der Statuszeile: {ORANGE}{STRING}
-STR_CONFIG_SETTING_STATUSBAR_POS_LEFT                           :Links
-STR_CONFIG_SETTING_STATUSBAR_POS_CENTER                         :Mitte
-STR_CONFIG_SETTING_STATUSBAR_POS_RIGHT                          :Rechts
 STR_CONFIG_SETTING_SNAP_RADIUS                                  :{LTBLUE}Fenster schnappen aneinander, wenn näher als: {ORANGE}{STRING} Pixel
 STR_CONFIG_SETTING_SNAP_RADIUS_DISABLED                         :{LTBLUE}Fenster schnappen aneinander, wenn näher als: {ORANGE}ausgeschaltet
 STR_CONFIG_SETTING_SOFT_LIMIT                                   :{LTBLUE}Maximale Fensteranzahl (nicht angepinnte): {ORANGE}{STRING}
@@ -1350,12 +1341,11 @@ STR_CONFIG_SETTING_VEHICLES_TRAINS                              :{ORANGE}Züge
 STR_CONFIG_SETTING_ECONOMY_TOWNS                                :{ORANGE}Städte
 STR_CONFIG_SETTING_ECONOMY_INDUSTRIES                           :{ORANGE}Industrien
 
+STR_CONFIG_SETTING_PATHFINDER_NPF                               :NPF
+STR_CONFIG_SETTING_PATHFINDER_YAPF_RECOMMENDED                  :YAPF {BLUE}(empfohlen)
+
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS                        :{LTBLUE}Pathfinder für Züge: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NPF                    :NPF
-STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_YAPF                   :YAPF {BLUE}(empfohlen)
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES                 :{LTBLUE}Pathfinder für Straßenfahrzeuge: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_NPF             :NPF
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_YAPF            :YAPF {BLUE}(empfohlen)
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS                         :{LTBLUE}Pathfinder für Schiffe: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_OPF                     :OPF {BLUE}(empfohlen)
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_NPF                     :NPF
