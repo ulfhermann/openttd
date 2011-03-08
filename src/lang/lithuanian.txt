@@ -1143,9 +1143,6 @@ STR_ECONOMY_FLUCTUATING                                         :Kintanti
 STR_REVERSE_AT_END_OF_LINE_AND_AT_STATIONS                      :Bėgių pabaigoje, stotelėse
 STR_REVERSE_AT_END_OF_LINE_ONLY                                 :Tik bėgių pabaigoje
 
-STR_DISASTERS_OFF                                               :Išjungta
-STR_DISASTERS_ON                                                :Įjungta
-
 STR_CITY_APPROVAL_PERMISSIVE                                    :Atlaidus
 STR_CITY_APPROVAL_TOLERANT                                      :Tolerantiškas
 STR_CITY_APPROVAL_HOSTILE                                       :Priešiškas
@@ -1159,16 +1156,22 @@ STR_CONFIG_SETTING_CAPTION                                      :{WHITE}Sudėtin
 STR_CONFIG_SETTING_OFF                                          :Išjungta
 STR_CONFIG_SETTING_ON                                           :Įjungta
 STR_CONFIG_SETTING_DISABLED                                     :išjungta
+
+STR_CONFIG_SETTING_COMPANIES_OFF                                :Išjungta
+STR_CONFIG_SETTING_COMPANIES_OWN                                :Nuosava įmonė
+STR_CONFIG_SETTING_COMPANIES_ALL                                :Visos įmonės
+
+
+STR_CONFIG_SETTING_HORIZONTAL_POS_LEFT                          :Kairėje
+STR_CONFIG_SETTING_HORIZONTAL_POS_CENTER                        :Centruoti
+STR_CONFIG_SETTING_HORIZONTAL_POS_RIGHT                         :Dešinėje
+
 STR_CONFIG_SETTING_BUILDONSLOPES                                :{LTBLUE}Leisti statyti pastatus pakrantėse ir ant šlaitų: {ORANGE}{STRING}
 STR_CONFIG_SETTING_AUTOSLOPE                                    :{LTBLUE}Leisti keisti reljefą po pastatais, bėgiais, ir t.t.. (autoslope): {ORANGE}{STRING}
 STR_CONFIG_SETTING_CATCHMENT                                    :{LTBLUE}Kurti tikroviškesnio dydžio mikrorajonus: {ORANGE}{STRING}
 STR_CONFIG_SETTING_EXTRADYNAMITE                                :{LTBLUE}Leisti griauti miestams priklausančius tiltus, kelius ir kt.: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL                     :{LTBLUE}Traukinių įsibėgėjimo nustatymas: {ORANGE}{STRING}
-STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_ORIGINAL            :Originalus
-STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_REALISTIC           :Realistiškas
 STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL              :{LTBLUE}Automobilių greitėjimo modelis: {ORANGE}{STRING}
-STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_ORIGINAL     :Originalus
-STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_REALISTIC    :Realistiškas
 STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Atbrailų statumas traukiniams {ORANGE}{STRING}%
 STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}Nuokalnių statumas automobiliams {ORANGE}{STRING}%
 STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Drausti traukiniams/laivams pasisukti 90 laips.kampu: {ORANGE}{STRING}
@@ -1279,13 +1282,7 @@ STR_CONFIG_SETTING_DATE_FORMAT_IN_SAVE_NAMES_ISO                :ISO (2008-12-31
 
 STR_CONFIG_SETTING_PAUSE_ON_NEW_GAME                            :{LTBLUE}Automatinė pauzė paleidžiant naują žaidimą: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ADVANCED_VEHICLE_LISTS                       :{LTBLUE}Naudoti pagerintą automobilių sąrašą: {ORANGE}{STRING}
-STR_CONFIG_SETTING_ADVANCED_VEHICLE_LISTS_OFF                   :Išjungta
-STR_CONFIG_SETTING_ADVANCED_VEHICLE_LISTS_OWN                   :Nuosava įmonė
-STR_CONFIG_SETTING_ADVANCED_VEHICLE_LISTS_ALL                   :Visos įmonės
 STR_CONFIG_SETTING_LOADING_INDICATORS                           :{LTBLUE}Naudotį krovimo indikatorius: {ORANGE}{STRING}
-STR_CONFIG_SETTING_LOADING_INDICATORS_OFF                       :Išjungta
-STR_CONFIG_SETTING_LOADING_INDICATORS_OWN                       :Savo įmonės
-STR_CONFIG_SETTING_LOADING_INDICATORS_ALL                       :Visų įmonių
 STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Rodyti laiką tvarkaraštyje užuot dienas: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}Rodyti arvykimą ir išvykimą tvarkaraščiuose: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Greitas tr. priemonių paskyrimų kūrimas: {ORANGE}{STRING}
@@ -1360,13 +1357,7 @@ STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_RAINFOREST              :tik tropiniuose
 STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_ALL                     :visur
 
 STR_CONFIG_SETTING_TOOLBAR_POS                                  :{LTBLUE}Pagrindinės įrankių juostos pozicija: {ORANGE}{STRING}
-STR_CONFIG_SETTING_TOOLBAR_POS_LEFT                             :Kairėje
-STR_CONFIG_SETTING_TOOLBAR_POS_CENTER                           :Centruoti
-STR_CONFIG_SETTING_TOOLBAR_POS_RIGHT                            :Dešinėje
 STR_CONFIG_SETTING_STATUSBAR_POS                                :{LTBLUE}Būsenos juostos vieta: {ORANGE}{STRING}
-STR_CONFIG_SETTING_STATUSBAR_POS_LEFT                           :Kairėje
-STR_CONFIG_SETTING_STATUSBAR_POS_CENTER                         :Centre
-STR_CONFIG_SETTING_STATUSBAR_POS_RIGHT                          :Dešinėje
 STR_CONFIG_SETTING_SNAP_RADIUS                                  :{LTBLUE}Langų persidengimo atstumas: {ORANGE}{STRING} px
 STR_CONFIG_SETTING_SNAP_RADIUS_DISABLED                         :{LTBLUE}Langų kibumo atstumas: {ORANGE}disabled
 STR_CONFIG_SETTING_SOFT_LIMIT                                   :{LTBLUE}Langų negriežtas limitas (nelipnių): {ORANGE}{STRING}
@@ -1400,12 +1391,11 @@ STR_CONFIG_SETTING_VEHICLES_TRAINS                              :{ORANGE}Traukin
 STR_CONFIG_SETTING_ECONOMY_TOWNS                                :{ORANGE}Miestai
 STR_CONFIG_SETTING_ECONOMY_INDUSTRIES                           :{ORANGE}Gamyklos
 
+STR_CONFIG_SETTING_PATHFINDER_NPF                               :NPF
+STR_CONFIG_SETTING_PATHFINDER_YAPF_RECOMMENDED                  :YAPF {BLUE}(Rekomenduojama)
+
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS                        :{LTBLUE}Traukinių maršruto radėjas: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NPF                    :NPF
-STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_YAPF                   :YAPF {BLUE}(Rekomenduojama)
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES                 :{LTBLUE}Automobilių maršruto radėjas: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_NPF             :NPF
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_YAPF            :YAPF {BLUE}(Rekomenduojama)
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS                         :{LTBLUE}Laivų maršruto radėjas: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_OPF                     :Originalus {BLUE}(Rekomenduojama)
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_NPF                     :NPF
