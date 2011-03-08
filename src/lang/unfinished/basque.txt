@@ -1066,9 +1066,6 @@ STR_ECONOMY_FLUCTUATING                                         :Fluktuazioekin
 STR_REVERSE_AT_END_OF_LINE_AND_AT_STATIONS                      :Bidearen bukaeran eta estazioan
 STR_REVERSE_AT_END_OF_LINE_ONLY                                 :Bidearen bukaeran bakarrik
 
-STR_DISASTERS_OFF                                               :Itzalita
-STR_DISASTERS_ON                                                :Piztuta
-
 STR_CITY_APPROVAL_PERMISSIVE                                    :Jasankorra
 STR_CITY_APPROVAL_TOLERANT                                      :Jasanbera
 STR_CITY_APPROVAL_HOSTILE                                       :Kontrakoa
@@ -1082,20 +1079,26 @@ STR_CONFIG_SETTING_CAPTION                                      :{WHITE}Konfigur
 STR_CONFIG_SETTING_OFF                                          :Itzalita
 STR_CONFIG_SETTING_ON                                           :Piztuta
 STR_CONFIG_SETTING_DISABLED                                     :desaktibatua
+
+STR_CONFIG_SETTING_COMPANIES_OFF                                :Itzalita
+STR_CONFIG_SETTING_COMPANIES_OWN                                :Enpresa propioa
+STR_CONFIG_SETTING_COMPANIES_ALL                                :Enpresa guztiak
+
+STR_CONFIG_SETTING_NONE                                         :Bat ere ez
+STR_CONFIG_SETTING_ORIGINAL                                     :Originala
+STR_CONFIG_SETTING_REALISTIC                                    :Errealista
+
+STR_CONFIG_SETTING_HORIZONTAL_POS_LEFT                          :Ezkerra
+STR_CONFIG_SETTING_HORIZONTAL_POS_CENTER                        :Erdia
+STR_CONFIG_SETTING_HORIZONTAL_POS_RIGHT                         :Eskuina
+
 STR_CONFIG_SETTING_BUILDONSLOPES                                :{LTBLUE}Aldapa eta kostan eraikitzea baimendu: {ORANGE}{STRING}
 STR_CONFIG_SETTING_AUTOSLOPE                                    :{LTBLUE}Eraikinen, trenbideen etabarren azpian paisaia aldatzea baimendu. (autoaldapak): {ORANGE}{STRING}
 STR_CONFIG_SETTING_CATCHMENT                                    :{LTBLUE}Bilketa guneen tamaina errealago egitea baimendu: {ORANGE}{STRING}
 STR_CONFIG_SETTING_EXTRADYNAMITE                                :{LTBLUE}Herriarenak diren errepide, zubi eta tunel gehiago kentzea baimendu: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOKE_AMOUNT                                 :{LTBLUE}Trenaren ke/txinparta kantitatea: {ORANGE}{STRING}
-STR_CONFIG_SETTING_SMOKE_AMOUNT_NONE                            :Bat ere ez
-STR_CONFIG_SETTING_SMOKE_AMOUNT_ORIGINAL                        :Originala
-STR_CONFIG_SETTING_SMOKE_AMOUNT_REALISTIC                       :Errealista
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL                     :{LTBLUE}Trenaren azelerazio modeloa: {ORANGE}{STRING}
-STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_ORIGINAL            :Originala
-STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_REALISTIC           :Errealista
 STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL              :{LTBLUE}Ibilgailuen azelerazio modelua: {ORANGE}{STRING}
-STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_ORIGINAL     :Originala
-STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_REALISTIC    :Errealista
 STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Aldapen zailtasuna trenentzako {ORANGE}{STRING}%
 STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}Aldapen zailtasuna errepide garraioetarako{ORANGE}{STRING}%
 STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Itsasontzi eta trenei 90 graduko biraketak debekatu: {ORANGE}{STRING}
@@ -1173,12 +1176,6 @@ STR_CONFIG_SETTING_COMMAND_PAUSE_LEVEL_NO_ACTIONS               :egintzarik ez
 STR_CONFIG_SETTING_COMMAND_PAUSE_LEVEL_ALL_NON_CONSTRUCTION     :eraikitzeko ez diren egintza guztiak
 STR_CONFIG_SETTING_COMMAND_PAUSE_LEVEL_ALL_NON_LANDSCAPING      :guztiak paisaia eraldatzeko egintzak baino
 STR_CONFIG_SETTING_COMMAND_PAUSE_LEVEL_ALL_ACTIONS              :egintza guztiak
-STR_CONFIG_SETTING_ADVANCED_VEHICLE_LISTS_OFF                   :Itzalita
-STR_CONFIG_SETTING_ADVANCED_VEHICLE_LISTS_OWN                   :Enpresa propioa
-STR_CONFIG_SETTING_ADVANCED_VEHICLE_LISTS_ALL                   :Enpresa guztiak
-STR_CONFIG_SETTING_LOADING_INDICATORS_OFF                       :Itzalita
-STR_CONFIG_SETTING_LOADING_INDICATORS_OWN                       :Enpresa propioa
-STR_CONFIG_SETTING_LOADING_INDICATORS_ALL                       :Enpresa guztiak
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_FIRST                      :Lehena eskuragarri
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_LAST                       :Azkena eskuragarri
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MOST_USED                  :Gehien erabilia
@@ -1208,13 +1205,7 @@ STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_NONE                    :Ezer ez {RED}(e
 STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_RAINFOREST              :bakarrik euri basoetan
 STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_ALL                     :leku guztietan
 
-STR_CONFIG_SETTING_TOOLBAR_POS_LEFT                             :Ezkerra
-STR_CONFIG_SETTING_TOOLBAR_POS_CENTER                           :Erdia
-STR_CONFIG_SETTING_TOOLBAR_POS_RIGHT                            :Eskuina
 STR_CONFIG_SETTING_STATUSBAR_POS                                :{LTBLUE}Egoera posizioa {ORANGE}{STRING}
-STR_CONFIG_SETTING_STATUSBAR_POS_LEFT                           :Ezkerra
-STR_CONFIG_SETTING_STATUSBAR_POS_CENTER                         :Erdia
-STR_CONFIG_SETTING_STATUSBAR_POS_RIGHT                          :Eskuina
 STR_CONFIG_SETTING_TOWN_GROWTH_NONE                             :Ezer ez
 STR_CONFIG_SETTING_TOWN_GROWTH_SLOW                             :Motel
 STR_CONFIG_SETTING_TOWN_GROWTH_NORMAL                           :Normala
@@ -1235,10 +1226,9 @@ STR_CONFIG_SETTING_VEHICLES_TRAINS                              :{ORANGE}Trenak
 STR_CONFIG_SETTING_ECONOMY_TOWNS                                :{ORANGE}Herriak
 STR_CONFIG_SETTING_ECONOMY_INDUSTRIES                           :{ORANGE}Industriak
 
-STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NPF                    :NPF
-STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_YAPF                   :YAPF {BLUE}(Gomendatua)
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_NPF             :NPF
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_YAPF            :YAPF {BLUE}(Gomendatua)
+STR_CONFIG_SETTING_PATHFINDER_NPF                               :NPF
+STR_CONFIG_SETTING_PATHFINDER_YAPF_RECOMMENDED                  :YAPF {BLUE}(Gomendatua)
+
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_OPF                     :Original {BLUE}(Gomendatua)
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_NPF                     :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_YAPF                    :YAPF {RED}(Ez gomendatua)
