@@ -138,6 +138,9 @@ class CYapfCostRouteLinkT {
 
 			/* Penalty for cargo waiting on our link. */
 			cost += (from->goods[this->Yapf().GetCargoID()].cargo.CountForNextHop(link->GetOriginOrderId()) * this->Yapf().PfGetSettings().route_station_waiting_factor) / PENALTY_DIVISOR;
+
+			/* Penalty for time since the last vehicle arrived. */
+			cost += link->GetWaitTime() * this->Yapf().PfGetSettings().route_station_last_veh_factor / PENALTY_DIVISOR;
 		}
 
 		/* Penalty for travel time. */
