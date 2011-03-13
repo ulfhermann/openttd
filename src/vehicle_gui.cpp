@@ -686,6 +686,12 @@ struct RefitWindow : public Window {
 	virtual void OnInvalidateData(int data)
 	{
 		switch (data) {
+			case -666:
+				/* Autoreplace replaced the vehicle.
+				 * Nothing to do though for this window.
+				 * This case is _not_ called asynchronously. Get out directly, rest can be done later */
+				break;
+
 			case 0: { // The consist has changed; rebuild the entire list.
 				/* Clear the selection. */
 				Vehicle *v = Vehicle::Get(this->window_number);
@@ -1121,7 +1127,7 @@ static inline void ChangeVehicleWindow(WindowClass window_class, VehicleID from_
 		}
 
 		/* Notify the window immediately, without scheduling. */
-		w->InvalidateData();
+		w->InvalidateData(-666);
 	}
 }
 
@@ -1603,6 +1609,9 @@ public:
 			return;
 		}
 
+		/* We can only set the trigger for resorting/rebuilding.
+		 * We cannot safely resort at this point, as there might be multiple scheduled invalidations,
+		 * and a rebuild needs to be done first though it is scheduled later. */
 		if (data == 0) {
 			this->vehicles.ForceRebuild();
 		} else {
@@ -1780,6 +1789,12 @@ struct VehicleDetailsWindow : Window {
 
 	virtual void OnInvalidateData(int data)
 	{
+		if (data == -666) {
+			/* Autoreplace replaced the vehicle.
+			 * Nothing to do for this window though.
+			 * This case is _not_ called asynchronously. Get out directly, rest can be done later */
+			return;
+		}
 		const Vehicle *v = Vehicle::Get(this->window_number);
 		if (v->type == VEH_ROAD) {
 			const NWidgetBase *nwid_info = this->GetWidget<NWidgetBase>(VLD_WIDGET_MIDDLE_DETAILS);
@@ -2578,6 +2593,16 @@ public:
 				this->SelectPlane(plane);
 				this->SetWidgetDirty(VVW_WIDGET_SELECT_REFIT_TURN);
 			}
+		}
+	}
+
+	virtual void OnInvalidateData(int data)
+	{
+		if (data == -666) {
+			/* Autoreplace replaced the vehicle.
+			 * Nothing to do for this window though.
+			 * This case is _not_ called asynchronously. Get out directly, rest can be done later */
+			return;
 		}
 	}
 
