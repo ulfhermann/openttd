@@ -19,24 +19,27 @@
 #include "sound_type.h"
 #include "strings_type.h"
 
-typedef uint16 EngineID;
+typedef uint16 EngineID; ///< Unique identification number of an engine.
 
 struct Engine;
 
+/** Available types of rail vehicles. */
 enum RailVehicleTypes {
 	RAILVEH_SINGLEHEAD,  ///< indicates a "standalone" locomotive
 	RAILVEH_MULTIHEAD,   ///< indicates a combination of two locomotives
 	RAILVEH_WAGON,       ///< simple wagon, not motorized
 };
 
+/** Type of rail engine. */
 enum EngineClass {
-	EC_STEAM,
-	EC_DIESEL,
-	EC_ELECTRIC,
-	EC_MONORAIL,
-	EC_MAGLEV,
+	EC_STEAM,    ///< Steam rail engine.
+	EC_DIESEL,   ///< Diesel rail engine.
+	EC_ELECTRIC, ///< Electric rail engine.
+	EC_MONORAIL, ///< Mono rail engine.
+	EC_MAGLEV,   ///< Maglev engine.
 };
 
+/** Information about a rail vehicle. */
 struct RailVehicleInfo {
 	byte image_index;
 	RailVehicleTypes railveh_type;
@@ -59,6 +62,7 @@ struct RailVehicleInfo {
 	byte user_def_data;             ///< Property 0x25: "User-defined bit mask" Used only for (very few) NewGRF vehicles
 };
 
+/** Information about a ship vehicle. */
 struct ShipVehicleInfo {
 	byte image_index;
 	byte cost_factor;
@@ -70,27 +74,31 @@ struct ShipVehicleInfo {
 	byte visual_effect;    ///< Bitstuffed NewGRF visual effect data
 };
 
-/* AircraftVehicleInfo subtypes, bitmask type.
+/**
+ * AircraftVehicleInfo subtypes, bitmask type.
  * If bit 0 is 0 then it is a helicopter, otherwise it is a plane
- * in which case bit 1 tells us whether it's a big(fast) plane or not */
+ * in which case bit 1 tells us whether it's a big(fast) plane or not.
+ */
 enum AircraftSubTypeBits {
 	AIR_HELI = 0,
 	AIR_CTOL = 1, ///< Conventional Take Off and Landing, i.e. planes
 	AIR_FAST = 2
 };
 
+/** Information about a aircraft vehicle. */
 struct AircraftVehicleInfo {
 	byte image_index;
 	byte cost_factor;
 	byte running_cost;
-	byte subtype;
+	byte subtype;               ///< Type of aircraft. @see AircraftSubTypeBits
 	SoundID sfx;
 	byte acceleration;
 	uint16 max_speed;           ///< Maximum speed (1 unit = 8 mph = 12.8 km-ish/h)
-	byte mail_capacity;
-	uint16 passenger_capacity;
+	byte mail_capacity;         ///< Mail capacity (bags).
+	uint16 passenger_capacity;  ///< Passenger capacity (persons).
 };
 
+/** Information about a road vehicle. */
 struct RoadVehicleInfo {
 	byte image_index;
 	byte cost_factor;
@@ -111,16 +119,16 @@ struct RoadVehicleInfo {
  *  @see table/engines.h
  */
 struct EngineInfo {
-	Date base_intro;
+	Date base_intro;    ///< Basic date of engine introduction (without random parts).
 	Year lifelength;    ///< Lifetime of a single vehicle
-	Year base_life;     ///< Basic duration of engine availability (without random parts)
+	Year base_life;     ///< Basic duration of engine availability (without random parts). \c 0xFF means infinite life.
 	byte decay_speed;
 	byte load_amount;
-	byte climates;
+	byte climates;      ///< Climates supported by the engine.
 	CargoID cargo_type;
 	uint32 refit_mask;
 	byte refit_cost;
-	byte misc_flags;
+	byte misc_flags;    ///< Miscellaneous flags. @see EngineMiscFlags
 	byte callback_mask; ///< Bitmask of vehicle callbacks that have to be called
 	int8 retire_early;  ///< Number of years early to retire vehicle
 	StringID string_id; ///< Default name of engine
@@ -146,10 +154,9 @@ enum EngineFlags {
 	ENGINE_OFFER_WINDOW_OPEN = 4, ///< The exclusive offer window is currently open for a company.
 };
 
-static const uint NUM_VEHICLE_TYPES             =   6;
 static const uint MAX_LENGTH_ENGINE_NAME_CHARS  =  32; ///< The maximum length of an engine name in characters including '\0'
 static const uint MAX_LENGTH_ENGINE_NAME_PIXELS = 160; ///< The maximum length of an engine name in pixels
 
-static const EngineID INVALID_ENGINE = 0xFFFF;
+static const EngineID INVALID_ENGINE = 0xFFFF; ///< Constant denoting an invalid engine.
 
 #endif /* ENGINE_TYPE_H */
