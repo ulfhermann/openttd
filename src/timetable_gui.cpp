@@ -243,13 +243,17 @@ struct TimetableWindow : Window {
 		return (sel < v->GetNumOrders() * 2 && sel >= 0) ? sel : INVALID_ORDER;
 	}
 
-	virtual void OnInvalidateData(int data)
+	/**
+	 * Some data on this window has become invalid.
+	 * @param data Information about the changed data.
+	 * @param gui_scope Whether the call is done from GUI scope. You may not do everything when not in GUI scope. See #InvalidateWindowData() for details.
+	 */
+	virtual void OnInvalidateData(int data = 0, bool gui_scope = true)
 	{
 		switch (data) {
 			case -666:
 				/* Autoreplace replaced the vehicle */
 				this->vehicle = Vehicle::Get(this->window_number);
-				/* This case is _not_ called asynchronously. Get out directly, rest can be done later */
 				break;
 
 			case -1:
@@ -261,11 +265,14 @@ struct TimetableWindow : Window {
 				break;
 
 			case -2:
+				if (!gui_scope) break;
 				this->UpdateSelectionStates();
 				this->ReInit();
 				break;
 
 			default: {
+				if (gui_scope) break; // only do this once; from command scope
+
 				/* Moving an order. If one of these is INVALID_VEH_ORDER_ID, then
 				 * the order is being created / removed */
 				if (this->sel_index == -1) break;
