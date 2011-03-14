@@ -683,15 +683,15 @@ struct RefitWindow : public Window {
 		}
 	}
 
-	virtual void OnInvalidateData(int data)
+	/**
+	 * Some data on this window has become invalid.
+	 * @param data Information about the changed data.
+	 * @param gui_scope Whether the call is done from GUI scope. You may not do everything when not in GUI scope. See #InvalidateWindowData() for details.
+	 */
+	virtual void OnInvalidateData(int data = 0, bool gui_scope = true)
 	{
 		switch (data) {
-			case -666:
-				/* Autoreplace replaced the vehicle.
-				 * Nothing to do though for this window.
-				 * This case is _not_ called asynchronously. Get out directly, rest can be done later */
-				break;
-
+			case -666: // Autoreplace replaced the vehicle; selected_vehicle became invalid.
 			case 0: { // The consist has changed; rebuild the entire list.
 				/* Clear the selection. */
 				Vehicle *v = Vehicle::Get(this->window_number);
@@ -701,6 +701,7 @@ struct RefitWindow : public Window {
 			}
 
 			case 2: { // The vehicle selection has changed; rebuild the entire list.
+				if (!gui_scope) break;
 				this->BuildRefitList();
 
 				/* The vehicle width has changed too. */
@@ -726,6 +727,7 @@ struct RefitWindow : public Window {
 			}
 
 			case 1: // A new cargo has been selected.
+				if (!gui_scope) break;
 				this->cargo = GetRefitOption();
 				break;
 		}
@@ -1126,8 +1128,8 @@ static inline void ChangeVehicleWindow(WindowClass window_class, VehicleID from_
 			_thd.window_number = to_index;
 		}
 
-		/* Notify the window immediately, without scheduling. */
-		w->InvalidateData(-666);
+		/* Notify the window. */
+		w->InvalidateData(-666, false);
 	}
 }
 
@@ -1600,19 +1602,23 @@ public:
 		this->GetWidget<NWidgetCore>(VLW_WIDGET_LIST)->widget_data = (this->vscroll->GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
 	}
 
-	virtual void OnInvalidateData(int data)
+	/**
+	 * Some data on this window has become invalid.
+	 * @param data Information about the changed data.
+	 * @param gui_scope Whether the call is done from GUI scope. You may not do everything when not in GUI scope. See #InvalidateWindowData() for details.
+	 */
+	virtual void OnInvalidateData(int data = 0, bool gui_scope = true)
 	{
-		if (HasBit(data, 31) && this->vli.type == VL_SHARED_ORDERS) {
+		if (!gui_scope && HasBit(data, 31) && this->vli.type == VL_SHARED_ORDERS) {
+			/* Needs to be done in command-scope, so everything stays valid */
 			this->vli.index = GB(data, 0, 20);
 			this->window_number = this->vli.Pack();
 			this->vehicles.ForceRebuild();
 			return;
 		}
 
-		/* We can only set the trigger for resorting/rebuilding.
-		 * We cannot safely resort at this point, as there might be multiple scheduled invalidations,
-		 * and a rebuild needs to be done first though it is scheduled later. */
 		if (data == 0) {
+			/* This needs to be done in command-scope to enforce rebuilding before resorting invalid data */
 			this->vehicles.ForceRebuild();
 		} else {
 			this->vehicles.ForceResort();
@@ -1787,14 +1793,19 @@ struct VehicleDetailsWindow : Window {
 		this->tab = TDW_TAB_CARGO;
 	}
 
-	virtual void OnInvalidateData(int data)
+	/**
+	 * Some data on this window has become invalid.
+	 * @param data Information about the changed data.
+	 * @param gui_scope Whether the call is done from GUI scope. You may not do everything when not in GUI scope. See #InvalidateWindowData() for details.
+	 */
+	virtual void OnInvalidateData(int data = 0, bool gui_scope = true)
 	{
 		if (data == -666) {
 			/* Autoreplace replaced the vehicle.
-			 * Nothing to do for this window though.
-			 * This case is _not_ called asynchronously. Get out directly, rest can be done later */
+			 * Nothing to do for this window. */
 			return;
 		}
+		if (!gui_scope) return;
 		const Vehicle *v = Vehicle::Get(this->window_number);
 		if (v->type == VEH_ROAD) {
 			const NWidgetBase *nwid_info = this->GetWidget<NWidgetBase>(VLD_WIDGET_MIDDLE_DETAILS);
@@ -2596,12 +2607,16 @@ public:
 		}
 	}
 
-	virtual void OnInvalidateData(int data)
+	/**
+	 * Some data on this window has become invalid.
+	 * @param data Information about the changed data.
+	 * @param gui_scope Whether the call is done from GUI scope. You may not do everything when not in GUI scope. See #InvalidateWindowData() for details.
+	 */
+	virtual void OnInvalidateData(int data = 0, bool gui_scope = true)
 	{
 		if (data == -666) {
 			/* Autoreplace replaced the vehicle.
-			 * Nothing to do for this window though.
-			 * This case is _not_ called asynchronously. Get out directly, rest can be done later */
+			 * Nothing to do for this window. */
 			return;
 		}
 	}
