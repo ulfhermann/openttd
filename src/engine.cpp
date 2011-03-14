@@ -85,8 +85,6 @@ Engine::Engine(VehicleType type, EngineID base)
 
 	/* Check if this base engine is within the original engine data range */
 	if (base >= _engine_counts[type]) {
-		/* Mark engine as valid anyway */
-		this->info.climates = 0x80;
 		/* Set model life to maximum to make wagons available */
 		this->info.base_life = 0xFF;
 		/* Set road vehicle tractive effort to the default value */
@@ -542,13 +540,21 @@ static void CheckRailIntroduction()
 
 void ShowEnginePreviewWindow(EngineID engine);
 
-/* Determine if an engine type is a wagon (and not a loco) */
+/**
+ * Determine whether an engine type is a wagon (and not a loco).
+ * @param index %Engine getting queried.
+ * @return Whether the queried engine is a wagon.
+ */
 static bool IsWagon(EngineID index)
 {
 	const Engine *e = Engine::Get(index);
 	return e->type == VEH_TRAIN && e->u.rail.railveh_type == RAILVEH_WAGON;
 }
 
+/**
+ * Update #reliability of engine \a e, (if needed) update the engine GUIs.
+ * @param e %Engine to update.
+ */
 static void CalcEngineReliability(Engine *e)
 {
 	uint age = e->age;
@@ -682,6 +688,11 @@ void StartupEngines()
 	InvalidateWindowClassesData(WC_BUILD_VEHICLE);
 }
 
+/**
+ * Company \a company accepts engine \a eid for preview.
+ * @param eid Engine being accepted (is under preview).
+ * @param company Current company previewing the engine.
+ */
 static void AcceptEnginePreview(EngineID eid, CompanyID company)
 {
 	Engine *e = Engine::Get(eid);
