@@ -732,9 +732,24 @@ void UpdateVehicleRouteLinks(const Vehicle *v, StationID arrived_at)
 	if (v->last_station_loaded == arrived_at) return;
 
 	Station *from = Station::Get(v->last_station_loaded);
+	Station *to = Station::Get(arrived_at);
 
 	/* Update incoming route link. */
 	UpdateVehicleRouteLinks(v, from, v->last_order_id, arrived_at, v->current_order.index);
+
+	/* Update outgoing links. */
+	CargoID cid;
+	FOR_EACH_SET_CARGO_ID(cid, v->vcache.cached_cargo_mask) {
+		/* Skip cargo types that don't have destinations enabled. */
+		if (!CargoHasDestinations(cid)) continue;
+
+		for (RouteLinkList::iterator link = to->goods[cid].routes.begin(); link != to->goods[cid].routes.end(); ++link) {
+			if ((*link)->GetOriginOrderId() == v->current_order.index) {
+				(*link)->VehicleArrived();
+				break;
+			}
+		}
+	}
 }
 
 /**
@@ -786,6 +801,22 @@ void InvalidateOrderRouteLinks(OrderID order)
 				} else {
 					++link;
 				}
+			}
+		}
+	}
+}
+
+/** Age and expire route links of a station. */
+void AgeRouteLinks(Station *st)
+{
+	for (CargoID cid = 0; cid < NUM_CARGO; cid++) {
+		/* Don't increment the iterator directly in the for loop as we don't want to increment when deleting a link. */
+		for (RouteLinkList::iterator link = st->goods[cid].routes.begin(); link != st->goods[cid].routes.end(); ) {
+			if ((*link)->wait_time++ > _settings_game.economy.cargodest.max_route_age) {
+				delete *link;
+				link = st->goods[cid].routes.erase(link);
+			} else {
+				++link;
 			}
 		}
 	}
