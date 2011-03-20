@@ -18,6 +18,7 @@
 #include "station_type.h"
 #include "engine_type.h"
 #include "company_type.h"
+#include <list>
 
 void ShowVehicleRefitWindow(const Vehicle *v, VehicleOrderID order, Window *parent);
 
@@ -45,6 +46,22 @@ enum TrainDetailsWindowTabs {
 	TDW_TAB_CAPACITY,  ///< Tab with cargo capacity of the vehicles
 	TDW_TAB_TOTALS,    ///< Tab with sum of total cargo transported
 };
+
+/** List item for one destination. */
+struct CargoDestSummaryData {
+	SourceID dest;     ///< Destination ID
+	SourceType type;   ///< Destination type
+	uint count;        ///< Cargo count
+
+	CargoDestSummaryData(SourceID dest, SourceType type, uint count)
+		: dest(dest), type(type), count(count)
+	{ }
+};
+
+/** List of cargo amounts grouped by final destination. */
+typedef std::list<CargoDestSummaryData> CargoDestSummary;
+
+void AddVehicleCargoDestSummary(const Vehicle *v, CargoDestSummary *sum);
 
 int DrawVehiclePurchaseInfo(int left, int right, int y, EngineID engine_number);
 

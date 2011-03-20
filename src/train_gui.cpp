@@ -295,9 +295,11 @@ int GetTrainDetailsWndVScroll(VehicleID veh_id, TrainDetailsWindowTabs det_tab)
 	if (det_tab == TDW_TAB_TOTALS) { // Total cargo tab
 		CargoArray act_cargo;
 		CargoArray max_cargo;
+		CargoDestSummary dests[NUM_CARGO];
 		for (const Vehicle *v = Vehicle::Get(veh_id); v != NULL; v = v->Next()) {
 			act_cargo[v->cargo_type] += v->cargo.Count();
 			max_cargo[v->cargo_type] += v->cargo_cap;
+			AddVehicleCargoDestSummary(v, &dests[v->cargo_type]);
 		}
 
 		/* Set scroll-amount seperately from counting, as to not compute num double
@@ -305,8 +307,9 @@ int GetTrainDetailsWndVScroll(VehicleID veh_id, TrainDetailsWindowTabs det_tab)
 		 */
 		for (CargoID i = 0; i < NUM_CARGO; i++) {
 			if (max_cargo[i] > 0) num++; // only count carriages that the train has
+			num += (int)dests[i].size();
 		}
-		num++; // needs one more because first line is description string
+		num += 2; // needs one more because first line is description string
 	} else {
 		for (const Train *v = Train::Get(veh_id); v != NULL; v = v->GetNextVehicle()) {
 			GetCargoSummaryOfArticulatedVehicle(v, &_cargo_summary);
@@ -405,12 +408,15 @@ void DrawTrainDetails(const Train *v, int left, int right, int y, int vscroll_po
 	} else {
 		CargoArray act_cargo;
 		CargoArray max_cargo;
+		CargoDestSummary dests[NUM_CARGO];
 		Money feeder_share = 0;
 
 		for (const Vehicle *u = v; u != NULL; u = u->Next()) {
 			act_cargo[u->cargo_type] += u->cargo.Count();
 			max_cargo[u->cargo_type] += u->cargo_cap;
 			feeder_share             += u->cargo.FeederShare();
+
+			AddVehicleCargoDestSummary(u, &dests[u->cargo_type]);
 		}
 
 		/* draw total cargo tab */
@@ -426,6 +432,17 @@ void DrawTrainDetails(const Train *v, int left, int right, int y, int vscroll_po
 				SetDParam(4, _settings_game.vehicle.freight_trains);
 				DrawString(left, right, y, FreightWagonMult(i) > 1 ? STR_VEHICLE_DETAILS_TRAIN_TOTAL_CAPACITY_MULT : STR_VEHICLE_DETAILS_TRAIN_TOTAL_CAPACITY);
 				y += WD_MATRIX_TOP + FONT_HEIGHT_NORMAL + WD_MATRIX_BOTTOM;
+			}
+
+			for (CargoDestSummary::const_iterator row = dests[i].begin(); row != dests[i].end() && vscroll_pos > -vscroll_cap; ++row) {
+				if (--vscroll_pos < 0) {
+					SetDParam(0, i);          // {SHORTCARGO} #1
+					SetDParam(1, row->count); // {SHORTCARGO} #2
+					SetDParam(2, row->type == ST_INDUSTRY ? STR_INDUSTRY_NAME : (row->type == ST_TOWN ? STR_TOWN_NAME : STR_COMPANY_NAME)); // {STRING1}
+					SetDParam(3, row->dest);  // Parameter of {STRING1}
+					DrawString(left + 2 * WD_PAR_VSEP_WIDE, right, y, STR_VEHICLE_DETAILS_CARGO_TO);
+					y += WD_MATRIX_TOP + FONT_HEIGHT_NORMAL + WD_MATRIX_BOTTOM;
+				}
 			}
 		}
 		SetDParam(0, feeder_share);

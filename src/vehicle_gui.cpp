@@ -2714,3 +2714,28 @@ int GetVehicleWidth(Vehicle *v)
 
 	return vehicle_width;
 }
+
+/**
+ * Sum the cargo carried by a vehicle by final destination.
+ * @param v The vehicle.
+ * @param sum The cargo summary is added to this.
+ */
+void AddVehicleCargoDestSummary(const Vehicle *v, CargoDestSummary *sum)
+{
+	const VehicleCargoList::List *packets = v->cargo.Packets();
+	for (VehicleCargoList::ConstIterator it = packets->begin(); it != packets->end(); ++it) {
+		const CargoPacket *cp = *it;
+
+		/* Search for an existing list entry. */
+		CargoDestSummary::iterator data;
+		for (data = sum->begin(); data != sum->end(); ++data) {
+			if (data->type == cp->DestinationType() && data->dest == cp->DestinationID()) {
+				data->count += cp->Count();
+				break;
+			}
+		}
+
+		/* Not found, insert new entry. */
+		if (data == sum->end() && cp->DestinationID() != INVALID_SOURCE) sum->push_back(CargoDestSummaryData(cp->DestinationID(), cp->DestinationType(), cp->Count()));
+	}
+}

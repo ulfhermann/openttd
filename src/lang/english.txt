@@ -3116,6 +3116,7 @@ STR_VEHICLE_DETAILS_TRAIN_TOTAL_CAPACITY_MULT                   :{LTBLUE}- {CARG
 STR_VEHICLE_DETAILS_CARGO_EMPTY                                 :{LTBLUE}Empty
 STR_VEHICLE_DETAILS_CARGO_FROM                                  :{LTBLUE}{CARGO} from {STATION}
 STR_VEHICLE_DETAILS_CARGO_FROM_MULT                             :{LTBLUE}{CARGO} from {STATION} (x{NUM})
+STR_VEHICLE_DETAILS_CARGO_TO                                    :{LTBLUE}{SHORTCARGO} to {STRING1}
 
 STR_VEHICLE_DETAIL_TAB_CARGO                                    :{BLACK}Cargo
 STR_VEHICLE_DETAILS_TRAIN_CARGO_TOOLTIP                         :{BLACK}Show details of cargo carried
