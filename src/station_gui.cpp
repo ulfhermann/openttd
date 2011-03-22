@@ -1415,8 +1415,7 @@ struct StationViewWindow : public Window {
 				const CargoDataEntry *via_entry = source_entry->Retrieve(stat.Via());
 				for (CargoDataSet::iterator dest_it = via_entry->Begin(); dest_it != via_entry->End(); ++dest_it) {
 					CargoDataEntry *dest_entry = *dest_it;
-					uint val = dest_entry->GetCount();
-					ShowCargo(cargo, i, from, stat.Via(), dest_entry->GetStation(), val);
+					ShowCargo(cargo, i, from, stat.Via(), dest_entry->GetStation(), dest_entry->GetCount());
 				}
 			}
 		}
@@ -1636,11 +1635,12 @@ struct StationViewWindow : public Window {
 	/**
 	 * Invalidate the cache for the given cargo.
 	 * @param cargo ID of the cargo.
+	 * @param gui_scope Whether the call is done from GUI scope. You may not do everything when not in GUI scope. See #InvalidateWindowData() for details.
 	 */
-	virtual void OnInvalidateData(int cargo)
+	virtual void OnInvalidateData(int data = 0, bool gui_scope = true)
 	{
-		this->cached_destinations.Remove((CargoID)cargo);
-		this->SetDirty();
+		if (!gui_scope) return;
+		this->cached_destinations.Remove((CargoID)data);
 	}
 
 	/**
