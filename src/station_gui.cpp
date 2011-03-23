@@ -1596,14 +1596,14 @@ struct StationViewWindow : public Window {
 
 					switch (this->groupings[column]) {
 						case GR_SOURCE:
-							str = GetEntryString(station, STR_STATION_VIEW_FROM_HERE, STR_STATION_VIEW_FROM, STR_STATION_VIEW_FROM_ANY);
+							str = this->GetEntryString(station, STR_STATION_VIEW_FROM_HERE, STR_STATION_VIEW_FROM, STR_STATION_VIEW_FROM_ANY);
 							break;
 						case GR_NEXT:
-							str = GetEntryString(station, STR_STATION_VIEW_VIA_HERE, STR_STATION_VIEW_VIA, STR_STATION_VIEW_VIA_ANY);
+							str = this->GetEntryString(station, STR_STATION_VIEW_VIA_HERE, STR_STATION_VIEW_VIA, STR_STATION_VIEW_VIA_ANY);
 							if (str == STR_STATION_VIEW_VIA) str = SearchNonStop(cd, station, column);
 							break;
 						case GR_DESTINATION:
-							str = GetEntryString(station, STR_STATION_VIEW_TO_HERE, STR_STATION_VIEW_TO, STR_STATION_VIEW_TO_ANY);
+							str = this->GetEntryString(station, STR_STATION_VIEW_TO_HERE, STR_STATION_VIEW_TO, STR_STATION_VIEW_TO_ANY);
 							break;
 						default:
 							NOT_REACHED();
@@ -1619,7 +1619,7 @@ struct StationViewWindow : public Window {
 				int shrink_left  = rtl ? r.left + WD_FRAMERECT_LEFT : r.right - this->expand_shrink_width + WD_FRAMERECT_LEFT;
 				int shrink_right = rtl ? r.left + this->expand_shrink_width - WD_FRAMERECT_RIGHT : r.right - WD_FRAMERECT_RIGHT;
 
-				DrawString(text_left, text_right, y, str, TC_FROMSTRING);
+				DrawString(text_left, text_right, y, str);
 
 				if (column < NUM_COLUMNS - 1) {
 					const char *sym = cd->GetNumChildren() > 0 ? "-" : "+";
