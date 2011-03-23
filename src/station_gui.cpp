@@ -1415,8 +1415,7 @@ struct StationViewWindow : public Window {
 				const CargoDataEntry *via_entry = source_entry->Retrieve(stat.Via());
 				for (CargoDataSet::iterator dest_it = via_entry->Begin(); dest_it != via_entry->End(); ++dest_it) {
 					CargoDataEntry *dest_entry = *dest_it;
-					uint val = dest_entry->GetCount();
-					ShowCargo(cargo, i, from, stat.Via(), dest_entry->GetStation(), val);
+					ShowCargo(cargo, i, from, stat.Via(), dest_entry->GetStation(), dest_entry->GetCount());
 				}
 			}
 		}
@@ -1597,14 +1596,14 @@ struct StationViewWindow : public Window {
 
 					switch (this->groupings[column]) {
 						case GR_SOURCE:
-							str = GetEntryString(station, STR_STATION_VIEW_FROM_HERE, STR_STATION_VIEW_FROM, STR_STATION_VIEW_FROM_ANY);
+							str = this->GetEntryString(station, STR_STATION_VIEW_FROM_HERE, STR_STATION_VIEW_FROM, STR_STATION_VIEW_FROM_ANY);
 							break;
 						case GR_NEXT:
-							str = GetEntryString(station, STR_STATION_VIEW_VIA_HERE, STR_STATION_VIEW_VIA, STR_STATION_VIEW_VIA_ANY);
+							str = this->GetEntryString(station, STR_STATION_VIEW_VIA_HERE, STR_STATION_VIEW_VIA, STR_STATION_VIEW_VIA_ANY);
 							if (str == STR_STATION_VIEW_VIA) str = SearchNonStop(cd, station, column);
 							break;
 						case GR_DESTINATION:
-							str = GetEntryString(station, STR_STATION_VIEW_TO_HERE, STR_STATION_VIEW_TO, STR_STATION_VIEW_TO_ANY);
+							str = this->GetEntryString(station, STR_STATION_VIEW_TO_HERE, STR_STATION_VIEW_TO, STR_STATION_VIEW_TO_ANY);
 							break;
 						default:
 							NOT_REACHED();
@@ -1620,7 +1619,7 @@ struct StationViewWindow : public Window {
 				int shrink_left  = rtl ? r.left + WD_FRAMERECT_LEFT : r.right - this->expand_shrink_width + WD_FRAMERECT_LEFT;
 				int shrink_right = rtl ? r.left + this->expand_shrink_width - WD_FRAMERECT_RIGHT : r.right - WD_FRAMERECT_RIGHT;
 
-				DrawString(text_left, text_right, y, str, TC_FROMSTRING);
+				DrawString(text_left, text_right, y, str);
 
 				if (column < NUM_COLUMNS - 1) {
 					const char *sym = cd->GetNumChildren() > 0 ? "-" : "+";
@@ -1636,11 +1635,12 @@ struct StationViewWindow : public Window {
 	/**
 	 * Invalidate the cache for the given cargo.
 	 * @param cargo ID of the cargo.
+	 * @param gui_scope Whether the call is done from GUI scope. You may not do everything when not in GUI scope. See #InvalidateWindowData() for details.
 	 */
-	virtual void OnInvalidateData(int cargo)
+	virtual void OnInvalidateData(int data = 0, bool gui_scope = true)
 	{
-		this->cached_destinations.Remove((CargoID)cargo);
-		this->SetDirty();
+		if (!gui_scope) return;
+		this->cached_destinations.Remove((CargoID)data);
 	}
 
 	/**
