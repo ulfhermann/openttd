@@ -49,6 +49,7 @@ private:
 	SourceID dest_id;           ///< Index of the destination.
 	SourceTypeByte dest_type;   ///< Type of #dest_id.
 	OrderID next_order;         ///< Next desired hop.
+	StationID next_station;     ///< Unload at this station next.
 
 	/** The CargoList caches, thus needs to know about it. */
 	template <class Tinst> friend class CargoList;
@@ -62,8 +63,8 @@ public:
 	static const uint16 MAX_COUNT = UINT16_MAX;
 
 	CargoPacket();
-	CargoPacket(StationID source, TileIndex source_xy, uint16 count, SourceType source_type, SourceID source_id, TileIndex dest_xy = INVALID_TILE, SourceType dest_type = ST_INDUSTRY, SourceID dest_id = INVALID_SOURCE, OrderID next_order = INVALID_ORDER);
-	CargoPacket(uint16 count, byte days_in_transit, StationID source, TileIndex source_xy, TileIndex loaded_at_xy, Money feeder_share = 0, SourceType source_type = ST_INDUSTRY, SourceID source_id = INVALID_SOURCE, TileIndex dest_xy = INVALID_TILE, SourceType dest_type = ST_INDUSTRY, SourceID dest_id = INVALID_SOURCE, OrderID next_order = INVALID_ORDER);
+	CargoPacket(StationID source, TileIndex source_xy, uint16 count, SourceType source_type, SourceID source_id, TileIndex dest_xy = INVALID_TILE, SourceType dest_type = ST_INDUSTRY, SourceID dest_id = INVALID_SOURCE, OrderID next_order = INVALID_ORDER, StationID next_station = INVALID_STATION);
+	CargoPacket(uint16 count, byte days_in_transit, StationID source, TileIndex source_xy, TileIndex loaded_at_xy, Money feeder_share = 0, SourceType source_type = ST_INDUSTRY, SourceID source_id = INVALID_SOURCE, TileIndex dest_xy = INVALID_TILE, SourceType dest_type = ST_INDUSTRY, SourceID dest_id = INVALID_SOURCE, OrderID next_order = INVALID_ORDER, StationID next_station = INVALID_STATION);
 
 	/** Destroy the packet. */
 	~CargoPacket() { }
@@ -182,6 +183,14 @@ public:
 		return this->next_order;
 	}
 
+	/**
+	 * Gets the station ID where the packet should be unloaded next.
+	 * @return The station ID where the packet should be unloaded.
+	 */
+	FORCEINLINE StationID NextStation() const
+	{
+		return this->next_station;
+	}
 
 	static void InvalidateAllFrom(SourceType src_type, SourceID src);
 	static void InvalidateAllFrom(StationID sid);
@@ -347,7 +356,8 @@ public:
 				cp1->dest_xy         == cp2->dest_xy &&
 				cp1->dest_type       == cp2->dest_type &&
 				cp1->dest_id         == cp2->dest_id &&
-				cp1->next_order      == cp2->next_order;
+				cp1->next_order      == cp2->next_order &&
+				cp1->next_station    == cp2->next_station;
 	}
 };
 
@@ -377,7 +387,8 @@ public:
 				cp1->dest_xy         == cp2->dest_xy &&
 				cp1->dest_type       == cp2->dest_type &&
 				cp1->dest_id         == cp2->dest_id &&
-				cp1->next_order      == cp2->next_order;
+				cp1->next_order      == cp2->next_order &&
+				cp1->next_station    == cp2->next_station;
 	}
 };
 
