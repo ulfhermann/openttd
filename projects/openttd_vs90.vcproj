@@ -3224,6 +3224,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\blitter\base.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\blitter\base.hpp"
 				>
 			</File>
