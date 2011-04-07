@@ -3163,11 +3163,11 @@ void Station::RunAverages()
 			} else {
 				LinkStat &ls = i->second;
 				ls.Decrease();
-				if (!ls.IsValid()) {
+				if (ls.IsValid()) {
+					++i;
+				} else {
 					DeleteStaleFlows(this->index, goods_index, id);
 					links.erase(i++);
-				} else {
-					++i;
 				}
 			}
 		}
