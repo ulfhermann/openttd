@@ -251,7 +251,7 @@ const SaveLoad *GetLinkStatDesc()
 		SLEG_VAR(             _station_id,         SLE_UINT16),
 		 SLE_VAR(LinkStat,    length,              SLE_UINT32),
 		 SLE_VAR(LinkStat,    capacity,            SLE_UINT32),
-		 SLE_VAR(LinkStat,    frozen,              SLE_UINT32),
+		 SLE_VAR(LinkStat,    timeout,             SLE_UINT32),
 		 SLE_VAR(LinkStat,    usage,               SLE_UINT32),
 		 SLE_END()
 	};
@@ -549,7 +549,7 @@ static void Load_STNN()
 				LinkStat ls;
 				for (uint16 i = 0; i < _num_links; ++i) {
 					SlObject(&ls, GetLinkStatDesc());
-					assert(!ls.HasCapacity());
+					assert(ls.IsValid());
 					st->goods[c].link_stats[_station_id] = ls;
 				}
 				FlowStat fs;
