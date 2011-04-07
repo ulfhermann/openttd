@@ -21,6 +21,8 @@
 #include "vehicle_type.h"
 #include "date_type.h"
 
+#include <list>
+
 typedef Pool<Order, OrderID, 256, 64000> OrderPool;
 typedef Pool<OrderList, OrderListID, 128, 64000> OrderListPool;
 extern OrderPool _order_pool;
@@ -159,6 +161,9 @@ public:
 	inline void SetConditionValue(uint16 value) { SB(this->dest, 0, 11, value); }
 
 	bool ShouldStopAtStation(const Vehicle *v, StationID station) const;
+	bool CanLoadOrUnload() const;
+	bool CanLeaveWithCargo(bool has_cargo) const;
+
 	TileIndex GetLocation(const Vehicle *v) const;
 
 	/** Checks if this order has travel_time and if needed wait_time set. */
@@ -197,7 +202,7 @@ private:
 	 */
 	inline const Order *GetNext(const Order *curr) const { return (curr->next == NULL) ? this->GetFirstOrder() : curr->next; }
 
-	StationID GetNextStoppingStation(const Order *next, StationID curr_station, uint hops) const;
+	StationID GetNextStoppingStation(const Order *next, StationID curr_station, std::list<StationID> *stations, uint hops) const;
 
 	Order *first;                     ///< First order of the order list.
 	VehicleOrderID num_orders;        ///< NOSAVE: How many orders there are in the list.
@@ -239,7 +244,7 @@ public:
 	 */
 	inline Order *GetLastOrder() const { return this->GetOrderAt(this->num_orders - 1); }
 
-	StationID GetNextStoppingStation(VehicleOrderID curr_order, StationID curr_station) const;
+	StationID GetNextStoppingStation(VehicleOrderID curr_order, StationID curr_station, std::list<StationID> *stations = NULL) const;
 
 	/**
 	 * Get number of orders in the order list.

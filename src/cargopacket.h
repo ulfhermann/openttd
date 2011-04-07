@@ -404,7 +404,7 @@ public:
 				cp1->source_id       == cp2->source_id;
 	}
 
-	uint TakeFrom(VehicleCargoList *source, uint max_unload, OrderUnloadFlags flags, StationID next_station, bool has_stopped, CargoPayment *payment);
+	uint TakeFrom(VehicleCargoList *source, uint max_unload, OrderUnloadFlags flags, std::list<StationID> &next, bool has_stopped, CargoPayment *payment);
 
 	uint MoveTo(VehicleCargoList *dest, uint cap, StationID next_station, bool reserve = false);
 
@@ -434,7 +434,7 @@ protected:
 	byte GetUnloadFlags(OrderUnloadFlags order_flags);
 
 	UnloadType WillUnloadOld(byte flags, StationID source);
-	UnloadType WillUnloadCargoDist(byte flags, StationID next_station, StationID via, StationID source);
+	UnloadType WillUnloadCargoDist(byte flags, std::list<StationID> &next, StationID via, StationID source);
 
 	uint MovePackets(VehicleCargoList *dest, uint cap, Iterator begin, Iterator end, bool reserve);
 };
