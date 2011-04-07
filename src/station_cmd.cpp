@@ -3172,14 +3172,16 @@ void RecalcFrozen(Station *st)
 	}
 
 	std::list<Vehicle *>::iterator v_it = st->loading_vehicles.begin();
+	std::list<StationID> stations;
 	while (v_it != st->loading_vehicles.end()) {
 		const Vehicle *front = *v_it;
 		OrderList *orders = front->orders.list;
 		if (orders != NULL) {
-			StationID next_station_id = orders->GetNextStoppingStation(front->cur_auto_order_index, st->index);
-			if (next_station_id != INVALID_STATION && next_station_id != st->index) {
-				IncreaseStats(st, front, next_station_id, true);
+			orders->GetNextStoppingStation(front->cur_auto_order_index, st->index, &stations);
+			for (std::list<StationID>::iterator i = stations.begin(); i != stations.end(); ++i) {
+				if (*i != st->index) IncreaseStats(st, front, *i, true);
 			}
+			stations.clear();
 		}
 		++v_it;
 	}
@@ -3214,7 +3216,7 @@ void DecreaseFrozen(Station *st, const Vehicle *front, StationID next_station_id
 			return;
 		}
 		link_stat.Unfreeze(v->cargo_cap);
-		assert(!link_stat.HasCapacity());
+		assert(link_stat.HasCapacity());
 	}
 }
 
@@ -3246,7 +3248,7 @@ void IncreaseStats(Station *st, const Vehicle *front, StationID next_station_id,
 				} else {
 					link_stat.Increase(v->cargo_cap, v->cargo.Count());
 				}
-				assert(!link_stat.HasCapacity());
+				assert(link_stat.HasCapacity());
 			}
 		}
 	}

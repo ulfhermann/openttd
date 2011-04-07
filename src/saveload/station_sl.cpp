@@ -472,7 +472,7 @@ static void Load_STNN()
 				LinkStat ls;
 				for (uint16 i = 0; i < _num_links; ++i) {
 					SlObject(&ls, GetLinkStatDesc());
-					assert(!ls.HasCapacity());
+					assert(ls.HasCapacity());
 					st->goods[c].link_stats[_station_id] = ls;
 				}
 			}

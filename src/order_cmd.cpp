@@ -30,6 +30,8 @@
 
 #include "table/strings.h"
 
+#include <algorithm>
+
 /* DestinationID must be at least as large as every these below, because it can
  * be any of them
  */
@@ -347,34 +349,41 @@ Order *OrderList::GetOrderAt(int index) const
  * @param hops Number of orders we have already checked.
  * @return Next stoppping station or INVALID_STATION.
  */
-StationID OrderList::GetNextStoppingStation(const Order *next, StationID curr_station, uint hops) const
+StationID OrderList::GetNextStoppingStation(const Order *next, StationID curr_station, std::list<StationID> *stations, uint hops) const
 {
 	if (next == NULL || hops > this->GetNumOrders()) {
 		return INVALID_STATION;
 	}
 
 	if (next->IsType(OT_CONDITIONAL)) {
-		StationID skip_to = this->GetNextStoppingStation(this->GetOrderAt(next->GetConditionSkipToOrder()), curr_station, hops + 1);
-		StationID advance = this->GetNextStoppingStation(this->GetNext(next), curr_station, hops + 1);
-		return (skip_to == advance) ? skip_to : INVALID_STATION;
+		StationID skip_to = this->GetNextStoppingStation(
+				this->GetOrderAt(next->GetConditionSkipToOrder()),
+				curr_station, stations, hops + 1);
+		StationID advance = this->GetNextStoppingStation(
+				this->GetNext(next), curr_station, stations, hops + 1);
+		return skip_to == advance ? skip_to : INVALID_STATION;
 	}
 
-	if (!(next->IsType(OT_GOTO_STATION) || next->IsType(OT_AUTOMATIC)) ||
-			(next->GetNonStopType() & ONSF_NO_STOP_AT_DESTINATION_STATION) != 0 ||
-			next->GetDestination() == curr_station) {
-		return GetNextStoppingStation(this->GetNext(next), curr_station, hops + 1);
+	if (!next->CanLoadOrUnload() ||	(next->GetDestination() == curr_station &&
+			(next->GetUnloadType() & (OUFB_TRANSFER | OUFB_UNLOAD)) == 0)) {
+		return this->GetNextStoppingStation(this->GetNext(next), curr_station, stations, hops + 1);
 	}
 
-	return next->GetDestination();
+	StationID st = next->GetDestination();
+	if (std::find(stations->begin(), stations->end(), st) == stations->end()) {
+		stations->push_back(st);
+	}
+	return st;
 }
 
 /**
  * Get the next station the vehicle will stop at, if that is deterministic.
  * @param curr_order ID of the current order.
  * @param curr_station Station the vehicle is just visiting or INVALID_STATION.
+ * @param stations list to record all possible next stations in when nondeterministic.
  * @return ID of the next station the vehicle will stop at or INVALID_STATION.
  */
-StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_order, StationID curr_station) const
+StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_order, StationID curr_station, std::list<StationID> *stations) const
 {
 	const Order *curr = this->GetOrderAt(curr_order);
 	if (curr == NULL) {
@@ -389,9 +398,9 @@ StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_order, StationID
 	if (curr_station == INVALID_STATION ||
 			!(curr->IsType(OT_GOTO_STATION) || curr->IsType(OT_AUTOMATIC)) ||
 			curr_station != curr->GetDestination()) {
-		return this->GetNextStoppingStation(curr, curr_station, 0);
+		return this->GetNextStoppingStation(curr, curr_station, stations, 0);
 	} else {
-		return this->GetNextStoppingStation(this->GetNext(curr), curr_station, 1);
+		return this->GetNextStoppingStation(this->GetNext(curr), curr_station, stations, 1);
 	}
 }
 
@@ -2081,4 +2090,24 @@ bool Order::ShouldStopAtStation(const Vehicle *v, StationID station) const
 			v->last_station_visited != station && // Do stop only when we've not just been there
 			/* Finally do stop when there is no non-stop flag set for this type of station. */
 			!(this->GetNonStopType() & (is_dest_station ? ONSF_NO_STOP_AT_DESTINATION_STATION : ONSF_NO_STOP_AT_INTERMEDIATE_STATIONS));
+}
+
+bool Order::CanLoadOrUnload() const
+{
+	return (this->IsType(OT_GOTO_STATION) || this->IsType(OT_AUTOMATIC)) &&
+			(this->GetNonStopType() & ONSF_NO_STOP_AT_DESTINATION_STATION) == 0 &&
+			((this->GetLoadType() & OLFB_NO_LOAD) == 0 ||
+			(this->GetUnloadType() & OUFB_NO_UNLOAD) == 0);
+}
+
+/**
+ * A vehicle can leave the current station with cargo if:
+ * 1. it can load cargo here OR
+ * 2a. it could leave the last station with cargo AND
+ * 2b. it doesn't have to unload all cargo here.
+ */
+bool Order::CanLeaveWithCargo(bool has_cargo) const
+{
+	return (this->GetLoadType() & OLFB_NO_LOAD) == 0 || (has_cargo &&
+			(this->GetUnloadType() & (OUFB_UNLOAD | OUFB_TRANSFER)) == 0);
 }

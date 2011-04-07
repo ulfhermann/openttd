@@ -151,11 +151,11 @@ public:
 	/**
 	 * Check if the capacity is 0. This is necessary as Capacity() might return
 	 * 0 even if there is a miniscule amount of capacity left.
-	 * @return If capacity is 0.
+	 * @return If capacity is not 0.
 	 */
 	FORCEINLINE bool HasCapacity() const
 	{
-		return this->capacity == 0;
+		return this->capacity > 0;
 	}
 };
 
