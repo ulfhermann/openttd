@@ -903,8 +903,6 @@ void InsertOrder(Vehicle *v, Order *new_o, VehicleOrderID sel_ord)
 		}
 		/* Update any possible open window of the vehicle */
 		InvalidateVehicleOrder(u, INVALID_VEH_ORDER_ID | (sel_ord << 8));
-
-		RecalcFrozenIfLoading(u);
 	}
 
 	/* As we insert an order, the order to skip to will be 'wrong'. */
@@ -937,8 +935,6 @@ static CommandCost DecloneOrder(Vehicle *dst, DoCommandFlag flags)
 	if (flags & DC_EXEC) {
 		DeleteVehicleOrders(dst);
 		InvalidateVehicleOrder(dst, -1);
-
-		RecalcFrozenIfLoading(dst);
 
 		InvalidateWindowClassesData(GetWindowClassForVehicleType(dst->type), 0);
 	}
@@ -1029,8 +1025,6 @@ void DeleteOrder(Vehicle *v, VehicleOrderID sel_ord)
 
 		/* Update any possible open window of the vehicle */
 		InvalidateVehicleOrder(u, sel_ord | (INVALID_VEH_ORDER_ID << 8));
-
-		RecalcFrozenIfLoading(u);
 	}
 
 	/* As we delete an order, the order to skip to will be 'wrong'. */
@@ -1166,8 +1160,6 @@ CommandCost CmdMoveOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 			assert(v->orders.list == u->orders.list);
 			/* Update any possible open window of the vehicle */
 			InvalidateVehicleOrder(u, moving_order | (target_order << 8));
-
-			RecalcFrozenIfLoading(u);
 		}
 
 		/* As we move an order, the order to skip to will be 'wrong'. */
@@ -1417,8 +1409,6 @@ CommandCost CmdModifyOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 				u->current_order.SetLoadType(order->GetLoadType());
 			}
 			InvalidateVehicleOrder(u, -2);
-
-			RecalcFrozenIfLoading(u);
 		}
 	}
 
@@ -1559,8 +1549,6 @@ CommandCost CmdCloneOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32
 		case CO_UNSHARE: return DecloneOrder(dst, flags);
 		default: return CMD_ERROR;
 	}
-
-	RecalcFrozenIfLoading(dst);
 
 	return CommandCost();
 }
@@ -1736,8 +1724,6 @@ restart:
 					/* In GUI, simulate by removing the order and adding it back */
 					InvalidateVehicleOrder(w, id | (INVALID_VEH_ORDER_ID << 8));
 					InvalidateVehicleOrder(w, (INVALID_VEH_ORDER_ID << 8) | id);
-
-					RecalcFrozenIfLoading(w);
 				}
 			}
 		}
@@ -1788,7 +1774,6 @@ void DeleteVehicleOrders(Vehicle *v, bool keep_orderlist, bool reset_order_indic
 			CancelLoadingDueToDeletedOrder(v);
 		}
 	}
-	RecalcFrozenIfLoading(v);
 }
 
 /**

@@ -1863,17 +1863,7 @@ void Vehicle::BeginLoading()
 	curr_station->loading_vehicles.push_back(this);
 
 	if (this->last_loading_station != INVALID_STATION && this->last_loading_station != this->last_station_visited) {
-		IncreaseStats(Station::Get(this->last_loading_station), this, this->last_station_visited, false);
-	}
-
-	OrderList *orders = this->orders.list;
-	if (orders != NULL && this->current_order.CanLeaveWithCargo(this->last_loading_station != INVALID_STATION)) {
-		std::list<StationID> next;
-		orders->GetNextStoppingStation(this->cur_auto_order_index, this->last_station_visited, &next);
-		for (std::list<StationID>::iterator i = next.begin(); i != next.end(); ++i) {
-			/* freeze stats for the next link */
-			IncreaseStats(curr_station, this, *i, true);
-		}
+		IncreaseStats(Station::Get(this->last_loading_station), this, this->last_station_visited);
 	}
 
 	PrepareUnload(this);
@@ -1904,18 +1894,6 @@ void Vehicle::LeaveStation()
 	this->current_order.MakeLeaveStation();
 	Station *st = Station::Get(this->last_station_visited);
 	st->loading_vehicles.remove(this);
-
-	OrderList *orders = this->orders.list;
-	if (orders != NULL) {
-		std::list<StationID> next;
-		orders->GetNextStoppingStation(this->cur_auto_order_index, this->last_station_visited, &next);
-		for (std::list<StationID>::iterator i = next.begin(); i != next.end(); ++i) {
-			DecreaseFrozen(st, this, *i);
-		}
-	} else {
-		DEBUG(misc, 1, "orders are NULL");
-		RecalcFrozen(st);
-	}
 
 	if ((this->current_order.GetLoadType() & OLFB_NO_LOAD) == 0 ||
 			(this->current_order.GetUnloadType() & OUFB_NO_UNLOAD) == 0) {
