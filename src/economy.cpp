@@ -46,6 +46,7 @@
 #include "core/pool_func.hpp"
 #include "newgrf.h"
 #include "core/backup_type.hpp"
+#include "cargo_type.h"
 
 #include "table/strings.h"
 #include "table/pricebase.h"
@@ -1157,10 +1158,9 @@ uint32 ReserveConsist(Station *st, Vehicle *u, std::list<StationID> &next_statio
 
 			int cap = v->cargo_cap - v->cargo.Count();
 			if (cap > 0) {
-				StationCargoList &list = st->goods[v->cargo_type].cargo;
 				for (std::list<StationID>::iterator i(next_stations.begin());
 						i != next_stations.end(); ++i) {
-					int reserved = list.MoveTo(&v->cargo, cap, *i, true);
+					int reserved = st->goods[v->cargo_type].cargo.MoveTo(&v->cargo, cap, *i, true);
 					if (reserved > 0) {
 						cap -= reserved;
 						SetBit(ret, v->cargo_type);
@@ -1172,6 +1172,24 @@ uint32 ReserveConsist(Station *st, Vehicle *u, std::list<StationID> &next_statio
 	return ret;
 }
 
+/**
+ * Refresh all links between the given station and a number of next stations
+ * for some cargos.
+ * @param st Station to refresh links at.
+ * @param next_stations Possible next hops.
+ * @param cargos Cargos to refresh links for.
+ */
+static void RefreshLinks(Station *st, std::list<StationID> &next_stations, uint32 cargos)
+{
+	if (cargos == 0) return;
+	for (std::list<StationID>::iterator i(next_stations.begin()); i != next_stations.end(); ++i) {
+		for (uint c = 0; c < NUM_CARGO; ++c) {
+			if (HasBit(cargos, c)) {
+				st->goods[c].link_stats[*i].Refresh();
+			}
+		}
+	}
+}
 
 /**
  * Loads/unload the vehicle if possible.
@@ -1194,7 +1212,9 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 
 	/* We have not waited enough time till the next round of loading/unloading */
 	if (v->load_unload_ticks != 0) {
-		return cargos_reserved | ReserveConsist(st, v, next_stations);
+		uint32 new_reserved = ReserveConsist(st, v, next_stations);
+		RefreshLinks(st, next_stations, new_reserved);
+		return cargos_reserved | new_reserved;
 	}
 
 	OrderUnloadFlags unload_flags = v->current_order.GetUnloadType();
@@ -1365,6 +1385,8 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 			SetBit(cargo_not_full, v->cargo_type);
 		}
 	}
+
+	RefreshLinks(st, next_stations, cargo_full | cargo_not_full);
 
 	/* Only set completely_emptied, if we just unloaded all remaining cargo */
 	completely_emptied &= anything_unloaded;
