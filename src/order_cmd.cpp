@@ -370,7 +370,7 @@ StationID OrderList::GetNextStoppingStation(const Order *next, StationID curr_st
 	}
 
 	StationID st = next->GetDestination();
-	if (std::find(stations->begin(), stations->end(), st) == stations->end()) {
+	if (stations != NULL && std::find(stations->begin(), stations->end(), st) == stations->end()) {
 		stations->push_back(st);
 	}
 	return st;
