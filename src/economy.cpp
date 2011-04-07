@@ -1079,9 +1079,8 @@ Money CargoPayment::PayTransfer(const CargoPacket *cp, uint count)
  * Prepare the vehicle to be unloaded.
  * @param curr_station the station where the consist is at the moment
  * @param front_v the vehicle to be unloaded
- * @param next_station_id id of the station the consist will be traveling next
  */
-void PrepareUnload(Station *curr_station, Vehicle *front_v, StationID next_station_id)
+void PrepareUnload(Station *curr_station, Vehicle *front_v)
 {
 	/* At this moment loading cannot be finished */
 	ClrBit(front_v->vehicle_flags, VF_LOADING_FINISHED);
@@ -1089,10 +1088,12 @@ void PrepareUnload(Station *curr_station, Vehicle *front_v, StationID next_stati
 	/* Start unloading at the first possible moment */
 	front_v->load_unload_ticks = 1;
 
-	if ((front_v->current_order.GetUnloadType() & OUFB_NO_UNLOAD) != 0) {
+	if (front_v->orders.list != NULL && (front_v->current_order.GetUnloadType() & OUFB_NO_UNLOAD) != 0) {
 		/* vehicle will keep all its cargo and LoadUnloadVehicle will never call MoveToStation,
 		 * so we have to update the flow stats here.
 		 */
+		StationID next_station_id = front_v->orders.list->GetNextStoppingStation(
+				front_v->cur_auto_order_index, curr_station->index);
 		if (next_station_id == INVALID_STATION) {
 			return;
 		} else {
@@ -1122,12 +1123,12 @@ void PrepareUnload(Station *curr_station, Vehicle *front_v, StationID next_stati
 
 /**
  * Reserves cargo if the full load order and improved_load is set.
- * @param st The station where the consist is loading at the moment
- * @param u The front of the loading vehicle consist
- * @param next_station The next station the vehicle will stop at
- * @return bit field for the cargo classes with bits for the reserved cargos set (if anything was reserved).
+ * @param st The station where the consist is loading at the moment.
+ * @param u The front of the loading vehicle consist.
+ * @param next_stations Station the vehicle might stop at next.
+ * @return Bit field for the cargo classes with bits for the reserved cargos set (if anything was reserved).
  */
-uint32 ReserveConsist(Station *st, Vehicle *u, StationID next_station)
+uint32 ReserveConsist(Station *st, Vehicle *u, std::list<StationID> &next_stations)
 {
 	uint32 ret = 0;
 	if (_settings_game.order.improved_load && (u->current_order.GetLoadType() & OLFB_FULL_LOAD)) {
@@ -1157,8 +1158,13 @@ uint32 ReserveConsist(Station *st, Vehicle *u, StationID next_station)
 			int cap = v->cargo_cap - v->cargo.Count();
 			if (cap > 0) {
 				StationCargoList &list = st->goods[v->cargo_type].cargo;
-				if (list.MoveTo(&v->cargo, cap, next_station, true) > 0) {
-					SetBit(ret, v->cargo_type);
+				for (std::list<StationID>::iterator i(next_stations.begin());
+						i != next_stations.end(); ++i) {
+					int reserved = list.MoveTo(&v->cargo, cap, *i, true);
+					if (reserved > 0) {
+						cap -= reserved;
+						SetBit(ret, v->cargo_type);
+					}
 				}
 			}
 		}
@@ -1180,15 +1186,15 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 	StationID last_visited = v->last_station_visited;
 	Station *st = Station::Get(last_visited);
 
-	StationID next_station = INVALID_STATION;
+	std::list<StationID> next_stations;
 	OrderList *orders = v->orders.list;
 	if (orders != NULL) {
-		next_station = orders->GetNextStoppingStation(v->cur_auto_order_index, last_visited);
+		orders->GetNextStoppingStation(v->cur_auto_order_index, last_visited, &next_stations);
 	}
 
 	/* We have not waited enough time till the next round of loading/unloading */
 	if (v->load_unload_ticks != 0) {
-		return cargos_reserved | ReserveConsist(st, v, next_station);
+		return cargos_reserved | ReserveConsist(st, v, next_stations);
 	}
 
 	OrderUnloadFlags unload_flags = v->current_order.GetUnloadType();
@@ -1242,7 +1248,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 			uint prev_count = ge->cargo.Count();
 			payment->SetCargo(v->cargo_type);
 			uint delivered = ge->cargo.TakeFrom(&v->cargo, amount_unloaded, unload_flags,
-					next_station, u->last_loading_station == last_visited, payment);
+					next_stations, u->last_loading_station == last_visited, payment);
 
 			st->time_since_unload = 0;
 			unloading_time += delivered;
@@ -1312,9 +1318,10 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 			if (_settings_game.order.improved_load) {
 				loaded += v->cargo.LoadReserved(cap_left);
 			}
-			if (loaded < cap_left) {
-				assert(v->cargo.ReservedCount() == 0);
-				loaded += ge->cargo.MoveTo(&v->cargo, cap_left - loaded, next_station);
+
+			for (std::list<StationID>::iterator i(next_stations.begin());
+					loaded < cap_left && i != next_stations.end(); ++i) {
+				loaded += ge->cargo.MoveTo(&v->cargo, cap_left - loaded, *i);
 			}
 
 			/* Store whether the maximum possible load amount was loaded or not.*/

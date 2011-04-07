@@ -1867,7 +1867,7 @@ void Vehicle::BeginLoading()
 		IncreaseStats(Station::Get(this->last_loading_station), this, this->last_station_visited);
 	}
 
-	PrepareUnload(curr_station, this, next_station_id);
+	PrepareUnload(curr_station, this);
 
 	SetWindowDirty(GetWindowClassForVehicleType(this->type), this->owner);
 	SetWindowWidgetDirty(WC_VEHICLE_VIEW, this->index, VVW_WIDGET_START_STOP_VEH);
