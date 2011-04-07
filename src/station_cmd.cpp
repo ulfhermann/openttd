@@ -3136,9 +3136,9 @@ void Station::RunAverages()
 				LinkStat &ls = i->second;
 				ls.Decrease();
 				if (ls.IsValid()) {
-					links.erase(i++);
-				} else {
 					++i;
+				} else {
+					links.erase(i++);
 				}
 			}
 		}
