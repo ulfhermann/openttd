@@ -3164,12 +3164,12 @@ void Station::RunAverages()
 			} else {
 				LinkStat &ls = i->second;
 				ls.Decrease();
-				if (ls.HasCapacity()) {
+				if (ls.IsValid()) {
+					++i;
+				} else {
 					DeleteStaleFlows(this->index, goods_index, id);
 					this->goods[goods_index].cargo.RerouteStalePackets(id);
 					links.erase(i++);
-				} else {
-					++i;
 				}
 			}
 		}
@@ -3199,79 +3199,6 @@ void Station::RunAverages()
 }
 
 /**
- * Recalculate the frozen value of the station the given vehicle is loading at
- * if the vehicle is loading.
- * @param v Vehicle to be examined.
- */
-void RecalcFrozenIfLoading(const Vehicle *v)
-{
-	if (v->current_order.IsType(OT_LOADING)) {
-		RecalcFrozen(Station::Get(v->last_station_visited));
-	}
-}
-
-/**
- * Recalculate all frozen values for all link stats of a station. This is done
- * by adding up the capacities of all loading vehicles.
- * @param st Station.
- */
-void RecalcFrozen(Station *st)
-{
-	for (CargoID cargo = 0; cargo < NUM_CARGO; ++cargo) {
-		LinkStatMap &links = st->goods[cargo].link_stats;
-		for (LinkStatMap::iterator i = links.begin(); i != links.end(); ++i) {
-			i->second.Unfreeze();
-		}
-	}
-
-	std::list<Vehicle *>::iterator v_it = st->loading_vehicles.begin();
-	while (v_it != st->loading_vehicles.end()) {
-		const Vehicle *front = *v_it;
-		OrderList *orders = front->orders.list;
-		if (orders != NULL) {
-			StationID next_station_id = orders->GetNextStoppingStation(front->cur_auto_order_index, st->index);
-			if (next_station_id != INVALID_STATION && next_station_id != st->index) {
-				IncreaseStats(st, front, next_station_id, true);
-			}
-		}
-		++v_it;
-	}
-}
-
-/**
- * Decrease the frozen values of all link stats associated with vehicles in the
- * given consist (ie the consist is leaving the station).
- * @param st Station to decrease the frozen values on.
- * @param front First vehicle in the consist.
- * @param next_station_id Station the vehicle is leaving for.
- */
-void DecreaseFrozen(Station *st, const Vehicle *front, StationID next_station_id)
-{
-	assert(st->index != next_station_id);
-	assert(next_station_id != INVALID_STATION);
-	for (const Vehicle *v = front; v != NULL; v = v->Next()) {
-		if (v->cargo_cap <= 0) continue;
-
-		LinkStatMap &link_stats = st->goods[v->cargo_type].link_stats;
-		LinkStatMap::iterator lstat_it = link_stats.find(next_station_id);
-		if (lstat_it == link_stats.end()) {
-			DEBUG(misc, 1, "frozen not in linkstat list.");
-			RecalcFrozen(st);
-			return;
-		}
-
-		LinkStat &link_stat = lstat_it->second;
-		if (link_stat.Frozen() < v->cargo_cap) {
-			DEBUG(misc, 1, "frozen is smaller than cargo cap.");
-			RecalcFrozen(st);
-			return;
-		}
-		link_stat.Unfreeze(v->cargo_cap);
-		assert(!link_stat.HasCapacity());
-	}
-}
-
-/**
  * Either freeze or increase capacity for all link stats associated with vehicles
  * in the given consist.
  * @param st Station to get the link stats from.
@@ -3279,7 +3206,7 @@ void DecreaseFrozen(Station *st, const Vehicle *front, StationID next_station_id
  * @param next_station_id Station the consist will be travelling to next.
  * @param freeze If true, freeze capacity, otherwise increase capacity.
  */
-void IncreaseStats(Station *st, const Vehicle *front, StationID next_station_id, bool freeze)
+void IncreaseStats(Station *st, const Vehicle *front, StationID next_station_id)
 {
 	Station *next = Station::GetIfValid(next_station_id);
 	assert(st->index != next_station_id && next != NULL);
@@ -3291,15 +3218,11 @@ void IncreaseStats(Station *st, const Vehicle *front, StationID next_station_id,
 			LinkStatMap::iterator i = stats.find(next_station_id);
 			if (i == stats.end()) {
 				stats.insert(std::make_pair(next_station_id, LinkStat(average_length,
-						v->cargo_cap, freeze ? v->cargo_cap : 0, freeze ? 0 : v->cargo.Count())));
+						v->cargo_cap, v->cargo.Count())));
 			} else {
 				LinkStat &link_stat = i->second;
-				if (freeze) {
-					link_stat.Freeze(v->cargo_cap);
-				} else {
-					link_stat.Increase(v->cargo_cap, v->cargo.Count());
-				}
-				assert(!link_stat.HasCapacity());
+				link_stat.Increase(v->cargo_cap, v->cargo.Count());
+				assert(link_stat.IsValid());
 			}
 		}
 	}
