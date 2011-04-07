@@ -116,12 +116,10 @@ public:
 
 	/**
 	 * Reset the timeout and make sure there is at least a minimum capacity.
-         * @param min_capacity minimum capacity for the link.
          */
-	FORCEINLINE void Refresh(uint min_capacity)
+	FORCEINLINE void Refresh()
 	{
 		this->timeout = this->length;
-		this->capacity = max(this->capacity, min_capacity);
 	}
 
 	/**
