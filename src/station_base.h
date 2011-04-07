@@ -44,9 +44,9 @@ private:
 	uint capacity;
 
 	/**
-	 * Capacity of currently loading vehicles.
+	 * Time until the link is removed. Decreases exponentially.
 	 */
-	uint frozen;
+	uint timeout;
 
 	/**
 	 * Usage of the link.
@@ -58,21 +58,21 @@ public:
 	/**
 	 * Minimum length of moving averages for capacity and usage.
 	 */
-	static const uint MIN_AVERAGE_LENGTH = 96;
+	static const uint MIN_AVERAGE_LENGTH = 32;
 
 	friend const SaveLoad *GetLinkStatDesc();
 
-	FORCEINLINE LinkStat(uint distance = 1, uint capacity = 0, uint frozen = 0, uint usage = 0) :
-		MovingAverage<uint>(distance), capacity(capacity), frozen(frozen), usage(usage) {}
+	FORCEINLINE LinkStat(uint distance = 1, uint capacity = 1, uint usage = 0) :
+		MovingAverage<uint>(distance), capacity(capacity), timeout(distance), usage(usage) {}
 
 	/**
 	 * Reset everything to 0.
 	 */
 	FORCEINLINE void Clear()
 	{
-		this->capacity = 0;
+		this->capacity = 1;
 		this->usage = 0;
-		this->frozen = 0;
+		this->timeout = this->length;
 	}
 
 	/**
@@ -81,7 +81,8 @@ public:
 	FORCEINLINE void Decrease()
 	{
 		this->MovingAverage<uint>::Decrease(this->usage);
-		this->capacity = max(this->MovingAverage<uint>::Decrease(this->capacity), this->frozen);
+		this->timeout = this->timeout * MIN_AVERAGE_LENGTH / (MIN_AVERAGE_LENGTH + 1);
+		this->capacity = max(this->MovingAverage<uint>::Decrease(this->capacity), (uint)1);
 	}
 
 	/**
@@ -103,61 +104,32 @@ public:
 	}
 
 	/**
-	 * Get the amount of frozen capacity.
-	 * @return Frozen capacity.
-	 */
-	FORCEINLINE uint Frozen() const
-	{
-		return this->frozen;
-	}
-
-	/**
 	 * Add some capacity and usage.
 	 * @param capacity Additional capacity.
 	 * @param usage Additional usage.
 	 */
 	FORCEINLINE void Increase(uint capacity, uint usage)
 	{
+		this->timeout = this->length;
 		this->capacity += capacity;
 		this->usage += usage;
 	}
 
 	/**
-	 * Freeze some of the capacity and prevent it from being decreased by the
-	 * moving average.
-	 * @param capacity Amount of capacity to be frozen.
-	 */
-	FORCEINLINE void Freeze(uint capacity)
+	 * Reset the timeout and make sure there is at least a minimum capacity.
+         */
+	FORCEINLINE void Refresh()
 	{
-		this->frozen += capacity;
-		this->capacity = max(this->frozen, this->capacity);
+		this->timeout = this->length;
 	}
 
 	/**
-	 * Thaw some of the frozen capacity and make it available for Decrease().
-	 * @oaram capacity Capacity to be thawed.
+	 * Check if the timeout has hit.
+	 * @return If timeout is > 0.
 	 */
-	FORCEINLINE void Unfreeze(uint capacity)
+	FORCEINLINE bool IsValid() const
 	{
-		this->frozen -= capacity;
-	}
-
-	/**
-	 * Thaw all frozen capacity.
-	 */
-	FORCEINLINE void Unfreeze()
-	{
-		this->frozen = 0;
-	}
-
-	/**
-	 * Check if the capacity is 0. This is necessary as Capacity() might return
-	 * 0 even if there is a miniscule amount of capacity left.
-	 * @return If capacity is 0.
-	 */
-	FORCEINLINE bool HasCapacity() const
-	{
-		return this->capacity == 0;
+		return this->timeout > 0;
 	}
 };
 
