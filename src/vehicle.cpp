@@ -1862,20 +1862,8 @@ void Vehicle::BeginLoading()
 	Station *curr_station = Station::Get(this->last_station_visited);
 	curr_station->loading_vehicles.push_back(this);
 
-	StationID next_station_id = INVALID_STATION;
-	OrderList *orders = this->orders.list;
-	if (orders != NULL) {
-		next_station_id = orders->GetNextStoppingStation(this->cur_auto_order_index, this->last_station_visited);
-	}
-
 	if (this->last_loading_station != INVALID_STATION && this->last_loading_station != this->last_station_visited) {
-		IncreaseStats(Station::Get(this->last_loading_station), this, this->last_station_visited, false);
-	}
-
-	if (this->CanLeaveWithCargo() && next_station_id != INVALID_STATION) {
-		assert(next_station_id != this->last_station_visited);
-		/* freeze stats for the next link */
-		IncreaseStats(curr_station, this, next_station_id, true);
+		IncreaseStats(Station::Get(this->last_loading_station), this, this->last_station_visited);
 	}
 
 	PrepareUnload(this);
@@ -1888,19 +1876,6 @@ void Vehicle::BeginLoading()
 	Station::Get(this->last_station_visited)->MarkTilesDirty(true);
 	this->cur_speed = 0;
 	this->MarkDirty();
-}
-
-/**
- * A vehicle can leave the current station with cargo if:
- * 1. it can load cargo here OR
- * 2a. it could leave the last station with cargo AND
- * 2b. it doesn't have to unload all cargo here.
- */
-bool Vehicle::CanLeaveWithCargo()
-{
-	return (this->current_order.GetLoadType() & OLFB_NO_LOAD) == 0 ||
-			((this->current_order.GetUnloadType() & (OUFB_UNLOAD | OUFB_TRANSFER)) == 0 &&
-			this->last_loading_station != INVALID_STATION);
 }
 
 /**
@@ -1920,25 +1895,17 @@ void Vehicle::LeaveStation()
 	Station *st = Station::Get(this->last_station_visited);
 	st->loading_vehicles.remove(this);
 
-	OrderList *orders = this->orders.list;
-	if (orders != NULL) {
-		StationID next_station_id = orders->GetNextStoppingStation(this->cur_auto_order_index, this->last_station_visited);
-		if (next_station_id != INVALID_STATION && next_station_id != this->last_station_visited) {
-			DecreaseFrozen(st, this, next_station_id);
+	if ((this->current_order.GetLoadType() & OLFB_NO_LOAD) == 0 ||
+			(this->current_order.GetUnloadType() & OUFB_NO_UNLOAD) == 0) {
+		if (this->current_order.CanLeaveWithCargo(this->last_loading_station != INVALID_STATION)) {
+			/* if the vehicle could load here or could stop with cargo loaded set the last loading station */
+			this->last_loading_station = this->last_station_visited;
+		} else {
+			/* if the vehicle couldn't load and had to unload or transfer everything
+			 * set the last loading station to invalid as it will leave empty.
+			 */
+			this->last_loading_station = INVALID_STATION;
 		}
-	} else {
-		DEBUG(misc, 1, "orders are NULL");
-		RecalcFrozen(st);
-	}
-
-	if (this->CanLeaveWithCargo()) {
-		/* if the vehicle could load here or could stop with cargo loaded set the last loading station */
-		this->last_loading_station = this->last_station_visited;
-	} else {
-		/* if the vehicle couldn't load and had to unload or transfer everything
-		 * set the last loading station to invalid as it will leave empty.
-		 */
-		this->last_loading_station = INVALID_STATION;
 	}
 
 	HideFillingPercent(&this->fill_percent_te_id);
