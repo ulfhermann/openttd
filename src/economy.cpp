@@ -1128,6 +1128,12 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 	StationID last_visited = v->last_station_visited;
 	Station *st = Station::Get(last_visited);
 
+	StationIDVector next_stations;
+	OrderList *orders = v->orders.list;
+	if (orders != NULL) {
+		orders->GetNextStoppingStation(v->cur_auto_order_index, last_visited, &next_stations);
+	}
+
 	if (v->type == VEH_TRAIN && (!IsTileType(v->tile, MP_STATION) || GetStationIndex(v->tile) != st->index)) {
 		/* The train reversed in the station. Take the "easy" way
 		 * out and let the train just leave as it always did. */
@@ -1152,6 +1158,8 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 
 	CargoPayment *payment = v->cargo_payment;
 
+	SmallMap<CargoID, uint, 1> capacities;
+	
 	for (; v != NULL; v = v->Next()) {
 		if (v->cargo_cap == 0) continue;
 
@@ -1228,6 +1236,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 
 		/* Do not pick up goods when we have no-load set or loading is stopped. */
 		if (u->current_order.GetLoadType() & OLFB_NO_LOAD || HasBit(u->vehicle_flags, VF_STOP_LOADING)) continue;
+		capacities[v->cargo_type] += v->cargo_cap;
 
 		/* update stats */
 		int t;
@@ -1318,6 +1327,14 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 		}
 	}
 
+
+	for (const SmallPair<CargoID, uint> *i = capacities.Begin(); i != capacities.End(); ++i) {
+		for (const StationID *next = next_stations.Begin(); next != next_stations.End(); ++next) {
+			/* Refresh the link and give it a minimum capacity. */
+			IncreaseStats(st, i->first, *next, i->second / next_stations.Length(), UINT_MAX);
+		}
+	}
+	
 	/* Only set completely_emptied, if we just unloaded all remaining cargo */
 	completely_emptied &= anything_unloaded;
 
