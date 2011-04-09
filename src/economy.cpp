@@ -1236,7 +1236,15 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 
 		/* Do not pick up goods when we have no-load set or loading is stopped. */
 		if (u->current_order.GetLoadType() & OLFB_NO_LOAD || HasBit(u->vehicle_flags, VF_STOP_LOADING)) continue;
-		capacities[v->cargo_type] += v->cargo_cap;
+		SmallPair<CargoID, uint> *i = capacities.Find(v->cargo_type);
+		if (i == capacities.End()) {
+			/* Braindead smallmap not providing a good method for that. */
+			i = capacities.Append();
+			i->first = v->cargo_type;
+			i->second = v->cargo_cap;
+		} else {
+			i->second += v->cargo_cap;
+		}
 
 		/* update stats */
 		int t;
