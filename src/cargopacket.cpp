@@ -508,15 +508,15 @@ UnloadType StationCargoList::WillUnloadOld(byte flags, StationID source)
  * will do, using the Cargodist algorithm.
  * @param flags  Unload flags telling if the cargo is accepted and what order
  *               flags there are.
- * @param next   Stations the vehicle the cargo is coming from might
- *               visit next.
+ * @param next   Station the vehicle the cargo is coming from will
+ *               visit next (or INVALID_STATION if unknown).
  * @param via    Station the cargo wants to go to next. If that is this
  *               station the cargo wants to be delivered.
  * @param source ID of the packets source station.
  * @return       Unload type (deliver, transfer, keep) telling what to do with
  *               the packet.
  */
-UnloadType StationCargoList::WillUnloadCargoDist(byte flags, const StationIDVector &next, StationID via, StationID source)
+UnloadType StationCargoList::WillUnloadCargoDist(byte flags, StationID next, StationID via, StationID source)
 {
 	if (via == this->station->index) {
 		/* this is the final destination, deliver ... */
@@ -547,7 +547,7 @@ UnloadType StationCargoList::WillUnloadCargoDist(byte flags, const StationIDVect
 		} else if (flags & UL_TRANSFER) {
 			/* transfer forced */
 			return UL_TRANSFER;
-		} else if (next.Contains(via)) {
+		} else if (next == via && next != INVALID_STATION) {
 			/* vehicle goes to the packet's next hop or has nondeterministic order: keep the packet*/
 			return UL_KEEP;
 		} else {
@@ -586,12 +586,12 @@ void VehicleCargoList::SwapReserved()
  * @param source       Vehicle cargo list to take the cargo from.
  * @param max_unload   Maximum amount of cargo entities to move.
  * @param flags        How to handle the moving (side effects).
- * @param next         Next unloading stations in the vehicle's order list.
+ * @param next         Next unloading station in the vehicle's order list.
  * @param has_stopped  Vehicle has stopped at this station before, so don't update the flow stats for kept cargo.
  * @param payment      Payment object to be updated when delivering/transferring.
  * @return Number of cargo entities actually moved.
  */
-uint StationCargoList::TakeFrom(VehicleCargoList *source, uint max_unload, OrderUnloadFlags order_flags, const StationIDVector &next, bool has_stopped, CargoPayment *payment)
+uint StationCargoList::TakeFrom(VehicleCargoList *source, uint max_unload, OrderUnloadFlags order_flags, StationID next, bool has_stopped, CargoPayment *payment)
 {
 	uint remaining_unload = max_unload;
 	uint unloaded;
@@ -604,7 +604,7 @@ uint StationCargoList::TakeFrom(VehicleCargoList *source, uint max_unload, Order
 		FlowStatSet &flows = dest->flows[cargo_source];
 		FlowStatSet::iterator begin = flows.begin();
 		StationID via = (begin != flows.end() ? begin->Via() : INVALID_STATION);
-		if (via != INVALID_STATION && next.Length() > 0) {
+		if (via != INVALID_STATION) {
 			/* use cargodist unloading*/
 			action = this->WillUnloadCargoDist(flags, next, via, cargo_source);
 		} else {
@@ -637,11 +637,11 @@ uint StationCargoList::TakeFrom(VehicleCargoList *source, uint max_unload, Order
 				break;
 			case UL_KEEP:
 				unloaded = source->KeepPacket(c);
-				if (via != INVALID_STATION && next.Length() > 0 && !has_stopped) {
-					if (next.Contains(via)) {
+				if (via != INVALID_STATION && next != INVALID_STATION && !has_stopped) {
+					if (via == next) {
 						dest->UpdateFlowStats(flows, begin, unloaded);
-					} else if (next.Length() == 1) {
-						dest->UpdateFlowStats(flows, unloaded, next[0]);
+					} else {
+						dest->UpdateFlowStats(flows, unloaded, next);
 					}
 				}
 				break;
@@ -795,15 +795,11 @@ uint StationCargoList::MovePackets(VehicleCargoList *dest, uint cap, Iterator be
 uint StationCargoList::MoveTo(VehicleCargoList *dest, uint cap, StationID next, bool reserve)
 {
 	uint orig_cap = cap;
-	if (next != INVALID_STATION) {
-		std::pair<Iterator, Iterator> bounds(this->packets.equal_range(next));
+	std::pair<Iterator, Iterator> bounds(this->packets.equal_range(next));
+	cap -= this->MovePackets(dest, cap, bounds.first, bounds.second, reserve);
+	if (next != INVALID_STATION && cap > 0) {
+		bounds = this->packets.equal_range(INVALID_STATION);
 		cap -= this->MovePackets(dest, cap, bounds.first, bounds.second, reserve);
-		if (cap > 0) {
-			bounds = this->packets.equal_range(INVALID_STATION);
-			cap -= this->MovePackets(dest, cap, bounds.first, bounds.second, reserve);
-		}
-	} else {
-		cap -= this->MovePackets(dest, cap, this->packets.begin(), this->packets.end(), reserve);
 	}
 	return orig_cap - cap;
 }
