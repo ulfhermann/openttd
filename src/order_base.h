@@ -185,6 +185,8 @@ public:
 void InsertOrder(Vehicle *v, Order *new_o, VehicleOrderID sel_ord);
 void DeleteOrder(Vehicle *v, VehicleOrderID sel_ord);
 
+typedef SmallVector<StationID, 1> StationIDVector;
+
 /**
  * Shared order list linking together the linked list of orders and the list
  *  of vehicles sharing this order list.
@@ -202,7 +204,7 @@ private:
 	 */
 	inline const Order *GetNext(const Order *curr) const { return (curr->next == NULL) ? this->GetFirstOrder() : curr->next; }
 
-	StationID GetNextStoppingStation(const Order *next, StationID curr_station, std::list<StationID> *stations, uint hops) const;
+	StationID GetNextStoppingStation(const Order *next, StationID curr_station, StationIDVector *stations, uint hops) const;
 
 	Order *first;                     ///< First order of the order list.
 	VehicleOrderID num_orders;        ///< NOSAVE: How many orders there are in the list.
@@ -244,7 +246,7 @@ public:
 	 */
 	inline Order *GetLastOrder() const { return this->GetOrderAt(this->num_orders - 1); }
 
-	StationID GetNextStoppingStation(VehicleOrderID curr_order, StationID curr_station, std::list<StationID> *stations = NULL) const;
+	StationID GetNextStoppingStation(VehicleOrderID curr_order, StationID curr_station, StationIDVector *stations = NULL) const;
 
 	/**
 	 * Get number of orders in the order list.
