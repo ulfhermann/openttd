@@ -349,7 +349,7 @@ Order *OrderList::GetOrderAt(int index) const
  * @param hops Number of orders we have already checked.
  * @return Next stoppping station or INVALID_STATION.
  */
-StationID OrderList::GetNextStoppingStation(const Order *next, StationID curr_station, std::list<StationID> *stations, uint hops) const
+StationID OrderList::GetNextStoppingStation(const Order *next, StationID curr_station, StationIDVector *stations, uint hops) const
 {
 	if (next == NULL || hops > this->GetNumOrders()) {
 		return INVALID_STATION;
@@ -370,9 +370,7 @@ StationID OrderList::GetNextStoppingStation(const Order *next, StationID curr_st
 	}
 
 	StationID st = next->GetDestination();
-	if (stations != NULL && std::find(stations->begin(), stations->end(), st) == stations->end()) {
-		stations->push_back(st);
-	}
+	if (stations != NULL) stations->Include(st);
 	return st;
 }
 
@@ -383,7 +381,7 @@ StationID OrderList::GetNextStoppingStation(const Order *next, StationID curr_st
  * @param stations list to record all possible next stations in when nondeterministic.
  * @return ID of the next station the vehicle will stop at or INVALID_STATION.
  */
-StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_order, StationID curr_station, std::list<StationID> *stations) const
+StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_order, StationID curr_station, StationIDVector *stations) const
 {
 	const Order *curr = this->GetOrderAt(curr_order);
 	if (curr == NULL) {
