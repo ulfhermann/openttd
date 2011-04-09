@@ -127,8 +127,9 @@ public:
 	/**
 	 * Reset the timeout and make sure there is at least a minimum capacity.
          */
-	FORCEINLINE void Refresh()
+	FORCEINLINE void Refresh(uint min_capacity)
 	{
+		this->capacity = max(this->capacity, min_capacity);
 		this->timeout = this->length;
 	}
 
