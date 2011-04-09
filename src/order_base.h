@@ -21,8 +21,6 @@
 #include "vehicle_type.h"
 #include "date_type.h"
 
-#include <list>
-
 typedef Pool<Order, OrderID, 256, 64000> OrderPool;
 typedef Pool<OrderList, OrderListID, 128, 64000> OrderListPool;
 extern OrderPool _order_pool;
@@ -184,8 +182,6 @@ public:
 
 void InsertOrder(Vehicle *v, Order *new_o, VehicleOrderID sel_ord);
 void DeleteOrder(Vehicle *v, VehicleOrderID sel_ord);
-
-typedef SmallVector<StationID, 1> StationIDVector;
 
 /**
  * Shared order list linking together the linked list of orders and the list
