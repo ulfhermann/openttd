@@ -22,6 +22,7 @@
 #include "vehicle_func.h"
 #include "depot_base.h"
 #include "core/pool_func.hpp"
+#include "core/random_func.hpp"
 #include "aircraft.h"
 #include "roadveh.h"
 #include "station_base.h"
@@ -342,62 +343,63 @@ Order *OrderList::GetOrderAt(int index) const
 
 /**
  * Recursively determine the next deterministic station to stop at.
+ * @param v The vehicle we're looking at.
  * @param next First order to check.
- * @param curr_station Station the vehicle is just visiting or INVALID_STATION.
  * @param hops Number of orders we have already checked.
  * @return Next stoppping station or INVALID_STATION.
  */
-StationID OrderList::GetNextStoppingStation(const Order *next, StationID curr_station, StationIDVector *stations, uint hops) const
+StationID OrderList::GetNextStoppingStation(const Vehicle *v, const Order *next, uint hops) const
 {
-	if (next == NULL || hops > this->GetNumOrders()) {
+	if (hops > this->GetNumOrders()) {
 		return INVALID_STATION;
 	}
 
+	if (next == NULL) {
+		next = this->GetOrderAt(v->cur_auto_order_index);
+		if (next == NULL) {
+			next = this->GetFirstOrder();
+			if (next == NULL) return INVALID_STATION;
+		} else {
+			next = this->GetNext(next);
+		}
+	}
+
 	if (next->IsType(OT_CONDITIONAL)) {
-		StationID skip_to = this->GetNextStoppingStation(
-				this->GetOrderAt(next->GetConditionSkipToOrder()),
-				curr_station, stations, hops + 1);
-		StationID advance = this->GetNextStoppingStation(
-				this->GetNext(next), curr_station, stations, hops + 1);
-		return skip_to == advance ? skip_to : INVALID_STATION;
+		if ((v->current_order.IsType(OT_GOTO_STATION) || v->current_order.IsType(OT_AUTOMATIC)) &&
+				next->GetConditionVariable() == OCV_LOAD_PERCENTAGE) {
+			/* If the vehicle is loading and the condition is based
+			 * on load percentage we can't tell what it will do.
+			 * So we choose randomly.
+			 */
+			if (RandomRange(2) == 0) {
+				return this->GetNextStoppingStation(v,
+					this->GetOrderAt(next->GetConditionSkipToOrder()),
+					hops + 1);
+			} else {
+				return this->GetNextStoppingStation(v,
+					this->GetNext(next), hops + 1);
+			}
+		} else {
+			/* Otherwise we're optimistic and expect that the
+			 * condition value won't change until it's evaluated.
+			 */
+			StationID skip_to = ProcessConditionalOrder(next, v);
+			if (skip_to != INVALID_VEH_ORDER_ID) {
+				return this->GetNextStoppingStation(v,
+						this->GetOrderAt(skip_to), hops + 1);
+			} else {
+				return this->GetNextStoppingStation(v,
+						this->GetNext(next), hops + 1);
+			}
+		}
 	}
 
-	if (!next->CanLoadOrUnload() ||	(next->GetDestination() == curr_station &&
+	if (!next->CanLoadOrUnload() ||	(next->GetDestination() == v->last_station_visited &&
 			(next->GetUnloadType() & (OUFB_TRANSFER | OUFB_UNLOAD)) == 0)) {
-		return this->GetNextStoppingStation(this->GetNext(next), curr_station, stations, hops + 1);
+		return this->GetNextStoppingStation(v, this->GetNext(next), hops + 1);
 	}
 
-	StationID st = next->GetDestination();
-	if (stations != NULL) stations->Include(st);
-	return st;
-}
-
-/**
- * Get the next station the vehicle will stop at, if that is deterministic.
- * @param curr_order ID of the current order.
- * @param curr_station Station the vehicle is just visiting or INVALID_STATION.
- * @param stations list to record all possible next stations in when nondeterministic.
- * @return ID of the next station the vehicle will stop at or INVALID_STATION.
- */
-StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_order, StationID curr_station, StationIDVector *stations) const
-{
-	const Order *curr = this->GetOrderAt(curr_order);
-	if (curr == NULL) {
-		curr = this->GetFirstOrder();
-		if (curr == NULL) return INVALID_STATION;
-	}
-
-	/* If we're not at a station or the current order doesn't yield the station
-	 * we're at, we have to check the current order; otherwise we have to check
-	 * the next one.
-	 */
-	if (curr_station == INVALID_STATION ||
-			!(curr->IsType(OT_GOTO_STATION) || curr->IsType(OT_AUTOMATIC)) ||
-			curr_station != curr->GetDestination()) {
-		return this->GetNextStoppingStation(curr, curr_station, stations, 0);
-	} else {
-		return this->GetNextStoppingStation(this->GetNext(curr), curr_station, stations, 1);
-	}
+	return next->GetDestination();
 }
 
 /**
