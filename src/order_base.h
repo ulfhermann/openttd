@@ -21,8 +21,6 @@
 #include "vehicle_type.h"
 #include "date_type.h"
 
-#include <list>
-
 typedef Pool<Order, OrderID, 256, 64000> OrderPool;
 typedef Pool<OrderList, OrderListID, 128, 64000> OrderListPool;
 extern OrderPool _order_pool;
@@ -202,7 +200,7 @@ private:
 	 */
 	inline const Order *GetNext(const Order *curr) const { return (curr->next == NULL) ? this->GetFirstOrder() : curr->next; }
 
-	StationID GetNextStoppingStation(const Order *next, StationID curr_station, std::list<StationID> *stations, uint hops) const;
+	StationID GetNextStoppingStation(const Order *next, StationID curr_station, StationIDVector *stations, uint hops) const;
 
 	Order *first;                     ///< First order of the order list.
 	VehicleOrderID num_orders;        ///< NOSAVE: How many orders there are in the list.
@@ -244,7 +242,7 @@ public:
 	 */
 	inline Order *GetLastOrder() const { return this->GetOrderAt(this->num_orders - 1); }
 
-	StationID GetNextStoppingStation(VehicleOrderID curr_order, StationID curr_station, std::list<StationID> *stations = NULL) const;
+	StationID GetNextStoppingStation(VehicleOrderID curr_order, StationID curr_station, StationIDVector *stations = NULL) const;
 
 	/**
 	 * Get number of orders in the order list.

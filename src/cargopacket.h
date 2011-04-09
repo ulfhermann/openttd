@@ -13,6 +13,7 @@
 #define CARGOPACKET_H
 
 #include "core/pool_type.hpp"
+#include "order_type.h"
 #include "economy_type.h"
 #include "station_type.h"
 #include "order_type.h"
@@ -403,7 +404,7 @@ public:
 				cp1->source_id       == cp2->source_id;
 	}
 
-	uint TakeFrom(VehicleCargoList *source, uint max_unload, OrderUnloadFlags flags, std::list<StationID> &next, bool has_stopped, CargoPayment *payment);
+	uint TakeFrom(VehicleCargoList *source, uint max_unload, OrderUnloadFlags flags, const StationIDVector &next, bool has_stopped, CargoPayment *payment);
 
 	uint MoveTo(VehicleCargoList *dest, uint cap, StationID next_station, bool reserve = false);
 
@@ -433,7 +434,7 @@ protected:
 	byte GetUnloadFlags(OrderUnloadFlags order_flags);
 
 	UnloadType WillUnloadOld(byte flags, StationID source);
-	UnloadType WillUnloadCargoDist(byte flags, std::list<StationID> &next, StationID via, StationID source);
+	UnloadType WillUnloadCargoDist(byte flags, const StationIDVector &next, StationID via, StationID source);
 
 	uint MovePackets(VehicleCargoList *dest, uint cap, Iterator begin, Iterator end, bool reserve);
 };
