@@ -1860,8 +1860,7 @@ void Vehicle::BeginLoading()
 		this->current_order.MakeLoading(false);
 	}
 
-	Station *curr_station = Station::Get(this->last_station_visited);
-	curr_station->loading_vehicles.push_back(this);
+	Station::Get(this->last_station_visited)->loading_vehicles.push_back(this);
 
 	if (this->last_loading_station != INVALID_STATION &&
 			this->last_loading_station != this->last_station_visited &&
