@@ -30,8 +30,6 @@
 
 #include "table/strings.h"
 
-#include <algorithm>
-
 /* DestinationID must be at least as large as every these below, because it can
  * be any of them
  */
