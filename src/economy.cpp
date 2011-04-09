@@ -1129,7 +1129,7 @@ void PrepareUnload(Station *curr_station, Vehicle *front_v)
  * @param next_stations Station the vehicle might stop at next.
  * @return Bit field for the cargo classes with bits for the reserved cargos set (if anything was reserved).
  */
-uint32 ReserveConsist(Station *st, Vehicle *u, std::list<StationID> &next_stations)
+uint32 ReserveConsist(Station *st, Vehicle *u, const StationIDVector &next_stations)
 {
 	uint32 ret = 0;
 	if (_settings_game.order.improved_load && (u->current_order.GetLoadType() & OLFB_FULL_LOAD)) {
@@ -1158,9 +1158,8 @@ uint32 ReserveConsist(Station *st, Vehicle *u, std::list<StationID> &next_statio
 
 			int cap = v->cargo_cap - v->cargo.Count();
 			if (cap > 0) {
-				for (std::list<StationID>::iterator i(next_stations.begin());
-						i != next_stations.end(); ++i) {
-					int reserved = st->goods[v->cargo_type].cargo.MoveTo(&v->cargo, cap, *i, true);
+				for (const StationID *next = next_stations.Begin(); next != next_stations.End(); ++next) {
+					int reserved = st->goods[v->cargo_type].cargo.MoveTo(&v->cargo, cap, *next, true);
 					if (reserved > 0) {
 						cap -= reserved;
 						SetBit(ret, v->cargo_type);
@@ -1170,25 +1169,6 @@ uint32 ReserveConsist(Station *st, Vehicle *u, std::list<StationID> &next_statio
 		}
 	}
 	return ret;
-}
-
-/**
- * Refresh all links between the given station and a number of next stations
- * for some cargos.
- * @param st Station to refresh links at.
- * @param next_stations Possible next hops.
- * @param cargos Cargos to refresh links for.
- */
-static void RefreshLinks(Station *st, std::list<StationID> &next_stations, uint32 cargos)
-{
-	if (cargos == 0) return;
-	for (std::list<StationID>::iterator i(next_stations.begin()); i != next_stations.end(); ++i) {
-		for (uint c = 0; c < NUM_CARGO; ++c) {
-			if (HasBit(cargos, c)) {
-				st->goods[c].link_stats[*i].Refresh();
-			}
-		}
-	}
 }
 
 /**
@@ -1204,7 +1184,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 	StationID last_visited = v->last_station_visited;
 	Station *st = Station::Get(last_visited);
 
-	std::list<StationID> next_stations;
+	StationIDVector next_stations;
 	OrderList *orders = v->orders.list;
 	if (orders != NULL) {
 		orders->GetNextStoppingStation(v->cur_auto_order_index, last_visited, &next_stations);
@@ -1213,7 +1193,6 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 	/* We have not waited enough time till the next round of loading/unloading */
 	if (v->load_unload_ticks != 0) {
 		uint32 new_reserved = ReserveConsist(st, v, next_stations);
-		RefreshLinks(st, next_stations, new_reserved);
 		return cargos_reserved | new_reserved;
 	}
 
@@ -1243,6 +1222,8 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 
 	CargoPayment *payment = v->cargo_payment;
 
+	SmallMap<CargoID, uint, 1> capacities;
+	
 	for (; v != NULL; v = v->Next()) {
 		if (v->cargo_cap == 0) continue;
 
@@ -1302,6 +1283,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 
 		/* Do not pick up goods when we have no-load set or loading is stopped. */
 		if (u->current_order.GetLoadType() & OLFB_NO_LOAD || HasBit(u->vehicle_flags, VF_STOP_LOADING)) continue;
+		capacities[v->cargo_type] += v->cargo_cap;
 
 		/* update stats */
 		int t;
@@ -1339,9 +1321,9 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 				loaded += v->cargo.LoadReserved(cap_left);
 			}
 
-			for (std::list<StationID>::iterator i(next_stations.begin());
-					loaded < cap_left && i != next_stations.end(); ++i) {
-				loaded += ge->cargo.MoveTo(&v->cargo, cap_left - loaded, *i);
+			for (const StationID *next = next_stations.Begin();
+					loaded < cap_left && next != next_stations.End(); ++next) {
+				loaded += ge->cargo.MoveTo(&v->cargo, cap_left - loaded, *next);
 			}
 
 			/* Store whether the maximum possible load amount was loaded or not.*/
@@ -1386,8 +1368,13 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 		}
 	}
 
-	RefreshLinks(st, next_stations, cargo_full | cargo_not_full);
-
+	for (const SmallPair<CargoID, uint> *i = capacities.Begin(); i != capacities.End(); ++i) {
+		for (const StationID *next = next_stations.Begin(); next != next_stations.End(); ++next) {
+			/* Refresh the link and give it a minimum capacity. */
+			IncreaseStats(st, i->first, *next, i->second / next_stations.Length(), UINT_MAX);
+		}
+	}
+	
 	/* Only set completely_emptied, if we just unloaded all remaining cargo */
 	completely_emptied &= anything_unloaded;
 
