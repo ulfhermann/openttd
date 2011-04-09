@@ -342,6 +342,43 @@ Order *OrderList::GetOrderAt(int index) const
 }
 
 /**
+ * Choose between the two possible next stations so that the given consist can
+ * load most cargo.
+ * @param v Head of the consist.
+ * @param st1 First station to choose from.
+ * @param st2 Second station to choose from.
+ * @return Either st1 or st2, depending on the amounts of cargo waiting at the
+ *	vehicle's current station for each.
+ */
+StationID OrderList::GetBestLoadableNext(const Vehicle *v, StationID st1, StationID st2) const
+{
+	SmallMap<CargoID, uint> capacities;
+	v->GetConsistFreeCapacities(capacities);
+	uint loadable1 = 0;
+	uint loadable2 = 0;
+	const Station *cur_station = Station::Get(v->last_station_visited);
+	for (SmallPair<CargoID, uint> *i = capacities.Begin(); i != capacities.End(); ++i) {
+		const StationCargoPacketMap *loadable_packets = cur_station->goods[i->first].cargo.Packets();
+		uint loadable_cargo = 0;
+		std::pair<StationCargoPacketMap::const_iterator, StationCargoPacketMap::const_iterator> p =
+			loadable_packets->equal_range(st1);
+		for (StationCargoPacketMap::const_iterator j = p.first; j != p.second; ++j) {
+			loadable_cargo = (*j)->Count();
+		}
+		loadable1 += min(i->second, loadable_cargo);
+
+		loadable_cargo = 0;
+		p = loadable_packets->equal_range(st2);
+		for (StationCargoPacketMap::const_iterator j = p.first; j != p.second; ++j) {
+			loadable_cargo = (*j)->Count();
+		}
+		loadable2 += min(i->second, loadable_cargo);
+	}
+	if (loadable1 == loadable2) return RandomRange(2) == 0 ? st1 : st2;
+	return loadable1 > loadable2 ? st1 : st2;
+}
+
+/**
  * Recursively determine the next deterministic station to stop at.
  * @param v The vehicle we're looking at.
  * @param next First order to check.
@@ -380,7 +417,7 @@ StationID OrderList::GetNextStoppingStation(const Vehicle *v, const Order *next,
 			if (advance == skip_to) {
 				return advance;
 			} else {
-				return RandomRange(2) == 0 ? skip_to : advance;
+				return this->GetBestLoadableNext(v, skip_to, advance);
 			}
 
 		} else {
