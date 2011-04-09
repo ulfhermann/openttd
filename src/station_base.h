@@ -74,7 +74,10 @@ public:
          * @param usage Initial usage of the link.
          */
 	FORCEINLINE LinkStat(uint distance, uint capacity = 1, uint usage = 0) :
-		MovingAverage<uint>(distance), capacity(capacity), timeout(distance), usage(usage) {}
+		MovingAverage<uint>(distance), capacity(capacity), timeout(distance), usage(usage)
+	{
+		assert(this->usage <= this->capacity);
+	}
 
 	/**
 	 * Reset everything to 0.
@@ -94,6 +97,7 @@ public:
 		this->MovingAverage<uint>::Decrease(this->usage);
 		this->timeout = this->timeout * MIN_AVERAGE_LENGTH / (MIN_AVERAGE_LENGTH + 1);
 		this->capacity = max(this->MovingAverage<uint>::Decrease(this->capacity), (uint)1);
+		assert(this->usage <= this->capacity);
 	}
 
 	/**
@@ -124,6 +128,7 @@ public:
 		this->timeout = this->length;
 		this->capacity += capacity;
 		this->usage += usage;
+		assert(this->usage <= this->capacity);
 	}
 
 	/**
