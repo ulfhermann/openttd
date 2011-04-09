@@ -60,7 +60,18 @@ public:
 
 	friend const SaveLoad *GetLinkStatDesc();
 
-	FORCEINLINE LinkStat(uint distance = 1, uint capacity = 1, uint usage = 0) :
+	/**
+	 * We don't allow creating a link stat without a timeout/length.
+         */
+	LinkStat() : MovingAverage<uint>(0) {NOT_REACHED();}
+
+	/**
+	 * Create a link stat with at least a distance.
+         * @param distance Length for the moving average and link timeout.
+         * @param capacity Initial capacity of the link.
+         * @param usage Initial usage of the link.
+         */
+	FORCEINLINE LinkStat(uint distance, uint capacity = 1, uint usage = 0) :
 		MovingAverage<uint>(distance), capacity(capacity), timeout(distance), usage(usage) {}
 
 	/**
