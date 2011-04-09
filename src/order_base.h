@@ -200,8 +200,6 @@ private:
 	 */
 	inline const Order *GetNext(const Order *curr) const { return (curr->next == NULL) ? this->GetFirstOrder() : curr->next; }
 
-	StationID GetNextStoppingStation(const Order *next, StationID curr_station, StationIDVector *stations, uint hops) const;
-
 	Order *first;                     ///< First order of the order list.
 	VehicleOrderID num_orders;        ///< NOSAVE: How many orders there are in the list.
 	VehicleOrderID num_manual_orders; ///< NOSAVE: How many manually added orders are there in the list.
@@ -242,8 +240,6 @@ public:
 	 */
 	inline Order *GetLastOrder() const { return this->GetOrderAt(this->num_orders - 1); }
 
-	StationID GetNextStoppingStation(VehicleOrderID curr_order, StationID curr_station, StationIDVector *stations = NULL) const;
-
 	/**
 	 * Get number of orders in the order list.
 	 * @return number of orders in the chain.
@@ -255,6 +251,8 @@ public:
 	 * @return number of manual orders in the chain.
 	 */
 	inline VehicleOrderID GetNumManualOrders() const { return this->num_manual_orders; }
+
+	StationID GetNextStoppingStation(const Vehicle *v, const Order *next = NULL, uint hops = 0) const;
 
 	void InsertOrderAt(Order *new_order, int index);
 	void DeleteOrderAt(int index);
