@@ -470,11 +470,12 @@ static void Load_STNN()
 			Station *st = Station::From(bst);
 			for (CargoID c = 0; c < NUM_CARGO; c++) {
 				SlObject(&st->goods[c], GetGoodsDesc());
-				LinkStat ls;
+				LinkStat ls(1);
 				for (uint16 i = 0; i < _num_links; ++i) {
 					SlObject(&ls, GetLinkStatDesc());
 					assert(ls.IsValid());
-					st->goods[c].link_stats[_station_id] = ls;
+					st->goods[c].link_stats.insert(
+						std::make_pair(_station_id, ls));
 				}
 			}
 		}
