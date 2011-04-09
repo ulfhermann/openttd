@@ -3197,31 +3197,44 @@ void Station::RunAverages()
 }
 
 /**
- * Either freeze or increase capacity for all link stats associated with vehicles
- * in the given consist.
+ * Increase capacity for a link stat given by station cargo and next hop.
+ * @param st Station to get the link stats from.
+ * @param cargo Cargo to increase stat for.
+ * @param next_station_id Station the consist will be travelling to next.
+ * @param capacity Capacity to add to link stat.
+ * @param usage Usage to add to link stat. If UINT_MAX refresh the link instead of increasing.
+ */
+void IncreaseStats(Station *st, CargoID cargo, StationID next_station_id, uint capacity, uint usage)
+{
+	LinkStatMap &stats = st->goods[cargo].link_stats;
+	LinkStatMap::iterator i = stats.find(next_station_id);
+	if (i == stats.end()) {
+		Station *next = Station::Get(next_station_id);
+		assert(st->index != next_station_id && next != NULL);
+		stats.insert(std::make_pair(next_station_id, LinkStat(
+				GetMovingAverageLength(st, next), capacity, usage)));
+	} else {
+		LinkStat &link_stat = i->second;
+		if (usage == UINT_MAX) {
+			link_stat.Refresh(capacity);
+		} else {
+			link_stat.Increase(capacity, usage);
+		}
+		assert(link_stat.IsValid());
+	}
+}
+
+/**
+ * Increase capacity for all link stats associated with vehicles in the given consist.
  * @param st Station to get the link stats from.
  * @param front First vehicle in the consist.
  * @param next_station_id Station the consist will be travelling to next.
- * @param freeze If true, freeze capacity, otherwise increase capacity.
  */
 void IncreaseStats(Station *st, const Vehicle *front, StationID next_station_id)
 {
-	Station *next = Station::GetIfValid(next_station_id);
-	assert(st->index != next_station_id && next != NULL);
-	uint average_length = GetMovingAverageLength(st, next);
-
 	for (const Vehicle *v = front; v != NULL; v = v->Next()) {
 		if (v->cargo_cap > 0) {
-			LinkStatMap &stats = st->goods[v->cargo_type].link_stats;
-			LinkStatMap::iterator i = stats.find(next_station_id);
-			if (i == stats.end()) {
-				stats.insert(std::make_pair(next_station_id, LinkStat(average_length,
-						v->cargo_cap, v->cargo.Count())));
-			} else {
-				LinkStat &link_stat = i->second;
-				link_stat.Increase(v->cargo_cap, v->cargo.Count());
-				assert(link_stat.IsValid());
-			}
+			IncreaseStats(st, v->cargo_type, next_station_id, v->cargo_cap, v->cargo.Count());
 		}
 	}
 }

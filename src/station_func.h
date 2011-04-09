@@ -49,6 +49,8 @@ void UpdateAirportsNoise();
 
 void IncreaseStats(Station *st, const Vehicle *v, StationID next_station_id);
 
+void IncreaseStats(Station *st, CargoID cargo, StationID next_station_id, uint capacity, uint usage);
+
 void DeleteStaleFlows(StationID at, CargoID c_id, StationID to);
 
 #endif /* STATION_FUNC_H */
