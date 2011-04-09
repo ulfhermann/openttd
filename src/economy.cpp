@@ -1344,10 +1344,11 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 		}
 	}
 
-
-	for (const SmallPair<CargoID, uint> *i = capacities.Begin(); i != capacities.End(); ++i) {
-		/* Refresh the link and give it a minimum capacity. */
-		IncreaseStats(st, i->first, next_station, i->second, UINT_MAX);
+	if (next_station != INVALID_STATION) {
+		for (const SmallPair<CargoID, uint> *i = capacities.Begin(); i != capacities.End(); ++i) {
+			/* Refresh the link and give it a minimum capacity. */
+			IncreaseStats(st, i->first, next_station, i->second, UINT_MAX);
+		}
 	}
 	
 	/* Only set completely_emptied, if we just unloaded all remaining cargo */
