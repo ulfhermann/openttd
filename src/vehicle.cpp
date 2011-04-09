@@ -1860,14 +1860,11 @@ void Vehicle::BeginLoading()
 		this->current_order.MakeLoading(false);
 	}
 
-	Station *curr_station = Station::Get(this->last_station_visited);
-	curr_station->loading_vehicles.push_back(this);
-
 	if (this->last_loading_station != INVALID_STATION && this->last_loading_station != this->last_station_visited) {
 		IncreaseStats(Station::Get(this->last_loading_station), this, this->last_station_visited);
 	}
 
-	PrepareUnload(curr_station, this);
+	PrepareUnload(this);
 
 	SetWindowDirty(GetWindowClassForVehicleType(this->type), this->owner);
 	SetWindowWidgetDirty(WC_VEHICLE_VIEW, this->index, VVW_WIDGET_START_STOP_VEH);

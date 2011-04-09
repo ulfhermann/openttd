@@ -1081,8 +1081,11 @@ Money CargoPayment::PayTransfer(const CargoPacket *cp, uint count)
  * @param curr_station the station where the consist is at the moment
  * @param front_v the vehicle to be unloaded
  */
-void PrepareUnload(Station *curr_station, Vehicle *front_v)
+void PrepareUnload(Vehicle *front_v)
 {
+	Station *curr_station = Station::Get(front_v->last_station_visited);
+	curr_station->loading_vehicles.push_back(front_v);
+
 	/* At this moment loading cannot be finished */
 	ClrBit(front_v->vehicle_flags, VF_LOADING_FINISHED);
 
@@ -1093,8 +1096,7 @@ void PrepareUnload(Station *curr_station, Vehicle *front_v)
 		/* vehicle will keep all its cargo and LoadUnloadVehicle will never call MoveToStation,
 		 * so we have to update the flow stats here.
 		 */
-		StationID next_station_id = front_v->orders.list->GetNextStoppingStation(
-				front_v->cur_auto_order_index, curr_station->index);
+		StationID next_station_id = front_v->GetNextStoppingStation();
 		if (next_station_id == INVALID_STATION) {
 			return;
 		} else {
@@ -1126,10 +1128,10 @@ void PrepareUnload(Station *curr_station, Vehicle *front_v)
  * Reserves cargo if the full load order and improved_load is set.
  * @param st The station where the consist is loading at the moment.
  * @param u The front of the loading vehicle consist.
- * @param next_stations Station the vehicle might stop at next.
+ * @param next_station Station the vehicle will stop at next.
  * @return Bit field for the cargo classes with bits for the reserved cargos set (if anything was reserved).
  */
-uint32 ReserveConsist(Station *st, Vehicle *u, const StationIDVector &next_stations)
+uint32 ReserveConsist(Station *st, Vehicle *u, StationID next_station)
 {
 	uint32 ret = 0;
 	if (_settings_game.order.improved_load && (u->current_order.GetLoadType() & OLFB_FULL_LOAD)) {
@@ -1158,12 +1160,10 @@ uint32 ReserveConsist(Station *st, Vehicle *u, const StationIDVector &next_stati
 
 			int cap = v->cargo_cap - v->cargo.Count();
 			if (cap > 0) {
-				for (const StationID *next = next_stations.Begin(); next != next_stations.End(); ++next) {
-					int reserved = st->goods[v->cargo_type].cargo.MoveTo(&v->cargo, cap, *next, true);
-					if (reserved > 0) {
-						cap -= reserved;
-						SetBit(ret, v->cargo_type);
-					}
+				int reserved = st->goods[v->cargo_type].cargo.MoveTo(&v->cargo, cap, next_station, true);
+				if (reserved > 0) {
+					cap -= reserved;
+					SetBit(ret, v->cargo_type);
 				}
 			}
 		}
@@ -1184,15 +1184,11 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 	StationID last_visited = v->last_station_visited;
 	Station *st = Station::Get(last_visited);
 
-	StationIDVector next_stations;
-	OrderList *orders = v->orders.list;
-	if (orders != NULL) {
-		orders->GetNextStoppingStation(v->cur_auto_order_index, last_visited, &next_stations);
-	}
+	StationID next_station = v->GetNextStoppingStation();
 
 	/* We have not waited enough time till the next round of loading/unloading */
 	if (v->load_unload_ticks != 0) {
-		uint32 new_reserved = ReserveConsist(st, v, next_stations);
+		uint32 new_reserved = ReserveConsist(st, v, next_station);
 		return cargos_reserved | new_reserved;
 	}
 
@@ -1249,7 +1245,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 			uint prev_count = ge->cargo.Count();
 			payment->SetCargo(v->cargo_type);
 			uint delivered = ge->cargo.TakeFrom(&v->cargo, amount_unloaded, unload_flags,
-					next_stations, u->last_loading_station == last_visited, payment);
+					next_station, u->last_loading_station == last_visited, payment);
 
 			st->time_since_unload = 0;
 			unloading_time += delivered;
@@ -1283,7 +1279,15 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 
 		/* Do not pick up goods when we have no-load set or loading is stopped. */
 		if (u->current_order.GetLoadType() & OLFB_NO_LOAD || HasBit(u->vehicle_flags, VF_STOP_LOADING)) continue;
-		capacities[v->cargo_type] += v->cargo_cap;
+		SmallPair<CargoID, uint> *i = capacities.Find(v->cargo_type);
+		if (i == capacities.End()) {
+			/* Braindead smallmap not providing a good method for that. */
+			i = capacities.Append();
+			i->first = v->cargo_type;
+			i->second = v->cargo_cap;
+		} else {
+			i->second += v->cargo_cap;
+		}
 
 		/* update stats */
 		int t;
@@ -1321,10 +1325,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 				loaded += v->cargo.LoadReserved(cap_left);
 			}
 
-			for (const StationID *next = next_stations.Begin();
-					loaded < cap_left && next != next_stations.End(); ++next) {
-				loaded += ge->cargo.MoveTo(&v->cargo, cap_left - loaded, *next);
-			}
+			loaded += ge->cargo.MoveTo(&v->cargo, cap_left - loaded, next_station);
 
 			/* Store whether the maximum possible load amount was loaded or not.*/
 			if (loaded == cap_left) {
@@ -1368,10 +1369,10 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 		}
 	}
 
-	for (const SmallPair<CargoID, uint> *i = capacities.Begin(); i != capacities.End(); ++i) {
-		for (const StationID *next = next_stations.Begin(); next != next_stations.End(); ++next) {
+	if (next_station != INVALID_STATION) {
+		for (const SmallPair<CargoID, uint> *i = capacities.Begin(); i != capacities.End(); ++i) {
 			/* Refresh the link and give it a minimum capacity. */
-			IncreaseStats(st, i->first, *next, i->second / next_stations.Length(), UINT_MAX);
+			IncreaseStats(st, i->first, next_station, i->second, UINT_MAX);
 		}
 	}
 	
