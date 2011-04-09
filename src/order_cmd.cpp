@@ -365,8 +365,7 @@ StationID OrderList::GetNextStoppingStation(const Vehicle *v, const Order *next,
 	}
 
 	if (next->IsType(OT_CONDITIONAL)) {
-		if ((v->current_order.IsType(OT_GOTO_STATION) || v->current_order.IsType(OT_AUTOMATIC)) &&
-				next->GetConditionVariable() == OCV_LOAD_PERCENTAGE) {
+		if (v->current_order.IsType(OT_LOADING) && next->GetConditionVariable() == OCV_LOAD_PERCENTAGE) {
 			/* If the vehicle is loading and the condition is based
 			 * on load percentage we can't tell what it will do.
 			 * So we choose randomly.
