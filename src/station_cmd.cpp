@@ -3245,15 +3245,17 @@ void IncreaseStats(Station *st, CargoID cargo, StationID next_station_id, uint c
 	LinkStatMap &stats = st->goods[cargo].link_stats;
 	LinkStatMap::iterator i = stats.find(next_station_id);
 	if (i == stats.end()) {
-		Station *next = Station::Get(next_station_id);
-		assert(st->index != next_station_id && next != NULL);
+		assert(st->index != next_station_id);
 		stats.insert(std::make_pair(next_station_id, LinkStat(
-				GetMovingAverageLength(st, next), capacity, usage)));
+				GetMovingAverageLength(st, 
+				Station::Get(next_station_id)), capacity,
+				usage == UINT_MAX ? 0 : usage)));
 	} else {
 		LinkStat &link_stat = i->second;
 		if (usage == UINT_MAX) {
 			link_stat.Refresh(capacity);
 		} else {
+			assert(capacity >= usage);
 			link_stat.Increase(capacity, usage);
 		}
 		assert(link_stat.IsValid());

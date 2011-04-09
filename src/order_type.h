@@ -13,15 +13,11 @@
 #define ORDER_TYPE_H
 
 #include "core/enum_type.hpp"
-#include "core/smallvec_type.hpp"
-#include "station_type.h"
 
 typedef byte VehicleOrderID;  ///< The index of an order within its current vehicle (not pool related)
 typedef uint16 OrderID;
 typedef uint16 OrderListID;
 typedef uint16 DestinationID;
-
-typedef SmallVector<StationID, 1> StationIDVector;
 
 /** Invalid vehicle order index (sentinel) */
 static const VehicleOrderID INVALID_VEH_ORDER_ID = 0xFF;
