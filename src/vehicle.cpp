@@ -1860,7 +1860,10 @@ void Vehicle::BeginLoading()
 		this->current_order.MakeLoading(false);
 	}
 
-	if (this->last_loading_station != INVALID_STATION && this->last_loading_station != this->last_station_visited) {
+	if (this->last_loading_station != INVALID_STATION &&
+			this->last_loading_station != this->last_station_visited &&
+			((this->current_order.GetLoadType() & OLFB_NO_LOAD) == 0 ||
+			(this->current_order.GetUnloadType() & OUFB_NO_UNLOAD) == 0)) {
 		IncreaseStats(Station::Get(this->last_loading_station), this, this->last_station_visited);
 	}
 
@@ -1906,12 +1909,6 @@ void Vehicle::LeaveStation()
 	/* Only update the timetable if the vehicle was supposed to stop here. */
 	if (this->current_order.GetNonStopType() != ONSF_STOP_EVERYWHERE) UpdateVehicleTimetable(this, false);
 
-	this->current_order.MakeLeaveStation();
-	Station *st = Station::Get(this->last_station_visited);
-	st->loading_vehicles.remove(this);
-
-	this->CancelReservation(INVALID_STATION, st);
-
 	if ((this->current_order.GetLoadType() & OLFB_NO_LOAD) == 0 ||
 			(this->current_order.GetUnloadType() & OUFB_NO_UNLOAD) == 0) {
 		if (this->current_order.CanLeaveWithCargo(this->last_loading_station != INVALID_STATION)) {
@@ -1924,6 +1921,11 @@ void Vehicle::LeaveStation()
 			this->last_loading_station = INVALID_STATION;
 		}
 	}
+
+	this->current_order.MakeLeaveStation();
+	Station *st = Station::Get(this->last_station_visited);
+	this->CancelReservation(INVALID_STATION, st);
+	st->loading_vehicles.remove(this);
 
 	HideFillingPercent(&this->fill_percent_te_id);
 
