@@ -12,6 +12,7 @@
 #ifndef VEHICLE_BASE_H
 #define VEHICLE_BASE_H
 
+#include "core/smallmap_type.hpp"
 #include "track_type.h"
 #include "command_type.h"
 #include "order_base.h"
@@ -254,6 +255,8 @@ public:
 	void DeleteUnreachedAutoOrders();
 
 	void HandleLoading(bool mode = false);
+
+	void GetConsistFreeCapacities(SmallMap<CargoID, uint> &capacities) const;
 
 	/**
 	 * Marks the vehicles to be redrawn and updates cached variables
