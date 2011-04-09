@@ -365,19 +365,24 @@ StationID OrderList::GetNextStoppingStation(const Vehicle *v, const Order *next,
 	}
 
 	if (next->IsType(OT_CONDITIONAL)) {
-		if (v->current_order.IsType(OT_LOADING) && next->GetConditionVariable() == OCV_LOAD_PERCENTAGE) {
+		if (v->current_order.IsType(OT_LOADING) &&
+				(v->current_order.GetLoadType() & OLFB_NO_LOAD) == 0 &&
+				next->GetConditionVariable() == OCV_LOAD_PERCENTAGE) {
 			/* If the vehicle is loading and the condition is based
 			 * on load percentage we can't tell what it will do.
 			 * So we choose randomly.
 			 */
-			if (RandomRange(2) == 0) {
-				return this->GetNextStoppingStation(v,
+			StationID skip_to = this->GetNextStoppingStation(v,
 					this->GetOrderAt(next->GetConditionSkipToOrder()),
 					hops + 1);
-			} else {
-				return this->GetNextStoppingStation(v,
+			StationID advance = this->GetNextStoppingStation(v,
 					this->GetNext(next), hops + 1);
+			if (advance == skip_to) {
+				return advance;
+			} else {
+				return RandomRange(2) == 0 ? skip_to : advance;
 			}
+
 		} else {
 			/* Otherwise we're optimistic and expect that the
 			 * condition value won't change until it's evaluated.
