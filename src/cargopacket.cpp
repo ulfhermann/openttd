@@ -547,7 +547,7 @@ UnloadType StationCargoList::WillUnloadCargoDist(byte flags, StationID next, Sta
 		} else if (flags & UL_TRANSFER) {
 			/* transfer forced */
 			return UL_TRANSFER;
-		} else if (next == via) {
+		} else if (next == via && next != INVALID_STATION) {
 			/* vehicle goes to the packet's next hop or has nondeterministic order: keep the packet*/
 			return UL_KEEP;
 		} else {
@@ -604,7 +604,7 @@ uint StationCargoList::TakeFrom(VehicleCargoList *source, uint max_unload, Order
 		FlowStatSet &flows = dest->flows[cargo_source];
 		FlowStatSet::iterator begin = flows.begin();
 		StationID via = (begin != flows.end() ? begin->Via() : INVALID_STATION);
-		if (via != INVALID_STATION && next != INVALID_STATION) {
+		if (via != INVALID_STATION) {
 			/* use cargodist unloading*/
 			action = this->WillUnloadCargoDist(flags, next, via, cargo_source);
 		} else {
@@ -795,15 +795,11 @@ uint StationCargoList::MovePackets(VehicleCargoList *dest, uint cap, Iterator be
 uint StationCargoList::MoveTo(VehicleCargoList *dest, uint cap, StationID next, bool reserve)
 {
 	uint orig_cap = cap;
-	if (next != INVALID_STATION) {
-		std::pair<Iterator, Iterator> bounds(this->packets.equal_range(next));
+	std::pair<Iterator, Iterator> bounds(this->packets.equal_range(next));
+	cap -= this->MovePackets(dest, cap, bounds.first, bounds.second, reserve);
+	if (next != INVALID_STATION && cap > 0) {
+		bounds = this->packets.equal_range(INVALID_STATION);
 		cap -= this->MovePackets(dest, cap, bounds.first, bounds.second, reserve);
-		if (cap > 0) {
-			bounds = this->packets.equal_range(INVALID_STATION);
-			cap -= this->MovePackets(dest, cap, bounds.first, bounds.second, reserve);
-		}
-	} else {
-		cap -= this->MovePackets(dest, cap, this->packets.begin(), this->packets.end(), reserve);
 	}
 	return orig_cap - cap;
 }
