@@ -15,8 +15,6 @@
 #include "core/random_func.hpp"
 #include "economy_base.h"
 
-#include <algorithm>
-
 /* Initialize the cargopacket-pool */
 CargoPacketPool _cargopacket_pool("CargoPacket");
 INSTANTIATE_POOL_METHODS(CargoPacket)
@@ -518,7 +516,7 @@ UnloadType StationCargoList::WillUnloadOld(byte flags, StationID source)
  * @return       Unload type (deliver, transfer, keep) telling what to do with
  *               the packet.
  */
-UnloadType StationCargoList::WillUnloadCargoDist(byte flags, std::list<StationID> &next, StationID via, StationID source)
+UnloadType StationCargoList::WillUnloadCargoDist(byte flags, const StationIDVector &next, StationID via, StationID source)
 {
 	if (via == this->station->index) {
 		/* this is the final destination, deliver ... */
@@ -549,7 +547,7 @@ UnloadType StationCargoList::WillUnloadCargoDist(byte flags, std::list<StationID
 		} else if (flags & UL_TRANSFER) {
 			/* transfer forced */
 			return UL_TRANSFER;
-		} else if (std::find(next.begin(), next.end(), via) != next.end()) {
+		} else if (next.Contains(via)) {
 			/* vehicle goes to the packet's next hop or has nondeterministic order: keep the packet*/
 			return UL_KEEP;
 		} else {
@@ -593,7 +591,7 @@ void VehicleCargoList::SwapReserved()
  * @param payment      Payment object to be updated when delivering/transferring.
  * @return Number of cargo entities actually moved.
  */
-uint StationCargoList::TakeFrom(VehicleCargoList *source, uint max_unload, OrderUnloadFlags order_flags, std::list<StationID> &next, bool has_stopped, CargoPayment *payment)
+uint StationCargoList::TakeFrom(VehicleCargoList *source, uint max_unload, OrderUnloadFlags order_flags, const StationIDVector &next, bool has_stopped, CargoPayment *payment)
 {
 	uint remaining_unload = max_unload;
 	uint unloaded;
@@ -606,7 +604,7 @@ uint StationCargoList::TakeFrom(VehicleCargoList *source, uint max_unload, Order
 		FlowStatSet &flows = dest->flows[cargo_source];
 		FlowStatSet::iterator begin = flows.begin();
 		StationID via = (begin != flows.end() ? begin->Via() : INVALID_STATION);
-		if (via != INVALID_STATION && !next.empty()) {
+		if (via != INVALID_STATION && next.Length() > 0) {
 			/* use cargodist unloading*/
 			action = this->WillUnloadCargoDist(flags, next, via, cargo_source);
 		} else {
@@ -639,11 +637,11 @@ uint StationCargoList::TakeFrom(VehicleCargoList *source, uint max_unload, Order
 				break;
 			case UL_KEEP:
 				unloaded = source->KeepPacket(c);
-				if (via != INVALID_STATION && !next.empty() && !has_stopped) {
-					if (std::find(next.begin(), next.end(), via) != next.end()) {
+				if (via != INVALID_STATION && next.Length() > 0 && !has_stopped) {
+					if (next.Contains(via)) {
 						dest->UpdateFlowStats(flows, begin, unloaded);
-					} else if (++next.begin() == next.end()) {
-						dest->UpdateFlowStats(flows, unloaded, next.front());
+					} else if (next.Length() == 1) {
+						dest->UpdateFlowStats(flows, unloaded, next[0]);
 					}
 				}
 				break;
