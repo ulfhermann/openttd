@@ -1331,7 +1331,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 		}
 	}
 
-	if (next_station != INVALID_STATION) {
+	if (next_station != INVALID_STATION && next_station != st->index) {
 		for (const SmallPair<CargoID, uint> *i = capacities.Begin(); i != capacities.End(); ++i) {
 			/* Refresh the link and give it a minimum capacity. */
 			IncreaseStats(st, i->first, next_station, i->second, UINT_MAX);
