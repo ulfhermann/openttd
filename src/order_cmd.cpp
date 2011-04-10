@@ -342,6 +342,43 @@ Order *OrderList::GetOrderAt(int index) const
 }
 
 /**
+ * Choose between the two possible next stations so that the given consist can
+ * load most cargo.
+ * @param v Head of the consist.
+ * @param st1 First station to choose from.
+ * @param st2 Second station to choose from.
+ * @return Either st1 or st2, depending on the amounts of cargo waiting at the
+ *	vehicle's current station for each.
+ */
+StationID OrderList::GetBestLoadableNext(const Vehicle *v, StationID st1, StationID st2) const
+{
+	SmallMap<CargoID, uint> capacities;
+	v->GetConsistFreeCapacities(capacities);
+	uint loadable1 = 0;
+	uint loadable2 = 0;
+	const Station *cur_station = Station::Get(v->last_station_visited);
+	for (SmallPair<CargoID, uint> *i = capacities.Begin(); i != capacities.End(); ++i) {
+		const StationCargoPacketMap *loadable_packets = cur_station->goods[i->first].cargo.Packets();
+		uint loadable_cargo = 0;
+		std::pair<StationCargoPacketMap::const_iterator, StationCargoPacketMap::const_iterator> p =
+			loadable_packets->equal_range(st1);
+		for (StationCargoPacketMap::const_iterator j = p.first; j != p.second; ++j) {
+			loadable_cargo = (*j)->Count();
+		}
+		loadable1 += min(i->second, loadable_cargo);
+
+		loadable_cargo = 0;
+		p = loadable_packets->equal_range(st2);
+		for (StationCargoPacketMap::const_iterator j = p.first; j != p.second; ++j) {
+			loadable_cargo = (*j)->Count();
+		}
+		loadable2 += min(i->second, loadable_cargo);
+	}
+	if (loadable1 == loadable2) return RandomRange(2) == 0 ? st1 : st2;
+	return loadable1 > loadable2 ? st1 : st2;
+}
+
+/**
  * Recursively determine the next deterministic station to stop at.
  * @param v The vehicle we're looking at.
  * @param next First order to check.
@@ -365,19 +402,24 @@ StationID OrderList::GetNextStoppingStation(const Vehicle *v, const Order *next,
 	}
 
 	if (next->IsType(OT_CONDITIONAL)) {
-		if (v->current_order.IsType(OT_LOADING) && next->GetConditionVariable() == OCV_LOAD_PERCENTAGE) {
+		if (v->current_order.IsType(OT_LOADING) &&
+				(v->current_order.GetLoadType() & OLFB_NO_LOAD) == 0 &&
+				next->GetConditionVariable() == OCV_LOAD_PERCENTAGE) {
 			/* If the vehicle is loading and the condition is based
 			 * on load percentage we can't tell what it will do.
 			 * So we choose randomly.
 			 */
-			if (RandomRange(2) == 0) {
-				return this->GetNextStoppingStation(v,
+			StationID skip_to = this->GetNextStoppingStation(v,
 					this->GetOrderAt(next->GetConditionSkipToOrder()),
 					hops + 1);
-			} else {
-				return this->GetNextStoppingStation(v,
+			StationID advance = this->GetNextStoppingStation(v,
 					this->GetNext(next), hops + 1);
+			if (advance == skip_to) {
+				return advance;
+			} else {
+				return this->GetBestLoadableNext(v, skip_to, advance);
 			}
+
 		} else {
 			/* Otherwise we're optimistic and expect that the
 			 * condition value won't change until it's evaluated.
