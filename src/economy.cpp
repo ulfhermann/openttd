@@ -1369,7 +1369,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 		}
 	}
 
-	if (next_station != INVALID_STATION) {
+	if (next_station != INVALID_STATION && next_station != st->index) {
 		for (const SmallPair<CargoID, uint> *i = capacities.Begin(); i != capacities.End(); ++i) {
 			/* Refresh the link and give it a minimum capacity. */
 			IncreaseStats(st, i->first, next_station, i->second, UINT_MAX);
