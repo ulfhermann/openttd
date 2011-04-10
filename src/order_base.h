@@ -199,6 +199,7 @@ private:
 	 * @return Next order.
 	 */
 	inline const Order *GetNext(const Order *curr) const { return (curr->next == NULL) ? this->GetFirstOrder() : curr->next; }
+	StationID GetBestLoadableNext(const Vehicle *v, StationID st1, StationID st2) const;
 
 	Order *first;                     ///< First order of the order list.
 	VehicleOrderID num_orders;        ///< NOSAVE: How many orders there are in the list.
