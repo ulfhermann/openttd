@@ -1153,8 +1153,6 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 	v->cur_speed = 0;
 
 	CargoPayment *payment = v->cargo_payment;
-
-	SmallMap<CargoID, uint, 1> capacities;
 	
 	for (; v != NULL; v = v->Next()) {
 		if (v->cargo_cap == 0) continue;
@@ -1232,15 +1230,6 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 
 		/* Do not pick up goods when we have no-load set or loading is stopped. */
 		if (u->current_order.GetLoadType() & OLFB_NO_LOAD || HasBit(u->vehicle_flags, VF_STOP_LOADING)) continue;
-		SmallPair<CargoID, uint> *i = capacities.Find(v->cargo_type);
-		if (i == capacities.End()) {
-			/* Braindead smallmap not providing a good method for that. */
-			i = capacities.Append();
-			i->first = v->cargo_type;
-			i->second = v->cargo_cap;
-		} else {
-			i->second += v->cargo_cap;
-		}
 
 		/* update stats */
 		int t;
@@ -1331,12 +1320,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 		}
 	}
 
-	if (next_station != INVALID_STATION && next_station != st->index) {
-		for (const SmallPair<CargoID, uint> *i = capacities.Begin(); i != capacities.End(); ++i) {
-			/* Refresh the link and give it a minimum capacity. */
-			IncreaseStats(st, i->first, next_station, i->second, UINT_MAX);
-		}
-	}
+	if (anything_loaded) v->IncreaseNextHopsStats();
 	
 	/* Only set completely_emptied, if we just unloaded all remaining cargo */
 	completely_emptied &= anything_unloaded;

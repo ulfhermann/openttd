@@ -258,6 +258,8 @@ public:
 
 	void GetConsistFreeCapacities(SmallMap<CargoID, uint> &capacities) const;
 
+	uint GetConsistTotalCapacity() const;
+
 	/**
 	 * Marks the vehicles to be redrawn and updates cached variables
 	 *
@@ -552,6 +554,8 @@ public:
 		return (this->orders.list == NULL) ? INVALID_STATION : this->orders.list->GetNextStoppingStation(this);
 	}
 
+	void IncreaseNextHopsStats();
+	
 	/**
 	 * Copy certain configurations and statistics of a vehicle after successful autoreplace/renew
 	 * The function shall copy everything that cannot be copied by a command (like orders / group etc),

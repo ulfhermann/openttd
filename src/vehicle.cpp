@@ -1920,6 +1920,62 @@ void Vehicle::LeaveStation()
 	}
 }
 
+void Vehicle::IncreaseNextHopsStats()
+{
+	StationID head_last_loading = this->last_loading_station;
+	SmallMap<CargoID, uint, 1> capacities;
+	for (Vehicle *v = this; v != NULL; v = v->Next()) {
+		v->last_loading_station = 0;
+		SmallPair<CargoID, uint> *i = capacities.Find(v->cargo_type);
+		if (i == capacities.End()) {
+			/* Braindead smallmap not providing a good method for that. */
+			i = capacities.Append();
+			i->first = v->cargo_type;
+			i->second = v->cargo_cap;
+		} else {
+			i->second += v->cargo_cap;
+		}
+	}
+	uint hops = 0;
+	const Order *cur = this->orders.list->GetNextStoppingOrder(this,
+			this->GetOrder(this->cur_auto_order_index), hops);
+	while (cur != NULL) {
+		const Order *next = this->orders.list->GetNextStoppingOrder(this,
+			this->orders.list->GetNext(cur), ++hops);
+		if (cur->IsType(OT_GOTO_DEPOT)) {
+			/* handle refit by dropping some vehicles. */
+			for (Vehicle *v = this; v != NULL; v = v->Next()) {
+				/* Was already refitted, skip it. */
+				if (v->last_loading_station == INVALID_STATION) continue;
+
+				if (v->cargo_type == new_cid) continue;
+				const Engine *e = Engine::Get(v->engine_type);
+				if (!e->CanCarryCargo()) continue;
+
+				/* TODO: handle aircraft with mail. */
+
+				/* If the vehicle is not refittable, count its capacity nevertheless if the cargo matches */
+				bool refittable = HasBit(e->info.refit_mask, new_cid);
+				if (!refittable && v->cargo_type != new_cid) continue;
+
+				/* Skip on next refit. */
+				v->last_loading_station = INVALID_STATION;
+				capacities[v->cargo_type] -= v->cargo_cap;
+			}
+		} else if (next != NULL) {
+			StationID next_station = next->GetDestination();
+			Station *st = Station::GetIfValid(cur->GetDestination());
+			if (st != NULL && next_station != INVALID_STATION && next_station != st->index) {
+				for (const SmallPair<CargoID, uint> *i = capacities.Begin(); i != capacities.End(); ++i) {
+					/* Refresh the link and give it a minimum capacity. */
+					IncreaseStats(st, i->first, next_station, i->second, UINT_MAX);
+				}
+			}
+		}
+		cur = next;
+	}
+	this->last_loading_station = head_last_loading;
+}
 
 /**
  * Handle the loading of the vehicle; when not it skips through dummy
@@ -1967,6 +2023,15 @@ void Vehicle::GetConsistFreeCapacities(SmallMap<CargoID, uint> &capacities) cons
 			pair->second += v->cargo_cap - v->cargo.Count();
 		}
 	}
+}
+
+uint Vehicle::GetConsistTotalCapacity() const
+{
+	uint result = 0;
+	for (const Vehicle *v = this; v != NULL; v = v->Next()) {
+		result += v->cargo_cap;
+	}
+	return result;
 }
 
 /**
