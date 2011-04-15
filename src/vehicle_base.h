@@ -554,7 +554,7 @@ public:
 		return (this->orders.list == NULL) ? INVALID_STATION : this->orders.list->GetNextStoppingStation(this);
 	}
 
-	void IncreaseNextHopsStats();
+	void RefreshNextHopsStats();
 	
 	/**
 	 * Copy certain configurations and statistics of a vehicle after successful autoreplace/renew

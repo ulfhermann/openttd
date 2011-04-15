@@ -1920,9 +1920,16 @@ void Vehicle::LeaveStation()
 	}
 }
 
-void Vehicle::IncreaseNextHopsStats()
+/**
+ * Predict a vehicle's course from it's current state and refresh all links it
+ * will visit.
+ */
+void Vehicle::RefreshNextHopsStats()
 {
+	/* backup front vehicle's last loading station. */
 	StationID head_last_loading = this->last_loading_station;
+
+	/* Assemble list of capacities and set last loading stations to 0. */
 	SmallMap<CargoID, uint, 1> capacities;
 	for (Vehicle *v = this; v != NULL; v = v->Next()) {
 		v->last_loading_station = 0;
@@ -1936,31 +1943,42 @@ void Vehicle::IncreaseNextHopsStats()
 			i->second += v->cargo_cap;
 		}
 	}
+
 	uint hops = 0;
-	const Order *cur = this->orders.list->GetNextStoppingOrder(this,
+	const Order *first = this->orders.list->GetNextStoppingOrder(this,
 			this->GetOrder(this->cur_auto_order_index), hops);
-	while (cur != NULL) {
-		const Order *next = this->orders.list->GetNextStoppingOrder(this,
-			this->orders.list->GetNext(cur), ++hops);
+	const Order *cur = first;
+	const Order *next = first;
+	while (next != NULL) {
+		next = this->orders.list->GetNextStoppingOrder(this,
+			this->orders.list->GetNext(next), ++hops);
 		if (cur->IsType(OT_GOTO_DEPOT)) {
 			/* handle refit by dropping some vehicles. */
+			CargoID new_cid = cur->GetRefitCargo();
 			for (Vehicle *v = this; v != NULL; v = v->Next()) {
 				/* Was already refitted, skip it. */
-				if (v->last_loading_station == INVALID_STATION) continue;
+				if (v->last_loading_station == INVALID_STATION || v->cargo_type == new_cid) continue;
 
-				if (v->cargo_type == new_cid) continue;
 				const Engine *e = Engine::Get(v->engine_type);
-				if (!e->CanCarryCargo()) continue;
-
-				/* TODO: handle aircraft with mail. */
-
-				/* If the vehicle is not refittable, count its capacity nevertheless if the cargo matches */
-				bool refittable = HasBit(e->info.refit_mask, new_cid);
-				if (!refittable && v->cargo_type != new_cid) continue;
+				if (!e->CanCarryCargo() || !HasBit(e->info.refit_mask, new_cid)) continue;
 
 				/* Skip on next refit. */
 				v->last_loading_station = INVALID_STATION;
 				capacities[v->cargo_type] -= v->cargo_cap;
+
+				/* Special case for aircraft with mail. */
+				if (v->type == VEH_AIRCRAFT) {
+					CargoID old_cid = v->cargo_type;
+					v->cargo_type = new_cid;
+					uint16 mail_capacity;
+					GetVehicleCapacity(v, &mail_capacity);
+					v->cargo_type = old_cid;
+					Vehicle *u = v->Next();
+					u->last_loading_station = INVALID_STATION;
+					if (mail_capacity < u->cargo_cap) {
+						capacities[u->cargo_type] -= u->cargo_cap - mail_capacity;
+					}
+				}
 			}
 		} else if (next != NULL) {
 			StationID next_station = next->GetDestination();
@@ -1968,12 +1986,15 @@ void Vehicle::IncreaseNextHopsStats()
 			if (st != NULL && next_station != INVALID_STATION && next_station != st->index) {
 				for (const SmallPair<CargoID, uint> *i = capacities.Begin(); i != capacities.End(); ++i) {
 					/* Refresh the link and give it a minimum capacity. */
-					IncreaseStats(st, i->first, next_station, i->second, UINT_MAX);
+					if (i->second > 0) IncreaseStats(st, i->first, next_station, i->second, UINT_MAX);
 				}
 			}
+			cur = next;
+			if (cur == first) break;
 		}
-		cur = next;
 	}
+
+	/* Restore front vehicle's last loading station. */
 	this->last_loading_station = head_last_loading;
 }
 

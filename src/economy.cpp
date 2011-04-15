@@ -1320,7 +1320,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 		}
 	}
 
-	if (anything_loaded) v->IncreaseNextHopsStats();
+	if (anything_loaded) v->RefreshNextHopsStats();
 	
 	/* Only set completely_emptied, if we just unloaded all remaining cargo */
 	completely_emptied &= anything_unloaded;
