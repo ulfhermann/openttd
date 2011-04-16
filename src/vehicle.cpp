@@ -1912,14 +1912,14 @@ void Vehicle::LeaveStation()
 	if ((this->current_order.GetLoadType() & OLFB_NO_LOAD) == 0 ||
 			(this->current_order.GetUnloadType() & OUFB_NO_UNLOAD) == 0) {
 		if (this->current_order.CanLeaveWithCargo(this->last_loading_station != INVALID_STATION)) {
-			/* if the vehicle could load here or could stop with cargo loaded set the last loading station */
-			this->last_loading_station = this->last_station_visited;
-
 			/* Refresh next hop stats to make sure we've done that at least once
 			 * during the stop and that refit_cap == cargo_cap for each vehicle in
 			 * the consist.
 			 */
 			this->RefreshNextHopsStats();
+
+			/* if the vehicle could load here or could stop with cargo loaded set the last loading station */
+			this->last_loading_station = this->last_station_visited;
 		} else {
 			/* if the vehicle couldn't load and had to unload or transfer everything
 			 * set the last loading station to invalid as it will leave empty.
@@ -1971,9 +1971,9 @@ void Vehicle::RefreshNextHopsStats()
 			this->GetOrder(this->cur_auto_order_index), hops);
 	const Order *cur = first;
 	const Order *next = first;
-	while (next != NULL) {
+	while (next != NULL && cur->CanLeaveWithCargo(true)) {
 		next = this->orders.list->GetNextStoppingOrder(this,
-			this->orders.list->GetNext(next), ++hops);
+				this->orders.list->GetNext(next), ++hops);
 		if (cur->IsType(OT_GOTO_DEPOT)) {
 			/* handle refit by dropping some vehicles. */
 			CargoID new_cid = cur->GetRefitCargo();
