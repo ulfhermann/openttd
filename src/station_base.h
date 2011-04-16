@@ -58,7 +58,7 @@ public:
 	/**
 	 * Minimum length of moving averages for capacity and usage.
 	 */
-	static const uint MIN_AVERAGE_LENGTH = 32;
+	static const uint MIN_AVERAGE_LENGTH = 48;
 
 	friend const SaveLoad *GetLinkStatDesc();
 
