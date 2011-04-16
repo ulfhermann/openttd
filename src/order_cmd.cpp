@@ -461,13 +461,13 @@ StationID OrderList::GetNextStoppingStation(const Vehicle *v) const
 	do {
 		next = this->GetNextStoppingOrder(v, next, ++hops, true);
 		/* Don't return a next stop if the vehicle has to unload everything. */
-		if (next->GetDestination() == v->last_station_visited &&
-				(next->GetUnloadType() & (OUFB_TRANSFER | OUFB_UNLOAD)) == 0) {
+		if (next == NULL || (next->GetDestination() == v->last_station_visited &&
+				(next->GetUnloadType() & (OUFB_TRANSFER | OUFB_UNLOAD)) == 0)) {
 			return INVALID_STATION;
 		}
-	} while (next != NULL && (next->IsType(OT_GOTO_DEPOT) || next->GetDestination() == v->last_station_visited));
+	} while (next->IsType(OT_GOTO_DEPOT) || next->GetDestination() == v->last_station_visited);
 
-	return next == NULL ? INVALID_STATION : next->GetDestination();
+	return next->GetDestination();
 }
 
 /**
