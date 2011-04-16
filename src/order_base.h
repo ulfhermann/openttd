@@ -192,14 +192,6 @@ private:
 	friend void AfterLoadVehicles(bool part_of_load); ///< For instantiating the shared vehicle chain
 	friend const struct SaveLoad *GetOrderListDescription(); ///< Saving and loading of order lists.
 
-	/**
-	 * Get the order after the given one or the first one, if the given one is the
-	 * last one.
-	 * @param curr Order to find the next one for.
-	 * @return Next order.
-	 */
-	inline const Order *GetNext(const Order *curr) const { return (curr->next == NULL) ? this->GetFirstOrder() : curr->next; }
-
 	Order *first;                     ///< First order of the order list.
 	VehicleOrderID num_orders;        ///< NOSAVE: How many orders there are in the list.
 	VehicleOrderID num_manual_orders; ///< NOSAVE: How many manually added orders are there in the list.
@@ -241,6 +233,14 @@ public:
 	inline Order *GetLastOrder() const { return this->GetOrderAt(this->num_orders - 1); }
 
 	/**
+	 * Get the order after the given one or the first one, if the given one is the
+	 * last one.
+	 * @param curr Order to find the next one for.
+	 * @return Next order.
+	 */
+	inline const Order *GetNext(const Order *curr) const { return (curr->next == NULL) ? this->GetFirstOrder() : curr->next; }
+
+	/**
 	 * Get number of orders in the order list.
 	 * @return number of orders in the chain.
 	 */
@@ -252,7 +252,8 @@ public:
 	 */
 	inline VehicleOrderID GetNumManualOrders() const { return this->num_manual_orders; }
 
-	StationID GetNextStoppingStation(const Vehicle *v, const Order *next = NULL, uint hops = 0) const;
+	StationID GetNextStoppingStation(const Vehicle *v) const;
+	const Order *GetNextStoppingOrder(const Vehicle *v, const Order *next, uint hops) const;
 
 	void InsertOrderAt(Order *new_order, int index);
 	void DeleteOrderAt(int index);
