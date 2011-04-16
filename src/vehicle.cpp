@@ -1898,6 +1898,12 @@ void Vehicle::LeaveStation()
 		if (this->current_order.CanLeaveWithCargo(this->last_loading_station != INVALID_STATION)) {
 			/* if the vehicle could load here or could stop with cargo loaded set the last loading station */
 			this->last_loading_station = this->last_station_visited;
+
+			/* Refresh next hop stats to make sure we've done that at least once
+			 * during the stop and that refit_cap == cargo_cap for each vehicle in
+			 * the consist.
+			 */
+			this->RefreshNextHopsStats();
 		} else {
 			/* if the vehicle couldn't load and had to unload or transfer everything
 			 * set the last loading station to invalid as it will leave empty.
@@ -1920,6 +1926,92 @@ void Vehicle::LeaveStation()
 	}
 }
 
+/**
+ * Predict a vehicle's course from it's current state and refresh all links it
+ * will visit. As a side effect reset the refit_cap of all vehicles in the
+ * consist to the cargo_cap. This method is expected to be called when loading
+ * at a station so it's safe to do so.
+ */
+void Vehicle::RefreshNextHopsStats()
+{
+	/* Assemble list of capacities and set last loading stations to 0. */
+	SmallMap<CargoID, uint, 1> capacities;
+	for (Vehicle *v = this; v != NULL; v = v->Next()) {
+		v->refit_cap = v->cargo_cap;
+		SmallPair<CargoID, uint> *i = capacities.Find(v->cargo_type);
+		if (i == capacities.End()) {
+			/* Braindead smallmap not providing a good method for that. */
+			i = capacities.Append();
+			i->first = v->cargo_type;
+			i->second = v->cargo_cap;
+		} else {
+			i->second += v->cargo_cap;
+		}
+	}
+
+	uint hops = 0;
+	const Order *first = this->orders.list->GetNextStoppingOrder(this,
+			this->GetOrder(this->cur_auto_order_index), hops);
+	const Order *cur = first;
+	const Order *next = first;
+	while (next != NULL) {
+		next = this->orders.list->GetNextStoppingOrder(this,
+			this->orders.list->GetNext(next), ++hops);
+		if (cur->IsType(OT_GOTO_DEPOT)) {
+			/* handle refit by dropping some vehicles. */
+			CargoID new_cid = cur->GetRefitCargo();
+			byte new_subtype = cur->GetRefitSubtype();
+			for (Vehicle *v = this; v != NULL; v = v->Next()) {
+				const Engine *e = Engine::Get(v->engine_type);
+				if (!HasBit(e->info.refit_mask, new_cid)) continue;
+
+				/* Back up the vehicle's cargo type */
+				CargoID temp_cid = v->cargo_type;
+				byte temp_subtype = v->cargo_subtype;
+				v->cargo_type = new_cid;
+				v->cargo_subtype = new_subtype;
+
+				uint16 mail_capacity = 0;
+				uint amount = GetVehicleCapacity(v, &mail_capacity);
+
+				/* Restore the original cargo type */
+				v->cargo_type = temp_cid;
+				v->cargo_subtype = temp_subtype;
+
+				/* Skip on next refit. */
+				if (new_cid != v->cargo_type && v->refit_cap > 0) {
+					capacities[v->cargo_type] -= v->refit_cap;
+					v->refit_cap = 0;
+				} else if (amount < v->refit_cap) {
+					capacities[v->cargo_type] -= v->refit_cap - amount;
+					v->refit_cap = amount;
+				}
+
+				/* Special case for aircraft with mail. */
+				if (v->type == VEH_AIRCRAFT) {
+					Vehicle *u = v->Next();
+					if (mail_capacity < u->refit_cap) {
+						capacities[u->cargo_type] -= u->refit_cap - mail_capacity;
+						u->refit_cap = mail_capacity;
+					}
+				}
+			}
+		} else if (next != NULL) {
+			StationID next_station = next->GetDestination();
+			Station *st = Station::GetIfValid(cur->GetDestination());
+			if (st != NULL && next_station != INVALID_STATION && next_station != st->index) {
+				for (const SmallPair<CargoID, uint> *i = capacities.Begin(); i != capacities.End(); ++i) {
+					/* Refresh the link and give it a minimum capacity. */
+					if (i->second > 0) IncreaseStats(st, i->first, next_station, i->second, UINT_MAX);
+				}
+			}
+			cur = next;
+			if (cur == first) break;
+		}
+	}
+
+	for (Vehicle *v = this; v != NULL; v = v->Next()) v->refit_cap = v->cargo_cap;
+}
 
 /**
  * Handle the loading of the vehicle; when not it skips through dummy
@@ -1939,6 +2031,13 @@ void Vehicle::HandleLoading(bool mode)
 
 			this->LeaveStation();
 
+			/* Only advance to next order if we just loaded at the current one */
+			const Order *order = this->GetOrder(this->cur_auto_order_index);
+			if (order == NULL ||
+					(!order->IsType(OT_AUTOMATIC) && !order->IsType(OT_GOTO_STATION)) ||
+					order->GetDestination() != this->last_station_visited) {
+				return;
+			}
 			break;
 		}
 
@@ -1967,6 +2066,15 @@ void Vehicle::GetConsistFreeCapacities(SmallMap<CargoID, uint> &capacities) cons
 			pair->second += v->cargo_cap - v->cargo.Count();
 		}
 	}
+}
+
+uint Vehicle::GetConsistTotalCapacity() const
+{
+	uint result = 0;
+	for (const Vehicle *v = this; v != NULL; v = v->Next()) {
+		result += v->cargo_cap;
+	}
+	return result;
 }
 
 /**
