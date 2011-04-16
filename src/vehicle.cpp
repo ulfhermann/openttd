@@ -1938,6 +1938,7 @@ void Vehicle::RefreshNextHopsStats()
 	SmallMap<CargoID, uint, 1> capacities;
 	for (Vehicle *v = this; v != NULL; v = v->Next()) {
 		v->refit_cap = v->cargo_cap;
+		if (v->refit_cap == 0) continue;
 		SmallPair<CargoID, uint> *i = capacities.Find(v->cargo_type);
 		if (i == capacities.End()) {
 			/* Braindead smallmap not providing a good method for that. */
@@ -1957,10 +1958,10 @@ void Vehicle::RefreshNextHopsStats()
 	while (next != NULL && cur->CanLeaveWithCargo(true)) {
 		next = this->orders.list->GetNextStoppingOrder(this,
 				this->orders.list->GetNext(next), ++hops);
-		if (cur->IsType(OT_GOTO_DEPOT)) {
+		if (next->IsType(OT_GOTO_DEPOT)) {
 			/* handle refit by dropping some vehicles. */
-			CargoID new_cid = cur->GetRefitCargo();
-			byte new_subtype = cur->GetRefitSubtype();
+			CargoID new_cid = next->GetRefitCargo();
+			byte new_subtype = next->GetRefitSubtype();
 			for (Vehicle *v = this; v != NULL; v = v->Next()) {
 				const Engine *e = Engine::Get(v->engine_type);
 				if (!HasBit(e->info.refit_mask, new_cid)) continue;
@@ -1994,7 +1995,9 @@ void Vehicle::RefreshNextHopsStats()
 						capacities[u->cargo_type] -= u->refit_cap - mail_capacity;
 						u->refit_cap = mail_capacity;
 					}
+					break; // aircraft have only one vehicle
 				}
+				if (v->type == VEH_SHIP) break; // ships too
 			}
 		} else if (next != NULL) {
 			StationID next_station = next->GetDestination();
