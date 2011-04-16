@@ -380,6 +380,17 @@ const Order *OrderList::GetBestLoadableNext(const Vehicle *v, const Order *o2, c
 	return loadable1 > loadable2 ? o1 : o2;
 }
 
+/**
+ * Get the next order which will make the given vehicle stop at a station
+ * or refit at a depot if its state doesn't change.
+ * @param v The vehicle in question.
+ * @param next The order to start looking at.
+ * @param hops The number of orders we have already looked at.
+ * @param is_loading If the vehicle is loading. This triggers a different
+ * behaviour on conditional orders based on load percentage.
+ * @return Either an order or NULL if the vehicle won't stop anymore.
+ * @see OrderList::GetBestLoadableNext
+ */
 const Order *OrderList::GetNextStoppingOrder(const Vehicle *v, const Order *next, uint hops, bool is_loading) const
 {
 	if (hops > this->GetNumOrders() || next == NULL) return NULL;
@@ -421,8 +432,7 @@ const Order *OrderList::GetNextStoppingOrder(const Vehicle *v, const Order *next
 		if (next->IsRefit()) return next;
 	}
 
-	if (!next->CanLoadOrUnload() ||
-			(next->GetUnloadType() & (OUFB_TRANSFER | OUFB_UNLOAD)) == 0) {
+	if (!next->CanLoadOrUnload()) {
 		return this->GetNextStoppingOrder(v, this->GetNext(next), hops + 1);
 	}
 
@@ -450,8 +460,13 @@ StationID OrderList::GetNextStoppingStation(const Vehicle *v) const
 	uint hops = 0;
 	do {
 		next = this->GetNextStoppingOrder(v, next, ++hops, true);
-	} while (next != NULL && (next->IsType(OT_GOTO_DEPOT) ||
-			next->GetDestination() == v->last_station_visited));
+		/* Don't return a next stop if the vehicle has to unload everything. */
+		if (next->GetDestination() == v->last_station_visited &&
+				(next->GetUnloadType() & (OUFB_TRANSFER | OUFB_UNLOAD)) == 0) {
+			return INVALID_STATION;
+		}
+	} while (next != NULL && (next->IsType(OT_GOTO_DEPOT) || next->GetDestination() == v->last_station_visited));
+
 	return next == NULL ? INVALID_STATION : next->GetDestination();
 }
 
