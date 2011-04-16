@@ -300,12 +300,14 @@ static CommandCost RefitVehicle(Vehicle *v, bool only_this, uint8 num_vehicles, 
 		}
 
 		if (flags & DC_EXEC) {
-			v->cargo.Truncate((v->cargo_type == new_cid) ? amount : 0);
+			v->refit_cap = (v->cargo_type == new_cid) ? min(amount, v->cargo_cap) : 0;
+			v->cargo.Truncate(v->refit_cap);
 			v->cargo_type = new_cid;
 			v->cargo_cap = amount;
 			v->cargo_subtype = new_subtype;
 			if (v->type == VEH_AIRCRAFT) {
 				Vehicle *u = v->Next();
+				u->refit_cap = min(u->cargo_cap, mail_capacity);
 				u->cargo_cap = mail_capacity;
 				u->cargo.Truncate(mail_capacity);
 			}
