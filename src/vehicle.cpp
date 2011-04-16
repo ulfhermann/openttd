@@ -1797,6 +1797,17 @@ uint GetVehicleCapacity(const Vehicle *v, uint16 *mail_capacity)
  */
 void Vehicle::DeleteUnreachedAutoOrders()
 {
+	if (this->IsGroundVehicle()) {
+		uint16 &gv_flags = this->GetGroundVehicleFlags();
+		if (HasBit(gv_flags, GVF_SUPPRESS_AUTOMATIC_ORDERS)) {
+			/* Do not delete orders, only skip them */
+			ClrBit(gv_flags, GVF_SUPPRESS_AUTOMATIC_ORDERS);
+			this->cur_auto_order_index = this->cur_real_order_index;
+			InvalidateVehicleOrder(this, 0);
+			return;
+		}
+	}
+
 	const Order *order = this->GetOrder(this->cur_auto_order_index);
 	while (order != NULL) {
 		if (this->cur_auto_order_index == this->cur_real_order_index) break;
@@ -1843,6 +1854,9 @@ void Vehicle::BeginLoading()
 		this->current_order.SetNonStopType(ONSF_NO_STOP_AT_ANY_STATION);
 
 	} else {
+		assert(this->IsGroundVehicle());
+		bool suppress_automatic_orders = HasBit(this->GetGroundVehicleFlags(), GVF_SUPPRESS_AUTOMATIC_ORDERS);
+
 		/* We weren't scheduled to stop here. Insert an automatic order
 		 * to show that we are stopping here, but only do that if the order
 		 * list isn't empty. */
@@ -1850,6 +1864,7 @@ void Vehicle::BeginLoading()
 		if (in_list != NULL && this->orders.list->GetNumOrders() < MAX_VEH_ORDER_ID &&
 				(!in_list->IsType(OT_AUTOMATIC) ||
 				in_list->GetDestination() != this->last_station_visited) &&
+				!suppress_automatic_orders &&
 				Order::CanAllocateItem()) {
 			Order *auto_order = new Order();
 			auto_order->MakeAutomatic(this->last_station_visited);
@@ -1938,6 +1953,7 @@ void Vehicle::RefreshNextHopsStats()
 	SmallMap<CargoID, uint, 1> capacities;
 	for (Vehicle *v = this; v != NULL; v = v->Next()) {
 		v->refit_cap = v->cargo_cap;
+		if (v->refit_cap == 0) continue;
 		SmallPair<CargoID, uint> *i = capacities.Find(v->cargo_type);
 		if (i == capacities.End()) {
 			/* Braindead smallmap not providing a good method for that. */
@@ -1957,10 +1973,10 @@ void Vehicle::RefreshNextHopsStats()
 	while (next != NULL && cur->CanLeaveWithCargo(true)) {
 		next = this->orders.list->GetNextStoppingOrder(this,
 				this->orders.list->GetNext(next), ++hops);
-		if (cur->IsType(OT_GOTO_DEPOT)) {
+		if (next->IsType(OT_GOTO_DEPOT)) {
 			/* handle refit by dropping some vehicles. */
-			CargoID new_cid = cur->GetRefitCargo();
-			byte new_subtype = cur->GetRefitSubtype();
+			CargoID new_cid = next->GetRefitCargo();
+			byte new_subtype = next->GetRefitSubtype();
 			for (Vehicle *v = this; v != NULL; v = v->Next()) {
 				const Engine *e = Engine::Get(v->engine_type);
 				if (!HasBit(e->info.refit_mask, new_cid)) continue;
@@ -1994,7 +2010,9 @@ void Vehicle::RefreshNextHopsStats()
 						capacities[u->cargo_type] -= u->refit_cap - mail_capacity;
 						u->refit_cap = mail_capacity;
 					}
+					break; // aircraft have only one vehicle
 				}
+				if (v->type == VEH_SHIP) break; // ships too
 			}
 		} else if (next != NULL) {
 			StationID next_station = next->GetDestination();
@@ -2111,6 +2129,11 @@ CommandCost Vehicle::SendToDepot(DoCommandFlag flags, DepotCommand command)
 			 * then skip to the next order; effectively cancelling this forced service */
 			if (this->current_order.GetDepotOrderType() & ODTFB_PART_OF_ORDERS) this->IncrementRealOrderIndex();
 
+			if (this->IsGroundVehicle()) {
+				uint16 &gv_flags = this->GetGroundVehicleFlags();
+				SetBit(gv_flags, GVF_SUPPRESS_AUTOMATIC_ORDERS);
+			}
+
 			this->current_order.MakeDummy();
 			SetWindowWidgetDirty(WC_VEHICLE_VIEW, this->index, VVW_WIDGET_START_STOP_VEH);
 		}
@@ -2125,6 +2148,11 @@ CommandCost Vehicle::SendToDepot(DoCommandFlag flags, DepotCommand command)
 
 	if (flags & DC_EXEC) {
 		if (this->current_order.IsType(OT_LOADING)) this->LeaveStation();
+
+		if (this->IsGroundVehicle()) {
+			uint16 &gv_flags = this->GetGroundVehicleFlags();
+			SetBit(gv_flags, GVF_SUPPRESS_AUTOMATIC_ORDERS);
+		}
 
 		this->dest_tile = location;
 		this->current_order.MakeGoToDepot(destination, ODTF_MANUAL);
@@ -2528,6 +2556,36 @@ const GroundVehicleCache *Vehicle::GetGroundVehicleCache() const
 		return &Train::From(this)->gcache;
 	} else {
 		return &RoadVehicle::From(this)->gcache;
+	}
+}
+
+/**
+ * Access the ground vehicle flags of the vehicle.
+ * @pre The vehicle is a #GroundVehicle.
+ * @return #GroundVehicleFlags of the vehicle.
+ */
+uint16 &Vehicle::GetGroundVehicleFlags()
+{
+	assert(this->IsGroundVehicle());
+	if (this->type == VEH_TRAIN) {
+		return Train::From(this)->gv_flags;
+	} else {
+		return RoadVehicle::From(this)->gv_flags;
+	}
+}
+
+/**
+ * Access the ground vehicle flags of the vehicle.
+ * @pre The vehicle is a #GroundVehicle.
+ * @return #GroundVehicleFlags of the vehicle.
+ */
+const uint16 &Vehicle::GetGroundVehicleFlags() const
+{
+	assert(this->IsGroundVehicle());
+	if (this->type == VEH_TRAIN) {
+		return Train::From(this)->gv_flags;
+	} else {
+		return RoadVehicle::From(this)->gv_flags;
 	}
 }
 
