@@ -3184,8 +3184,8 @@ void IncreaseStats(Station *st, CargoID cargo, StationID next_station_id, uint c
 void IncreaseStats(Station *st, const Vehicle *front, StationID next_station_id)
 {
 	for (const Vehicle *v = front; v != NULL; v = v->Next()) {
-		if (v->cargo_cap > 0) {
-			IncreaseStats(st, v->cargo_type, next_station_id, v->cargo_cap, v->cargo.Count());
+		if (v->refit_cap > 0) {
+			IncreaseStats(st, v->cargo_type, next_station_id, v->refit_cap, v->cargo.Count());
 		}
 	}
 }

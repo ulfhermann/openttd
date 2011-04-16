@@ -1898,6 +1898,12 @@ void Vehicle::LeaveStation()
 		if (this->current_order.CanLeaveWithCargo(this->last_loading_station != INVALID_STATION)) {
 			/* if the vehicle could load here or could stop with cargo loaded set the last loading station */
 			this->last_loading_station = this->last_station_visited;
+
+			/* Refresh next hop stats to make sure we've done that at least once
+			 * during the stop and that refit_cap == cargo_cap for each vehicle in
+			 * the consist.
+			 */
+			this->RefreshNextHopsStats();
 		} else {
 			/* if the vehicle couldn't load and had to unload or transfer everything
 			 * set the last loading station to invalid as it will leave empty.
@@ -1922,17 +1928,16 @@ void Vehicle::LeaveStation()
 
 /**
  * Predict a vehicle's course from it's current state and refresh all links it
- * will visit.
+ * will visit. As a side effect reset the refit_cap of all vehicles in the
+ * consist to the cargo_cap. This method is expected to be called when loading
+ * at a station so it's safe to do so.
  */
 void Vehicle::RefreshNextHopsStats()
 {
-	/* backup front vehicle's last loading station. */
-	StationID head_last_loading = this->last_loading_station;
-
 	/* Assemble list of capacities and set last loading stations to 0. */
 	SmallMap<CargoID, uint, 1> capacities;
 	for (Vehicle *v = this; v != NULL; v = v->Next()) {
-		v->last_loading_station = 0;
+		v->refit_cap = v->cargo_cap;
 		SmallPair<CargoID, uint> *i = capacities.Find(v->cargo_type);
 		if (i == capacities.End()) {
 			/* Braindead smallmap not providing a good method for that. */
@@ -1955,28 +1960,39 @@ void Vehicle::RefreshNextHopsStats()
 		if (cur->IsType(OT_GOTO_DEPOT)) {
 			/* handle refit by dropping some vehicles. */
 			CargoID new_cid = cur->GetRefitCargo();
+			byte new_subtype = cur->GetRefitSubtype();
 			for (Vehicle *v = this; v != NULL; v = v->Next()) {
-				/* Was already refitted, skip it. */
-				if (v->last_loading_station == INVALID_STATION || v->cargo_type == new_cid) continue;
-
 				const Engine *e = Engine::Get(v->engine_type);
-				if (!e->CanCarryCargo() || !HasBit(e->info.refit_mask, new_cid)) continue;
+				if (!HasBit(e->info.refit_mask, new_cid)) continue;
+
+				/* Back up the vehicle's cargo type */
+				CargoID temp_cid = v->cargo_type;
+				byte temp_subtype = v->cargo_subtype;
+				v->cargo_type = new_cid;
+				v->cargo_subtype = new_subtype;
+
+				uint16 mail_capacity = 0;
+				uint amount = GetVehicleCapacity(v, &mail_capacity);
+
+				/* Restore the original cargo type */
+				v->cargo_type = temp_cid;
+				v->cargo_subtype = temp_subtype;
 
 				/* Skip on next refit. */
-				v->last_loading_station = INVALID_STATION;
-				capacities[v->cargo_type] -= v->cargo_cap;
+				if (new_cid != v->cargo_type && v->refit_cap > 0) {
+					capacities[v->cargo_type] -= v->refit_cap;
+					v->refit_cap = 0;
+				} else if (amount < v->refit_cap) {
+					capacities[v->cargo_type] -= v->refit_cap - amount;
+					v->refit_cap = amount;
+				}
 
 				/* Special case for aircraft with mail. */
 				if (v->type == VEH_AIRCRAFT) {
-					CargoID old_cid = v->cargo_type;
-					v->cargo_type = new_cid;
-					uint16 mail_capacity;
-					GetVehicleCapacity(v, &mail_capacity);
-					v->cargo_type = old_cid;
 					Vehicle *u = v->Next();
-					u->last_loading_station = INVALID_STATION;
-					if (mail_capacity < u->cargo_cap) {
-						capacities[u->cargo_type] -= u->cargo_cap - mail_capacity;
+					if (mail_capacity < u->refit_cap) {
+						capacities[u->cargo_type] -= u->refit_cap - mail_capacity;
+						u->refit_cap = mail_capacity;
 					}
 				}
 			}
@@ -1994,8 +2010,7 @@ void Vehicle::RefreshNextHopsStats()
 		}
 	}
 
-	/* Restore front vehicle's last loading station. */
-	this->last_loading_station = head_last_loading;
+	for (Vehicle *v = this; v != NULL; v = v->Next()) v->refit_cap = v->cargo_cap;
 }
 
 /**

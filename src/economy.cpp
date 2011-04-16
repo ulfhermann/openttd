@@ -1128,8 +1128,6 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 	StationID last_visited = v->last_station_visited;
 	Station *st = Station::Get(last_visited);
 
-	StationID next_station = v->GetNextStoppingStation();
-	
 	if (v->type == VEH_TRAIN && (!IsTileType(v->tile, MP_STATION) || GetStationIndex(v->tile) != st->index)) {
 		/* The train reversed in the station. Take the "easy" way
 		 * out and let the train just leave as it always did. */
@@ -1319,8 +1317,6 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 			SetBit(cargo_not_full, v->cargo_type);
 		}
 	}
-
-	if (anything_loaded) v->RefreshNextHopsStats();
 	
 	/* Only set completely_emptied, if we just unloaded all remaining cargo */
 	completely_emptied &= anything_unloaded;
@@ -1369,6 +1365,9 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 			} else if (cargo_not_full != 0) {
 				finished_loading = false;
 			}
+
+			/* Refresh next hop stats if we're full loading to avoid deadlocks. */
+			if (!finished_loading) v->RefreshNextHopsStats();
 		}
 		unloading_time = 20;
 
