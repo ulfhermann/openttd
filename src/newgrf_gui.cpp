@@ -342,7 +342,7 @@ struct NewGRFParametersWindow : public Window {
 				} else if (par_info->type == PTYPE_UINT_ENUM && click_count >= 2) {
 					/* Display a query box so users can enter a custom value. */
 					SetDParam(0, this->grf_config->param[num]);
-					ShowQueryString(STR_JUST_INT, STR_CONFIG_SETTING_QUERY_CAPTION, 10, 100, this, CS_NUMERAL, QSF_NONE);
+					ShowQueryString(STR_JUST_INT, STR_CONFIG_SETTING_QUERY_CAPTION, 10, this, CS_NUMERAL, QSF_NONE);
 				}
 
 				this->SetDirty();
@@ -510,7 +510,6 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 	typedef GUIList<const GRFConfig *> GUIGRFConfigList;
 
 	static const uint EDITBOX_MAX_SIZE   =  50;
-	static const uint EDITBOX_MAX_LENGTH = 300;
 
 	static Listing   last_sorting;   ///< Default sorting of #GUIGRFConfigList.
 	static Filtering last_filtering; ///< Default filtering of #GUIGRFConfigList.
@@ -556,7 +555,7 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 		this->GetWidget<NWidgetStacked>(SNGRFS_SHOW_APPLY)->SetDisplayedPlane(this->editable ? 0 : SZSP_HORIZONTAL);
 		this->FinishInitNested(desc);
 
-		InitializeTextBuffer(&this->text, this->edit_str_buf, this->edit_str_size, EDITBOX_MAX_LENGTH);
+		InitializeTextBuffer(&this->text, this->edit_str_buf, this->edit_str_size);
 		this->SetFocusedWidget(SNGRFS_FILTER);
 
 		this->avails.SetListing(this->last_sorting);
@@ -786,7 +785,7 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 			}
 
 			case SNGRFS_PRESET_SAVE:
-				ShowQueryString(STR_EMPTY, STR_NEWGRF_SETTINGS_PRESET_SAVE_QUERY, 32, 100, this, CS_ALPHANUMERAL, QSF_NONE);
+				ShowQueryString(STR_EMPTY, STR_NEWGRF_SETTINGS_PRESET_SAVE_QUERY, 32, this, CS_ALPHANUMERAL, QSF_NONE);
 				break;
 
 			case SNGRFS_PRESET_DELETE:
