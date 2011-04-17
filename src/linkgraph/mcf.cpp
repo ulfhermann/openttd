@@ -289,7 +289,7 @@ bool MCF1stPass::EliminateCycles()
 		 * node
 		 */
 		std::fill(path.begin(), path.end(), (Path *)NULL);
-		cycles_found = this->EliminateCycles(path, node, node) || cycles_found;
+		cycles_found |= this->EliminateCycles(path, node, node);
 	}
 	return cycles_found;
 }
@@ -333,9 +333,9 @@ MCF1stPass::MCF1stPass(LinkGraphComponent *graph) : MultiCommodityFlow(graph)
 					}
 				}
 			}
-			CleanupPaths(source, paths);
+			this->CleanupPaths(source, paths);
 		}
-		if (!more_loops) more_loops = EliminateCycles();
+		if (!more_loops) more_loops = this->EliminateCycles();
 	}
 }
 
@@ -362,7 +362,7 @@ MCF2ndPass::MCF2ndPass(LinkGraphComponent *graph) : MultiCommodityFlow(graph)
 					if (edge.unsatisfied_demand > 0) demand_left = true;
 				}
 			}
-			CleanupPaths(source, paths);
+			this->CleanupPaths(source, paths);
 		}
 	}
 }
