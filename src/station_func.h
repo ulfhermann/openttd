@@ -18,6 +18,7 @@
 #include "road_type.h"
 #include "cargo_type.h"
 #include "company_type.h"
+#include "order_type.h"
 
 void ModifyStationRatingAround(TileIndex tile, Owner owner, int amount, uint radius);
 
@@ -30,6 +31,7 @@ CargoArray GetProductionAroundTiles(TileIndex tile, int w, int h, int rad);
 CargoArray GetAcceptanceAroundTiles(TileIndex tile, int w, int h, int rad, uint32 *always_accepted = NULL);
 
 void UpdateStationAcceptance(Station *st, bool show_msg);
+uint UpdateStationWaiting(Station *st, CargoID type, uint amount, SourceType source_type, SourceID source_id, TileIndex dest_tile = INVALID_TILE, SourceType dest_type = ST_INDUSTRY, SourceID dest_id = INVALID_SOURCE, OrderID next_hop = INVALID_ORDER, StationID next_unload = INVALID_STATION, byte flags = 0);
 
 const DrawTileSprites *GetStationTileLayout(StationType st, byte gfx);
 void StationPickerDrawSprite(int x, int y, StationType st, RailType railtype, RoadType roadtype, int image);
