@@ -1042,7 +1042,7 @@ bool InsertTextBufferChar(Textbuf *tb, WChar key)
 {
 	const byte charwidth = GetCharacterWidth(FS_NORMAL, key);
 	uint16 len = (uint16)Utf8CharLen(key);
-	if (tb->bytes + len <= tb->max_bytes && tb->chars + 1 <= tb->max_chars && (tb->max_pixels == 0 || tb->pixels + charwidth <= tb->max_pixels)) {
+	if (tb->bytes + len <= tb->max_bytes && tb->chars + 1 <= tb->max_chars) {
 		memmove(tb->buf + tb->caretpos + len, tb->buf + tb->caretpos, tb->bytes - tb->caretpos);
 		Utf8Encode(tb->buf + tb->caretpos, key);
 		tb->chars++;
@@ -1079,7 +1079,6 @@ bool InsertTextBufferClipboard(Textbuf *tb)
 		if (tb->chars + chars + 1   > tb->max_chars) break;
 
 		byte char_pixels = GetCharacterWidth(FS_NORMAL, c);
-		if (tb->max_pixels != 0 && pixels + tb->pixels + char_pixels > tb->max_pixels) break;
 
 		pixels += char_pixels;
 		bytes += len;
@@ -1159,13 +1158,10 @@ bool MoveTextBufferPos(Textbuf *tb, int navmode)
  * @param tb Textbuf type which is getting initialized
  * @param buf the buffer that will be holding the data for input
  * @param max_bytes maximum size in bytes, including terminating '\0'
- * @param max_pixels maximum length in pixels of this buffer. If reached, buffer
- * cannot grow, even if maxsize would allow because there is space. Width
- * of zero '0' means the buffer is only restricted by maxsize
  */
-void InitializeTextBuffer(Textbuf *tb, char *buf, uint16 max_bytes, uint16 max_pixels)
+void InitializeTextBuffer(Textbuf *tb, char *buf, uint16 max_bytes)
 {
-	InitializeTextBuffer(tb, buf, max_bytes, max_bytes, max_pixels);
+	InitializeTextBuffer(tb, buf, max_bytes, max_bytes);
 }
 
 /**
@@ -1175,11 +1171,8 @@ void InitializeTextBuffer(Textbuf *tb, char *buf, uint16 max_bytes, uint16 max_p
  * @param buf the buffer that will be holding the data for input
  * @param max_bytes maximum size in bytes, including terminating '\0'
  * @param max_chars maximum size in chars, including terminating '\0'
- * @param max_pixels maximum length in pixels of this buffer. If reached, buffer
- * cannot grow, even if maxsize would allow because there is space. Width
- * of zero '0' means the buffer is only restricted by maxsize
  */
-void InitializeTextBuffer(Textbuf *tb, char *buf, uint16 max_bytes, uint16 max_chars, uint16 max_pixels)
+void InitializeTextBuffer(Textbuf *tb, char *buf, uint16 max_bytes, uint16 max_chars)
 {
 	assert(max_bytes != 0);
 	assert(max_chars != 0);
@@ -1187,7 +1180,6 @@ void InitializeTextBuffer(Textbuf *tb, char *buf, uint16 max_bytes, uint16 max_c
 	tb->buf        = buf;
 	tb->max_bytes  = max_bytes;
 	tb->max_chars  = max_chars;
-	tb->max_pixels = max_pixels;
 	tb->caret      = true;
 	UpdateTextBufferSize(tb);
 }
@@ -1365,7 +1357,7 @@ struct QueryStringWindow : public QueryStringBaseWindow
 {
 	QueryStringFlags flags; ///< Flags controlling behaviour of the window.
 
-	QueryStringWindow(StringID str, StringID caption, uint max_bytes, uint max_chars, uint max_pixels, const WindowDesc *desc, Window *parent, CharSetFilter afilter, QueryStringFlags flags) :
+	QueryStringWindow(StringID str, StringID caption, uint max_bytes, uint max_chars, const WindowDesc *desc, Window *parent, CharSetFilter afilter, QueryStringFlags flags) :
 			QueryStringBaseWindow(max_bytes, max_chars)
 	{
 		GetString(this->edit_str_buf, str, &this->edit_str_buf[max_bytes - 1]);
@@ -1382,7 +1374,7 @@ struct QueryStringWindow : public QueryStringBaseWindow
 		this->caption = caption;
 		this->afilter = afilter;
 		this->flags = flags;
-		InitializeTextBuffer(&this->text, this->edit_str_buf, max_bytes, max_chars, max_pixels);
+		InitializeTextBuffer(&this->text, this->edit_str_buf, max_bytes, max_chars);
 
 		this->InitNested(desc);
 
@@ -1508,16 +1500,15 @@ static const WindowDesc _query_string_desc(
  * @param str StringID for the text shown in the textbox
  * @param caption StringID of text shown in caption of querywindow
  * @param maxsize maximum size in bytes or characters (including terminating '\0') depending on flags
- * @param maxwidth maximum width in pixels allowed
  * @param parent pointer to a Window that will handle the events (ok/cancel) of this
  *        window. If NULL, results are handled by global function HandleOnEditText
  * @param afilter filters out unwanted character input
  * @param flags various flags, @see QueryStringFlags
  */
-void ShowQueryString(StringID str, StringID caption, uint maxsize, uint maxwidth, Window *parent, CharSetFilter afilter, QueryStringFlags flags)
+void ShowQueryString(StringID str, StringID caption, uint maxsize, Window *parent, CharSetFilter afilter, QueryStringFlags flags)
 {
 	DeleteWindowById(WC_QUERY_STRING, 0);
-	new QueryStringWindow(str, caption, ((flags & QSF_LEN_IN_CHARS) ? MAX_CHAR_LENGTH : 1) * maxsize, maxsize, maxwidth, &_query_string_desc, parent, afilter, flags);
+	new QueryStringWindow(str, caption, ((flags & QSF_LEN_IN_CHARS) ? MAX_CHAR_LENGTH : 1) * maxsize, maxsize, &_query_string_desc, parent, afilter, flags);
 }
 
 
