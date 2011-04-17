@@ -47,15 +47,21 @@ struct CYapfRouteLinkNodeKeyT {
 struct CYapfRouteLinkNodeT : public CYapfNodeT<CYapfRouteLinkNodeKeyT, CYapfRouteLinkNodeT> {
 	typedef CYapfNodeT<CYapfRouteLinkNodeKeyT, CYapfRouteLinkNodeT> Base;
 
+	uint m_num_transfers; ///< Number of transfers to reach this node.
+
 	/** Initialize this node. */
 	FORCEINLINE void Set(CYapfRouteLinkNodeT *parent, RouteLink *link)
 	{
 		Base::Set(parent, false);
 		this->m_key.Set(link);
+		this->m_num_transfers = (parent != NULL) ? parent->m_num_transfers : 0;
 	}
 
 	/** Get the route link of this node. */
 	FORCEINLINE RouteLink *GetRouteLink() const { return this->m_key.m_link; }
+
+	/** Get the number of transfers needed to reach this node. */
+	FORCEINLINE int GetNumberOfTransfers() const { return this->m_num_transfers; }
 };
 
 typedef CNodeList_HashTableT<CYapfRouteLinkNodeT, 8, 10, 2048> CRouteLinkNodeList;
@@ -93,7 +99,7 @@ class CYapfCostRouteLinkT {
 	FORCEINLINE const Tpf& Yapf() const { return *static_cast<const Tpf*>(this); }
 
 	/** Check if this is a valid connection. */
-	FORCEINLINE bool ValidLink(const RouteLink *link, const RouteLink *parent) const
+	FORCEINLINE bool ValidLink(Node &n, const RouteLink *link, const RouteLink *parent) const
 	{
 		/* If the parent link has an owner, and the owner is different to
 		 * the new owner, discard the node. Otherwise cargo could switch
@@ -107,6 +113,9 @@ class CYapfCostRouteLinkT {
 
 			/* Can't transfer if the last order prohibits unloading. */
 			if (parent->GetDestOrderId() != INVALID_ORDER && (Order::Get(parent->GetDestOrderId())->GetUnloadType() & OUFB_NO_UNLOAD) != 0) return false;
+
+			/* Increase transfer counter and stop if max number of transfers is exceeded. */
+			if (++n.m_num_transfers > Yapf().PfGetSettings().route_max_transfers) return false;
 		}
 
 		return true;
@@ -150,7 +159,7 @@ public:
 			RouteLink *parent = n.m_parent->GetRouteLink();
 
 			/* Check if the link is a valid connection. */
-			if (!this->ValidLink(link, parent)) return false;
+			if (!this->ValidLink(n, link, parent)) return false;
 
 			/* Cost of the single route link. */
 			segment_cost += this->RouteLinkCost(link, parent);
