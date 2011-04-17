@@ -155,7 +155,7 @@ struct SignListWindow : QueryStringBaseWindow, SignList {
 
 		/* Initialize the text edit widget */
 		this->afilter = CS_ALPHANUMERAL;
-		InitializeTextBuffer(&this->text, this->edit_str_buf, MAX_LENGTH_SIGN_NAME_CHARS * MAX_CHAR_LENGTH, MAX_LENGTH_SIGN_NAME_CHARS, MAX_LENGTH_SIGN_NAME_PIXELS);
+		InitializeTextBuffer(&this->text, this->edit_str_buf, MAX_LENGTH_SIGN_NAME_CHARS * MAX_CHAR_LENGTH, MAX_LENGTH_SIGN_NAME_CHARS);
 		ClearFilterTextWidget();
 
 		/* Initialize the filtering variables */
@@ -289,8 +289,8 @@ struct SignListWindow : QueryStringBaseWindow, SignList {
 			case SLW_LIST: {
 				Dimension spr_dim = GetSpriteSize(SPR_COMPANY_ICON);
 				this->text_offset = WD_FRAMETEXT_LEFT + spr_dim.width + 2; // 2 pixels space between icon and the sign text.
-				resize->height = max<uint>(FONT_HEIGHT_NORMAL, GetSpriteSize(SPR_COMPANY_ICON).height);
-				Dimension d = {this->text_offset + MAX_LENGTH_SIGN_NAME_PIXELS + WD_FRAMETEXT_RIGHT, WD_FRAMERECT_TOP + 5 * resize->height + WD_FRAMERECT_BOTTOM};
+				resize->height = max<uint>(FONT_HEIGHT_NORMAL, spr_dim.height);
+				Dimension d = {this->text_offset + WD_FRAMETEXT_RIGHT, WD_FRAMERECT_TOP + 5 * resize->height + WD_FRAMERECT_BOTTOM};
 				*size = maxdim(*size, d);
 				break;
 			}
@@ -403,7 +403,7 @@ static const NWidgetPart _nested_sign_list_widgets[] = {
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
 		NWidget(NWID_VERTICAL),
-			NWidget(WWT_PANEL, COLOUR_GREY, SLW_LIST), SetMinimalSize(WD_FRAMETEXT_LEFT + 16 + MAX_LENGTH_SIGN_NAME_PIXELS + WD_FRAMETEXT_RIGHT, 50),
+			NWidget(WWT_PANEL, COLOUR_GREY, SLW_LIST), SetMinimalSize(WD_FRAMETEXT_LEFT + 16 + 255 + WD_FRAMETEXT_RIGHT, 50),
 								SetResize(1, 10), SetFill(1, 0), SetScrollbar(SLW_SCROLLBAR), EndContainer(),
 			NWidget(NWID_HORIZONTAL),
 				NWidget(WWT_PANEL, COLOUR_GREY), SetFill(1, 1),
@@ -502,7 +502,7 @@ struct SignWindow : QueryStringBaseWindow, SignList {
 		*last_of = '\0';
 
 		this->cur_sign = si->index;
-		InitializeTextBuffer(&this->text, this->edit_str_buf, this->edit_str_size, this->max_chars, MAX_LENGTH_SIGN_NAME_PIXELS);
+		InitializeTextBuffer(&this->text, this->edit_str_buf, this->edit_str_size, this->max_chars);
 
 		this->SetWidgetDirty(QUERY_EDIT_SIGN_WIDGET_TEXT);
 		this->SetFocusedWidget(QUERY_EDIT_SIGN_WIDGET_TEXT);
