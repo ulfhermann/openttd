@@ -1755,7 +1755,7 @@ struct GameSettingsWindow : Window {
 
 				this->valuewindow_entry = pe;
 				SetDParam(0, value);
-				ShowQueryString(STR_JUST_INT, STR_CONFIG_SETTING_QUERY_CAPTION, 10, 100, this, CS_NUMERAL, QSF_ENABLE_DEFAULT);
+				ShowQueryString(STR_JUST_INT, STR_CONFIG_SETTING_QUERY_CAPTION, 10, this, CS_NUMERAL, QSF_ENABLE_DEFAULT);
 			}
 		}
 	}
@@ -2008,7 +2008,7 @@ struct CustomCurrencyWindow : Window {
 
 		if (len != 0) {
 			this->query_widget = line;
-			ShowQueryString(str, STR_CURRENCY_CHANGE_PARAMETER, len + 1, 250, this, afilter, QSF_NONE);
+			ShowQueryString(str, STR_CURRENCY_CHANGE_PARAMETER, len + 1, this, afilter, QSF_NONE);
 		}
 
 		this->flags4 |= WF_TIMEOUT_BEGIN;
