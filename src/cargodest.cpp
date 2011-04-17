@@ -24,6 +24,7 @@
 #include "vehicle_base.h"
 #include "station_base.h"
 #include "pathfinder/yapf/yapf.h"
+#include "company_base.h"
 
 
 static const uint MAX_EXTRA_LINKS       = 2;    ///< Number of extra links allowed.
@@ -706,6 +707,139 @@ void UpdateCargoLinks()
 
 	/* Something went wrong here... */
 	NOT_REACHED();
+}
+
+/** Enumerate all towns accepting a specific cargo. */
+static bool EnumAcceptingTown(const Town *t, void *data)
+{
+	return t->AcceptsCargo((CargoID)(size_t)data);
+}
+
+/** Enumerate all industries accepting a specific cargo. */
+static bool EnumAcceptingIndustry(const Industry *ind, void *data)
+{
+	return ind->AcceptsCargo((CargoID)(size_t)data);
+}
+
+/**
+ * Move cargo to a station with destination information.
+ * @param cid Cargo type.
+ * @param amount[in,out] Cargo amount, return is actually moved cargo.
+ * @param source_type Type of the cargo source.
+ * @param source_id ID of the cargo source.
+ * @param all_stations List of possible target stations.
+ * @param src_tile Source tile.
+ * @return True if the cargo was handled has having destinations.
+ */
+bool MoveCargoWithDestinationToStation(CargoID cid, uint *amount, SourceType source_type, SourceID source_id, const StationList *all_stations, TileIndex src_tile)
+{
+	if (!CargoHasDestinations(cid)) return false;
+
+	CargoSourceSink *source = NULL;
+	CargoSourceSink *dest = NULL;
+	CargoLink *l = NULL;
+
+	/* Company HQ doesn't have cargo links. */
+	if (source_type != ST_HEADQUARTERS) {
+		source = source_type == ST_TOWN ? static_cast<CargoSourceSink *>(Town::Get(source_id)) : static_cast<CargoSourceSink *>(Industry::Get(source_id));
+		/* No links yet? Create cargo without destination. */
+		if (source->cargo_links[cid].Length() == 0) return false;
+
+		/* Randomly choose a cargo link. */
+		uint weight = RandomRange(source->cargo_links_weight[cid] - 1);
+		uint cur_sum = 0;
+
+		for (l = source->cargo_links[cid].Begin(); l != source->cargo_links[cid].End(); l++) {
+			cur_sum += l->weight;
+			if (weight < cur_sum) {
+				/* Link is valid if it is random destination or accepts the cargo. */
+				if (l->dest == NULL || l->dest->AcceptsCargo(cid)) break;
+			}
+		}
+
+		if (l != source->cargo_links[cid].End()) {
+			l->amount.new_max += *amount;
+			dest = l->dest;
+		}
+	}
+
+	/* No destination or random destination? Try a random town. */
+	if (dest == NULL) dest = Town::GetRandom(&EnumAcceptingTown, INVALID_TOWN, (void *)(size_t)cid);
+	/* No luck? Try a random industry. */
+	if (dest == NULL) dest = Industry::GetRandom(&EnumAcceptingIndustry, INVALID_INDUSTRY, (void *)(size_t)cid);
+	/* Still no luck, nothing left to try. */
+	if (dest == NULL) return false;
+
+	/* Pick a tile that belongs to the destination. */
+	TileArea dest_area = dest->GetTileForDestination(cid);
+
+	/* Maximum pathfinder penalty based on distance. */
+	uint r = RandomRange(_settings_game.economy.cargodest.max_route_penalty[1]);
+	uint max_cost = _settings_game.economy.cargodest.max_route_penalty[0] + r;
+	max_cost *= DistanceSquare(src_tile, dest_area.tile);
+
+	/* Randomly determine the routing flags for the packet.
+	 * Right now only the two lowest bits are defined. */
+	byte flags = r & 0x3;
+
+	/* Find a route to the destination. */
+	StationID st, st_unload;
+	bool found = false;
+	RouteLink *route_link = YapfChooseRouteLink(cid, all_stations, src_tile, dest_area, &st, &st_unload, flags, &found, INVALID_ORDER, max_cost);
+
+	/* Cargo can move to the destination (it might be direct local
+	 * delivery though), count it as actually transported. */
+	if (found && l != NULL) l->amount.new_act += *amount * (route_link == NULL ? 256 : Station::Get(st)->goods[cid].rating + 1) / 256;
+
+	if (route_link == NULL) {
+		/* No suitable link found (or direct delivery), nothing
+		 * is moved to the station. */
+		*amount = 0;
+		return true;
+	}
+
+	/* Move cargo to the station. */
+	Station *from = Station::Get(st);
+	*amount = UpdateStationWaiting(from, cid, *amount * from->goods[cid].rating, source_type, source_id, dest_area.tile, dest->GetType(), dest->GetID(), route_link->GetOriginOrderId(), st_unload, flags);
+
+	/* If this is a symmetric cargo type, try to generate some cargo going from
+	 * destination to source as well. It's no error if that is not possible. */
+	if (IsSymmetricCargo(cid)) {
+		/* Try to find the matching cargo link back to the source. If no
+		 * link is found, don't generate return traffic. */
+		CargoLink *back_link = dest->cargo_links[cid].Find(CargoLink(source));
+		if (back_link == dest->cargo_links[cid].End()) return true;
+
+		back_link->amount.new_max += *amount;
+
+		/* Find stations around the new source area. */
+		StationFinder stf(dest_area);
+		TileIndex tile = dest_area.tile;
+
+		/* The the new destination area. */
+		switch (source_type) {
+			case ST_INDUSTRY:
+				dest_area = static_cast<Industry *>(source)->location;
+				break;
+			case ST_TOWN:
+				dest_area = TileArea(src_tile, 2, 2);
+				break;
+			case ST_HEADQUARTERS:
+				dest_area = TileArea(Company::Get(source_id)->location_of_HQ, 2, 2);
+				break;
+		}
+
+		/* Find a route and update transported amount if found. */
+		route_link = YapfChooseRouteLink(cid, stf.GetStations(), tile, dest_area, &st, &st_unload, flags, &found, INVALID_ORDER, max_cost);
+		if (found) back_link->amount.new_act += *amount;
+
+		if (route_link != NULL) {
+			/* Found a back link, move to station. */
+			UpdateStationWaiting(Station::Get(st), cid, *amount * 256, dest->GetType(), dest->GetID(), dest_area.tile, source_type, source_id, route_link->GetOriginOrderId(), st_unload, flags);
+		}
+	}
+
+	return true;
 }
 
 /**
