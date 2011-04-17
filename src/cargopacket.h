@@ -339,6 +339,8 @@ public:
 
 	void InvalidateCache();
 
+	void InvalidateNextStation();
+
 	/**
 	 * Are two the two CargoPackets mergeable in the context of
 	 * a list of CargoPackets for a Vehicle?

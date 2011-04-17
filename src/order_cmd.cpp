@@ -985,6 +985,9 @@ void DeleteOrder(Vehicle *v, VehicleOrderID sel_ord)
 
 		/* Update any possible open window of the vehicle */
 		InvalidateVehicleOrder(u, sel_ord | (INVALID_VEH_ORDER_ID << 8));
+
+		/* Clear the next unload station of all cargo packets, it might not be in the orders anymore. */
+		u->cargo.InvalidateNextStation();
 	}
 
 	/* As we delete an order, the order to skip to will be 'wrong'. */
@@ -1372,6 +1375,9 @@ CommandCost CmdModifyOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 				u->current_order.SetLoadType(order->GetLoadType());
 			}
 			InvalidateVehicleOrder(u, -2);
+
+			/* Invalidate the next unload station of all packets as we might not unload there anymore. */
+			u->cargo.InvalidateNextStation();
 		}
 	}
 
@@ -1732,6 +1738,9 @@ void DeleteVehicleOrders(Vehicle *v, bool keep_orderlist, bool reset_order_indic
 		v->orders.list->FreeChain(keep_orderlist);
 		if (!keep_orderlist) v->orders.list = NULL;
 	}
+
+	/* Invalidate the next unload station of all cargo. */
+	v->cargo.InvalidateNextStation();
 
 	if (reset_order_indices) {
 		v->cur_auto_order_index = v->cur_real_order_index = 0;

@@ -426,6 +426,14 @@ void VehicleCargoList::InvalidateCache()
 	this->Parent::InvalidateCache();
 }
 
+/** Invalidate next unload station of all cargo packets. */
+void VehicleCargoList::InvalidateNextStation()
+{
+	for (ConstIterator it(this->packets.begin()); it != this->packets.end(); it++) {
+		(*it)->next_station = INVALID_STATION;
+	}
+}
+
 /*
  * We have to instantiate everything we want to be usable.
  */
