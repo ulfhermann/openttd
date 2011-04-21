@@ -1347,9 +1347,6 @@ STR_CONFIG_SETTING_PATHFINDER_YAPF_RECOMMENDED                  :YAPF {BLUE}(Rec
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS                        :{LTBLUE}Sistema de encaminhar comboios: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES                 :{LTBLUE}Sistema de encaminhar veículos de estrada: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS                         :{LTBLUE}Sistema de encaminhar barcos: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_OPF                     :Original {BLUE}(Recomendado)
-STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_NPF                     :NPF
-STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_YAPF                    :YAPF {RED}(Não recomendado)
 STR_CONFIG_SETTING_REVERSE_AT_SIGNALS                           :{LTBLUE}Inversão automática nos sinais: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_QUERY_CAPTION                                :{WHITE}Alterar valor
@@ -3804,7 +3801,7 @@ STR_TOWN_BUILDING_NAME_STADIUM_2                                :Estádio
 STR_TOWN_BUILDING_NAME_OFFICES_1                                :Escritórios
 STR_TOWN_BUILDING_NAME_HOUSES_2                                 :Casas
 STR_TOWN_BUILDING_NAME_CINEMA_1                                 :Cinema
-STR_TOWN_BUILDING_NAME_SHOPPING_MALL_1                          :Centro Comercial
+STR_TOWN_BUILDING_NAME_SHOPPING_MALL_1                          :Centro comercial
 STR_TOWN_BUILDING_NAME_IGLOO_1                                  :Iglu
 STR_TOWN_BUILDING_NAME_TEPEES_1                                 :Tipis
 STR_TOWN_BUILDING_NAME_TEAPOT_HOUSE_1                           :Casa-bule
