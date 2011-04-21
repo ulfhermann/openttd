@@ -1496,15 +1496,13 @@ STR_CONFIG_SETTING_VEHICLES_TRAINS                              :{ORANGE}Пое�
 STR_CONFIG_SETTING_ECONOMY_TOWNS                                :{ORANGE}Города
 STR_CONFIG_SETTING_ECONOMY_INDUSTRIES                           :{ORANGE}Промышленность
 
+STR_CONFIG_SETTING_PATHFINDER_OPF                               :оригинальный
 STR_CONFIG_SETTING_PATHFINDER_NPF                               :NPF
 STR_CONFIG_SETTING_PATHFINDER_YAPF_RECOMMENDED                  :YAPF {BLUE}(Рекомендуется)
 
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS                        :{LTBLUE}Алгоритм поиска пути для поездов: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES                 :{LTBLUE}Алгоритм поиска пути для автотранспорта: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS                         :{LTBLUE}Алгоритм поиска пути для кораблей: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_OPF                     :Оригинальный {BLUE}(Рекомендуется)
-STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_NPF                     :NPF
-STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_YAPF                    :YAPF {RED}(Не рекомендуется)
 STR_CONFIG_SETTING_REVERSE_AT_SIGNALS                           :{LTBLUE}Автоматический разворот у сигналов: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_QUERY_CAPTION                                :{WHITE}Изменить значение
@@ -3922,6 +3920,7 @@ STR_ERROR_VEHICLE_IS_DESTROYED                                  :{WHITE}... тр
 # Specific vehicle errors
 STR_ERROR_CAN_T_MAKE_TRAIN_PASS_SIGNAL                          :{WHITE}Невозможно игнорировать светофор. Опасно...
 STR_ERROR_CAN_T_REVERSE_DIRECTION_TRAIN                         :{WHITE}Не удалось развернуть поезд...
+STR_ERROR_TRAIN_START_NO_POWER                                  :У поезда нет тяги
 
 STR_ERROR_CAN_T_MAKE_ROAD_VEHICLE_TURN                          :{WHITE}Невозможно развернуть автомобиль...
 
