@@ -1403,9 +1403,6 @@ STR_CONFIG_SETTING_PATHFINDER_YAPF_RECOMMENDED                  :YAPF {BLUE}(soo
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS                        :{LTBLUE}Rongide marsruudileidja: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES                 :{LTBLUE}Maanteesõidukite marsruudileidja: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS                         :{LTBLUE}Laevade marsruudileidja: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_OPF                     :Algne {BLUE}(soovitatud)
-STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_NPF                     :NPF
-STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_YAPF                    :YAPF {RED}(ebasoovitatav)
 STR_CONFIG_SETTING_REVERSE_AT_SIGNALS                           :{LTBLUE}Automaatne tagasipööre signaalide juures: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_QUERY_CAPTION                                :{WHITE}Muuda seadete väärtusi
@@ -4284,6 +4281,7 @@ STR_TINY_BLACK_COMA                                             :{TINYFONT}{BLAC
 STR_TINY_COMMA                                                  :{TINYFONT}{COMMA}
 STR_BLUE_COMMA                                                  :{BLUE}{COMMA}
 STR_RED_COMMA                                                   :{RED}{COMMA}
+STR_TINY_BLACK_DECIMAL                                          :{TINYFONT}{BLACK}{DECIMAL}
 STR_COMPANY_MONEY                                               :{WHITE}{CURRENCY}
 STR_BLACK_DATE_LONG                                             :{BLACK}{DATE_LONG}
 STR_BLACK_CROSS                                                 :{BLACK}{CROSS}
