@@ -1663,9 +1663,6 @@ STR_CONFIG_SETTING_PATHFINDER_YAPF_RECOMMENDED                  :YAPF {BLUE}(р�
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS                        :{LTBLUE}Альгарытм пошуку шляху для цягнікоў: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES                 :{LTBLUE}Альгарытм пошуку шляху для аўтатранспарту: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS                         :{LTBLUE}Альгарытм пошуку шляху для караблёў: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_OPF                     :арыгінальны {BLUE}(рэкамендуецца)
-STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_NPF                     :NPF
-STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_YAPF                    :YAPF {RED}(не рэкамэндуецца)
 STR_CONFIG_SETTING_REVERSE_AT_SIGNALS                           :{LTBLUE}Аўтаматычны разварот перад сыгналамi: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_QUERY_CAPTION                                :{WHITE}Зьмяніць значэньне
@@ -4093,6 +4090,7 @@ STR_ERROR_VEHICLE_IS_DESTROYED                                  :{WHITE}... тр
 # Specific vehicle errors
 STR_ERROR_CAN_T_MAKE_TRAIN_PASS_SIGNAL                          :{WHITE}Немагчыма ігнараваць сыгнал. Небяспечна...
 STR_ERROR_CAN_T_REVERSE_DIRECTION_TRAIN                         :{WHITE}Не атрымалася завярнуць цягнік...
+STR_ERROR_TRAIN_START_NO_POWER                                  :У цягніка няма цягі
 
 STR_ERROR_CAN_T_MAKE_ROAD_VEHICLE_TURN                          :{WHITE}Немагчыма завярнуць аўтамабіль...
 
