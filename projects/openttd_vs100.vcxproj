@@ -387,6 +387,7 @@
     <ClInclude Include="..\src\bridge.h" />
     <ClInclude Include="..\src\cargo_type.h" />
     <ClInclude Include="..\src\cargodest_base.h" />
+    <ClInclude Include="..\src\cargodest_gui.h" />
     <ClInclude Include="..\src\cargopacket.h" />
     <ClInclude Include="..\src\cargotype.h" />
     <ClInclude Include="..\src\cheat_func.h" />
@@ -637,6 +638,7 @@
     <ClCompile Include="..\src\autoreplace_gui.cpp" />
     <ClCompile Include="..\src\bridge_gui.cpp" />
     <ClCompile Include="..\src\build_vehicle_gui.cpp" />
+    <ClCompile Include="..\src\cargodest_gui.cpp" />
     <ClCompile Include="..\src\cheat_gui.cpp" />
     <ClCompile Include="..\src\company_gui.cpp" />
     <ClCompile Include="..\src\console_gui.cpp" />

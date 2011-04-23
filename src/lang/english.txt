@@ -2526,6 +2526,13 @@ STR_EDIT_SIGN_PREVIOUS_SIGN_TOOLTIP                             :{BLACK}Go to pr
 
 STR_EDIT_SIGN_SIGN_OSKTITLE                                     :{BLACK}Enter a name for the sign
 
+# Cargodest UI strings
+STR_VIEW_CARGO_LAST_MONTH_OUT                                   :{BLACK}Outgoing cargo last month:
+STR_VIEW_CARGO_LAST_MONTH_TOWN                                  :{BLACK}{SHORTCARGO} out of {CARGO} to {TOWN}
+STR_VIEW_CARGO_LAST_MONTH_INDUSTRY                              :{BLACK}{SHORTCARGO} out of {CARGO} to {INDUSTRY}
+STR_VIEW_CARGO_LAST_MONTH_LOCAL                                 :{BLACK}{SHORTCARGO} out of {CARGO} to local destinations
+STR_VIEW_CARGO_LAST_MONTH_OTHER                                 :{BLACK}{SHORTCARGO} out of {CARGO} to other destinations
+
 # Town directory window
 STR_TOWN_DIRECTORY_CAPTION                                      :{WHITE}Towns
 STR_TOWN_DIRECTORY_NONE                                         :{ORANGE}- None -
