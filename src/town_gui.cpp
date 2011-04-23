@@ -31,6 +31,7 @@
 #include "townname_func.h"
 #include "core/geometry_func.hpp"
 #include "genworld.h"
+#include "cargodest_gui.h"
 #include "widgets/dropdown_func.h"
 
 #include "widgets/town_widget.h"
@@ -299,10 +300,12 @@ struct TownViewWindow : Window {
 private:
 	Town *town; ///< Town displayed by the window.
 
+	CargoDestinationList dest_list; ///< Sorted list of demand destinations.
+
 public:
 	static const int WID_TV_HEIGHT_NORMAL = 150;
 
-	TownViewWindow(WindowDesc *desc, WindowNumber window_number) : Window(desc)
+	TownViewWindow(WindowDesc *desc, WindowNumber window_number) : Window(desc), dest_list(Town::Get(window_number))
 	{
 		this->CreateNestedTree();
 
@@ -406,6 +409,7 @@ public:
 			SetDParamStr(0, this->town->text);
 			DrawStringMultiLine(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_LEFT, y += FONT_HEIGHT_NORMAL, UINT16_MAX, STR_JUST_RAW_STRING, TC_BLACK);
 		}
+		this->dest_list.DrawList(r.left, r.right, y);
 	}
 
 	virtual void OnClick(Point pt, int widget, int click_count)
@@ -484,6 +488,7 @@ public:
 			SetDParamStr(0, this->town->text);
 			aimed_height += GetStringHeight(STR_JUST_RAW_STRING, width);
 		}
+		aimed_height += this->dest_list.GetListHeight();
 
 		return aimed_height;
 	}
@@ -518,6 +523,13 @@ public:
 		/* Called when setting station noise or required cargoes have changed, in order to resize the window */
 		this->SetDirty(); // refresh display for current size. This will allow to avoid glitches when downgrading
 		this->ResizeWindowAsNeeded();
+
+		/* Rebuild destination list if data is not zero, otherwise just resort. */
+		if (data != 0) {
+			this->dest_list.InvalidateData();
+		} else {
+			this->dest_list.Resort();
+		}
 	}
 
 	virtual void OnQueryTextFinished(char *str)
