@@ -33,6 +33,7 @@
 #include "core/geometry_func.hpp"
 #include "genworld.h"
 #include "sprite.h"
+#include "cargodest_gui.h"
 
 #include "table/strings.h"
 
@@ -318,10 +319,12 @@ struct TownViewWindow : Window {
 private:
 	Town *town; ///< Town displayed by the window.
 
+	CargoDestinationList dest_list; ///< Sorted list of demand destinations.
+
 public:
 	static const int TVW_HEIGHT_NORMAL = 150;
 
-	TownViewWindow(const WindowDesc *desc, WindowNumber window_number) : Window()
+	TownViewWindow(const WindowDesc *desc, WindowNumber window_number) : Window(), dest_list(Town::Get(window_number))
 	{
 		this->CreateNestedTree(desc);
 
@@ -432,6 +435,8 @@ public:
 			SetDParam(1, this->town->MaxTownNoise());
 			DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_LEFT, y += FONT_HEIGHT_NORMAL, STR_TOWN_VIEW_NOISE_IN_TOWN);
 		}
+
+		this->dest_list.DrawList(r.left, r.right, y);
 	}
 
 	virtual void OnClick(Point pt, int widget, int click_count)
@@ -504,6 +509,8 @@ public:
 
 		if (_settings_game.economy.station_noise_level) aimed_height += FONT_HEIGHT_NORMAL;
 
+		aimed_height += this->dest_list.GetListHeight();
+
 		return aimed_height;
 	}
 
@@ -537,6 +544,13 @@ public:
 		/* Called when setting station noise or required cargos have changed, in order to resize the window */
 		this->SetDirty(); // refresh display for current size. This will allow to avoid glitches when downgrading
 		this->ResizeWindowAsNeeded();
+
+		/* Rebuild destination list if data is not zero, otherwise just resort. */
+		if (data != 0) {
+			this->dest_list.InvalidateData();
+		} else {
+			this->dest_list.Resort();
+		}
 	}
 
 	virtual void OnQueryTextFinished(char *str)

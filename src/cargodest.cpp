@@ -20,14 +20,20 @@
 	Town *t;
 	FOR_ALL_TOWNS(t) {
 		for (CargoID cid = 0; cid < NUM_CARGO; cid++) {
-			if (t->HasLinkTo(cid, this)) t->cargo_links[cid].Erase(t->cargo_links[cid].Find(CargoLink(this)));
+			if (t->HasLinkTo(cid, this)) {
+				t->cargo_links[cid].Erase(t->cargo_links[cid].Find(CargoLink(this)));
+				InvalidateWindowData(WC_TOWN_VIEW, t->index, 1);
+			}
 		}
 	}
 
 	Industry *ind;
 	FOR_ALL_INDUSTRIES(ind) {
 		for (CargoID cid = 0; cid < NUM_CARGO; cid++) {
-			if (ind->HasLinkTo(cid, this)) ind->cargo_links[cid].Erase(ind->cargo_links[cid].Find(CargoLink(this)));
+			if (ind->HasLinkTo(cid, this)) {
+				ind->cargo_links[cid].Erase(ind->cargo_links[cid].Find(CargoLink(this)));
+				InvalidateWindowData(WC_INDUSTRY_VIEW, ind->index, 1);
+			}
 		}
 	}
 }
