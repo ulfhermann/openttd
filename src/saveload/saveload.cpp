@@ -2422,6 +2422,9 @@ void WaitTillSaved()
 	_save_thread->Join();
 	delete _save_thread;
 	_save_thread = NULL;
+
+	/* Make sure every other state is handled properly as well. */
+	ProcessAsyncSaveFinish();
 }
 
 /**
