@@ -685,6 +685,29 @@ void UpdateCargoLinks()
 }
 
 
+/** Get a random destination tile index for this cargo. */
+/* virtual */ TileArea Town::GetTileForDestination(CargoID cid)
+{
+	assert(this->cargo_accepted_weights[cid] != 0);
+
+	/* Randomly choose a target square. */
+	uint32 weight = RandomRange(this->cargo_accepted_weights[cid] - 1);
+
+	/* Iterate over all grid squares till the chosen square is found. */
+	uint32 weight_sum = 0;
+	const TileArea &area = this->cargo_accepted.GetArea();
+	TILE_AREA_LOOP(tile, area) {
+		if (TileX(tile) % AcceptanceMatrix::GRID == 0 && TileY(tile) % AcceptanceMatrix::GRID == 0) {
+			weight_sum += this->cargo_accepted_max_weight - (DistanceMax(this->xy_aligned, tile) / AcceptanceMatrix::GRID) * 2;
+			/* Return tile area inside the grid square if this is the chosen square. */
+			if (weight < weight_sum) return TileArea(tile + TileDiffXY(1, 1), 2, 2);
+		}
+	}
+
+	/* Something went wrong here... */
+	NOT_REACHED();
+}
+
 /**
  * Get the current best route link for a cargo packet at a station.
  * @param st Station the route starts at.
