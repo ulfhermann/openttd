@@ -14,6 +14,7 @@
 
 #include "cargo_type.h"
 #include "town_type.h"
+#include "tilearea_type.h"
 #include "core/smallvec_type.hpp"
 
 struct CargoSourceSink;
@@ -75,6 +76,9 @@ struct CargoSourceSink {
 
 	/** Create the special cargo links for a cargo if not already present. */
 	virtual void CreateSpecialLinks(CargoID cid);
+
+	/** Get a random destination tile index for this cargo. */
+	virtual TileArea GetTileForDestination(CargoID cid) = 0;
 
 	void SaveCargoSourceSink();
 	void LoadCargoSourceSink();
