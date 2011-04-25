@@ -109,6 +109,11 @@ struct Industry : IndustryPool::PoolItem<&_industry_pool>, CargoSourceSink {
 
 	/* virtual */ uint GetDestinationWeight(CargoID cid, byte weight_mod) const;
 
+	/* virtual */ TileArea GetTileForDestination(CargoID cid)
+	{
+		return this->location;
+	}
+
 	/**
 	 * Check if a given tile belongs to this industry.
 	 * @param tile The tile to check.
