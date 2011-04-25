@@ -92,6 +92,7 @@ class CYapfCostRouteLinkT {
 	typedef typename Types::TrackFollower Follower;      ///< The route follower.
 	typedef typename Types::NodeList::Titem Node;        ///< This will be our node type.
 
+	static const int PENALTY_DIVISOR      = 16;          ///< Penalty factor divisor for fixed-point arithmetics.
 	static const int LOCAL_PENALTY_FACTOR = 20;          ///< Penalty factor for source-local delivery.
 
 	/** To access inherited path finder. */
@@ -135,6 +136,9 @@ class CYapfCostRouteLinkT {
 		if (link->GetOriginOrderId() != parent->GetDestOrderId() || (Order::Get(link->GetOriginOrderId())->GetUnloadType() & OUFB_UNLOAD) != 0) {
 			cost += this->Yapf().PfGetSettings().route_transfer_cost;
 		}
+
+		/* Penalty for travel time. */
+		cost += (link->GetTravelTime() * this->Yapf().PfGetSettings().route_travel_time_factor) / PENALTY_DIVISOR;
 
 		return cost;
 	}
