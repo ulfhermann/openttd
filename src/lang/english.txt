@@ -1626,6 +1626,12 @@ STR_CONFIG_SETTING_LOCALISATION_UNITS_HEIGHT_IMPERIAL           :Imperial (ft)
 STR_CONFIG_SETTING_LOCALISATION_UNITS_HEIGHT_METRIC             :Metric (m)
 STR_CONFIG_SETTING_LOCALISATION_UNITS_HEIGHT_SI                 :SI (m)
 
+STR_CONFIG_SETTING_CARGODEST                                    :{LTBLUE}Enable cargo destinations for: {ORANGE}{STRING1}
+STR_CONFIG_SETTING_CARGODEST_NOTHING                            :Nothing
+STR_CONFIG_SETTING_CARGODEST_TOWN_CARGO                         :Mail and passengers
+STR_CONFIG_SETTING_CARGODEST_INDUSTRY_CARGO                     :Industry cargos
+STR_CONFIG_SETTING_CARGODEST_ALL                                :All cargos
+
 STR_CONFIG_SETTING_GUI                                          :{ORANGE}Interface
 STR_CONFIG_SETTING_LOCALISATION                                 :{ORANGE}Localisation
 STR_CONFIG_SETTING_CONSTRUCTION                                 :{ORANGE}Construction

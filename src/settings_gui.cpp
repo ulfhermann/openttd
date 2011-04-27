@@ -1582,6 +1582,7 @@ static SettingEntry _settings_economy[] = {
 	SettingEntry("difficulty.vehicle_costs"),
 	SettingEntry("difficulty.construction_cost"),
 	SettingEntry("difficulty.disasters"),
+	SettingEntry("economy.cargodest.mode"),
 };
 /** Economy sub-page */
 static SettingsPage _settings_economy_page = {_settings_economy, lengthof(_settings_economy)};

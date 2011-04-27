@@ -20,6 +20,7 @@
 #include "rail_gui.h"
 #include "linkgraph/linkgraph.h"
 #include "saveload/saveload.h"
+#include "cargodest_func.h"
 
 Year      _cur_year;   ///< Current year, starting at 0
 Month     _cur_month;  ///< Current month (0..11)
@@ -242,6 +243,7 @@ static void OnNewMonth()
 	IndustryMonthlyLoop();
 	SubsidyMonthlyLoop();
 	StationMonthlyLoop();
+	UpdateCargoLinks();
 #ifdef ENABLE_NETWORK
 	if (_network_server) NetworkServerMonthlyLoop();
 #endif /* ENABLE_NETWORK */

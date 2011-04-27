@@ -31,6 +31,7 @@
 #include "core/backup_type.hpp"
 #include "progress.h"
 #include "error.h"
+#include "cargodest_func.h"
 #include "game/game.hpp"
 #include "game/game_instance.hpp"
 
@@ -138,6 +139,7 @@ static void _GenerateWorld(void *)
 				GenerateIndustries();
 				GenerateObjects();
 				GenerateTrees();
+				UpdateCargoLinks();
 			}
 		}
 
