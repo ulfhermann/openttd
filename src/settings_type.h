@@ -389,8 +389,11 @@ struct CargodestSettings {
 	uint8  city_town_links;                  ///< additional number of links for cities
 	uint8  town_chances_town[4];             ///< chances a link from a town to a town has a specific destination class (@see FindTownDestination)
 	uint8  town_chances_city[4];             ///< chances a link from a city to a town has a specific destination class (@see FindTownDestination)
+	uint8  random_dest_chance;               ///< percentage for traffic with random destination
 	uint32 big_town_pop[2];                  ///< (0=#BIG_TOWN_POP_MAIL) mail, (1=#BIG_TOWN_POP_PAX) passenger amount to count as a big town
 	uint16 pop_scale_town[4];                ///< population/cargo amount scale divisor for (0=#SCALE_TOWN) all cargos (1=#SCALE_TOWN_BIG) for big towns except (2=#SCALE_TOWN_PAX) passengers (3=#SCALE_TOWN_BIG_PAX) for big towns
+	uint16 min_weight_town[2];               ///< minimum link weight for (0=MIN_WEIGHT_TOWN) all cargos except (1=MIN_WEIGHT_TOWN_PAX) passengers
+	uint16 weight_scale_town[4];             ///< weight scale divisor for (0=#SCALE_TOWN) all cargos (1=#SCALE_TOWN_BIG) for big towns except (2=#SCALE_TOWN_PAX) passengers (3=#SCALE_TOWN_BIG_PAX) for big towns
 	uint32 town_nearby_dist;                 ///< squared distance (on a 256x256 map) inside which a town is considered nearby
 };
 

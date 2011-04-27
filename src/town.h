@@ -145,6 +145,7 @@ struct Town : TownPool::PoolItem<&_town_pool>, CargoSourceSink {
 		return HasBit(this->cargo_produced, cid);
 	}
 
+	/* virtual */ uint GetDestinationWeight(CargoID cid, byte weight_mod) const;
 	/* virtual */ void CreateSpecialLinks(CargoID cid);
 
 	/**
