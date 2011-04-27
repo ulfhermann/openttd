@@ -1474,6 +1474,7 @@ static SettingEntry _settings_economy[] = {
 	SettingEntry("economy.inflation"),
 	SettingEntry("economy.smooth_economy"),
 	SettingEntry("economy.feeder_payment_share"),
+	SettingEntry("economy.cargodest.mode"),
 };
 /** Economy sub-page */
 static SettingsPage _settings_economy_page = {_settings_economy, lengthof(_settings_economy)};

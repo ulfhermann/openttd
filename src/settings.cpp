@@ -61,6 +61,8 @@
 #include "smallmap_gui.h"
 #include "roadveh.h"
 #include "fios.h"
+#include "industry.h"
+#include "cargodest_func.h"
 
 #include "void_map.h"
 #include "station_base.h"
@@ -1148,6 +1150,26 @@ static bool StationCatchmentChanged(int32 p1)
 	return true;
 }
 
+static bool CargodestModeChanged(int32 p1)
+{
+	/* Clear all links for cargoes that aren't routed anymore. */
+	CargoSourceSink *css;
+	FOR_ALL_TOWNS(css) {
+		for (CargoID cid = 0; cid < NUM_CARGO; cid++) {
+			if (!CargoHasDestinations(cid)) css->cargo_links[cid].Clear();
+		}
+	}
+	FOR_ALL_INDUSTRIES(css) {
+		for (CargoID cid = 0; cid < NUM_CARGO; cid++) {
+			if (!CargoHasDestinations(cid)) css->cargo_links[cid].Clear();
+		}
+	}
+
+	/* Update remaining links. */
+	UpdateCargoLinks();
+
+	return true;
+}
 
 #ifdef ENABLE_NETWORK
 
