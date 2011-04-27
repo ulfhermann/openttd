@@ -52,6 +52,7 @@
 #include "../smallmap_gui.h"
 #include "../news_func.h"
 #include "../error.h"
+#include "../cargodest_func.h"
 
 
 #include "saveload_internal.h"
@@ -2814,6 +2815,8 @@ bool AfterLoadGame()
 		FOR_ALL_INDUSTRIES(ind) {
 			UpdateIndustryAcceptance(ind);
 		}
+
+		UpdateCargoLinks();
 	}
 
 	if (IsSavegameVersionBefore(184)) {
