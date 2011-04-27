@@ -29,6 +29,12 @@ static const uint BASE_TOWN_LINKS       = 0; ///< Index into _settings_game.econ
 static const uint BASE_TOWN_LINKS_SYMM  = 1; ///< Index into _settings_game.economy.cargodest.base_town_links for symmteric cargos
 static const uint BASE_IND_LINKS        = 0; ///< Index into _settings_game.economy.cargodest.base_ind_links for normal cargo
 static const uint BASE_IND_LINKS_TOWN   = 1; ///< Index into _settings_game.economy.cargodest.base_ind_links for town cargos
+static const uint BIG_TOWN_POP_MAIL     = 0; ///< Index into _settings_game.economy.cargodest.big_town_pop for mail
+static const uint BIG_TOWN_POP_PAX      = 1; ///< Index into _settings_game.economy.cargodest.big_town_pop for passengers
+static const uint SCALE_TOWN            = 0; ///< Index into _settings_game.economy.cargodest.pop_scale_town for normal cargo
+static const uint SCALE_TOWN_BIG        = 1; ///< Index into _settings_game.economy.cargodest.pop_scale_town for normal cargo of big towns
+static const uint SCALE_TOWN_PAX        = 2; ///< Index into _settings_game.economy.cargodest.pop_scale_town for passengers
+static const uint SCALE_TOWN_BIG_PAX    = 3; ///< Index into _settings_game.economy.cargodest.pop_scale_town for passengers of big towns
 
 /** Are cargo destinations for this cargo type enabled? */
 bool CargoHasDestinations(CargoID cid)
@@ -55,10 +61,18 @@ static bool IsSymmetricCargo(CargoID cid)
 	return spec->town_effect == TE_PASSENGERS;
 }
 
+/** Is this a passenger cargo. */
+static bool IsPassengerCargo(CargoID cid)
+{
+	const CargoSpec *spec = CargoSpec::Get(cid);
+	return spec->town_effect == TE_PASSENGERS;
+}
+
 
 /** Information for the town/industry enumerators. */
 struct EnumRandomData {
 	CargoSourceSink *source;
+	TileIndex       source_xy;
 	CargoID         cid;
 	bool            limit_links;
 };
@@ -82,6 +96,29 @@ static bool EnumAnyTown(const Town *t, void *data)
 	return EnumAnyDest(t, erd) && t->AcceptsCargo(erd->cid);
 }
 
+/** Enumerate cities. */
+static bool EnumCity(const Town *t, void *data)
+{
+	return EnumAnyTown(t, data) && t->larger_town;
+}
+
+/** Enumerate towns with a big population. */
+static bool EnumBigTown(const Town *t, void *data)
+{
+	EnumRandomData *erd = (EnumRandomData *)data;
+	return EnumAnyTown(t, erd) && (IsPassengerCargo(erd->cid) ? t->pass.old_max > _settings_game.economy.cargodest.big_town_pop[BIG_TOWN_POP_PAX] : t->mail.old_max > _settings_game.economy.cargodest.big_town_pop[BIG_TOWN_POP_MAIL]);
+}
+
+/** Enumerate nearby towns. */
+static bool EnumNearbyTown(const Town *t, void *data)
+{
+	EnumRandomData *erd = (EnumRandomData *)data;
+	/* Scale distance by 1D map size to make sure that there are still
+	 * candidates left on larger maps with few towns, but don't scale
+	 * by 2D map size so the map still feels bigger. */
+	return EnumAnyTown(t, data) && DistanceSquare(t->xy, erd->source_xy) < ScaleByMapSize1D(_settings_game.economy.cargodest.town_nearby_dist);
+}
+
 /** Enumerate any industry not already a destination and accepting a specific cargo. */
 static bool EnumAnyIndustry(const Industry *ind, void *data)
 {
@@ -91,17 +128,38 @@ static bool EnumAnyIndustry(const Industry *ind, void *data)
 
 
 /** Find a town as a destination. */
-static CargoSourceSink *FindTownDestination(CargoSourceSink *source, CargoID cid, TownID skip = INVALID_TOWN)
+static CargoSourceSink *FindTownDestination(byte &weight_mod, CargoSourceSink *source, TileIndex source_xy, CargoID cid, const uint8 destclass_chance[4], TownID skip = INVALID_TOWN)
 {
-	EnumRandomData erd = {source, cid, IsSymmetricCargo(cid)};
+	/* Enum functions for: nearby town, city, big town, and any town. */
+	static const Town::EnumTownProc destclass_enum[] = {
+		&EnumNearbyTown, &EnumCity, &EnumBigTown, &EnumAnyTown
+	};
+	static const byte weight_mods[] = {5, 4, 3, 2};
+	assert_compile(lengthof(destclass_enum) == lengthof(weight_mods));
 
-	return Town::GetRandom(&EnumAnyTown, skip, &erd);
+	EnumRandomData erd = {source, source_xy, cid, IsSymmetricCargo(cid)};
+
+	/* Determine destination class. If no town is found in this class,
+	 * the search falls through to the following classes. */
+	byte destclass = RandomRange(destclass_chance[3]);
+
+	weight_mod = 1;
+	Town *dest = NULL;
+	for (uint i = 0; i < lengthof(destclass_enum) && dest == NULL; i++) {
+		/* Skip if destination class not reached. */
+		if (destclass > destclass_chance[i]) continue;
+
+		dest = Town::GetRandom(destclass_enum[i], skip, &erd);
+		weight_mod = weight_mods[i];
+	}
+
+	return dest;
 }
 
 /** Find an industry as a destination. */
 static CargoSourceSink *FindIndustryDestination(CargoSourceSink *source, CargoID cid, IndustryID skip = INVALID_INDUSTRY)
 {
-	EnumRandomData erd = {source, cid, IsSymmetricCargo(cid)};
+	EnumRandomData erd = {source, INVALID_TILE, cid, IsSymmetricCargo(cid)};
 
 	return Industry::GetRandom(&EnumAnyIndustry, skip, &erd);
 }
@@ -167,7 +225,7 @@ static void RemoveLowestLink(CargoSourceSink *source, CargoID cid)
 }
 
 /** Create missing cargo links for a source. */
-static void CreateNewLinks(CargoSourceSink *source, CargoID cid, uint chance_a, uint chance_b, TownID skip_town, IndustryID skip_ind)
+static void CreateNewLinks(CargoSourceSink *source, TileIndex source_xy, CargoID cid, uint chance_a, uint chance_b, const uint8 town_chance[], TownID skip_town, IndustryID skip_ind)
 {
 	uint num_links = source->num_links_expected[cid];
 
@@ -180,16 +238,17 @@ static void CreateNewLinks(CargoSourceSink *source, CargoID cid, uint chance_a, 
 	/* Add new links until the expected link count is reached. */
 	while (source->cargo_links[cid].Length() < num_links) {
 		CargoSourceSink *dest = NULL;
+		byte weight_mod = 1;
 
 		/* Chance for town/industry is chance_a/chance_b, otherwise try industry/town. */
 		if (Chance16(chance_a, chance_b)) {
-			dest = FindTownDestination(source, cid, skip_town);
+			dest = FindTownDestination(weight_mod, source, source_xy, cid, town_chance, skip_town);
 			/* No town found? Try an industry. */
 			if (dest == NULL) dest = FindIndustryDestination(source, cid, skip_ind);
 		} else {
 			dest = FindIndustryDestination(source, cid, skip_ind);
 			/* No industry found? Try a town. */
-			if (dest == NULL) dest = FindTownDestination(source, cid, skip_town);
+			if (dest == NULL) dest = FindTownDestination(weight_mod, source, source_xy, cid, town_chance, skip_town);
 		}
 
 		/* If we didn't find a destination, break out of the loop because no
@@ -198,11 +257,11 @@ static void CreateNewLinks(CargoSourceSink *source, CargoID cid, uint chance_a, 
 
 		/* If this is a symmetric cargo and we accept it as well, create a back link. */
 		if (IsSymmetricCargo(cid) && dest->SuppliesCargo(cid) && source->AcceptsCargo(cid)) {
-			*dest->cargo_links[cid].Append() = CargoLink(source);
+			*dest->cargo_links[cid].Append() = CargoLink(source, weight_mod);
 			source->num_incoming_links[cid]++;
 		}
 
-		*source->cargo_links[cid].Append() = CargoLink(dest);
+		*source->cargo_links[cid].Append() = CargoLink(dest, weight_mod);
 		dest->num_incoming_links[cid]++;
 	}
 }
@@ -241,7 +300,17 @@ void UpdateExpectedLinks(Town *t)
 		if (CargoHasDestinations(cid)) {
 			t->CreateSpecialLinks(cid);
 
+			uint max_amt = IsPassengerCargo(cid) ? t->pass.old_max : t->mail.old_max;
+			uint big_amt = _settings_game.economy.cargodest.big_town_pop[IsPassengerCargo(cid) ? BIG_TOWN_POP_PAX : BIG_TOWN_POP_MAIL];
+
 			uint num_links = _settings_game.economy.cargodest.base_town_links[IsSymmetricCargo(cid) ? BASE_TOWN_LINKS_SYMM : BASE_TOWN_LINKS];
+			/* Add links based on the available cargo amount. */
+			num_links += min(max_amt, big_amt) / _settings_game.economy.cargodest.pop_scale_town[IsPassengerCargo(cid) ? SCALE_TOWN_PAX : SCALE_TOWN];
+			if (max_amt > big_amt) num_links += (max_amt - big_amt) / _settings_game.economy.cargodest.pop_scale_town[IsPassengerCargo(cid) ? SCALE_TOWN_BIG_PAX : SCALE_TOWN_BIG];
+			/* Ensure a city has at least city_town_links more than the base value.
+			 * This improves the link distribution at the beginning of a game when
+			 * the towns are still small. */
+			if (t->larger_town) num_links = max<uint>(num_links, _settings_game.economy.cargodest.city_town_links + _settings_game.economy.cargodest.base_town_links[IsSymmetricCargo(cid) ? BASE_TOWN_LINKS_SYMM : BASE_TOWN_LINKS]);
 
 			/* Account for the two special links. */
 			num_links++;
@@ -281,7 +350,7 @@ void UpdateCargoLinks(Town *t)
 		if (CargoHasDestinations(cid)) {
 			/* If this is a town cargo, 95% chance for town/industry destination and
 			 * 5% for industry/town. The reverse chance otherwise. */
-			CreateNewLinks(t, cid, IsTownCargo(cid) ? 19 : 1, 20, t->index, INVALID_INDUSTRY);
+			CreateNewLinks(t, t->xy, cid, IsTownCargo(cid) ? 19 : 1, 20, t->larger_town ? _settings_game.economy.cargodest.town_chances_city : _settings_game.economy.cargodest.town_chances_town, t->index, INVALID_INDUSTRY);
 		}
 	}
 }
@@ -296,7 +365,7 @@ void UpdateCargoLinks(Industry *ind)
 		if (CargoHasDestinations(cid)) {
 			/* If this is a town cargo, 75% chance for town/industry destination and
 			 * 25% for industry/town. The reverse chance otherwise. */
-			CreateNewLinks(ind, cid, IsTownCargo(cid) ? 3 : 1, 4, INVALID_TOWN, ind->index);
+			CreateNewLinks(ind, ind->location.tile, cid, IsTownCargo(cid) ? 3 : 1, 4, _settings_game.economy.cargodest.town_chances_town, INVALID_TOWN, ind->index);
 		}
 	}
 }
