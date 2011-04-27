@@ -395,7 +395,9 @@ struct CargodestSettings {
 	uint16 pop_scale_town[4];                ///< population/cargo amount scale divisor for (0=#SCALE_TOWN) all cargos (1=#SCALE_TOWN_BIG) for big towns except (2=#SCALE_TOWN_PAX) passengers (3=#SCALE_TOWN_BIG_PAX) for big towns
 	uint16 cargo_scale_ind[2];               ///< cargo amount scale divisor for (0=#CARGO_SCALE_IND) all cargos except (1=#CARGO_SCALE_IND_TOWN) town cargos
 	uint16 min_weight_town[2];               ///< minimum link weight for (0=MIN_WEIGHT_TOWN) all cargos except (1=MIN_WEIGHT_TOWN_PAX) passengers
+	uint16 min_weight_ind;                   ///< minimum link weight for industry links
 	uint16 weight_scale_town[4];             ///< weight scale divisor for (0=#SCALE_TOWN) all cargos (1=#SCALE_TOWN_BIG) for big towns except (2=#SCALE_TOWN_PAX) passengers (3=#SCALE_TOWN_BIG_PAX) for big towns
+	uint16 weight_scale_ind[2];              ///< weight scale divisor for (0=#WEIGHT_SCALE_IND_PROD) produced cargo (1=#WEIGHT_SCALE_IND_PILE) stockpiled cargo
 	uint32 town_nearby_dist;                 ///< squared distance (on a 256x256 map) inside which a town is considered nearby
 	uint32 ind_nearby_dist;                  ///< squared distance (on a 256x256 map) inside which an industry is considered nearby
 };
