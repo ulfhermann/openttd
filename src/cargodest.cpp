@@ -22,8 +22,9 @@
 #include "window_func.h"
 
 
-static const uint MAX_EXTRA_LINKS       = 2; ///< Number of extra links allowed.
-static const byte INTOWN_LINK_WEIGHTMOD = 8; ///< Weight modifier for in-town links.
+static const uint MAX_EXTRA_LINKS       = 2;    ///< Number of extra links allowed.
+static const byte INTOWN_LINK_WEIGHTMOD = 8;    ///< Weight modifier for in-town links.
+static const uint MAX_IND_STOCKPILE     = 1000; ///< Maximum stockpile to consider for industry link weight.
 
 static const uint BASE_TOWN_LINKS       = 0; ///< Index into _settings_game.economy.cargodest.base_town_links for normal cargo
 static const uint BASE_TOWN_LINKS_SYMM  = 1; ///< Index into _settings_game.economy.cargodest.base_town_links for symmteric cargos
@@ -40,6 +41,8 @@ static const uint CARGO_SCALE_IND       = 0; ///< Index into _settings_game.econ
 static const uint CARGO_SCALE_IND_TOWN  = 1; ///< Index into _settings_game.economy.cargodest.cargo_scale_ind for town cargos
 static const uint MIN_WEIGHT_TOWN       = 0; ///< Index into _settings_game.economy.cargodest.min_weight_town for normal cargo
 static const uint MIN_WEIGHT_TOWN_PAX   = 1; ///< Index into _settings_game.economy.cargodest.min_weight_town for passengers
+static const uint WEIGHT_SCALE_IND_PROD = 0; ///< Index into _settings_game.economy.cargodest.weight_scale_ind for produced cargo
+static const uint WEIGHT_SCALE_IND_PILE = 1; ///< Index into _settings_game.economy.cargodest.weight_scale_ind for stockpiled cargo
 
 /** Are cargo destinations for this cargo type enabled? */
 bool CargoHasDestinations(CargoID cid)
@@ -518,7 +521,22 @@ void UpdateCargoLinks(Industry *ind)
 
 /* virtual */ uint Industry::GetDestinationWeight(CargoID cid, byte weight_mod) const
 {
-	return weight_mod;
+	uint weight = _settings_game.economy.cargodest.min_weight_ind;
+
+	for (uint i = 0; i < lengthof(this->accepts_cargo); i++) {
+		if (this->accepts_cargo[i] != cid) continue;
+		/* Empty stockpile means more weight for the link. Stockpiles
+		 * above a fixed maximum have no further effect. */
+		uint stockpile = ClampU(this->incoming_cargo_waiting[i], 0, MAX_IND_STOCKPILE);
+		weight += (MAX_IND_STOCKPILE - stockpile) * weight_mod / _settings_game.economy.cargodest.weight_scale_ind[WEIGHT_SCALE_IND_PILE];
+	}
+
+	/* Add a weight for the produced cargo. Use the average production
+	 * here so the weight isn't fluctuating that much when the input
+	 * cargo isn't delivered regularly. */
+	weight += (this->average_production[0] + this->average_production[1]) * weight_mod / _settings_game.economy.cargodest.weight_scale_ind[WEIGHT_SCALE_IND_PROD];
+
+	return weight;
 }
 
 /** Recalculate the link weights. */
@@ -557,12 +575,21 @@ void UpdateLinkWeights(Town *t)
 void UpdateLinkWeights(CargoSourceSink *css)
 {
 	for (uint cid = 0; cid < NUM_CARGO; cid++) {
-		css->cargo_links_weight[cid] = 0;
+		uint weight_sum = 0;
 
-		for (CargoLink *l = css->cargo_links[cid].Begin(); l != css->cargo_links[cid].End(); l++) {
-			css->cargo_links_weight[cid] += l->weight;
+		if (css->cargo_links[cid].Length() == 0) continue;
+
+		for (CargoLink *l = css->cargo_links[cid].Begin() + 1; l != css->cargo_links[cid].End(); l++) {
+			l->weight = l->dest->GetDestinationWeight(cid, l->weight_mod);
+			weight_sum += l->weight;
+
 			l->amount.NewMonth();
 		}
+
+		/* Set weight for the undetermined destination link to random_dest_chance%. */
+		css->cargo_links[cid].Begin()->weight = weight_sum == 0 ? 1 : (weight_sum * _settings_game.economy.cargodest.random_dest_chance) / (100 - _settings_game.economy.cargodest.random_dest_chance);
+
+		css->cargo_links_weight[cid] = weight_sum + css->cargo_links[cid].Begin()->weight;
 	}
 }
 
