@@ -247,7 +247,6 @@ public:
 		return this->count == 0 ? 0 : this->cargo_days_in_transit / this->count;
 	}
 
-	void Append(CargoPacket *cp, bool update_cache = true);
 	void Truncate(uint max_remaining);
 
 	void InvalidateCache();
