@@ -30,6 +30,8 @@
 #include "core/geometry_func.hpp"
 #include "vehiclelist.h"
 #include "cargodest_base.h"
+#include "industry.h"
+#include "town.h"
 
 #include "table/strings.h"
 
@@ -1483,10 +1485,43 @@ struct StationViewWindow : public Window {
 	 */
 	bool HandleCargoDestEntryClick(CargoDestEntry &entry, int row)
 	{
-		if (entry.start_row == row && !entry.children.empty()) {
-			entry.expanded = !entry.expanded;
-			this->SetWidgetDirty(SVW_WAITING);
-			this->SetWidgetDirty(SVW_SCROLLBAR);
+		if (entry.start_row == row) {
+			if (_ctrl_pressed) {
+				/* Scroll viewport to destination tile .*/
+				TileIndex dest_tile = 0;
+				switch (entry.type) {
+					case CargoDestEntry::FINAL_DEST:
+						switch (entry.data.type) {
+							case ST_INDUSTRY:
+								dest_tile = Industry::Get(entry.data.css)->location.tile;
+								break;
+							case ST_TOWN:
+								dest_tile = Town::Get(entry.data.css)->xy;
+								break;
+							case ST_HEADQUARTERS:
+								dest_tile = Company::Get(entry.data.css)->location_of_HQ;
+								break;
+
+							default:
+								NOT_REACHED();
+						}
+						break;
+
+					case CargoDestEntry::NEXT_HOP:
+					case CargoDestEntry::TRANSFER_HOP:
+						dest_tile = Station::Get(entry.data.station)->xy;
+						break;
+
+					default:
+						NOT_REACHED();
+				}
+				ScrollMainWindowToTile(dest_tile);
+			} else if (!entry.children.empty()) {
+				/* Expand/collapse entry. */
+				entry.expanded = !entry.expanded;
+				this->SetWidgetDirty(SVW_WAITING);
+				this->SetWidgetDirty(SVW_SCROLLBAR);
+			}
 		}
 
 		if (entry.start_row < row) {
