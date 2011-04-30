@@ -292,7 +292,7 @@ struct RectAndIndustryVector {
  * @param user_data pointer to RectAndIndustryVector
  * @return always false, we want to search all tiles
  */
-static bool FindIndustryToDeliver(TileIndex ind_tile, void *user_data)
+static bool FindIndustry(TileIndex ind_tile, void *user_data)
 {
 	/* Only process industry tiles */
 	if (!IsTileType(ind_tile, MP_INDUSTRY)) return false;
@@ -307,13 +307,6 @@ static bool FindIndustryToDeliver(TileIndex ind_tile, void *user_data)
 	int x = TileX(ind_tile);
 	int y = TileY(ind_tile);
 	if (x < riv->rect.left || x > riv->rect.right || y < riv->rect.top || y > riv->rect.bottom) return false;
-
-	/* Include only industries that can accept cargo */
-	uint cargo_index;
-	for (cargo_index = 0; cargo_index < lengthof(ind->accepts_cargo); cargo_index++) {
-		if (ind->accepts_cargo[cargo_index] != CT_INVALID) break;
-	}
-	if (cargo_index >= lengthof(ind->accepts_cargo)) return false;
 
 	*riv->industries_near->Append() = ind;
 
@@ -341,7 +334,7 @@ void Station::RecomputeIndustriesNear()
 		max(DistanceManhattan(start_tile, TileXY(riv.rect.right, riv.rect.top)), DistanceManhattan(start_tile, TileXY(riv.rect.right, riv.rect.bottom)))
 	);
 
-	CircularTileSearch(&start_tile, 2 * max_radius + 1, &FindIndustryToDeliver, &riv);
+	CircularTileSearch(&start_tile, 2 * max_radius + 1, &FindIndustry, &riv);
 }
 
 /**
