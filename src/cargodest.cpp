@@ -21,6 +21,8 @@
 #include "town.h"
 #include "industry.h"
 #include "window_func.h"
+#include "vehicle_base.h"
+#include "station_base.h"
 
 
 /* Possible link weight modifiers. */
@@ -768,3 +770,62 @@ CargoLink *CargoSourceSink::GetRandomLink(CargoID cid, bool allow_self)
 /* Initialize the RouteLink-pool */
 RouteLinkPool _routelink_pool("RouteLink");
 INSTANTIATE_POOL_METHODS(RouteLink)
+
+/**
+ * Update or create a single route link for a specific vehicle and cargo.
+ * @param v The vehicle.
+ * @param cargos Create links for the cargo types whose bit is set.
+ * @param clear_others Should route links for cargo types nor carried be cleared?
+ * @param from Originating station.
+ * @param from_oid Originating order.
+ * @param to_id Destination station ID.
+ * @param to_oid Destination order.
+ */
+void UpdateVehicleRouteLinks(const Vehicle *v, uint32 cargos, bool clear_others, Station *from, OrderID from_oid, StationID to_id, OrderID to_oid)
+{
+	for (CargoID cid = 0; cid < NUM_CARGO; cid++) {
+		bool has_cargo = HasBit(cargos, cid);
+		/* Skip if cargo not carried and we aren't supposed to clear other links. */
+		if (!clear_others && !has_cargo) continue;
+		/* Skip cargo types that don't have destinations enabled. */
+		if (!CargoHasDestinations(cid)) continue;
+
+		RouteLinkList::iterator link;
+		for (link = from->goods[cid].routes.begin(); link != from->goods[cid].routes.end(); ++link) {
+			if ((*link)->GetOriginOrderId() == from_oid) {
+				if (has_cargo) {
+					/* Update destination if necessary. */
+					(*link)->SetDestination(to_id, to_oid);
+				} else {
+					/* Remove link. */
+					delete *link;
+					from->goods[cid].routes.erase(link);
+				}
+				break;
+			}
+		}
+
+		/* No link found? Append a new one. */
+		if (has_cargo && link == from->goods[cid].routes.end() && RouteLink::CanAllocateItem()) {
+			from->goods[cid].routes.push_back(new RouteLink(to_id, from_oid, to_oid, v->owner));
+		}
+	}
+}
+
+/**
+ * Update route links after a vehicle has arrived at a station.
+ * @param v The vehicle.
+ * @param arrived_at The station the vehicle arrived at.
+ */
+void UpdateVehicleRouteLinks(const Vehicle *v, StationID arrived_at)
+{
+	/* Only update links if we have valid previous station and orders. */
+	if (v->last_station_loaded == INVALID_STATION || v->last_order_id == INVALID_ORDER || v->current_order.index == INVALID_ORDER) return;
+	/* Loop? Not good. */
+	if (v->last_station_loaded == arrived_at) return;
+
+	Station *from = Station::Get(v->last_station_loaded);
+
+	/* Update incoming route link. */
+	UpdateVehicleRouteLinks(v, v->vcache.cached_cargo_mask, false, from, v->last_order_id, arrived_at, v->current_order.index);
+}

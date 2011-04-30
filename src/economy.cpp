@@ -435,6 +435,13 @@ void ChangeOwnershipOfCompanyItems(Owner old_owner, Owner new_owner)
 			/* if a company goes bankrupt, set owner to OWNER_NONE so the sign doesn't disappear immediately
 			 * also, drawing station window would cause reading invalid company's colour */
 			st->owner = new_owner == INVALID_OWNER ? OWNER_NONE : new_owner;
+
+			/* Move route links to the new company. */
+			for (CargoID cid = 0; cid < NUM_CARGO; cid++) {
+				for (RouteLinkList::iterator itr = st->goods[cid].routes.begin(); itr != st->goods[cid].routes.end(); ++itr) {
+					if ((*itr)->owner == old_owner) (*itr)->owner = new_owner;
+				}
+			}
 		}
 	}
 

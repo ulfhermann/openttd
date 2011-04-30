@@ -13,8 +13,11 @@
 #define CARGODEST_FUNC_H
 
 #include "cargo_type.h"
+#include "vehicle_type.h"
 
 bool CargoHasDestinations(CargoID cid);
+
+void UpdateVehicleRouteLinks(const Vehicle *v, StationID arrived_at);
 
 void RebuildCargoLinkCounts();
 void UpdateCargoLinks();
