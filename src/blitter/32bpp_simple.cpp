@@ -15,6 +15,7 @@
 
 #include "../table/sprites.h"
 
+/** Instantiation of the simple 32bpp blitter factory. */
 static FBlitter_32bppSimple iFBlitter_32bppSimple;
 
 void Blitter_32bppSimple::Draw(Blitter::BlitterParams *bp, BlitterMode mode, ZoomLevel zoom)
@@ -77,7 +78,7 @@ void Blitter_32bppSimple::DrawColourMappingRect(void *dst, int width, int height
 		} while (--height);
 		return;
 	}
-	if (pal == PALETTE_TO_STRUCT_GREY) {
+	if (pal == PALETTE_NEWSPAPER) {
 		do {
 			for (int i = 0; i != width; i++) {
 				*udst = MakeGrey(*udst);
