@@ -18,6 +18,12 @@ enum CargoRoutingMode {
 	CRM_INDUSTRY_CARGOS = 1, ///< Cargos produced by industries have destinations.
 };
 
+/** Enum specifying if cargo should have fixed or variable destinations. */
+enum CargoDistributionMode {
+	CDM_FIXED     = 0, ///< Destinations are predetermined without considering the network.
+	CDM_REACHABLE = 1, ///< Only reachable destinations are chosen.
+};
+
 /** Flags specifying how cargo should be routed. */
 enum RoutingFlags {
 	RF_WANT_FAST,    ///< Cargo wants to travel as fast as possible.

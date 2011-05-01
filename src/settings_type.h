@@ -392,6 +392,7 @@ struct VehicleSettings {
 /** Settings related to cargo destinations. */
 struct CargodestSettings {
 	uint8  mode;                             ///< flags specifying which cargos are routed to specific destinations, @see CargoRoutingMode
+	uint8  distribution_mode;                ///< distribution mode for cargo, either "fixed destinations" or "destinations in existing network"
 	uint8  base_town_links[2];               ///< minimum number of town demand links for (0=#BASE_TOWN_LINKS) all cargos except (1=#BASE_TOWN_LINKS_SYMM) symmetric cargos
 	uint8  base_ind_links[3];                ///< minimum number of industry demand links for (0=#BASE_IND_LINKS) all cargos except (1=#BASE_IND_LINKS_TOWN) town cargos and (2=#BASE_IND_LINKS_SYMM) symmetric cargos
 	uint8  city_town_links;                  ///< additional number of links for cities

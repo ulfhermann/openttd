@@ -1327,6 +1327,9 @@ STR_CONFIG_SETTING_CARGODEST_NOTHING                            :Nothing
 STR_CONFIG_SETTING_CARGODEST_TOWN_CARGO                         :Mail and passengers
 STR_CONFIG_SETTING_CARGODEST_INDUSTRY_CARGO                     :Industry cargos
 STR_CONFIG_SETTING_CARGODEST_ALL                                :All cargos
+STR_CONFIG_SETTING_CARGODEST_MODE                               :{LTBLUE}Distribution mode for cargo: {ORANGE}{STRING1}
+STR_CONFIG_SETTING_CARGODEST_MODE_DEST                          :Choose fixed destinations
+STR_CONFIG_SETTING_CARGODEST_MODE_DIST                          :Choose reachable destinations
 
 STR_CONFIG_SETTING_GUI                                          :{ORANGE}Interface
 STR_CONFIG_SETTING_CONSTRUCTION                                 :{ORANGE}Construction
