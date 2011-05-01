@@ -48,6 +48,13 @@ static const uint MIN_WEIGHT_TOWN_PAX   = 1; ///< Index into _settings_game.econ
 static const uint WEIGHT_SCALE_IND_PROD = 0; ///< Index into _settings_game.economy.cargodest.weight_scale_ind for produced cargo
 static const uint WEIGHT_SCALE_IND_PILE = 1; ///< Index into _settings_game.economy.cargodest.weight_scale_ind for stockpiled cargo
 
+/**
+ * ID of the last iteration through the route graph.
+ * Doesn't need to be saved as it's only important that subsequent iterations
+ * get different IDs and none of them gets an ID of 0.
+ */
+static uint _route_graph_iteration = 1;
+
 /** Are cargo destinations for this cargo type enabled? */
 bool CargoHasDestinations(CargoID cid)
 {
@@ -400,6 +407,84 @@ static byte GetLinkWeightModifier(CargoSourceSink *from, CargoSourceSink *to, Ca
 	}
 }
 
+/**
+ * 1. Build the link graph component containing the given station by using BFS on the routes.
+ * 2. Set every included station's checked_at to _tick_counter.
+ * 3. Create all possible cargo links between towns and industries around stations in the component.
+ * @param first Station to start the search at.
+ * @param cid Cargo to build the component for
+ */
+void CreateRouteGraphComponent(Station *first, CargoID cid)
+{
+	typedef std::list<Station *> StationList;
+	typedef std::list<CargoSourceSink *> NodeList;
+	StationList search_queue;
+	NodeList accepting;
+	NodeList supplying;
+	search_queue.push_back(first);
+
+	/* find all stations belonging to the current component */
+	while (!search_queue.empty()) {
+		Station *st = search_queue.front();
+		search_queue.pop_front();
+
+		if (st->goods[cid].checked_at != _route_graph_iteration) {
+			bool supplies = HasBit(st->goods[cid].acceptance_pickup, GoodsEntry::PICKUP);
+			bool accepts = HasBit(st->goods[cid].acceptance_pickup, GoodsEntry::ACCEPTANCE);
+			if (supplies && st->town->SuppliesCargo(cid)) supplying.push_back(st->town);
+			if (accepts && st->town->AcceptsCargo(cid)) accepting.push_back(st->town);
+			for (Industry **i = st->industries_near.Begin(); 
+					i != st->industries_near.End(); ++i) {
+				if (supplies && (*i)->SuppliesCargo(cid)) supplying.push_back(*i);
+				if (accepts && (*i)->AcceptsCargo(cid)) accepting.push_back(*i);
+			}
+			st->goods[cid].checked_at = _route_graph_iteration;
+		
+			const RouteLinkList &links = st->goods[cid].routes;
+			for (RouteLinkList::const_iterator i = links.begin(); i != links.end(); ++i) {
+				Station *target = Station::GetIfValid((*i)->GetDestination());
+				if (target == NULL) continue;
+				search_queue.push_back(target);
+			}
+		}
+	}
+	
+	for (NodeList::iterator j = supplying.begin(); j != supplying.end(); ++j) {
+		CargoSourceSink *from = *j;
+		for (NodeList::iterator i = accepting.begin(); i != accepting.end(); ++i) {
+			CargoSourceSink *to = *i;
+			if (from != to) {
+				CargoLink *link = from->cargo_links[cid].Find(CargoLink(to));
+				if (link == from->cargo_links[cid].End()) {
+					*from->cargo_links[cid].Append() = CargoLink(to, LWM_INVALID);
+					to->num_incoming_links[cid]++;
+				} else {
+					link->weight_mod = LWM_INVALID;
+				}
+			}
+		}
+		for (CargoLink *link = from->cargo_links[cid].Begin(); link != from->cargo_links[cid].End();) {
+			if (link->weight_mod != LWM_INVALID && from != link->dest && link->dest != NULL) {
+				from->cargo_links[cid].Erase(link);
+				link->dest->num_incoming_links[cid]--;
+			} else {
+				link->weight_mod = GetLinkWeightModifier(from, link->dest, cid);
+				++link;
+			}
+		}
+	}
+}
+
+/** Create all cargo links possible in the given transport network around a station. */
+static void CreateConnectedNewLinks(Station *st)
+{
+	for (CargoID cid = 0; cid != NUM_CARGO; ++cid) {
+		if (st->goods[cid].checked_at != _route_graph_iteration && (st->goods[cid].acceptance_pickup != 0)) {
+			CreateRouteGraphComponent(st, cid);
+		}
+	}
+}
+
 /** Create missing cargo links for a source. */
 static void CreateNewLinks(CargoSourceSink *source, TileIndex source_xy, CargoID cid, uint chance_a, uint chance_b, const uint8 town_chance[], TownID skip_town, IndustryID skip_ind)
 {
@@ -464,6 +549,24 @@ static void RemoveInvalidLinks(CargoSourceSink *css)
 				l++;
 			}
 		}
+	}
+}
+
+/** Create special links for a town if they don't exist yet. */
+void UpdateSpecialLinks(Town *t)
+{
+	CargoID cid;
+	FOR_EACH_SET_CARGO_ID(cid, t->cargo_produced) {
+		if (CargoHasDestinations(cid)) t->CreateSpecialLinks(cid);
+	}
+}
+
+/** Create special links for an industry if they don't exist yet. */
+void UpdateSpecialLinks(Industry *ind)
+{
+	for (uint i = 0; i < lengthof(ind->produced_cargo); i++) {
+		CargoID cid = ind->produced_cargo[i];
+		if (cid != INVALID_CARGO && CargoHasDestinations(cid)) ind->CreateSpecialLinks(cid);
 	}
 }
 
@@ -740,17 +843,33 @@ void UpdateCargoLinks()
 	/* Remove links that have become invalid. */
 	FOR_ALL_TOWNS(t) RemoveInvalidLinks(t);
 	FOR_ALL_INDUSTRIES(ind) RemoveInvalidLinks(ind);
+			
+	switch (_settings_game.economy.cargodest.distribution_mode) {
+		case CDM_FIXED:
+			/* Recalculate the number of expected links. */
+			FOR_ALL_TOWNS(t) UpdateExpectedLinks(t);
+			FOR_ALL_INDUSTRIES(ind) UpdateExpectedLinks(ind);
+			
+			/* Make sure each industry gets at at least some input cargo. */
+			FOR_ALL_INDUSTRIES(ind) AddMissingIndustryLinks(ind);
 
-	/* Recalculate the number of expected links. */
-	FOR_ALL_TOWNS(t) UpdateExpectedLinks(t);
-	FOR_ALL_INDUSTRIES(ind) UpdateExpectedLinks(ind);
+			/* Update the demand link list. */
+			FOR_ALL_TOWNS(t) UpdateCargoLinks(t);
+			FOR_ALL_INDUSTRIES(ind) UpdateCargoLinks(ind);
+			break;
 
-	/* Make sure each industry gets at at least some input cargo. */
-	FOR_ALL_INDUSTRIES(ind) AddMissingIndustryLinks(ind);
+		case CDM_REACHABLE:
+			FOR_ALL_TOWNS(t) UpdateSpecialLinks(t);
+			FOR_ALL_INDUSTRIES(ind) UpdateSpecialLinks(ind);
+			
+			if (++_route_graph_iteration == 0) _route_graph_iteration = 1;
+			Station *st;
+			FOR_ALL_STATIONS(st) CreateConnectedNewLinks(st);
+			break;
 
-	/* Update the demand link list. */
-	FOR_ALL_TOWNS(t) UpdateCargoLinks(t);
-	FOR_ALL_INDUSTRIES(ind) UpdateCargoLinks(ind);
+		default:
+			NOT_REACHED();
+	}
 
 	/* Recalculate links weights. */
 	FOR_ALL_TOWNS(t) UpdateLinkWeights(t);

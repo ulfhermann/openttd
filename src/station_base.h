@@ -39,7 +39,8 @@ struct GoodsEntry {
 		rating(INITIAL_STATION_RATING),
 		last_speed(0),
 		last_age(255),
-		cargo_counter(0)
+		cargo_counter(0),
+		checked_at(0)
 	{}
 
 	byte acceptance_pickup;
@@ -51,6 +52,7 @@ struct GoodsEntry {
 	uint16 cargo_counter;   ///< Update timer for the packets' next hop
 	StationCargoList cargo; ///< The cargo packets of cargo waiting in this station
 	RouteLinkList routes;   ///< List of originating route links
+	uint checked_at;        ///< NOSAVE: Last route graph iteration when this goods entry was checked for connections
 };
 
 /** All airport-related information. Only valid if tile != INVALID_TILE. */
