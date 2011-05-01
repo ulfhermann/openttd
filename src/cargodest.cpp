@@ -28,7 +28,6 @@
 
 
 static const uint MAX_EXTRA_LINKS       = 2;    ///< Number of extra links allowed.
-static const byte INTOWN_LINK_WEIGHTMOD = 8;    ///< Weight modifier for in-town links.
 static const uint MAX_IND_STOCKPILE     = 1000; ///< Maximum stockpile to consider for industry link weight.
 
 static const uint BASE_TOWN_LINKS       = 0; ///< Index into _settings_game.economy.cargodest.base_town_links for normal cargo
@@ -81,6 +80,40 @@ static bool IsPassengerCargo(CargoID cid)
 	return spec->town_effect == TE_PASSENGERS;
 }
 
+/** Are two tiles near each other according to the given distance modifier. */
+static bool IsNearby(TileIndex source_xy, TileIndex dest_xy, uint32 nearby_dist)
+{
+	/* Scale distance by 1D map size to make sure that there are still
+	 * candidates left on larger maps with few towns, but don't scale
+	 * by 2D map size so the map still feels bigger. */
+	return DistanceSquare(source_xy, dest_xy) < ScaleByMapSize1D(nearby_dist);
+}
+
+/** Is a town near to a tile. */
+static bool IsTownNearby(TileIndex source_xy, const Town *t)
+{
+	return IsNearby(source_xy, t->xy, _settings_game.economy.cargodest.town_nearby_dist);
+}
+
+/** Is an industry near to a tile. */
+static bool IsIndustryNearby(TileIndex source_xy, const Industry *ind)
+{
+	return IsNearby(source_xy, ind->location.tile, _settings_game.economy.cargodest.ind_nearby_dist);
+}
+
+/** Does this town produce a lot of the given cargo. */
+static bool IsBigTown(const Town *t, CargoID cid)
+{
+	return IsPassengerCargo(cid) ? 
+		t->pass.old_max > _settings_game.economy.cargodest.big_town_pop[BIG_TOWN_POP_PAX] : 
+		t->mail.old_max > _settings_game.economy.cargodest.big_town_pop[BIG_TOWN_POP_MAIL];
+}
+
+/** Does this industry produce anything. */
+static bool IsProducingIndustry(const Industry *ind)
+{
+	return ind->produced_cargo[0] != CT_INVALID || ind->produced_cargo[1] != CT_INVALID;
+}
 
 /** Information for the town/industry enumerators. */
 struct EnumRandomData {
@@ -119,17 +152,14 @@ static bool EnumCity(const Town *t, void *data)
 static bool EnumBigTown(const Town *t, void *data)
 {
 	EnumRandomData *erd = (EnumRandomData *)data;
-	return EnumAnyTown(t, erd) && (IsPassengerCargo(erd->cid) ? t->pass.old_max > _settings_game.economy.cargodest.big_town_pop[BIG_TOWN_POP_PAX] : t->mail.old_max > _settings_game.economy.cargodest.big_town_pop[BIG_TOWN_POP_MAIL]);
+	return EnumAnyTown(t, erd) && IsBigTown(t, erd->cid);
 }
 
 /** Enumerate nearby towns. */
 static bool EnumNearbyTown(const Town *t, void *data)
 {
 	EnumRandomData *erd = (EnumRandomData *)data;
-	/* Scale distance by 1D map size to make sure that there are still
-	 * candidates left on larger maps with few towns, but don't scale
-	 * by 2D map size so the map still feels bigger. */
-	return EnumAnyTown(t, data) && DistanceSquare(t->xy, erd->source_xy) < ScaleByMapSize1D(_settings_game.economy.cargodest.town_nearby_dist);
+	return EnumAnyTown(t, data) && IsTownNearby(erd->source_xy, t);
 }
 
 /** Enumerate any industry not already a destination and accepting a specific cargo. */
@@ -143,16 +173,13 @@ static bool EnumAnyIndustry(const Industry *ind, void *data)
 static bool EnumNearbyIndustry(const Industry *ind, void *data)
 {
 	EnumRandomData *erd = (EnumRandomData *)data;
-	/* Scale distance by 1D map size to make sure that there are still
-	 * candidates left on larger maps with few industries, but don't scale
-	 * by 2D map size so the map still feels bigger. */
-	return EnumAnyIndustry(ind, data) && DistanceSquare(ind->location.tile, erd->source_xy) < ScaleByMapSize1D(_settings_game.economy.cargodest.ind_nearby_dist);
+	return EnumAnyIndustry(ind, data) && IsIndustryNearby(erd->source_xy, ind);
 }
 
 /** Enumerate industries that are producing cargo. */
 static bool EnumProducingIndustry(const Industry *ind, void *data)
 {
-	return EnumAnyIndustry(ind, data) && (ind->produced_cargo[0] != CT_INVALID || ind->produced_cargo[1] != CT_INVALID);
+	return EnumAnyIndustry(ind, data) && IsProducingIndustry(ind);
 }
 
 /** Enumerate cargo sources supplying a specific cargo. */
@@ -166,20 +193,14 @@ static bool EnumAnySupplier(const T *css, void *data)
 static bool EnumNearbySupplier(const Industry *ind, void *data)
 {
 	EnumRandomData *erd = (EnumRandomData *)data;
-	/* Scale distance by 1D map size to make sure that there are still
-	 * candidates left on larger maps with few industries, but don't scale
-	 * by 2D map size so the map still feels bigger. */
-	return EnumAnySupplier(ind, data) && DistanceSquare(ind->location.tile, erd->source_xy) < ScaleByMapSize1D(_settings_game.economy.cargodest.ind_nearby_dist);
+	return EnumAnySupplier(ind, data) && IsIndustryNearby(erd->source_xy, ind);
 }
 
 /** Enumerate nearby cargo sources supplying a specific cargo. */
 static bool EnumNearbySupplier(const Town *t, void *data)
 {
 	EnumRandomData *erd = (EnumRandomData *)data;
-	/* Scale distance by 1D map size to make sure that there are still
-	 * candidates left on larger maps with few industries, but don't scale
-	 * by 2D map size so the map still feels bigger. */
-	return EnumAnySupplier(t, data) && DistanceSquare(t->xy, erd->source_xy) < ScaleByMapSize1D(_settings_game.economy.cargodest.town_nearby_dist);
+	return EnumAnySupplier(t, data) && IsTownNearby(erd->source_xy, t);
 }
 
 
@@ -190,7 +211,7 @@ static CargoSourceSink *FindTownDestination(byte &weight_mod, CargoSourceSink *s
 	static const Town::EnumTownProc destclass_enum[] = {
 		&EnumNearbyTown, &EnumCity, &EnumBigTown, &EnumAnyTown
 	};
-	static const byte weight_mods[] = {5, 4, 3, 2};
+	static const byte weight_mods[] = {LWM_TOWN_NEARBY, LWM_CITY, LWM_TOWN_BIG, LWM_TOWN_ANY};
 	assert_compile(lengthof(destclass_enum) == lengthof(weight_mods));
 
 	EnumRandomData erd = {source, source_xy, cid, IsSymmetricCargo(cid)};
@@ -199,7 +220,7 @@ static CargoSourceSink *FindTownDestination(byte &weight_mod, CargoSourceSink *s
 	 * the search falls through to the following classes. */
 	byte destclass = RandomRange(destclass_chance[3]);
 
-	weight_mod = 1;
+	weight_mod = LWM_ANYWHERE;
 	Town *dest = NULL;
 	for (uint i = 0; i < lengthof(destclass_enum) && dest == NULL; i++) {
 		/* Skip if destination class not reached. */
@@ -219,7 +240,7 @@ static CargoSourceSink *FindIndustryDestination(byte &weight_mod, CargoSourceSin
 	static const Industry::EnumIndustryProc destclass_enum[] = {
 		&EnumNearbyIndustry, &EnumProducingIndustry, &EnumAnyIndustry
 	};
-	static const byte weight_mods[] = {5, 7, 3};
+	static const byte weight_mods[] = {LWM_INDUSTRY_NEARBY, LWM_INDUSTRY_PRODUCING, LWM_INDUSTRY_ANY};
 	assert_compile(lengthof(destclass_enum) == lengthof(_settings_game.economy.cargodest.ind_chances));
 
 	EnumRandomData erd = {source, source_xy, cid, IsSymmetricCargo(cid)};
@@ -228,7 +249,7 @@ static CargoSourceSink *FindIndustryDestination(byte &weight_mod, CargoSourceSin
 	 * the search falls through to the following classes. */
 	byte destclass = RandomRange(*lastof(_settings_game.economy.cargodest.ind_chances));
 
-	weight_mod = 1;
+	weight_mod = LWM_ANYWHERE;
 	Industry *dest = NULL;
 	for (uint i = 0; i < lengthof(destclass_enum) && dest == NULL; i++) {
 		/* Skip if destination class not reached. */
@@ -279,11 +300,11 @@ static CargoSourceSink *FindSupplySource(Industry *dest, CargoID cid)
 
 	if (this->AcceptsCargo(cid)) {
 		/* Add special link for town-local demand if not already present. */
-		if (this->cargo_links[cid].Length() < 2) *this->cargo_links[cid].Append() = CargoLink(this, INTOWN_LINK_WEIGHTMOD);
+		if (this->cargo_links[cid].Length() < 2) *this->cargo_links[cid].Append() = CargoLink(this, LWM_INTOWN);
 		if (this->cargo_links[cid].Get(1)->dest != this) {
 			/* Insert link at second place. */
 			*this->cargo_links[cid].Append() = *this->cargo_links[cid].Get(1);
-			*this->cargo_links[cid].Get(1) = CargoLink(this, INTOWN_LINK_WEIGHTMOD);
+			*this->cargo_links[cid].Get(1) = CargoLink(this, LWM_INTOWN);
 		}
 	} else {
 		/* Remove link for town-local demand if present. */
@@ -325,6 +346,60 @@ static void RemoveLowestLink(CargoSourceSink *source, CargoID cid)
 	}
 }
 
+/**
+ * Get the link weight modifier for a link.
+ * @param from Source of cargo.
+ * @param to Destination of cargo.
+ * @param cid Cargo to be transported.
+ * @return A LinkWeightModifier.
+ */
+static byte GetLinkWeightModifier(CargoSourceSink *from, CargoSourceSink *to, CargoID cid)
+{
+	if (to == NULL) return LWM_ANYWHERE;
+	
+	TileIndex from_xy = INVALID_TILE;
+	switch (from->GetType()) {
+		case ST_TOWN:
+			from_xy = static_cast<Town *>(from)->xy;
+			break;
+		case ST_INDUSTRY:
+			from_xy = static_cast<Industry *>(from)->location.tile;
+			break;
+		case ST_HEADQUARTERS:
+			NOT_REACHED();
+	}
+
+	switch (to->GetType()) {
+		case ST_TOWN: {
+			Town *t = static_cast<Town *>(to);
+			if (from == to) {
+				return LWM_INTOWN;
+			} else if (IsTownNearby(from_xy, t)) {
+				return LWM_TOWN_NEARBY;
+			} else if (t->larger_town) {
+				return LWM_CITY;
+			} else if (IsBigTown(t, cid)) {
+				return LWM_TOWN_BIG;
+			} else {
+				return LWM_TOWN_ANY;
+			}
+		}
+		case ST_INDUSTRY: {
+			Industry *ind = static_cast<Industry *>(to);
+			if (IsIndustryNearby(from_xy, ind)) {
+				return LWM_INDUSTRY_NEARBY;
+			} else if (IsProducingIndustry(ind)) {
+				return LWM_INDUSTRY_PRODUCING;
+			} else {
+				return LWM_INDUSTRY_ANY;
+			}
+		}
+		default:
+			NOT_REACHED();
+			return LWM_INVALID;
+	}
+}
+
 /** Create missing cargo links for a source. */
 static void CreateNewLinks(CargoSourceSink *source, TileIndex source_xy, CargoID cid, uint chance_a, uint chance_b, const uint8 town_chance[], TownID skip_town, IndustryID skip_ind)
 {
@@ -339,7 +414,7 @@ static void CreateNewLinks(CargoSourceSink *source, TileIndex source_xy, CargoID
 	/* Add new links until the expected link count is reached. */
 	while (source->cargo_links[cid].Length() < num_links) {
 		CargoSourceSink *dest = NULL;
-		byte weight_mod = 1;
+		byte weight_mod = LWM_ANYWHERE;
 
 		/* Chance for town/industry is chance_a/chance_b, otherwise try industry/town. */
 		if (Chance16(chance_a, chance_b)) {

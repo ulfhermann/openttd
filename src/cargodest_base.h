@@ -31,7 +31,7 @@ struct CargoLink {
 	uint                 weight;     ///< Weight of this link.
 	byte                 weight_mod; ///< Weight modifier.
 
-	CargoLink(CargoSourceSink *d, byte mod = 1) : dest(d), weight(1), weight_mod(mod) {}
+	CargoLink(CargoSourceSink *d, byte mod = LWM_ANYWHERE) : dest(d), weight(1), weight_mod(mod) {}
 
 	/* Compare two cargo links for inequality. */
 	bool operator !=(const CargoLink &other) const

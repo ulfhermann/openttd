@@ -30,6 +30,20 @@ enum RoutingFlags {
 	RF_WANT_CHEAP,   ///< Cargo wants to travel as cheap as possible.
 };
 
+/** Weight modifiers for links. */
+enum LinkWeightModifier {
+	LWM_ANYWHERE = 1,           ///< Weight modifier for undetermined destinations.
+	LWM_TOWN_ANY = 2,           ///< Default modifier for town destinations.
+	LWM_INDUSTRY_ANY = 3,       ///< Default modifier for industry destinations.
+	LWM_TOWN_BIG = 3,           ///< Weight modifier for big towns.
+	LWM_CITY = 4,               ///< Weight modifier for cities.
+	LWM_TOWN_NEARBY = 5,        ///< Weight modifier for nearby towns.
+	LWM_INDUSTRY_NEARBY = 5,    ///< Weight modifier for nearby industries.
+	LWM_INDUSTRY_PRODUCING = 7, ///< Weight modifier for producing industries.
+	LWM_INTOWN = 8,             ///< Weight modifier for in-town links.
+	LWM_INVALID = 0xff
+};
+
 /** Unique identifier for a routing link. */
 typedef uint32 RouteLinkID;
 struct RouteLink;
