@@ -135,6 +135,7 @@ const SaveLoad *GetRouteLinkDescription()
 		SLE_VAR(RouteLink, prev_order,   SLE_UINT16),
 		SLE_VAR(RouteLink, next_order,   SLE_UINT16),
 		SLE_VAR(RouteLink, owner,        SLE_UINT8),
+		SLE_VAR(RouteLink, vtype,        SLE_UINT8),
 		SLE_VAR(RouteLink, travel_time,  SLE_UINT32),
 		SLE_VAR(RouteLink, wait_time,    SLE_UINT16),
 

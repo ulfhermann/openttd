@@ -132,6 +132,11 @@ class CYapfCostRouteLinkT {
 		const Station *to = Station::Get(link->GetDestination());
 		cost = DistanceManhattan(from->xy, to->xy) * this->Yapf().PfGetSettings().route_distance_factor;
 
+		/* Modulate the distance by a vehicle-type specific factor to
+		 * simulate the different costs. */
+		assert_compile(lengthof(_settings_game.pf.yapf.route_mode_cost_factor) == VEH_AIRCRAFT + 1);
+		cost *= this->Yapf().PfGetSettings().route_mode_cost_factor[link->GetVehicleType()];
+
 		/* Transfer penalty when switching vehicles or forced unloading. */
 		if (link->GetOriginOrderId() != parent->GetDestOrderId() || (Order::Get(link->GetOriginOrderId())->GetUnloadType() & OUFB_UNLOAD) != 0) {
 			cost += this->Yapf().PfGetSettings().route_transfer_cost;

@@ -20,6 +20,7 @@
 #include "order_type.h"
 #include "station_type.h"
 #include "company_type.h"
+#include "vehicle_type.h"
 
 struct CargoSourceSink;
 
@@ -104,15 +105,17 @@ private:
 	OrderID         prev_order;      ///< Id of the order the vehicle had when arriving at the origin.
 	OrderID         next_order;      ///< Id of the order the vehicle will leave the station with.
 	OwnerByte       owner;           ///< Owner of the vehicle of the link.
+	VehicleTypeByte vtype;           ///< Vehicle type traveling this link.
 	uint32          travel_time;     ///< Average travel duration of this link.
 	uint16          wait_time;       ///< Days since the last vehicle traveled this link.
 
 public:
 	/** Constructor */
-	RouteLink(StationID dest = INVALID_STATION, OrderID prev_order = INVALID_ORDER, OrderID next_order = INVALID_ORDER, Owner owner = INVALID_OWNER, uint32 travel_time = 0)
+	RouteLink(StationID dest = INVALID_STATION, OrderID prev_order = INVALID_ORDER, OrderID next_order = INVALID_ORDER, Owner owner = INVALID_OWNER, uint32 travel_time = 0, VehicleType vtype = VEH_INVALID)
 		: dest(dest), prev_order(prev_order), next_order(next_order), travel_time(travel_time), wait_time(0)
 	{
 		this->owner = owner;
+		this->vtype = vtype;
 	}
 
 	~RouteLink() {}
@@ -128,6 +131,9 @@ public:
 
 	/** Get the owner of this link. */
 	inline Owner GetOwner() const { return this->owner; }
+
+	/** Get the type of the vehicles on this link. */
+	inline VehicleType GetVehicleType() const { return this->vtype; }
 
 	/** Get the travel time of this link. */
 	inline uint32 GetTravelTime() const { return this->travel_time; }
