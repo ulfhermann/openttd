@@ -780,8 +780,9 @@ INSTANTIATE_POOL_METHODS(RouteLink)
  * @param from_oid Originating order.
  * @param to_id Destination station ID.
  * @param to_oid Destination order.
+ * @param travel_time Travel time for the route.
  */
-void UpdateVehicleRouteLinks(const Vehicle *v, uint32 cargos, bool clear_others, Station *from, OrderID from_oid, StationID to_id, OrderID to_oid)
+void UpdateVehicleRouteLinks(const Vehicle *v, uint32 cargos, bool clear_others, Station *from, OrderID from_oid, StationID to_id, OrderID to_oid, uint32 travel_time)
 {
 	for (CargoID cid = 0; cid < NUM_CARGO; cid++) {
 		bool has_cargo = HasBit(cargos, cid);
@@ -796,6 +797,7 @@ void UpdateVehicleRouteLinks(const Vehicle *v, uint32 cargos, bool clear_others,
 				if (has_cargo) {
 					/* Update destination if necessary. */
 					(*link)->SetDestination(to_id, to_oid);
+					(*link)->UpdateTravelTime(travel_time);
 				} else {
 					/* Remove link. */
 					delete *link;
@@ -807,7 +809,7 @@ void UpdateVehicleRouteLinks(const Vehicle *v, uint32 cargos, bool clear_others,
 
 		/* No link found? Append a new one. */
 		if (has_cargo && link == from->goods[cid].routes.end() && RouteLink::CanAllocateItem()) {
-			from->goods[cid].routes.push_back(new RouteLink(to_id, from_oid, to_oid, v->owner));
+			from->goods[cid].routes.push_back(new RouteLink(to_id, from_oid, to_oid, v->owner, travel_time));
 		}
 	}
 }
@@ -828,7 +830,7 @@ void UpdateVehicleRouteLinks(const Vehicle *v, StationID arrived_at)
 	Station *to = Station::Get(arrived_at);
 
 	/* Update incoming route link. */
-	UpdateVehicleRouteLinks(v, v->vcache.cached_cargo_mask, false, from, v->last_order_id, arrived_at, v->current_order.index);
+	UpdateVehicleRouteLinks(v, v->vcache.cached_cargo_mask, false, from, v->last_order_id, arrived_at, v->current_order.index, v->travel_time);
 
 	/* Update outgoing links. */
 	CargoID cid;
@@ -882,7 +884,12 @@ void PrefillRouteLinks(const Vehicle *v)
 			if (prev_order != NULL && prev_order != order && prev_order->GetDestination() != order->GetDestination()) {
 				Station *from = Station::Get(prev_order->GetDestination());
 				Station *to = Station::Get(order->GetDestination());
-				UpdateVehicleRouteLinks(v, transported_cargos, true, from, prev_order->index, order->GetDestination(), order->index);
+				/* A vehicle with the speed of 128 km/h-ish would take one tick for each of the
+				 * #TILE_SIZE steps per tile. For aircraft, the time needs to be scaled with the
+				 * plane speed factor. */
+				uint time = DistanceManhattan(from->xy, to->xy) * TILE_SIZE * 128 / v->GetDisplayMaxSpeed();
+				if (v->type == VEH_AIRCRAFT) time *= _settings_game.vehicle.plane_speed;
+				UpdateVehicleRouteLinks(v, transported_cargos, true, from, prev_order->index, order->GetDestination(), order->index, time);
 			}
 
 			prev_order = order;

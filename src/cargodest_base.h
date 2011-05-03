@@ -104,12 +104,13 @@ private:
 	OrderID         prev_order;      ///< Id of the order the vehicle had when arriving at the origin.
 	OrderID         next_order;      ///< Id of the order the vehicle will leave the station with.
 	OwnerByte       owner;           ///< Owner of the vehicle of the link.
+	uint32          travel_time;     ///< Average travel duration of this link.
 	uint16          wait_time;       ///< Days since the last vehicle traveled this link.
 
 public:
 	/** Constructor */
-	RouteLink(StationID dest = INVALID_STATION, OrderID prev_order = INVALID_ORDER, OrderID next_order = INVALID_ORDER, Owner owner = INVALID_OWNER)
-		: dest(dest), prev_order(prev_order), next_order(next_order), wait_time(0)
+	RouteLink(StationID dest = INVALID_STATION, OrderID prev_order = INVALID_ORDER, OrderID next_order = INVALID_ORDER, Owner owner = INVALID_OWNER, uint32 travel_time = 0)
+		: dest(dest), prev_order(prev_order), next_order(next_order), travel_time(travel_time), wait_time(0)
 	{
 		this->owner = owner;
 	}
@@ -128,6 +129,9 @@ public:
 	/** Get the owner of this link. */
 	inline Owner GetOwner() const { return this->owner; }
 
+	/** Get the travel time of this link. */
+	inline uint32 GetTravelTime() const { return this->travel_time; }
+
 	/** Get the wait time at the origin station. */
 	inline uint16 GetWaitTime() const { return this->wait_time; }
 
@@ -136,6 +140,13 @@ public:
 	{
 		this->dest = dest_id;
 		this->next_order = dest_order_id;
+	}
+
+	/** Update the travel time with a new travel time.  */
+	void UpdateTravelTime(uint32 new_time)
+	{
+		/* Weighted average so that a single late vehicle will not skew the time. */
+		this->travel_time = (3 * this->travel_time + new_time) / 4;
 	}
 
 	/** A vehicle arrived at the origin of the link, reset waiting time. */
