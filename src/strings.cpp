@@ -1570,6 +1570,7 @@ bool ReadLanguagePack(const LanguageMetadata *lang)
 
 	/* Some lists need to be sorted again after a language change. */
 	InitializeSortedCargoSpecs();
+	BuildCargoTypesLegend();
 	SortIndustryTypes();
 	BuildIndustriesLegend();
 	SortNetworkLanguages();

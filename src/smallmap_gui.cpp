@@ -26,6 +26,10 @@
 #include "sound_func.h"
 #include "window_func.h"
 #include "company_base.h"
+#include "station_base.h"
+#include "company_func.h"
+#include "cargotype.h"
+#include "core/smallmap_type.hpp"
 
 #include "table/strings.h"
 
@@ -40,6 +44,7 @@ enum SmallMapWindowWidgets {
 	SM_WIDGET_CONTOUR,           ///< Button to select the contour view (height map).
 	SM_WIDGET_VEHICLES,          ///< Button to select the vehicles view.
 	SM_WIDGET_INDUSTRIES,        ///< Button to select the industries view.
+	SM_WIDGET_ROUTE_LINKS,       ///< Button to select the route link view.
 	SM_WIDGET_ROUTES,            ///< Button to select the routes view.
 	SM_WIDGET_VEGETATION,        ///< Button to select the vegetation view.
 	SM_WIDGET_OWNERS,            ///< Button to select the owners view.
@@ -53,6 +58,7 @@ enum SmallMapWindowWidgets {
 
 static int _smallmap_industry_count; ///< Number of used industries
 static int _smallmap_company_count;  ///< Number of entries in the owner legend.
+static int _smallmap_cargo_count;    ///< Number of entries in the cargo legend.
 
 static const int NUM_NO_COMPANY_ENTRIES = 4; ///< Number of entries in the owner legend that are not companies.
 
@@ -64,25 +70,25 @@ static const uint8 PC_TREES           = 0x57; ///< Green palette colour for tree
 static const uint8 PC_WATER           = 0xCA; ///< Dark blue palette colour for water.
 
 /** Macro for ordinary entry of LegendAndColour */
-#define MK(a, b) {a, b, INVALID_INDUSTRYTYPE, 0, INVALID_COMPANY, true, false, false}
+#define MK(a, b) {a, b, INVALID_INDUSTRYTYPE, 0, INVALID_COMPANY, INVALID_CARGO, true, false, false}
 
 /** Macro for a height legend entry with configurable colour. */
-#define MC(height)  {0, STR_TINY_BLACK_HEIGHT, INVALID_INDUSTRYTYPE, height, INVALID_COMPANY, true, false, false}
+#define MC(height)  {0, STR_TINY_BLACK_HEIGHT, INVALID_INDUSTRYTYPE, height, INVALID_COMPANY, INVALID_CARGO, true, false, false}
 
 /** Macro for non-company owned property entry of LegendAndColour */
-#define MO(a, b) {a, b, INVALID_INDUSTRYTYPE, 0, INVALID_COMPANY, true, false, false}
+#define MO(a, b) {a, b, INVALID_INDUSTRYTYPE, 0, INVALID_COMPANY, INVALID_CARGO, true, false, false}
 
 /** Macro used for forcing a rebuild of the owner legend the first time it is used. */
-#define MOEND() {0, 0, INVALID_INDUSTRYTYPE, 0, OWNER_NONE, true, true, false}
+#define MOEND() {0, 0, INVALID_INDUSTRYTYPE, 0, OWNER_NONE, INVALID_CARGO, true, true, false}
 
 /** Macro for end of list marker in arrays of LegendAndColour */
-#define MKEND() {0, STR_NULL, INVALID_INDUSTRYTYPE, 0, INVALID_COMPANY, true, true, false}
+#define MKEND() {0, STR_NULL, INVALID_INDUSTRYTYPE, 0, INVALID_COMPANY, INVALID_CARGO, true, true, false}
 
 /**
  * Macro for break marker in arrays of LegendAndColour.
  * It will have valid data, though
  */
-#define MS(a, b) {a, b, INVALID_INDUSTRYTYPE, 0, INVALID_COMPANY, true, false, true}
+#define MS(a, b) {a, b, INVALID_INDUSTRYTYPE, 0, INVALID_COMPANY, INVALID_CARGO, true, false, true}
 
 /** Structure for holding relevant data for legends in small map */
 struct LegendAndColour {
@@ -91,6 +97,7 @@ struct LegendAndColour {
 	IndustryType type;         ///< Type of industry. Only valid for industry entries.
 	uint8 height;              ///< Height in tiles. Only valid for height legend entries.
 	CompanyID company;         ///< Company to display. Only valid for company entries of the owner legend.
+	CargoID cid;               ///< Cargo type to display. Only valid for entries of the cargo legend.
 	bool show_on_map;          ///< For filtering industries, if \c true, industry is shown on the map in colour.
 	bool end;                  ///< This is the end of the list.
 	bool col_break;            ///< Perform a column break and go further at the next column.
@@ -176,6 +183,10 @@ static LegendAndColour _legend_land_owners[NUM_NO_COMPANY_ENTRIES + MAX_COMPANIE
 static LegendAndColour _legend_from_industries[NUM_INDUSTRYTYPES + 1];
 /** For connecting industry type to position in industries list(small map legend) */
 static uint _industry_to_list_pos[NUM_INDUSTRYTYPES];
+/** Legend text for the cargo types in the route link legend. */
+static LegendAndColour _legend_from_cargoes[NUM_CARGO + 1];
+/** For connecting cargo type to position in route link legend. */
+static uint _cargotype_to_list_pos[NUM_CARGO];
 /** Show heightmap in industry and owner mode of smallmap window. */
 static bool _smallmap_show_heightmap = false;
 /** For connecting company ID to position in owner list (small map legend) */
@@ -212,10 +223,38 @@ void BuildIndustriesLegend()
 	_smallmap_industry_count = j;
 }
 
+/** Fills the array for the route link legend. */
+void BuildCargoTypesLegend()
+{
+	uint j = 0;
+
+	/* Add all standard cargo types. */
+	const CargoSpec *cs;
+	FOR_ALL_SORTED_STANDARD_CARGOSPECS(cs) {
+		_legend_from_cargoes[j].legend = cs->name;
+		_legend_from_cargoes[j].colour = cs->legend_colour;
+		_legend_from_cargoes[j].cid = cs->Index();
+		_legend_from_cargoes[j].show_on_map = true;
+		_legend_from_cargoes[j].col_break = false;
+		_legend_from_cargoes[j].end = false;
+
+		/* Store widget number for this cargo type. */
+		_cargotype_to_list_pos[cs->Index()] = j;
+		j++;
+	}
+
+	/* Terminate list. */
+	_legend_from_cargoes[j].end = true;
+
+	/* Store number of enabled cargos. */
+	_smallmap_cargo_count = j;
+}
+
 static const LegendAndColour * const _legend_table[] = {
 	_legend_land_contours,
 	_legend_vehicles,
 	_legend_from_industries,
+	_legend_from_cargoes,
 	_legend_routes,
 	_legend_vegetation,
 	_legend_land_owners,
@@ -478,9 +517,10 @@ static inline uint32 GetSmallMapIndustriesPixels(TileIndex tile, TileType t)
  *
  * @param tile The tile of which we would like to get the colour.
  * @param t    Effective tile type of the tile (see #GetEffectiveTileType).
+ * @param show_height Whether to show the height of plain tiles.
  * @return The colour of tile  in the small map in mode "Routes"
  */
-static inline uint32 GetSmallMapRoutesPixels(TileIndex tile, TileType t)
+static inline uint32 GetSmallMapRoutesPixels(TileIndex tile, TileType t, bool show_height = false)
 {
 	if (t == MP_STATION) {
 		switch (GetStationType(tile)) {
@@ -503,7 +543,7 @@ static inline uint32 GetSmallMapRoutesPixels(TileIndex tile, TileType t)
 
 	/* Ground colour */
 	const SmallMapColourScheme *cs = &_heightmap_schemes[_settings_client.gui.smallmap_land_colour];
-	return ApplyMask(cs->default_colour, &_smallmap_contours_andor[t]);
+	return ApplyMask(show_height ? cs->height_colours[TileHeight(tile)] : cs->default_colour, &_smallmap_contours_andor[t]);
 }
 
 
@@ -590,6 +630,7 @@ class SmallMapWindow : public Window {
 		SMT_CONTOUR,
 		SMT_VEHICLES,
 		SMT_INDUSTRY,
+		SMT_ROUTE_LINKS,
 		SMT_ROUTES,
 		SMT_VEGETATION,
 		SMT_OWNER,
@@ -779,6 +820,9 @@ class SmallMapWindow : public Window {
 			case SMT_INDUSTRY:
 				return GetSmallMapIndustriesPixels(tile, et);
 
+			case SMT_ROUTE_LINKS:
+				return GetSmallMapRoutesPixels(tile, et, _smallmap_show_heightmap);
+
 			case SMT_ROUTES:
 				return GetSmallMapRoutesPixels(tile, et);
 
@@ -907,6 +951,92 @@ class SmallMapWindow : public Window {
 	}
 
 	/**
+	 * Adds the route links to the smallmap.
+	 */
+	void DrawRouteLinks() const
+	{
+		/* Iterate all shown cargo types. */
+		for (int i = 0; i < _smallmap_cargo_count; i++) {
+			if (_legend_from_cargoes[i].show_on_map) {
+				CargoID cid = _legend_from_cargoes[i].cid;
+
+				/* Iterate all stations. */
+				const Station *st;
+				FOR_ALL_STATIONS(st) {
+					Point src_pt = this->RemapTile(TileX(st->xy), TileY(st->xy));
+					src_pt.x -= this->subscroll;
+
+					/* Collect waiting cargo per destination station. */
+					std::map<StationID, uint> links;
+					for (RouteLinkList::const_iterator l = st->goods[cid].routes.begin(); l != st->goods[cid].routes.end(); ++l) {
+						if (IsInteractiveCompany((*l)->GetOwner())) links[(*l)->GetDestination()] += st->goods[cid].cargo.CountForNextHop((*l)->GetOriginOrderId());
+					}
+
+					/* Add cargo count on back-links. */
+					for (std::map<StationID, uint>::iterator itr = links.begin(); itr != links.end(); ++itr) {
+						/* Get destination location. */
+						const Station *dest = Station::Get(itr->first);
+						Point dest_pt = this->RemapTile(TileX(dest->xy), TileY(dest->xy));
+						dest_pt.x -= this->subscroll;
+
+						/* Get total count including back-links. */
+						uint count = itr->second;
+						for (RouteLinkList::const_iterator j = dest->goods[cid].routes.begin(); j != dest->goods[cid].routes.end(); ++j) {
+							if ((*j)->GetDestination() == st->index && IsInteractiveCompany((*j)->GetOwner())) count += dest->goods[cid].cargo.CountForNextHop((*j)->GetOriginOrderId());
+						}
+
+						/* Calculate line size from waiting cargo. */
+						int size = 1;
+						if (count >= 400) size++;
+						if (count >= 800) size++;
+						if (count >= 1600) size++;
+						if (count >= 3200) size++;
+
+						/* Draw black border and cargo coloured line. */
+						GfxDrawLine(src_pt.x, src_pt.y, dest_pt.x, dest_pt.y, PC_BLACK, size + 2);
+						GfxDrawLine(src_pt.x, src_pt.y, dest_pt.x, dest_pt.y, _legend_from_cargoes[i].colour, size);
+					}
+				}
+			}
+		}
+
+		/* Draw station rect. */
+		const Station *st;
+		FOR_ALL_STATIONS(st) {
+			/* Count total cargo and check for links for all shown cargo types. */
+			uint total = 0;
+			bool show = false;
+			for (CargoID cid = 0; cid < NUM_CARGO; cid++) {
+				if (_legend_from_cargoes[_cargotype_to_list_pos[cid]].show_on_map) {
+					total += st->goods[cid].cargo.Count();
+					show |= !st->goods[cid].routes.empty();
+				}
+			}
+
+			if (!show) continue;
+
+			/* Get rect size from total cargo count. */
+			int d = 1;
+			if (total >= 200) d++;
+			if (total >= 400) d++;
+			if (total >= 800) d++;
+			if (total >= 1600) d++;
+			if (total >= 3200) d++;
+			if (total >= 6400) d++;
+
+			/* Get top-left corner of the rect. */
+			Point dest_pt = this->RemapTile(TileX(st->xy), TileY(st->xy));
+			dest_pt.x -= this->subscroll + d/2;
+			dest_pt.y -= d/2;
+
+			/* Draw black border and company-colour inset. */
+			byte colour = _colour_gradient[Company::IsValidID(st->owner) ? Company::Get(st->owner)->colour : (byte)COLOUR_GREY][6];
+			GfxFillRect(dest_pt.x - 1, dest_pt.y - 1, dest_pt.x + d + 1, dest_pt.y + d + 1, PC_BLACK); // Draw black frame
+			GfxFillRect(dest_pt.x, dest_pt.y, dest_pt.x + d, dest_pt.y + d, colour); // Draw colour insert
+		}
+	}
+
+	/**
 	 * Draws vertical part of map indicator
 	 * @param x X coord of left/right border of main viewport
 	 * @param y Y coord of top border of main viewport
@@ -1013,6 +1143,9 @@ class SmallMapWindow : public Window {
 		/* Draw vehicles */
 		if (this->map_type == SMT_CONTOUR || this->map_type == SMT_VEHICLES) this->DrawVehicles(dpi, blitter);
 
+		/* Draw route links. */
+		if (this->map_type == SMT_ROUTE_LINKS) this->DrawRouteLinks();
+
 		/* Draw town names */
 		if (this->show_towns) this->DrawTowns(dpi);
 
@@ -1043,6 +1176,13 @@ class SmallMapWindow : public Window {
 				legend_tooltip = STR_SMALLMAP_TOOLTIP_COMPANY_SELECTION;
 				enable_all_tooltip = STR_SMALLMAP_TOOLTIP_ENABLE_ALL_COMPANIES;
 				disable_all_tooltip = STR_SMALLMAP_TOOLTIP_DISABLE_ALL_COMPANIES;
+				plane = 0;
+				break;
+
+			case SMT_ROUTE_LINKS:
+				legend_tooltip = STR_SMALLMAP_TOOLTIP_ROUTELINK_SELECTION;
+				enable_all_tooltip = STR_SMALLMAP_TOOLTIP_ENABLE_ALL_ROUTELINKS;
+				disable_all_tooltip = STR_SMALLMAP_TOOLTIP_DISABLE_ALL_ROUTELINKS;
 				plane = 0;
 				break;
 
@@ -1145,6 +1285,9 @@ public:
 					} else {
 						str = tbl->legend;
 					}
+				} else if (i == SMT_ROUTE_LINKS) {
+					SetDParam(0, tbl->legend);
+					str = STR_SMALLMAP_CARGO;
 				} else {
 					if (tbl->col_break) {
 						this->min_number_of_fixed_rows = max(this->min_number_of_fixed_rows, height);
@@ -1192,7 +1335,7 @@ public:
 
 			case SM_WIDGET_LEGEND: {
 				uint columns = this->GetNumberColumnsLegend(r.right - r.left + 1);
-				uint number_of_rows = max((this->map_type == SMT_INDUSTRY || this->map_type == SMT_OWNER) ? CeilDiv(max(_smallmap_company_count, _smallmap_industry_count), columns) : 0, this->min_number_of_fixed_rows);
+				uint number_of_rows = max((this->map_type == SMT_INDUSTRY || this->map_type == SMT_OWNER || this->map_type == SMT_ROUTE_LINKS) ? CeilDiv(max(_smallmap_company_count, max(_smallmap_industry_count, _smallmap_cargo_count)), columns) : 0, this->min_number_of_fixed_rows);
 				bool rtl = _current_text_dir == TD_RTL;
 				uint y_org = r.top + WD_FRAMERECT_TOP;
 				uint x = rtl ? r.right - this->column_width - WD_FRAMERECT_RIGHT : r.left + WD_FRAMERECT_LEFT;
@@ -1206,7 +1349,7 @@ public:
 				uint blob_right = rtl ? this->column_width - 1 : LEGEND_BLOB_WIDTH;
 
 				for (const LegendAndColour *tbl = _legend_table[this->map_type]; !tbl->end; ++tbl) {
-					if (tbl->col_break || ((this->map_type == SMT_INDUSTRY || this->map_type == SMT_OWNER) && i++ >= number_of_rows)) {
+					if (tbl->col_break || ((this->map_type == SMT_INDUSTRY || this->map_type == SMT_OWNER || this->map_type == SMT_ROUTE_LINKS) && i++ >= number_of_rows)) {
 						/* Column break needed, continue at top, COLUMN_WIDTH pixels
 						 * (one "row") to the right. */
 						x += rtl ? -(int)this->column_width : this->column_width;
@@ -1225,6 +1368,16 @@ public:
 							DrawString(x + text_left, x + text_right, y, STR_SMALLMAP_INDUSTRY, TC_GREY);
 						} else {
 							DrawString(x + text_left, x + text_right, y, STR_SMALLMAP_INDUSTRY, TC_BLACK);
+							GfxFillRect(x + blob_left, y + 1, x + blob_right, y + row_height - 1, PC_BLACK); // Outer border of the legend colour
+						}
+					} else if (this->map_type == SMT_ROUTE_LINKS) {
+						/* Cargo name needs formatting for tiny font. */
+						SetDParam(0, tbl->legend);
+						if (!tbl->show_on_map) {
+							/* Draw only the string and not the border of the legend colour. */
+							DrawString(x + text_left, x + text_right, y, STR_SMALLMAP_CARGO, TC_GREY);
+						} else {
+							DrawString(x + text_left, x + text_right, y, STR_SMALLMAP_CARGO, TC_BLACK);
 							GfxFillRect(x + blob_left, y + 1, x + blob_right, y + row_height - 1, PC_BLACK); // Outer border of the legend colour
 						}
 					} else if (this->map_type == SMT_OWNER && tbl->company != INVALID_COMPANY) {
@@ -1311,6 +1464,7 @@ public:
 			case SM_WIDGET_CONTOUR:    // Show land contours
 			case SM_WIDGET_VEHICLES:   // Show vehicles
 			case SM_WIDGET_INDUSTRIES: // Show industries
+			case SM_WIDGET_ROUTE_LINKS:// Show route links
 			case SM_WIDGET_ROUTES:     // Show transport routes
 			case SM_WIDGET_VEGETATION: // Show vegetation
 			case SM_WIDGET_OWNERS:     // Show land owners
@@ -1333,11 +1487,11 @@ public:
 				break;
 
 			case SM_WIDGET_LEGEND: // Legend
-				if (this->map_type == SMT_INDUSTRY || this->map_type == SMT_OWNER) {
+				if (this->map_type == SMT_INDUSTRY || this->map_type == SMT_OWNER || this->map_type == SMT_ROUTE_LINKS) {
 					const NWidgetBase *wi = this->GetWidget<NWidgetBase>(SM_WIDGET_LEGEND); // Label panel
 					uint line = (pt.y - wi->pos_y - WD_FRAMERECT_TOP) / FONT_HEIGHT_SMALL;
 					uint columns = this->GetNumberColumnsLegend(wi->current_x);
-					uint number_of_rows = max(CeilDiv(max(_smallmap_company_count, _smallmap_industry_count), columns), this->min_number_of_fixed_rows);
+					uint number_of_rows = max(CeilDiv(max(_smallmap_company_count, max(_smallmap_industry_count, _smallmap_cargo_count)), columns), this->min_number_of_fixed_rows);
 					if (line >= number_of_rows) break;
 
 					bool rtl = _current_text_dir == TD_RTL;
@@ -1395,6 +1549,30 @@ public:
 								_legend_land_owners[company_pos].show_on_map = !_legend_land_owners[company_pos].show_on_map;
 							}
 						}
+					} else if (this->map_type == SMT_ROUTE_LINKS) {
+						/* If click on cargo label, find right cargo type and enable/disable it. */
+						int cargo_pos = (column * number_of_rows) + line;
+						if (cargo_pos < _smallmap_cargo_count) {
+							if (_ctrl_pressed) {
+								/* Disable all, except the clicked one */
+								bool changes = false;
+								for (int i = 0; i != _smallmap_cargo_count; i++) {
+									bool new_state = i == cargo_pos;
+									if (_legend_from_cargoes[i].show_on_map != new_state) {
+										changes = true;
+										_legend_from_cargoes[i].show_on_map = new_state;
+									}
+								}
+								if (!changes) {
+									/* Nothing changed? Then show all (again). */
+									for (int i = 0; i != _smallmap_cargo_count; i++) {
+										_legend_from_cargoes[i].show_on_map = true;
+									}
+								}
+							} else {
+								_legend_from_cargoes[cargo_pos].show_on_map = !_legend_from_cargoes[cargo_pos].show_on_map;
+							}
+						}
 					}
 					this->SetDirty();
 				}
@@ -1409,6 +1587,10 @@ public:
 					for (int i = NUM_NO_COMPANY_ENTRIES; i != _smallmap_company_count; i++) {
 						_legend_land_owners[i].show_on_map = true;
 					}
+				} else if (this->map_type == SMT_ROUTE_LINKS) {
+					for (int i = 0; i != _smallmap_cargo_count; i++) {
+						_legend_from_cargoes[i].show_on_map = true;
+					}
 				}
 				this->SetDirty();
 				break;
@@ -1418,9 +1600,13 @@ public:
 					for (int i = 0; i != _smallmap_industry_count; i++) {
 						_legend_from_industries[i].show_on_map = false;
 					}
-				} else {
+				} else if (this->map_type == SMT_OWNER) {
 					for (int i = NUM_NO_COMPANY_ENTRIES; i != _smallmap_company_count; i++) {
 						_legend_land_owners[i].show_on_map = false;
+					}
+				} else if (this->map_type == SMT_ROUTE_LINKS) {
+					for (int i = 0; i != _smallmap_cargo_count; i++) {
+						_legend_from_cargoes[i].show_on_map = false;
 					}
 				}
 				this->SetDirty();
@@ -1657,6 +1843,8 @@ static const NWidgetPart _nested_smallmap_bar[] = {
 							SetDataTip(SPR_IMG_SHOW_VEHICLES, STR_SMALLMAP_TOOLTIP_SHOW_VEHICLES_ON_MAP), SetFill(1, 1),
 					NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_INDUSTRIES),
 							SetDataTip(SPR_IMG_INDUSTRY, STR_SMALLMAP_TOOLTIP_SHOW_INDUSTRIES_ON_MAP), SetFill(1, 1),
+					NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_ROUTE_LINKS),
+							SetDataTip(SPR_IMG_SHOW_ROUTES, STR_SMALLMAP_TOOLTIP_SHOW_ROUTE_LINKS_ON_MAP), SetFill(1, 1),
 				EndContainer(),
 				/* Bottom button row. */
 				NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
@@ -1670,6 +1858,7 @@ static const NWidgetPart _nested_smallmap_bar[] = {
 							SetDataTip(SPR_IMG_PLANTTREES, STR_SMALLMAP_TOOLTIP_SHOW_VEGETATION_ON_MAP), SetFill(1, 1),
 					NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_OWNERS),
 							SetDataTip(SPR_IMG_COMPANY_GENERAL, STR_SMALLMAP_TOOLTIP_SHOW_LAND_OWNERS_ON_MAP), SetFill(1, 1),
+					NWidget(NWID_SPACER), SetFill(1, 1),
 				EndContainer(),
 				NWidget(NWID_SPACER), SetResize(0, 1),
 			EndContainer(),

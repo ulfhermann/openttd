@@ -13,6 +13,7 @@
 #define SMALLMAP_GUI_H
 
 void BuildIndustriesLegend();
+void BuildCargoTypesLegend();
 void ShowSmallMap();
 void BuildLandLegend();
 void BuildOwnerLegend();
