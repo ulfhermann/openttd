@@ -1019,6 +1019,9 @@ struct StationViewWindow : public Window {
 	Scrollbar *vscroll;
 	CargoDestEntry::List cargodest_list[NUM_CARGO]; ///< List of cargoes sorted by destination.
 
+	static StringID last_cargo_from_str;
+	static StringID last_cargo_from_tooltip;
+
 	/** Height of the #SVW_ACCEPTLIST widget for different views. */
 	enum AcceptListHeight {
 		ALH_RATING  = 13, ///< Height of the cargo ratings view.
@@ -1032,6 +1035,7 @@ struct StationViewWindow : public Window {
 
 		this->CreateNestedTree(desc);
 		this->vscroll = this->GetScrollbar(SVW_SCROLLBAR);
+		this->GetWidget<NWidgetCore>(SVW_CARGO_FROM)->SetDataTip(StationViewWindow::last_cargo_from_str, StationViewWindow::last_cargo_from_tooltip);
 		/* Nested widget tree creation is done in two steps to ensure that this->GetWidget<NWidgetCore>(SVW_ACCEPTS) exists in UpdateWidgetSize(). */
 		this->FinishInitNested(desc, window_number);
 
@@ -1559,24 +1563,30 @@ struct StationViewWindow : public Window {
 			}
 
 			case SVW_CARGO_FROM: {
-				/* Swap between 'Source', 'Destination', 'Next hop' and 'Transfer' view. */
+				/* Swap between 'Source', 'Destination', 'Next hop' and 'Transfer' view.
+				 * Store the new view so the next opened station window shows the same view. */
 				NWidgetCore *nwi = this->GetWidget<NWidgetCore>(SVW_CARGO_FROM);
 				switch (nwi->widget_data) {
 					case STR_STATION_VIEW_WAITING_BUTTON:
-						nwi->SetDataTip(STR_STATION_VIEW_WAITING_TO_BUTTON, STR_STATION_VIEW_WAITING_TO_TOOLTIP);
+						StationViewWindow::last_cargo_from_str     = STR_STATION_VIEW_WAITING_TO_BUTTON;
+						StationViewWindow::last_cargo_from_tooltip = STR_STATION_VIEW_WAITING_TO_TOOLTIP;
 						break;
 					case STR_STATION_VIEW_WAITING_TO_BUTTON:
-						nwi->SetDataTip(STR_STATION_VIEW_WAITING_VIA_BUTTON, STR_STATION_VIEW_WAITING_VIA_TOOLTIP);
+						StationViewWindow::last_cargo_from_str     = STR_STATION_VIEW_WAITING_VIA_BUTTON;
+						StationViewWindow::last_cargo_from_tooltip = STR_STATION_VIEW_WAITING_VIA_TOOLTIP;
 						break;
 					case STR_STATION_VIEW_WAITING_VIA_BUTTON:
-						nwi->SetDataTip(STR_STATION_VIEW_WAITING_TRANSFER_BUTTON, STR_STATION_VIEW_WAITING_TRANSFER_TOOLTIP);
+						StationViewWindow::last_cargo_from_str     = STR_STATION_VIEW_WAITING_TRANSFER_BUTTON;
+						StationViewWindow::last_cargo_from_tooltip = STR_STATION_VIEW_WAITING_TRANSFER_TOOLTIP;
 						break;
 					case STR_STATION_VIEW_WAITING_TRANSFER_BUTTON:
-						nwi->SetDataTip(STR_STATION_VIEW_WAITING_BUTTON, STR_STATION_VIEW_WAITING_TOOLTIP);
+						StationViewWindow::last_cargo_from_str     = STR_STATION_VIEW_WAITING_BUTTON;
+						StationViewWindow::last_cargo_from_tooltip = STR_STATION_VIEW_WAITING_TOOLTIP;
 						break;
 					default:
 						NOT_REACHED();
 				}
+				nwi->SetDataTip(StationViewWindow::last_cargo_from_str, StationViewWindow::last_cargo_from_tooltip);
 				this->ClearCargodestList();
 				this->SetWidgetDirty(SVW_CARGO_FROM);
 				this->SetWidgetDirty(SVW_WAITING);
@@ -1612,6 +1622,8 @@ struct StationViewWindow : public Window {
 	}
 };
 
+StringID StationViewWindow::last_cargo_from_str     = STR_STATION_VIEW_WAITING_VIA_BUTTON;
+StringID StationViewWindow::last_cargo_from_tooltip = STR_STATION_VIEW_WAITING_VIA_TOOLTIP;
 
 static const WindowDesc _station_view_desc(
 	WDP_AUTO, 249, 110,
