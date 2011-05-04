@@ -13,6 +13,9 @@
 #include "core/pool_func.hpp"
 #include "economy_base.h"
 #include "station_base.h"
+#include "cargodest_func.h"
+#include "cargodest_base.h"
+#include "settings_type.h"
 
 /* Initialize the cargopacket-pool */
 CargoPacketPool _cargopacket_pool("CargoPacket");
@@ -477,6 +480,61 @@ void StationCargoList::InvalidateCache()
 {
 	this->order_cache.clear();
 	this->Parent::InvalidateCache();
+}
+
+/**
+ * Recompute the desired next hop of a cargo packet.
+ * @param cp  Cargo packet to update.
+ * @param st  Station of  this list.
+ * @param cid Cargo type of this list.
+ * @return False if the packet was deleted, true otherwise.
+ */
+bool StationCargoList::UpdateCargoNextHop(CargoPacket *cp, Station *st, CargoID cid)
+{
+	StationID next_unload;
+	RouteLink *l = FindRouteLinkForCargo(st, cid, cp, &next_unload);
+
+	if (l == NULL) {
+		/* No link to destination, drop packet. */
+		this->RemoveFromCache(cp);
+		delete cp;
+		return false;
+	}
+
+	/* Update next hop info. */
+	this->RemoveFromCache(cp);
+	cp->next_station = next_unload;
+	cp->next_order = l->GetOriginOrderId();
+	this->AddToCache(cp);
+
+	return true;
+}
+
+/**
+ * Recompute the desired next hop of all cargo packets.
+ * @param st  Station of this list.
+ * @param cid Cargo type of this list.
+ */
+void StationCargoList::UpdateCargoNextHop(Station *st, CargoID cid)
+{
+	uint count = 0;
+	StationCargoList::Iterator iter;
+	for (iter = this->packets.begin(); count < this->next_start + _settings_game.economy.cargodest.route_recalc_chunk && iter != this->packets.end(); count++) {
+		if (count < this->next_start) continue;
+		if ((*iter)->DestinationID() != INVALID_SOURCE) {
+			if (this->UpdateCargoNextHop(*iter, st, cid)) {
+				++iter;
+			} else {
+				iter = this->packets.erase(iter);
+			}
+		} else {
+			++iter;
+		}
+	}
+
+	/* Update start counter for next loop. */
+	this->next_start = count;
+	if (this->next_start >= this->packets.size()) this->next_start = 0;
 }
 
 /**

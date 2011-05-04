@@ -378,10 +378,13 @@ protected:
 	typedef CargoList<StationCargoList> Parent;
 
 	OrderMap order_cache;
+	uint32 next_start;        ///< Packet number to start the next hop update loop from.
 
 	void AddToCache(const CargoPacket *cp);
 	void RemoveFromCache(const CargoPacket *cp);
 	void RemoveFromCacheLocal(const CargoPacket *cp, uint amount);
+
+	bool UpdateCargoNextHop(CargoPacket *cp, Station *st, CargoID cid);
 
 public:
 	/** The super class ought to know what it's doing. */
@@ -390,6 +393,8 @@ public:
 	friend const struct SaveLoad *GetGoodsDesc();
 
 	void InvalidateCache();
+
+	void UpdateCargoNextHop(Station *st, CargoID cid);
 
 	/**
 	 * Gets the cargo counts per next hop.

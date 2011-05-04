@@ -38,7 +38,8 @@ struct GoodsEntry {
 		days_since_pickup(255),
 		rating(INITIAL_STATION_RATING),
 		last_speed(0),
-		last_age(255)
+		last_age(255),
+		cargo_counter(0)
 	{}
 
 	byte acceptance_pickup;
@@ -47,6 +48,7 @@ struct GoodsEntry {
 	byte last_speed;
 	byte last_age;
 	byte amount_fract;      ///< Fractional part of the amount in the cargo list
+	uint16 cargo_counter;   ///< Update timer for the packets' next hop
 	StationCargoList cargo; ///< The cargo packets of cargo waiting in this station
 	RouteLinkList routes;   ///< List of originating route links
 };

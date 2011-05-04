@@ -412,6 +412,8 @@ struct CargodestSettings {
 	uint32 town_nearby_dist;                 ///< squared distance (on a 256x256 map) inside which a town is considered nearby
 	uint32 ind_nearby_dist;                  ///< squared distance (on a 256x256 map) inside which an industry is considered nearby
 	uint16 max_route_age;                    ///< maximum days since the last vehicle traveled a link until link expiration
+	uint16 route_recalc_delay;               ///< delay in ticks between recalculating the next hop of cargo packets
+	uint16 route_recalc_chunk;               ///< maximum amount of cargo packets to recalculate in one step
 };
 
 /** Settings related to the economy. */

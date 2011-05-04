@@ -3173,6 +3173,11 @@ void OnTick_Station()
 			/* Age and expire route links. */
 			Station *s = Station::From(st);
 			if (s->index % DAY_TICKS == _date_fract) AgeRouteLinks(s);
+
+			/* Decrement cargo update counter. */
+			for (CargoID cid = 0; cid < NUM_CARGO; cid++) {
+				if (s->goods[cid].cargo_counter > 0) s->goods[cid].cargo_counter--;
+			}
 		}
 	}
 }
