@@ -2159,6 +2159,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\saveload\cargodest_sl.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\saveload\cargopacket_sl.cpp"
 				>
 			</File>

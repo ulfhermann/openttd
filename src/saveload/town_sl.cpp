@@ -187,13 +187,19 @@ static void Load_HIDS()
 	Load_NewGRFMapping(_house_mngr);
 }
 
+static void RealSave_TOWN(Town *t)
+{
+	SlObject(t, _town_desc);
+	t->SaveCargoSourceSink();
+}
+
 static void Save_TOWN()
 {
 	Town *t;
 
 	FOR_ALL_TOWNS(t) {
 		SlSetArrayIndex(t->index);
-		SlObject(t, _town_desc);
+		SlAutolength((AutolengthProc *)RealSave_TOWN, t);
 	}
 }
 
@@ -204,10 +210,20 @@ static void Load_TOWN()
 	while ((index = SlIterateArray()) != -1) {
 		Town *t = new (index) Town();
 		SlObject(t, _town_desc);
+		t->LoadCargoSourceSink();
+	}
+}
+
+static void Ptrs_TOWN()
+{
+	Town *t;
+
+	FOR_ALL_TOWNS(t) {
+		t->PtrsCargoSourceSink();
 	}
 }
 
 extern const ChunkHandler _town_chunk_handlers[] = {
-	{ 'HIDS', Save_HIDS, Load_HIDS, NULL, NULL, CH_ARRAY },
-	{ 'CITY', Save_TOWN, Load_TOWN, NULL, NULL, CH_ARRAY | CH_LAST},
+	{ 'HIDS', Save_HIDS, Load_HIDS, NULL,      NULL, CH_ARRAY },
+	{ 'CITY', Save_TOWN, Load_TOWN, Ptrs_TOWN, NULL, CH_ARRAY | CH_LAST},
 };

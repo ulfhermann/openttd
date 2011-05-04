@@ -13,13 +13,42 @@
 #define CARGODEST_BASE_H
 
 #include "cargo_type.h"
+#include "town_type.h"
+#include "core/smallvec_type.hpp"
+
+struct CargoSourceSink;
+
+/** Information about a demand link for cargo. */
+struct CargoLink {
+	CargoSourceSink      *dest;      ///< Destination of the link.
+	TransportedCargoStat amount;     ///< Transported cargo statistics.
+	uint                 weight;     ///< Weight of this link.
+	byte                 weight_mod; ///< Weight modifier.
+
+	CargoLink(CargoSourceSink *d, byte mod) : dest(d), weight(1), weight_mod(mod) {}
+
+	/* Compare two cargo links for inequality. */
+	bool operator !=(const CargoLink &other) const
+	{
+		return other.dest != dest;
+	}
+};
 
 /** An entity producing or accepting cargo with a destination. */
 struct CargoSourceSink {
+	/** List of destinations for each cargo type. */
+	SmallVector<CargoLink, 8> cargo_links[NUM_CARGO];
+	/** Sum of the destination weights for each cargo type. */
+	uint cargo_links_weight[NUM_CARGO];
+
 	/** Get the type of this entity. */
 	virtual SourceType GetType() const = 0;
 	/** Get the source ID corresponding with this entity. */
 	virtual SourceID GetID() const = 0;
+
+	void SaveCargoSourceSink();
+	void LoadCargoSourceSink();
+	void PtrsCargoSourceSink();
 };
 
 #endif /* CARGODEST_BASE_H */
