@@ -1150,9 +1150,9 @@ static bool StationCatchmentChanged(int32 p1)
 	return true;
 }
 
-static bool CargodestModeChanged(int32 p1)
+bool CargodestModeChanged(int32 p1)
 {
-	/* Clear route links for cargoes that aren't routed anymore. */
+	/* Clear route links and destinations for cargoes that aren't routed anymore. */
 	Station *st;
 	FOR_ALL_STATIONS(st) {
 		for (CargoID cid = 0; cid < NUM_CARGO; cid++) {
@@ -1163,12 +1163,24 @@ static bool CargodestModeChanged(int32 p1)
 				delete *i;
 			}
 			st->goods[cid].routes.clear();
+
+			/* Remove destinations from cargo packets. */
+			for (StationCargoList::Iterator i = st->goods[cid].cargo.packets.begin(); i != st->goods[cid].cargo.packets.end(); ++i) {
+				(*i)->dest_id = INVALID_SOURCE;
+			}
+			st->goods[cid].cargo.InvalidateCache();
 		}
 	}
 
 	Vehicle *v;
 	FOR_ALL_VEHICLES(v) {
 		if (v->IsFrontEngine()) PrefillRouteLinks(v);
+		if (CargoHasDestinations(v->cargo_type)) continue;
+		/* Remove destination from all cargoes that aren't routed anymore. */
+		for (VehicleCargoList::Iterator i = v->cargo.packets.begin(); i != v->cargo.packets.end(); ++i) {
+			(*i)->dest_id = INVALID_SOURCE;
+		}
+		v->cargo.InvalidateCache();
 	}
 
 	/* Clear all links for cargoes that aren't routed anymore. */
