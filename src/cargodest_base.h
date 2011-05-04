@@ -98,16 +98,18 @@ struct RouteLink : public RouteLinkPool::PoolItem<&_routelink_pool> {
 private:
 	friend const struct SaveLoad *GetRouteLinkDescription(); ///< Saving and loading of route links.
 	friend void ChangeOwnershipOfCompanyItems(Owner old_owner, Owner new_owner);
+	friend void AgeRouteLinks(Station *st);
 
 	StationID       dest;            ///< Destination station id.
 	OrderID         prev_order;      ///< Id of the order the vehicle had when arriving at the origin.
 	OrderID         next_order;      ///< Id of the order the vehicle will leave the station with.
 	OwnerByte       owner;           ///< Owner of the vehicle of the link.
+	uint16          wait_time;       ///< Days since the last vehicle traveled this link.
 
 public:
 	/** Constructor */
 	RouteLink(StationID dest = INVALID_STATION, OrderID prev_order = INVALID_ORDER, OrderID next_order = INVALID_ORDER, Owner owner = INVALID_OWNER)
-		: dest(dest), prev_order(prev_order), next_order(next_order)
+		: dest(dest), prev_order(prev_order), next_order(next_order), wait_time(0)
 	{
 		this->owner = owner;
 	}
@@ -126,11 +128,20 @@ public:
 	/** Get the owner of this link. */
 	inline Owner GetOwner() const { return this->owner; }
 
+	/** Get the wait time at the origin station. */
+	inline uint16 GetWaitTime() const { return this->wait_time; }
+
 	/** Update the destination of the route link. */
 	inline void SetDestination(StationID dest_id, OrderID dest_order_id)
 	{
 		this->dest = dest_id;
 		this->next_order = dest_order_id;
+	}
+
+	/** A vehicle arrived at the origin of the link, reset waiting time. */
+	void VehicleArrived()
+	{
+		this->wait_time = 0;
 	}
 };
 

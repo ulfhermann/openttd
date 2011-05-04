@@ -403,6 +403,7 @@ struct CargodestSettings {
 	uint16 weight_scale_ind[2];              ///< weight scale divisor for (0=#WEIGHT_SCALE_IND_PROD) produced cargo (1=#WEIGHT_SCALE_IND_PILE) stockpiled cargo
 	uint32 town_nearby_dist;                 ///< squared distance (on a 256x256 map) inside which a town is considered nearby
 	uint32 ind_nearby_dist;                  ///< squared distance (on a 256x256 map) inside which an industry is considered nearby
+	uint16 max_route_age;                    ///< maximum days since the last vehicle traveled a link until link expiration
 };
 
 /** Settings related to the economy. */
