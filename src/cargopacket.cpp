@@ -430,6 +430,14 @@ void VehicleCargoList::InvalidateCache()
 	this->Parent::InvalidateCache();
 }
 
+/** Invalidate next unload station of all cargo packets. */
+void VehicleCargoList::InvalidateNextStation()
+{
+	for (VehicleCargoList::ConstIterator it = this->packets.begin(); it != this->packets.end(); ++it) {
+		(*it)->next_station = INVALID_STATION;
+	}
+}
+
 /**
  * Invalidates the next hop info of all cargo packets with a given next order or unload station.
  * @param order Next order to invalidate.

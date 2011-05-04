@@ -947,6 +947,17 @@ static void CancelLoadingDueToDeletedOrder(Vehicle *v)
 }
 
 /**
+ * Invalidate the next unload station of all cargo packets of a vehicle chain.
+ * @param v The vehicle.
+ */
+static void InvalidateNextStation(Vehicle *v)
+{
+	for (; v != NULL; v = v->Next()) {
+		v->cargo.InvalidateNextStation();
+	}
+}
+
+/**
  * Delete an order but skip the parameter validation.
  * @param v       The vehicle to delete the order from.
  * @param sel_ord The id of the order to be deleted.
@@ -986,6 +997,9 @@ void DeleteOrder(Vehicle *v, VehicleOrderID sel_ord)
 
 		/* Update any possible open window of the vehicle */
 		InvalidateVehicleOrder(u, sel_ord | (INVALID_VEH_ORDER_ID << 8));
+
+		/* Clear the next unload station of all cargo packets, it might not be in the orders anymore. */
+		InvalidateNextStation(u);
 	}
 
 	/* As we delete an order, the order to skip to will be 'wrong'. */
@@ -1373,6 +1387,9 @@ CommandCost CmdModifyOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 				u->current_order.SetLoadType(order->GetLoadType());
 			}
 			InvalidateVehicleOrder(u, -2);
+
+			/* Invalidate the next unload station of all packets as we might not unload there anymore. */
+			InvalidateNextStation(u);
 		}
 	}
 
@@ -1733,6 +1750,9 @@ void DeleteVehicleOrders(Vehicle *v, bool keep_orderlist, bool reset_order_indic
 		v->orders.list->FreeChain(keep_orderlist);
 		if (!keep_orderlist) v->orders.list = NULL;
 	}
+
+	/* Invalidate the next unload station of all cargo. */
+	InvalidateNextStation(v);
 
 	if (reset_order_indices) {
 		v->cur_implicit_order_index = v->cur_real_order_index = 0;
