@@ -29,6 +29,7 @@ static const byte LWM_TONY_BIG      = 3; ///< Weight modifier for big towns.
 static const byte LWM_TONY_CITY     = 4; ///< Weight modifier for cities.
 static const byte LWM_TONY_NEARBY   = 5; ///< Weight modifier for nearby towns.
 static const byte LWM_INTOWN        = 8; ///< Weight modifier for in-town links.
+static const byte LWM_IND_ANY       = 2; ///< Default weight modifier for industries.
 
 static const uint MAX_EXTRA_LINKS       = 2; ///< Number of extra links allowed.
 
@@ -126,6 +127,17 @@ static bool IsTownNearby(const Town *t, TileIndex ti)
 	return IsNearby(t->xy, ti, _settings_game.economy.cargodest.town_nearby_dist);
 }
 
+/**
+ * Test whether a tiles is near an industry.
+ * @param ind The industry.
+ * @param ti The tile to test.
+ * @return True if the tiles is near the town.
+ */
+static bool IsIndustryNearby(const Industry *ind, TileIndex ti)
+{
+	return IsNearby(ind->location.tile, ti, _settings_game.economy.cargodest.ind_nearby_dist);
+}
+
 /** Common helper for town/industry enumeration. */
 static bool EnumAnyDest(const CargoSourceSink *dest, EnumRandomData *erd)
 {
@@ -172,6 +184,27 @@ static bool EnumAnyIndustry(const Industry *ind, void *data)
 	return EnumAnyDest(ind, erd) && ind->AcceptsCargo(erd->cid);
 }
 
+/** Enumerate cargo sources supplying a specific cargo. */
+template <typename T>
+static bool EnumAnySupplier(const T *css, void *data)
+{
+	return css->SuppliesCargo(((EnumRandomData *)data)->cid);
+}
+
+/** Enumerate nearby cargo sources supplying a specific cargo. */
+static bool EnumNearbySupplier(const Industry *ind, void *data)
+{
+	EnumRandomData *erd = (EnumRandomData *)data;
+	return EnumAnySupplier(ind, data) && IsIndustryNearby(ind, erd->source_xy);
+}
+
+/** Enumerate nearby cargo sources supplying a specific cargo. */
+static bool EnumNearbySupplier(const Town *t, void *data)
+{
+	EnumRandomData *erd = (EnumRandomData *)data;
+	return EnumAnySupplier(t, data) && IsTownNearby(t, erd->source_xy);
+}
+
 
 /** Find a town as a destination. */
 static CargoSourceSink *FindTownDestination(byte &weight_mod, CargoSourceSink *source, TileIndex source_xy, CargoID cid, const uint8 destclass_chance[4], TownID skip = INVALID_TOWN)
@@ -208,6 +241,30 @@ static CargoSourceSink *FindIndustryDestination(CargoSourceSink *source, CargoID
 	EnumRandomData erd = {source, INVALID_TILE, cid, IsSymmetricCargo(cid)};
 
 	return Industry::GetRandom(&EnumAnyIndustry, skip, &erd);
+}
+
+/** Find a supply for a cargo type. */
+static CargoSourceSink *FindSupplySource(Industry *dest, CargoID cid)
+{
+	EnumRandomData erd = {dest, dest->location.tile, cid, false};
+
+	CargoSourceSink *source = NULL;
+
+	/* Even chance for industry source first, town second and vice versa.
+	 * Try a nearby supplier first, then check all suppliers. */
+	if (Chance16(1, 2)) {
+		source = Industry::GetRandom(&EnumNearbySupplier, dest->index, &erd);
+		if (source == NULL) source = Town::GetRandom(&EnumNearbySupplier, INVALID_TOWN, &erd);
+		if (source == NULL) source = Industry::GetRandom(&EnumAnySupplier, dest->index, &erd);
+		if (source == NULL) source = Town::GetRandom(&EnumAnySupplier, INVALID_TOWN, &erd);
+	} else {
+		source = Town::GetRandom(&EnumNearbySupplier, INVALID_TOWN, &erd);
+		if (source == NULL) source = Industry::GetRandom(&EnumNearbySupplier, dest->index, &erd);
+		if (source == NULL) source = Town::GetRandom(&EnumAnySupplier, INVALID_TOWN, &erd);
+		if (source == NULL) source = Industry::GetRandom(&EnumAnySupplier, dest->index, &erd);
+	}
+
+	return source;
 }
 
 /* virtual */ void CargoSourceSink::CreateSpecialLinks(CargoID cid)
@@ -392,6 +449,37 @@ void UpdateExpectedLinks(Industry *ind)
 	}
 }
 
+/** Make sure an industry has at least one incoming link for each accepted cargo. */
+void AddMissingIndustryLinks(Industry *ind)
+{
+	for (uint i = 0; i < lengthof(ind->accepts_cargo); i++) {
+		CargoID cid = ind->accepts_cargo[i];
+		if (cid == INVALID_CARGO) continue;
+
+		/* Do we already have at least one cargo source? */
+		if (ind->num_incoming_links[cid] > 0) continue;
+
+		CargoSourceSink *source = FindSupplySource(ind, cid);
+		if (source == NULL) continue; // Too bad...
+
+		if (source->cargo_links[cid].Length() >= source->num_links_expected[cid] + MAX_EXTRA_LINKS) {
+			/* Increase the expected link count if adding another link would
+			 * exceed the count, as otherwise this (or another) link would
+			 * get removed right again. */
+			source->num_links_expected[cid]++;
+		}
+
+		*source->cargo_links[cid].Append() = CargoLink(ind, LWM_IND_ANY);
+		ind->num_incoming_links[cid]++;
+
+		/* If this is a symmetric cargo and we produce it as well, create a back link. */
+		if (IsSymmetricCargo(cid) && ind->SuppliesCargo(cid) && source->AcceptsCargo(cid)) {
+			*ind->cargo_links[cid].Append() = CargoLink(source, LWM_IND_ANY);
+			source->num_incoming_links[cid]++;
+		}
+	}
+}
+
 /** Update the demand links. */
 void UpdateCargoLinks(Town *t)
 {
@@ -561,6 +649,9 @@ void UpdateCargoLinks()
 	/* Recalculate the number of expected links. */
 	FOR_ALL_TOWNS(t) UpdateExpectedLinks(t);
 	FOR_ALL_INDUSTRIES(ind) UpdateExpectedLinks(ind);
+
+	/* Make sure each industry gets at at least some input cargo. */
+	FOR_ALL_INDUSTRIES(ind) AddMissingIndustryLinks(ind);
 
 	/* Update the demand link list. */
 	FOR_ALL_TOWNS(t) UpdateCargoLinks(t);
