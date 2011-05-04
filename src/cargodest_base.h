@@ -118,7 +118,7 @@ public:
 		this->vtype = vtype;
 	}
 
-	~RouteLink() {}
+	~RouteLink();
 
 	/** Get the target station of this link. */
 	inline StationID GetDestination() const { return this->dest; }

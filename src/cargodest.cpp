@@ -794,6 +794,16 @@ RouteLinkPool _routelink_pool("RouteLink");
 INSTANTIATE_POOL_METHODS(RouteLink)
 
 /**
+ * Invalidate some stuff on destruction.
+ */
+RouteLink::~RouteLink()
+{
+	if (RouteLink::CleaningPool()) return;
+
+	if (this->GetOriginOrderId() != INVALID_ORDER) StationCargoList::InvalidateAllTo(this->GetOriginOrderId());
+}
+
+/**
  * Update or create a single route link for a specific vehicle and cargo.
  * @param v The vehicle.
  * @param cargos Create links for the cargo types whose bit is set.

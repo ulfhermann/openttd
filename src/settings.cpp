@@ -1167,6 +1167,7 @@ bool CargodestModeChanged(int32 p1)
 			/* Remove destinations from cargo packets. */
 			for (StationCargoList::Iterator i = st->goods[cid].cargo.packets.begin(); i != st->goods[cid].cargo.packets.end(); ++i) {
 				(*i)->dest_id = INVALID_SOURCE;
+				(*i)->next_order = INVALID_ORDER;
 			}
 			st->goods[cid].cargo.InvalidateCache();
 		}
@@ -1179,6 +1180,7 @@ bool CargodestModeChanged(int32 p1)
 		/* Remove destination from all cargoes that aren't routed anymore. */
 		for (VehicleCargoList::Iterator i = v->cargo.packets.begin(); i != v->cargo.packets.end(); ++i) {
 			(*i)->dest_id = INVALID_SOURCE;
+			(*i)->next_order = INVALID_ORDER;
 		}
 		v->cargo.InvalidateCache();
 	}

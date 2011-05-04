@@ -17,6 +17,7 @@
 #include "station_type.h"
 #include "cargo_type.h"
 #include "vehicle_type.h"
+#include "order_type.h"
 #include <list>
 
 /** Unique identifier for a single cargo packet. */
@@ -47,6 +48,7 @@ private:
 	TileIndex dest_xy;          ///< Destination tile or INVALID_TILE if no specific destination
 	SourceID dest_id;           ///< Index of the destination.
 	SourceTypeByte dest_type;   ///< Type of #dest_id.
+	OrderID next_order;         ///< Next desired hop.
 
 	/** The CargoList caches, thus needs to know about it. */
 	template <class Tinst> friend class CargoList;
@@ -60,8 +62,8 @@ public:
 	static const uint16 MAX_COUNT = UINT16_MAX;
 
 	CargoPacket();
-	CargoPacket(StationID source, TileIndex source_xy, uint16 count, SourceType source_type, SourceID source_id, TileIndex dest_xy = INVALID_TILE, SourceType dest_type = ST_INDUSTRY, SourceID dest_id = INVALID_SOURCE);
-	CargoPacket(uint16 count, byte days_in_transit, StationID source, TileIndex source_xy, TileIndex loaded_at_xy, Money feeder_share = 0, SourceType source_type = ST_INDUSTRY, SourceID source_id = INVALID_SOURCE, TileIndex dest_xy = INVALID_TILE, SourceType dest_type = ST_INDUSTRY, SourceID dest_id = INVALID_SOURCE);
+	CargoPacket(StationID source, TileIndex source_xy, uint16 count, SourceType source_type, SourceID source_id, TileIndex dest_xy = INVALID_TILE, SourceType dest_type = ST_INDUSTRY, SourceID dest_id = INVALID_SOURCE, OrderID next_order = INVALID_ORDER);
+	CargoPacket(uint16 count, byte days_in_transit, StationID source, TileIndex source_xy, TileIndex loaded_at_xy, Money feeder_share = 0, SourceType source_type = ST_INDUSTRY, SourceID source_id = INVALID_SOURCE, TileIndex dest_xy = INVALID_TILE, SourceType dest_type = ST_INDUSTRY, SourceID dest_id = INVALID_SOURCE, OrderID next_order = INVALID_ORDER);
 
 	/** Destroy the packet. */
 	~CargoPacket() { }
@@ -169,6 +171,15 @@ public:
 	FORCEINLINE SourceType DestinationType() const
 	{
 		return this->dest_type;
+	}
+
+	/**
+	 * Gets the order ID of the next desired hop.
+	 * @return The order ID of the next desired hop.
+	 */
+	FORCEINLINE OrderID NextHop() const
+	{
+		return this->next_order;
 	}
 
 
@@ -335,7 +346,8 @@ public:
 				cp1->loaded_at_xy    == cp2->loaded_at_xy &&
 				cp1->dest_xy         == cp2->dest_xy &&
 				cp1->dest_type       == cp2->dest_type &&
-				cp1->dest_id         == cp2->dest_id;
+				cp1->dest_id         == cp2->dest_id &&
+				cp1->next_order      == cp2->next_order;
 	}
 };
 
@@ -364,8 +376,12 @@ public:
 				cp1->source_id       == cp2->source_id &&
 				cp1->dest_xy         == cp2->dest_xy &&
 				cp1->dest_type       == cp2->dest_type &&
-				cp1->dest_id         == cp2->dest_id;
+				cp1->dest_id         == cp2->dest_id &&
+				cp1->next_order      == cp2->next_order;
 	}
+
+	static void InvalidateAllTo(OrderID order);
+	static void InvalidateAllTo(SourceType type, SourceID dest);
 };
 
 #endif /* CARGOPACKET_H */
