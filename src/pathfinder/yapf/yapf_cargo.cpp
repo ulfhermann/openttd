@@ -135,6 +135,9 @@ class CYapfCostRouteLinkT {
 		/* Transfer penalty when switching vehicles or forced unloading. */
 		if (link->GetOriginOrderId() != parent->GetDestOrderId() || (Order::Get(link->GetOriginOrderId())->GetUnloadType() & OUFB_UNLOAD) != 0) {
 			cost += this->Yapf().PfGetSettings().route_transfer_cost;
+
+			/* Penalty for time since the last vehicle arrived. */
+			cost += link->GetWaitTime() * this->Yapf().PfGetSettings().route_station_last_veh_factor / PENALTY_DIVISOR;
 		}
 
 		/* Penalty for travel time. */

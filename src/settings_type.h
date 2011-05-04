@@ -330,6 +330,7 @@ struct YAPFSettings {
 	uint32 route_max_transfers;              ///< maximum number of allowed transfers
 	uint16 route_distance_factor;            ///< factor for the link length
 	uint16 route_travel_time_factor;         ///< factor * CYapfCostRouteLinkT::PENALTY_DIVISOR (=16) for the link travel time
+	uint16 route_station_last_veh_factor;    ///< factor * CYapfCostRouteLinkT::PENALTY_DIVISOR (=16) for the time since the last vehicle arrived at a station
 };
 
 /** Settings related to all pathfinders. */
