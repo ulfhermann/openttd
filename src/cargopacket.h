@@ -19,6 +19,7 @@
 #include "vehicle_type.h"
 #include "order_type.h"
 #include <list>
+#include <map>
 
 /** Unique identifier for a single cargo packet. */
 typedef uint32 CargoPacketID;
@@ -244,6 +245,8 @@ protected:
 
 	void RemoveFromCache(const CargoPacket *cp);
 
+	void RemoveFromCacheLocal(const CargoPacket *cp, uint amount) {}
+
 public:
 	/** Create the cargo list. */
 	CargoList() {}
@@ -368,10 +371,45 @@ public:
  */
 class StationCargoList : public CargoList<StationCargoList> {
 public:
+	typedef std::map<OrderID, int> OrderMap;
+
+protected:
+	/** The (direct) parent of this class. */
+	typedef CargoList<StationCargoList> Parent;
+
+	OrderMap order_cache;
+
+	void AddToCache(const CargoPacket *cp);
+	void RemoveFromCache(const CargoPacket *cp);
+	void RemoveFromCacheLocal(const CargoPacket *cp, uint amount);
+
+public:
 	/** The super class ought to know what it's doing. */
 	friend class CargoList<StationCargoList>;
 	/** The stations, via GoodsEntry, have a CargoList. */
 	friend const struct SaveLoad *GetGoodsDesc();
+
+	void InvalidateCache();
+
+	/**
+	 * Gets the cargo counts per next hop.
+	 * @return Cargo counts.
+	 */
+	const OrderMap& CountForNextHop() const
+	{
+		return this->order_cache;
+	}
+
+	/**
+	 * Gets the cargo count for a next hop.
+	 * @param order The next hop.
+	 * @return The cargo count for the specified next hop.
+	 */
+	int CountForNextHop(OrderID order) const
+	{
+		OrderMap::const_iterator i = this->order_cache.find(order);
+		return i != this->order_cache.end() ? i->second : 0;
+	}
 
 	/**
 	 * Are two the two CargoPackets mergeable in the context of

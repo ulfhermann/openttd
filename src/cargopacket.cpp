@@ -263,6 +263,7 @@ void CargoList<Tinst>::Truncate(uint max_remaining)
 			uint diff = local_count - max_remaining;
 			this->count -= diff;
 			this->cargo_days_in_transit -= cp->days_in_transit * diff;
+			static_cast<Tinst *>(this)->RemoveFromCacheLocal(cp, diff);
 			cp->count = max_remaining;
 			max_remaining = 0;
 		} else {
@@ -439,6 +440,46 @@ void VehicleCargoList::InvalidateNextStation()
 }
 
 /**
+ * Update the local next-hop count cache.
+ * @param cp Packet the be removed.
+ * @param amount Cargo amount to be removed.
+ */
+void StationCargoList::RemoveFromCacheLocal(const CargoPacket *cp, uint amount)
+{
+	this->order_cache[cp->next_order] -= amount;
+	if (this->order_cache[cp->next_order] == 0) this->order_cache.erase(cp->next_order);
+}
+
+/**
+ * Update the cached values to reflect the removal of this packet.
+ * Decreases count and days_in_transit.
+ * @param cp Packet to be removed from cache.
+ */
+void StationCargoList::RemoveFromCache(const CargoPacket *cp)
+{
+	this->RemoveFromCacheLocal(cp, cp->count);
+	this->Parent::RemoveFromCache(cp);
+}
+
+/**
+ * Update the cache to reflect adding of this packet.
+ * Increases count and days_in_transit.
+ * @param cp New packet to be inserted.
+ */
+void StationCargoList::AddToCache(const CargoPacket *cp)
+{
+	this->order_cache[cp->next_order] += cp->count;
+	this->Parent::AddToCache(cp);
+}
+
+/** Invalidates the cached data and rebuild it. */
+void StationCargoList::InvalidateCache()
+{
+	this->order_cache.clear();
+	this->Parent::InvalidateCache();
+}
+
+/**
  * Invalidates the next hop info of all cargo packets with a given next order or unload station.
  * @param order Next order to invalidate.
  * @param st_unload Unload station to invalidate.
@@ -453,8 +494,10 @@ void VehicleCargoList::InvalidateNextStation()
 				if (cp->next_order == order || cp->next_station == st_unload) {
 					/* Invalidate both order and unload station as both likely
 					 * don't make sense anymore. */
+					st->goods[cid].cargo.RemoveFromCache(cp);
 					cp->next_order = INVALID_ORDER;
 					cp->next_station = INVALID_STATION;
+					st->goods[cid].cargo.AddToCache(cp);
 				}
 			}
 		}
@@ -475,8 +518,10 @@ void VehicleCargoList::InvalidateNextStation()
 				if (cp->dest_id == dest && cp->dest_type == type) {
 					/* Invalidate both next order and unload station as we
 					 * want the packets to be not routed anymore. */
+					st->goods[cid].cargo.RemoveFromCache(cp);
 					cp->next_order = INVALID_ORDER;
 					cp->next_station = INVALID_STATION;
+					st->goods[cid].cargo.AddToCache(cp);
 				}
 			}
 		}
