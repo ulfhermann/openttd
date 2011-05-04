@@ -1327,6 +1327,12 @@ STR_CONFIG_SETTING_LARGER_TOWNS_DISABLED                        :{LTBLUE}Proport
 STR_CONFIG_SETTING_CITY_SIZE_MULTIPLIER                         :{LTBLUE}Initial city size multiplier: {ORANGE}{STRING1}
 STR_CONFIG_SETTING_MODIFIED_ROAD_REBUILD                        :{LTBLUE}Remove absurd road-elements during the road construction: {ORANGE}{STRING1}
 
+STR_CONFIG_SETTING_CARGODEST_PAX                                :{LTBLUE}Destination mode for passengers/mail: {ORANGE}{STRING1}
+STR_CONFIG_SETTING_CARGODEST_TOWN                               :{LTBLUE}Destination mode for town-accepted cargoes: {ORANGE}{STRING1}
+STR_CONFIG_SETTING_CARGODEST_OTHER                              :{LTBLUE}Destination mode for other cargoes: {ORANGE}{STRING1}
+STR_CONFIG_SETTING_CARGODEST_MODE_OFF                           :Original
+STR_CONFIG_SETTING_CARGODEST_MODE_DEST                          :Fixed destinations
+
 STR_CONFIG_SETTING_GUI                                          :{ORANGE}Interface
 STR_CONFIG_SETTING_CONSTRUCTION                                 :{ORANGE}Construction
 STR_CONFIG_SETTING_VEHICLES                                     :{ORANGE}Vehicles

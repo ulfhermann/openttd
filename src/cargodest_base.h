@@ -41,6 +41,9 @@ struct CargoSourceSink {
 	/** Sum of the destination weights for each cargo type. */
 	uint cargo_links_weight[NUM_CARGO];
 
+	/** NOSAVE: Desired link count for each cargo. */
+	uint16 num_links_expected[NUM_CARGO];
+
 	virtual ~CargoSourceSink();
 
 	/** Get the type of this entity. */
@@ -56,13 +59,16 @@ struct CargoSourceSink {
 	 */
 	bool HasLinkTo(CargoID cid, const CargoSourceSink *dest) const
 	{
-		return this->cargo_links[cid].Contains(CargoLink(const_cast<CargoSourceSink *>(dest)));
+		return this->cargo_links[cid].Contains(CargoLink(const_cast<CargoSourceSink *>(dest), 1));
 	}
 
 	/** Is this cargo accepted? */
 	virtual bool AcceptsCargo(CargoID cid) const = 0;
 	/** Is this cargo produced? */
 	virtual bool SuppliesCargo(CargoID cid) const = 0;
+
+	/** Create the special cargo links for a cargo if not already present. */
+	virtual void CreateSpecialLinks(CargoID cid);
 
 	void SaveCargoSourceSink();
 	void LoadCargoSourceSink();

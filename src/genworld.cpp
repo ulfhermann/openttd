@@ -32,6 +32,7 @@
 #include "newgrf.h"
 #include "core/random_func.hpp"
 #include "core/backup_type.hpp"
+#include "cargodest_func.h"
 
 #include "table/sprites.h"
 
@@ -142,6 +143,7 @@ static void _GenerateWorld(void *)
 				GenerateIndustries();
 				GenerateObjects();
 				GenerateTrees();
+				UpdateCargoLinks();
 			}
 		}
 

@@ -820,7 +820,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\cargodest_func.h"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\cargodest_gui.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\cargodest_type.h"
 				>
 			</File>
 			<File

@@ -120,7 +120,9 @@ bmp.h
 bridge.h
 cargo_type.h
 cargodest_base.h
+cargodest_func.h
 cargodest_gui.h
+cargodest_type.h
 cargopacket.h
 cargotype.h
 cheat_func.h

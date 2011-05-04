@@ -382,6 +382,15 @@ struct VehicleSettings {
 	uint8  plane_crashes;                    ///< number of plane crashes, 0 = none, 1 = reduced, 2 = normal
 };
 
+/** Settings related to cargo destinations. */
+struct CargodestSettings {
+	uint8  mode_pax_mail;                    ///< routing mode for cargoes with TE_PASSENGERS or TE_MAIL
+	uint8  mode_town_cargo;                  ///< routing mode for cargoes with other town effects
+	uint8  mode_others;                      ///< routing mode for all other cargoes
+	uint8  base_town_links[2];               ///< minimum number of town demand links for (0=#BASE_TOWN_LINKS) all cargos except (1=#BASE_TOWN_LINKS_SYMM) symmetric cargos
+	uint8  base_ind_links[2];                ///< minimum number of industry demand links for (0=#BASE_IND_LINKS) all cargos except (1=#BASE_IND_LINKS_TOWN) town cargos
+};
+
 /** Settings related to the economy. */
 struct EconomySettings {
 	bool   inflation;                        ///< disable inflation
@@ -404,6 +413,8 @@ struct EconomySettings {
 	bool   station_noise_level;              ///< build new airports when the town noise level is still within accepted limits
 	uint16 town_noise_population[3];         ///< population to base decision on noise evaluation (@see town_council_tolerance)
 	bool   allow_town_level_crossings;       ///< towns are allowed to build level crossings
+
+	CargodestSettings cargodest;             ///< settings related to cargo destinations
 };
 
 /** Settings related to stations. */
