@@ -38,10 +38,12 @@ static const uint BASE_IND_LINKS        = 0; ///< Index into _settings_game.econ
 static const uint BASE_IND_LINKS_TOWN   = 1; ///< Index into _settings_game.economy.cargodest.base_ind_links for town cargos
 static const uint BIG_TOWN_POP_MAIL     = 0; ///< Index into _settings_game.economy.cargodest.big_town_pop for mail
 static const uint BIG_TOWN_POP_PAX      = 1; ///< Index into _settings_game.economy.cargodest.big_town_pop for passengers
-static const uint SCALE_TOWN            = 0; ///< Index into _settings_game.economy.cargodest.pop_scale_town for normal cargo
-static const uint SCALE_TOWN_BIG        = 1; ///< Index into _settings_game.economy.cargodest.pop_scale_town for normal cargo of big towns
-static const uint SCALE_TOWN_PAX        = 2; ///< Index into _settings_game.economy.cargodest.pop_scale_town for passengers
-static const uint SCALE_TOWN_BIG_PAX    = 3; ///< Index into _settings_game.economy.cargodest.pop_scale_town for passengers of big towns
+static const uint SCALE_TOWN            = 0; ///< Index into _settings_game.economy.cargodest.pop_scale_town/weight_scale_town for normal cargo
+static const uint SCALE_TOWN_BIG        = 1; ///< Index into _settings_game.economy.cargodest.pop_scale_town/weight_scale_town for normal cargo of big towns
+static const uint SCALE_TOWN_PAX        = 2; ///< Index into _settings_game.economy.cargodest.pop_scale_town/weight_scale_town for passengers
+static const uint SCALE_TOWN_BIG_PAX    = 3; ///< Index into _settings_game.economy.cargodest.pop_scale_town/weight_scale_town for passengers of big towns
+static const uint MIN_WEIGHT_TOWN       = 0; ///< Index into _settings_game.economy.cargodest.min_weight_town for normal cargo
+static const uint MIN_WEIGHT_TOWN_PAX   = 1; ///< Index into _settings_game.economy.cargodest.min_weight_town for passengers
 
 /** Are cargo destinations for this cargo type enabled? */
 bool CargoHasDestinations(CargoID cid)
@@ -416,6 +418,60 @@ void UpdateCargoLinks(Industry *ind)
 			 * 25% for industry/town. The reverse chance otherwise. */
 			CreateNewLinks(ind, ind->location.tile, cid, IsTownCargo(cid) ? 3 : 1, 4, _settings_game.economy.cargodest.town_chances_town, INVALID_TOWN, ind->index);
 		}
+	}
+}
+
+/* virtual */ uint Town::GetDestinationWeight(CargoID cid, byte weight_mod) const
+{
+	uint max_amt = IsPassengerCargo(cid) ? this->pass.old_max : this->mail.old_max;
+	uint big_amt = _settings_game.economy.cargodest.big_town_pop[IsPassengerCargo(cid) ? BIG_TOWN_POP_PAX : BIG_TOWN_POP_MAIL];
+
+	/* The weight is calculated by a piecewise function. We start with a predefined
+	 * minimum weight and then add the weight for the cargo amount up to the big
+	 * town amount. If the amount is more than the big town amount, this is also
+	 * added to the weight with a different scale factor to make sure that big towns
+	 * don't siphon the cargo away too much from the smaller destinations. */
+	uint weight = _settings_game.economy.cargodest.min_weight_town[IsPassengerCargo(cid) ? MIN_WEIGHT_TOWN_PAX : MIN_WEIGHT_TOWN];
+	weight += min(max_amt, big_amt) * weight_mod / _settings_game.economy.cargodest.weight_scale_town[IsPassengerCargo(cid) ? SCALE_TOWN_PAX : SCALE_TOWN];
+	if (max_amt > big_amt) weight += (max_amt - big_amt) * weight_mod / _settings_game.economy.cargodest.weight_scale_town[IsPassengerCargo(cid) ? SCALE_TOWN_BIG_PAX : SCALE_TOWN_BIG];
+
+	return weight;
+}
+
+/* virtual */ uint Industry::GetDestinationWeight(CargoID cid, byte weight_mod) const
+{
+	return weight_mod;
+}
+
+/** Recalculate the link weights. */
+void UpdateLinkWeights(Town *t)
+{
+	for (CargoID cid = 0; cid < NUM_CARGO; cid++) {
+		uint weight_sum = 0;
+
+		if (t->cargo_links[cid].Length() == 0) continue;
+
+		t->cargo_links[cid].Begin()->amount.NewMonth();
+
+		/* Skip the special link for undetermined destinations. */
+		for (CargoLink *l = t->cargo_links[cid].Begin() + 1; l != t->cargo_links[cid].End(); l++) {
+			l->weight = l->dest->GetDestinationWeight(cid, l->weight_mod);
+			weight_sum += l->weight;
+
+			l->amount.NewMonth();
+		}
+
+		/* Limit the weight of the in-town link to at most 1/3 of the total weight. */
+		if (t->cargo_links[cid].Length() > 1 && t->cargo_links[cid].Get(1)->dest == t) {
+			uint new_weight = min(t->cargo_links[cid].Get(1)->weight, weight_sum / 3);
+			weight_sum -= t->cargo_links[cid].Get(1)->weight - new_weight;
+			t->cargo_links[cid].Get(1)->weight = new_weight;
+		}
+
+		/* Set weight for the undetermined destination link to random_dest_chance%. */
+		t->cargo_links[cid].Begin()->weight = weight_sum == 0 ? 1 : (weight_sum * _settings_game.economy.cargodest.random_dest_chance) / (100 - _settings_game.economy.cargodest.random_dest_chance);
+
+		t->cargo_links_weight[cid] = weight_sum + t->cargo_links[cid].Begin()->weight;
 	}
 }
 
