@@ -331,6 +331,7 @@ struct YAPFSettings {
 	uint16 route_distance_factor;            ///< factor for the link length
 	uint16 route_travel_time_factor;         ///< factor * CYapfCostRouteLinkT::PENALTY_DIVISOR (=16) for the link travel time
 	uint16 route_station_last_veh_factor;    ///< factor * CYapfCostRouteLinkT::PENALTY_DIVISOR (=16) for the time since the last vehicle arrived at a station
+	uint16 route_station_waiting_factor;     ///< factor * CYapfCostRouteLinkT::PENALTY_DIVISOR (=16) for the waiting cargo at a station
 	byte   route_mode_cost_factor[4];        ///< vehicle type dependent factor for the link length
 };
 
