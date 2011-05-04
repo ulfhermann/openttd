@@ -99,6 +99,7 @@ const SaveLoad *GetCargoPacketDesc()
 		 SLE_CONDVAR(CargoPacket, dest_id,         SLE_UINT16, 161, SL_MAX_VERSION),
 		 SLE_CONDVAR(CargoPacket, dest_type,       SLE_UINT8,  161, SL_MAX_VERSION),
 		 SLE_CONDVAR(CargoPacket, next_order,      SLE_UINT16, 161, SL_MAX_VERSION),
+		 SLE_CONDVAR(CargoPacket, next_station,    SLE_UINT16, 161, SL_MAX_VERSION),
 
 		/* Used to be paid_for, but that got changed. */
 		SLE_CONDNULL(1, 0, 120),

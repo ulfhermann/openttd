@@ -1168,6 +1168,7 @@ bool CargodestModeChanged(int32 p1)
 			for (StationCargoList::Iterator i = st->goods[cid].cargo.packets.begin(); i != st->goods[cid].cargo.packets.end(); ++i) {
 				(*i)->dest_id = INVALID_SOURCE;
 				(*i)->next_order = INVALID_ORDER;
+				(*i)->next_station = INVALID_STATION;
 			}
 			st->goods[cid].cargo.InvalidateCache();
 		}
@@ -1181,6 +1182,7 @@ bool CargodestModeChanged(int32 p1)
 		for (VehicleCargoList::Iterator i = v->cargo.packets.begin(); i != v->cargo.packets.end(); ++i) {
 			(*i)->dest_id = INVALID_SOURCE;
 			(*i)->next_order = INVALID_ORDER;
+			(*i)->next_station = INVALID_STATION;
 		}
 		v->cargo.InvalidateCache();
 	}

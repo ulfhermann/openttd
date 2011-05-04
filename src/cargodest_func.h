@@ -20,7 +20,7 @@
 
 bool CargoHasDestinations(CargoID cid);
 
-RouteLink *FindRouteLinkForCargo(Station *st, CargoID cid, const struct CargoPacket *cp, OrderID order = INVALID_ORDER, bool *found = NULL);
+RouteLink *FindRouteLinkForCargo(Station *st, CargoID cid, const struct CargoPacket *cp, StationID *next_unload, OrderID order = INVALID_ORDER, bool *found = NULL);
 
 void UpdateVehicleRouteLinks(const Vehicle *v, StationID arrived_at);
 void PrefillRouteLinks(const Vehicle *v);

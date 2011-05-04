@@ -777,7 +777,7 @@ CargoLink *CargoSourceSink::GetRandomLink(CargoID cid, bool allow_self)
  * @param[out] found Set to true if a route was found.
  * @return The preferred route link or NULL if either no suitable link found or the station is the final destination.
  */
-RouteLink *FindRouteLinkForCargo(Station *st, CargoID cid, const CargoPacket *cp, OrderID order, bool *found)
+RouteLink *FindRouteLinkForCargo(Station *st, CargoID cid, const CargoPacket *cp, StationID *next_unload, OrderID order, bool *found)
 {
 	if (cp->DestinationID() == INVALID_SOURCE) return NULL;
 
@@ -785,7 +785,7 @@ RouteLink *FindRouteLinkForCargo(Station *st, CargoID cid, const CargoPacket *cp
 	*sl.Append() = st;
 
 	TileArea area = (cp->DestinationType() == ST_INDUSTRY) ? Industry::Get(cp->DestinationID())->location : TileArea(cp->DestinationXY(), 2, 2);
-	return YapfChooseRouteLink(cid, &sl, st->xy, area, NULL, found, order);
+	return YapfChooseRouteLink(cid, &sl, st->xy, area, NULL, next_unload, found, order);
 }
 
 
@@ -800,7 +800,7 @@ RouteLink::~RouteLink()
 {
 	if (RouteLink::CleaningPool()) return;
 
-	if (this->GetOriginOrderId() != INVALID_ORDER) StationCargoList::InvalidateAllTo(this->GetOriginOrderId());
+	if (this->GetOriginOrderId() != INVALID_ORDER) StationCargoList::InvalidateAllTo(this->GetOriginOrderId(), this->GetDestination());
 }
 
 /**
