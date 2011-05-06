@@ -414,6 +414,7 @@ struct CargodestSettings {
 	uint16 max_route_age;                    ///< maximum days since the last vehicle traveled a link until link expiration
 	uint16 route_recalc_delay;               ///< delay in ticks between recalculating the next hop of cargo packets
 	uint16 route_recalc_chunk;               ///< maximum amount of cargo packets to recalculate in one step
+	uint16 max_route_penalty[2];             ///< maximum penalty factor based on distance, (1) base value, (2) random additional span
 };
 
 /** Settings related to the economy. */

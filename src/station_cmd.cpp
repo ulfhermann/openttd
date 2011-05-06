@@ -48,6 +48,7 @@
 #include "table/airporttile_ids.h"
 #include "newgrf_airporttiles.h"
 #include "order_backup.h"
+#include "cargodest_func.h"
 
 #include "table/strings.h"
 
@@ -3326,10 +3327,13 @@ const StationList *StationFinder::GetStations()
 	return &this->stations;
 }
 
-uint MoveGoodsToStation(CargoID type, uint amount, SourceType source_type, SourceID source_id, const StationList *all_stations)
+uint MoveGoodsToStation(CargoID type, uint amount, SourceType source_type, SourceID source_id, const StationList *all_stations, TileIndex src_tile)
 {
 	/* Return if nothing to do. Also the rounding below fails for 0. */
 	if (amount == 0) return 0;
+
+	/* Handle cargo that has cargo destinations enabled. */
+	if (MoveCargoWithDestinationToStation(type, &amount, source_type, source_id, all_stations, src_tile)) return amount;
 
 	Station *st1 = NULL;   // Station with best rating
 	Station *st2 = NULL;   // Second best station
