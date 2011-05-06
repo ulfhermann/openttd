@@ -23,6 +23,7 @@
 #include "subsidy_func.h"
 #include "core/pool_func.hpp"
 #include "core/random_func.hpp"
+#include "cargodest_func.h"
 
 #include "table/strings.h"
 
@@ -168,13 +169,22 @@ static Subsidy *FindSubsidyPassengerRoute()
 {
 	assert(Subsidy::CanAllocateItem());
 
-	const Town *src = Town::GetRandom();
+	Town *src = Town::GetRandom();
 	if (src->population < SUBSIDY_PAX_MIN_POPULATION ||
 			src->pct_pass_transported > SUBSIDY_MAX_PCT_TRANSPORTED) {
 		return NULL;
 	}
 
-	const Town *dst = Town::GetRandom();
+	const Town *dst = NULL;
+	if (CargoHasDestinations(CT_PASSENGERS)) {
+		/* Try to get a town from the demand destinations. */
+		CargoLink *link = src->GetRandomLink(CT_PASSENGERS, false);
+		if (link == src->cargo_links[CT_PASSENGERS].End()) return NULL;
+		if (link->dest != NULL && link->dest->GetType() != ST_TOWN) return NULL;
+		dst = static_cast<const Town *>(link->dest);
+	}
+	if (dst == NULL) dst = Town::GetRandom();
+
 	if (dst->population < SUBSIDY_PAX_MIN_POPULATION || src == dst) {
 		return NULL;
 	}
@@ -195,7 +205,7 @@ static Subsidy *FindSubsidyCargoRoute()
 {
 	assert(Subsidy::CanAllocateItem());
 
-	const Industry *i = Industry::GetRandom();
+	Industry *i = Industry::GetRandom();
 	if (i == NULL) return NULL;
 
 	CargoID cargo;
@@ -224,9 +234,17 @@ static Subsidy *FindSubsidyCargoRoute()
 	SourceID dst;
 
 	if (cs->town_effect == TE_GOODS || cs->town_effect == TE_FOOD) {
-		/*  The destination is a town */
+		/* The destination is a town */
 		dst_type = ST_TOWN;
-		const Town *t = Town::GetRandom();
+		const Town *t = NULL;
+		if (CargoHasDestinations(cargo)) {
+			/* Try to get a town from the demand destinations. */
+			CargoLink *link = i->GetRandomLink(cargo, false);
+			if (link == i->cargo_links[cargo].End()) return NULL;
+			if (link->dest != NULL && link->dest->GetType() != dst_type) return NULL;
+			t = static_cast<const Town *>(link->dest);
+		}
+		if (t == NULL) t = Town::GetRandom();
 
 		/* Only want big towns */
 		if (t->population < SUBSIDY_CARGO_MIN_POPULATION) return NULL;
@@ -237,7 +255,16 @@ static Subsidy *FindSubsidyCargoRoute()
 	} else {
 		/* The destination is an industry */
 		dst_type = ST_INDUSTRY;
-		const Industry *i2 = Industry::GetRandom();
+		const Industry *i2 = NULL;
+		if (CargoHasDestinations(cargo)) {
+			/* Try to get a town from the demand destinations. */
+			CargoLink *link = i->GetRandomLink(cargo, false);
+			if (link == i->cargo_links[cargo].End()) return NULL;
+			if (link->dest != NULL && link->dest->GetType() != dst_type) return NULL;
+			i2 = static_cast<const Industry *>(link->dest);
+		}
+		if (i2 == NULL) i2 = Industry::GetRandom();
+
 
 		/* The industry must accept the cargo */
 		if (i2 == NULL || i == i2 ||

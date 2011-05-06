@@ -73,6 +73,8 @@ struct CargoSourceSink {
 	/** Get the link weight for this as a destination for a specific cargo. */
 	virtual uint GetDestinationWeight(CargoID cid, byte weight_mod) const = 0;
 
+	CargoLink *GetRandomLink(CargoID cid, bool allow_self);
+
 	/** Create the special cargo links for a cargo if not already present. */
 	virtual void CreateSpecialLinks(CargoID cid);
 
