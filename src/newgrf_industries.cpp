@@ -35,6 +35,12 @@ static uint32 _industry_creation_random_bits;
 IndustryOverrideManager _industry_mngr(NEW_INDUSTRYOFFSET, NUM_INDUSTRYTYPES, INVALID_INDUSTRYTYPE);
 IndustryTileOverrideManager _industile_mngr(NEW_INDUSTRYTILEOFFSET, NUM_INDUSTRYTILES, INVALID_INDUSTRYTILE);
 
+/**
+ * Map the GRF local type to an industry type.
+ * @param grf_type The GRF local type.
+ * @param grf_id The GRF of the local type.
+ * @return The industry type in the global scope.
+ */
 IndustryType MapNewGRFIndustryType(IndustryType grf_type, uint32 grf_id)
 {
 	if (grf_type == IT_INVALID) return IT_INVALID;
@@ -106,10 +112,11 @@ static uint32 GetClosestIndustry(TileIndex tile, IndustryType type, const Indust
  * function.
  * @param param_setID parameter given to the callback, which is the set id, or the local id, in our terminology
  * @param layout_filter on what layout do we filter?
+ * @param town_filter Do we filter on the same town as the current industry?
  * @param current Industry for which the inquiry is made
  * @return the formatted answer to the callback : rr(reserved) cc(count) dddd(manhattan distance of closest sister)
  */
-static uint32 GetCountAndDistanceOfClosestInstance(byte param_setID, byte layout_filter, const Industry *current)
+static uint32 GetCountAndDistanceOfClosestInstance(byte param_setID, byte layout_filter, bool town_filter, const Industry *current)
 {
 	uint32 GrfID = GetRegister(0x100);  ///< Get the GRFID of the definition to look for in register 100h
 	IndustryType ind_index;
@@ -135,7 +142,7 @@ static uint32 GetCountAndDistanceOfClosestInstance(byte param_setID, byte layout
 	/* If the industry type is invalid, there is none and the closest is far away. */
 	if (ind_index >= NUM_INDUSTRYTYPES) return 0 | 0xFFFF;
 
-	if (layout_filter == 0) {
+	if (layout_filter == 0 && !town_filter) {
 		/* If the filter is 0, it could be because none was specified as well as being really a 0.
 		 * In either case, just do the regular var67 */
 		closest_dist = GetClosestIndustry(current->location.tile, ind_index, current);
@@ -145,7 +152,7 @@ static uint32 GetCountAndDistanceOfClosestInstance(byte param_setID, byte layout
 		 * Unfortunately, we have to do it manually */
 		const Industry *i;
 		FOR_ALL_INDUSTRIES(i) {
-			if (i->type == ind_index && i != current && i->selected_layout == layout_filter) {
+			if (i->type == ind_index && i != current && (i->selected_layout == layout_filter || layout_filter == 0) && (!town_filter || i->town == current->town)) {
 				closest_dist = min(closest_dist, DistanceManhattan(current->location.tile, i->location.tile));
 				count++;
 			}
@@ -264,7 +271,16 @@ uint32 IndustryGetVariable(const ResolverObject *object, byte variable, byte par
 		/* Count of industry, distance of closest instance
 		 * 68 is the same as 67, but with a filtering on selected layout */
 		case 0x67:
-		case 0x68: return GetCountAndDistanceOfClosestInstance(parameter, variable == 0x68 ? GB(GetRegister(0x101), 0, 8) : 0, industry);
+		case 0x68: {
+			byte layout_filter = 0;
+			bool town_filter = false;
+			if (variable == 0x68) {
+				uint32 reg = GetRegister(0x101);
+				layout_filter = GB(reg, 0, 8);
+				town_filter = HasBit(reg, 8);
+			}
+			return GetCountAndDistanceOfClosestInstance(parameter, layout_filter, town_filter, industry);
+		}
 
 		/* Get a variable from the persistent storage */
 		case 0x7C: return industry->psa.Get(parameter);
@@ -386,6 +402,16 @@ static void NewIndustryResolver(ResolverObject *res, TileIndex tile, Industry *i
 	res->grffile         = (indspec != NULL ? indspec->grf_prop.grffile : NULL);
 }
 
+/**
+ * Perform an industry callback.
+ * @param callback The callback to perform.
+ * @param param1 The first parameter.
+ * @param param2 The second parameter.
+ * @param industry The industry to do the callback for.
+ * @param type The type of industry to do the callback for.
+ * @param tile The tile associated with the callback.
+ * @return The callback result.
+ */
 uint16 GetIndustryCallback(CallbackID callback, uint32 param1, uint32 param2, Industry *industry, IndustryType type, TileIndex tile)
 {
 	ResolverObject object;
