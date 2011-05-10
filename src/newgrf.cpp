@@ -315,12 +315,6 @@ StringID MapGRFStringID(uint32 grfid, StringID str)
 	return TTDPStringIDToOTTDStringIDMapping(str);
 }
 
-static inline uint8 MapDOSColour(uint8 colour)
-{
-	extern const byte _palmap_d2w[];
-	return (_use_palette == PAL_DOS ? colour : _palmap_d2w[colour]);
-}
-
 static std::map<uint32, uint32> _grf_id_overrides;
 
 static void SetNewGRFOverride(uint32 source_grfid, uint32 target_grfid)
@@ -2192,11 +2186,11 @@ static ChangeInfoResult CargoChangeInfo(uint cid, int numinfo, int prop, ByteRea
 				break;
 
 			case 0x13: // Colour for station rating bars
-				cs->rating_colour = MapDOSColour(buf->ReadByte());
+				cs->rating_colour = buf->ReadByte();
 				break;
 
 			case 0x14: // Colour for cargo graph
-				cs->legend_colour = MapDOSColour(buf->ReadByte());
+				cs->legend_colour = buf->ReadByte();
 				break;
 
 			case 0x15: // Freight status
@@ -2802,7 +2796,7 @@ static ChangeInfoResult IndustriesChangeInfo(uint indid, int numinfo, int prop, 
 				break;
 
 			case 0x19: // Map colour
-				indsp->map_colour = MapDOSColour(buf->ReadByte());
+				indsp->map_colour = buf->ReadByte();
 				break;
 
 			case 0x1A: // Special industry flags to define special behavior
@@ -3285,7 +3279,7 @@ static ChangeInfoResult RailTypeChangeInfo(uint id, int numinfo, int prop, ByteR
 				break;
 
 			case 0x12: // Station graphic
-				rti->total_offset = Clamp(buf->ReadByte(), 0, 2) * 82;
+				rti->fallback_railtype = Clamp(buf->ReadByte(), 0, 2);
 				break;
 
 			case 0x13: // Construction cost factor
@@ -3301,7 +3295,7 @@ static ChangeInfoResult RailTypeChangeInfo(uint id, int numinfo, int prop, ByteR
 				break;
 
 			case 0x16: // Map colour
-				rti->map_colour = MapDOSColour(buf->ReadByte());
+				rti->map_colour = buf->ReadByte();
 				break;
 
 			case 0x17: // Introduction date
@@ -4565,6 +4559,7 @@ static void FeatureMapSpriteGroup(ByteReader *buf)
 		/* Skip number of cargo ids? */
 		buf->ReadByte();
 		uint16 groupid = buf->ReadWord();
+		if (!IsValidGroupID(groupid, "FeatureMapSpriteGroup")) return;
 
 		grfmsg(6, "FeatureMapSpriteGroup: Adding generic feature callback for feature %d", feature);
 
@@ -6526,14 +6521,19 @@ static bool ChangeGRFPalette(size_t len, ByteReader *buf)
 		buf->Skip(len);
 	} else {
 		char data = buf->ReadByte();
+		GRFPalette pal = GRFP_GRF_UNSET;
 		switch (data) {
 			case '*':
-			case 'A': _cur_grfconfig->palette |= GRFP_GRF_ANY;     break;
-			case 'W': _cur_grfconfig->palette |= GRFP_GRF_WINDOWS; break;
-			case 'D': _cur_grfconfig->palette |= GRFP_GRF_DOS;     break;
+			case 'A': pal = GRFP_GRF_ANY;     break;
+			case 'W': pal = GRFP_GRF_WINDOWS; break;
+			case 'D': pal = GRFP_GRF_DOS;     break;
 			default:
 				grfmsg(2, "StaticGRFInfo: unexpected value '%02x' for 'INFO'->'PALS', ignoring this field", data);
 				break;
+		}
+		if (pal != GRFP_GRF_UNSET) {
+			_cur_grfconfig->palette &= ~GRFP_GRF_MASK;
+			_cur_grfconfig->palette |= pal;
 		}
 	}
 	return true;
@@ -7334,12 +7334,11 @@ static void BuildCargoTranslationMap()
 	}
 }
 
-static void InitNewGRFFile(const GRFConfig *config, int sprite_offset)
+static void InitNewGRFFile(const GRFConfig *config)
 {
 	GRFFile *newfile = GetFileByFilename(config->filename);
 	if (newfile != NULL) {
 		/* We already loaded it once. */
-		newfile->sprite_offset = sprite_offset;
 		_cur_grffile = newfile;
 		return;
 	}
@@ -7347,7 +7346,6 @@ static void InitNewGRFFile(const GRFConfig *config, int sprite_offset)
 	newfile = CallocT<GRFFile>(1);
 
 	newfile->filename = strdup(config->filename);
-	newfile->sprite_offset = sprite_offset;
 	newfile->grfid = config->ident.grfid;
 
 	/* Initialise local settings to defaults */
@@ -7944,7 +7942,7 @@ void LoadNewGRFFile(GRFConfig *config, uint file_index, GrfLoadingStage stage)
 
 	FioOpenFile(file_index, filename);
 	_file_index = file_index; // XXX
-	_palette_remap_grf[_file_index] = ((config->palette & GRFP_USE_MASK) != (_use_palette == PAL_WINDOWS));
+	_palette_remap_grf[_file_index] = (config->palette & GRFP_USE_MASK);
 
 	_cur_grfconfig = config;
 
@@ -8307,7 +8305,7 @@ void LoadNewGRF(uint load_index, uint file_index)
 				continue;
 			}
 
-			if (stage == GLS_LABELSCAN) InitNewGRFFile(c, _cur_spriteid);
+			if (stage == GLS_LABELSCAN) InitNewGRFFile(c);
 			LoadNewGRFFile(c, slot++, stage);
 			if (stage == GLS_RESERVE) {
 				SetBit(c->flags, GCF_RESERVED);
