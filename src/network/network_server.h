@@ -19,29 +19,31 @@
 #include "../thread/thread.h"
 
 class ServerNetworkGameSocketHandler;
+/** Make the code look slightliy nicer/simpler. */
 typedef ServerNetworkGameSocketHandler NetworkClientSocket;
+/** Pool with all client sockets. */
 typedef Pool<NetworkClientSocket, ClientIndex, 8, MAX_CLIENT_SLOTS, PT_NCLIENT> NetworkClientSocketPool;
 extern NetworkClientSocketPool _networkclientsocket_pool;
 
 /** Class for handling the server side of the game connection. */
 class ServerNetworkGameSocketHandler : public NetworkClientSocketPool::PoolItem<&_networkclientsocket_pool>, public NetworkGameSocketHandler, public TCPListenHandler<ServerNetworkGameSocketHandler, PACKET_SERVER_FULL, PACKET_SERVER_BANNED> {
 protected:
-	DECLARE_GAME_RECEIVE_COMMAND(PACKET_CLIENT_JOIN);
-	DECLARE_GAME_RECEIVE_COMMAND(PACKET_CLIENT_COMPANY_INFO);
-	DECLARE_GAME_RECEIVE_COMMAND(PACKET_CLIENT_GAME_PASSWORD);
-	DECLARE_GAME_RECEIVE_COMMAND(PACKET_CLIENT_COMPANY_PASSWORD);
-	DECLARE_GAME_RECEIVE_COMMAND(PACKET_CLIENT_GETMAP);
-	DECLARE_GAME_RECEIVE_COMMAND(PACKET_CLIENT_MAP_OK);
-	DECLARE_GAME_RECEIVE_COMMAND(PACKET_CLIENT_ACK);
-	DECLARE_GAME_RECEIVE_COMMAND(PACKET_CLIENT_COMMAND);
-	DECLARE_GAME_RECEIVE_COMMAND(PACKET_CLIENT_CHAT);
-	DECLARE_GAME_RECEIVE_COMMAND(PACKET_CLIENT_SET_PASSWORD);
-	DECLARE_GAME_RECEIVE_COMMAND(PACKET_CLIENT_SET_NAME);
-	DECLARE_GAME_RECEIVE_COMMAND(PACKET_CLIENT_QUIT);
-	DECLARE_GAME_RECEIVE_COMMAND(PACKET_CLIENT_ERROR);
-	DECLARE_GAME_RECEIVE_COMMAND(PACKET_CLIENT_RCON);
-	DECLARE_GAME_RECEIVE_COMMAND(PACKET_CLIENT_NEWGRFS_CHECKED);
-	DECLARE_GAME_RECEIVE_COMMAND(PACKET_CLIENT_MOVE);
+	virtual NetworkRecvStatus Receive_CLIENT_JOIN(Packet *p);
+	virtual NetworkRecvStatus Receive_CLIENT_COMPANY_INFO(Packet *p);
+	virtual NetworkRecvStatus Receive_CLIENT_GAME_PASSWORD(Packet *p);
+	virtual NetworkRecvStatus Receive_CLIENT_COMPANY_PASSWORD(Packet *p);
+	virtual NetworkRecvStatus Receive_CLIENT_GETMAP(Packet *p);
+	virtual NetworkRecvStatus Receive_CLIENT_MAP_OK(Packet *p);
+	virtual NetworkRecvStatus Receive_CLIENT_ACK(Packet *p);
+	virtual NetworkRecvStatus Receive_CLIENT_COMMAND(Packet *p);
+	virtual NetworkRecvStatus Receive_CLIENT_CHAT(Packet *p);
+	virtual NetworkRecvStatus Receive_CLIENT_SET_PASSWORD(Packet *p);
+	virtual NetworkRecvStatus Receive_CLIENT_SET_NAME(Packet *p);
+	virtual NetworkRecvStatus Receive_CLIENT_QUIT(Packet *p);
+	virtual NetworkRecvStatus Receive_CLIENT_ERROR(Packet *p);
+	virtual NetworkRecvStatus Receive_CLIENT_RCON(Packet *p);
+	virtual NetworkRecvStatus Receive_CLIENT_NEWGRFS_CHECKED(Packet *p);
+	virtual NetworkRecvStatus Receive_CLIENT_MOVE(Packet *p);
 
 	NetworkRecvStatus SendCompanyInfo();
 	NetworkRecvStatus SendNewGRFCheck();
@@ -125,7 +127,17 @@ public:
 void NetworkServer_Tick(bool send_frame);
 void NetworkServerSetCompanyPassword(CompanyID company_id, const char *password, bool already_hashed = true);
 
+/**
+ * Iterate over all the sockets from a given starting point.
+ * @param var The variable to iterate with.
+ * @param start The start of the iteration.
+ */
 #define FOR_ALL_CLIENT_SOCKETS_FROM(var, start) FOR_ALL_ITEMS_FROM(NetworkClientSocket, clientsocket_index, var, start)
+
+/**
+ * Iterate over all the sockets.
+ * @param var The variable to iterate with.
+ */
 #define FOR_ALL_CLIENT_SOCKETS(var) FOR_ALL_CLIENT_SOCKETS_FROM(var, 0)
 
 #else /* ENABLE_NETWORK */
