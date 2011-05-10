@@ -27,6 +27,8 @@
 #endif
 
 extern bool HasScenario(const ContentInfo *ci, bool md5sum);
+
+/** The client we use to connect to the server. */
 ClientNetworkContentSocketHandler _network_content_client;
 
 /** Wrapper function for the HasProc */
@@ -44,7 +46,7 @@ static bool HasGRFConfig(const ContentInfo *ci, bool md5sum)
  */
 typedef bool (*HasProc)(const ContentInfo *ci, bool md5sum);
 
-DEF_CONTENT_RECEIVE_COMMAND(Client, PACKET_CONTENT_SERVER_INFO)
+bool ClientNetworkContentSocketHandler::Receive_SERVER_INFO(Packet *p)
 {
 	ContentInfo *ci = new ContentInfo();
 	ci->type     = (ContentType)p->Recv_uint8();
@@ -163,6 +165,10 @@ DEF_CONTENT_RECEIVE_COMMAND(Client, PACKET_CONTENT_SERVER_INFO)
 	return true;
 }
 
+/**
+ * Request the content list for the given type.
+ * @param type The content type to request the list for.
+ */
 void ClientNetworkContentSocketHandler::RequestContentList(ContentType type)
 {
 	if (type == CONTENT_TYPE_END) {
@@ -188,6 +194,11 @@ void ClientNetworkContentSocketHandler::RequestContentList(ContentType type)
 	this->SendPacket(p);
 }
 
+/**
+ * Request the content list for a given number of content IDs.
+ * @param count The number of IDs to request.
+ * @param content_ids The unique identifiers of the content to request information about.
+ */
 void ClientNetworkContentSocketHandler::RequestContentList(uint count, const ContentID *content_ids)
 {
 	this->Connect();
@@ -213,6 +224,11 @@ void ClientNetworkContentSocketHandler::RequestContentList(uint count, const Con
 	}
 }
 
+/**
+ * Request the content list for a list of content.
+ * @param cv List with unique IDs and MD5 checksums.
+ * @param send_md5sum Whether we want a MD5 checksum matched set of files or not.
+ */
 void ClientNetworkContentSocketHandler::RequestContentList(ContentVector *cv, bool send_md5sum)
 {
 	if (cv == NULL) return;
@@ -258,6 +274,12 @@ void ClientNetworkContentSocketHandler::RequestContentList(ContentVector *cv, bo
 	}
 }
 
+/**
+ * Actually begin downloading the content we selected.
+ * @param[out] files The number of files we are going to download.
+ * @param[out] bytes The number of bytes we are going to download.
+ * @param fallback Whether to use the fallback or not.
+ */
 void ClientNetworkContentSocketHandler::DownloadSelectedContent(uint &files, uint &bytes, bool fallback)
 {
 	bytes = 0;
@@ -283,6 +305,10 @@ void ClientNetworkContentSocketHandler::DownloadSelectedContent(uint &files, uin
 	}
 }
 
+/**
+ * Initiate downloading the content over HTTP.
+ * @param content The content to download.
+ */
 void ClientNetworkContentSocketHandler::DownloadSelectedContentHTTP(const ContentIDList &content)
 {
 	uint count = content.Length();
@@ -307,6 +333,10 @@ void ClientNetworkContentSocketHandler::DownloadSelectedContentHTTP(const Conten
 	/* NetworkHTTPContentConnecter takes over freeing of content_request! */
 }
 
+/**
+ * Initiate downloading the content over the fallback protocol.
+ * @param content The content to download.
+ */
 void ClientNetworkContentSocketHandler::DownloadSelectedContentFallback(const ContentIDList &content)
 {
 	uint count = content.Length();
@@ -425,7 +455,7 @@ static bool GunzipFile(const ContentInfo *ci)
 #endif /* defined(WITH_ZLIB) */
 }
 
-DEF_CONTENT_RECEIVE_COMMAND(Client, PACKET_CONTENT_SERVER_CONTENT)
+bool ClientNetworkContentSocketHandler::Receive_SERVER_CONTENT(Packet *p)
 {
 	if (this->curFile == NULL) {
 		delete this->curInfo;
@@ -661,9 +691,7 @@ void ClientNetworkContentSocketHandler::OnReceiveData(const char *data, size_t l
 }
 
 /**
- * Create a socket handler with the given socket and (server) address.
- * @param s the socket to communicate over
- * @param sin the IP/port of the server
+ * Create a socket handler to handle the connection.
  */
 ClientNetworkContentSocketHandler::ClientNetworkContentSocketHandler() :
 	NetworkContentSocketHandler(),
@@ -683,8 +711,13 @@ ClientNetworkContentSocketHandler::~ClientNetworkContentSocketHandler()
 	for (ContentIterator iter = this->infos.Begin(); iter != this->infos.End(); iter++) delete *iter;
 }
 
+/** Connect to the content server. */
 class NetworkContentConnecter : TCPConnecter {
 public:
+	/**
+	 * Initiate the connecting.
+	 * @param address The address of the server.
+	 */
 	NetworkContentConnecter(const NetworkAddress &address) : TCPConnecter(address) {}
 
 	virtual void OnFailure()

@@ -33,6 +33,7 @@ AdminIndex _redirect_console_to_admin = INVALID_ADMIN_ID;
 /** The amount of admins connected. */
 byte _network_admins_connected = 0;
 
+/** The pool with sockets/clients. */
 NetworkAdminSocketPool _networkadminsocket_pool("NetworkAdminSocket");
 INSTANTIATE_POOL_METHODS(NetworkAdminSocket)
 
@@ -52,6 +53,7 @@ static const AdminUpdateFrequency _admin_update_type_frequencies[] = {
 	ADMIN_FREQUENCY_POLL,                                                                                                                                  ///< ADMIN_UPDATE_CMD_NAMES
 	                       ADMIN_FREQUENCY_AUTOMATIC,                                                                                                      ///< ADMIN_UPDATE_CMD_LOGGING
 };
+/** Sanity check. */
 assert_compile(lengthof(_admin_update_type_frequencies) == ADMIN_UPDATE_END);
 
 /**
@@ -105,6 +107,11 @@ ServerNetworkAdminSocketHandler::~ServerNetworkAdminSocketHandler()
 	}
 }
 
+/**
+ * Handle the acception of a connection.
+ * @param s The socket of the new connection.
+ * @param address The address of the peer.
+ */
 /* static */ void ServerNetworkAdminSocketHandler::AcceptConnection(SOCKET s, const NetworkAddress &address)
 {
 	ServerNetworkAdminSocketHandler *as = new ServerNetworkAdminSocketHandler(s);
@@ -115,6 +122,10 @@ ServerNetworkAdminSocketHandler::~ServerNetworkAdminSocketHandler()
  * Sending functions for admin network
  ************/
 
+/**
+ * Send an error to the admin.
+ * @param error The error to send.
+ */
 NetworkRecvStatus ServerNetworkAdminSocketHandler::SendError(NetworkErrorCode error)
 {
 	Packet *p = new Packet(ADMIN_PACKET_SERVER_ERROR);
@@ -131,6 +142,7 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendError(NetworkErrorCode er
 	return this->CloseConnection(true);
 }
 
+/** Send the protocol version to the admin. */
 NetworkRecvStatus ServerNetworkAdminSocketHandler::SendProtocol()
 {
 	Packet *p = new Packet(ADMIN_PACKET_SERVER_PROTOCOL);
@@ -150,6 +162,7 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendProtocol()
 	return this->SendWelcome();
 }
 
+/** Send a welcome message to the admin. */
 NetworkRecvStatus ServerNetworkAdminSocketHandler::SendWelcome()
 {
 	this->status = ADMIN_STATUS_ACTIVE;
@@ -172,6 +185,7 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendWelcome()
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
+/** Tell the admin we started a new game. */
 NetworkRecvStatus ServerNetworkAdminSocketHandler::SendNewGame()
 {
 	Packet *p = new Packet(ADMIN_PACKET_SERVER_NEWGAME);
@@ -179,6 +193,7 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendNewGame()
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
+/** Tell the admin we're shutting down. */
 NetworkRecvStatus ServerNetworkAdminSocketHandler::SendShutdown()
 {
 	Packet *p = new Packet(ADMIN_PACKET_SERVER_SHUTDOWN);
@@ -186,6 +201,7 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendShutdown()
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
+/** Tell the admin the date. */
 NetworkRecvStatus ServerNetworkAdminSocketHandler::SendDate()
 {
 	Packet *p = new Packet(ADMIN_PACKET_SERVER_DATE);
@@ -196,6 +212,10 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendDate()
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
+/**
+ * Tell the admin that a client joined.
+ * @param client_id The client that joined.
+ */
 NetworkRecvStatus ServerNetworkAdminSocketHandler::SendClientJoin(ClientID client_id)
 {
 	Packet *p = new Packet(ADMIN_PACKET_SERVER_CLIENT_JOIN);
@@ -206,6 +226,10 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendClientJoin(ClientID clien
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
+/**
+ * Send an initial set of data from some client's information.
+ * @param cs The information about a client.
+ */
 NetworkRecvStatus ServerNetworkAdminSocketHandler::SendClientInfo(const NetworkClientSocket *cs)
 {
 	/* Only send data when we're a proper client, not just someone trying to query the server. */
@@ -226,6 +250,11 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendClientInfo(const NetworkC
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
+
+/**
+ * Send an update for some client's information.
+ * @param ci The information about a client.
+ */
 NetworkRecvStatus ServerNetworkAdminSocketHandler::SendClientUpdate(const NetworkClientInfo *ci)
 {
 	Packet *p = new Packet(ADMIN_PACKET_SERVER_CLIENT_UPDATE);
@@ -239,6 +268,10 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendClientUpdate(const Networ
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
+/**
+ * Tell the admin that a client quit.
+ * @param client_id The client that quit.
+ */
 NetworkRecvStatus ServerNetworkAdminSocketHandler::SendClientQuit(ClientID client_id)
 {
 	Packet *p = new Packet(ADMIN_PACKET_SERVER_CLIENT_QUIT);
@@ -249,6 +282,11 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendClientQuit(ClientID clien
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
+/**
+ * Tell the admin that a client made an error.
+ * @param client_id The client that made the error.
+ * @param error The error that was made.
+ */
 NetworkRecvStatus ServerNetworkAdminSocketHandler::SendClientError(ClientID client_id, NetworkErrorCode error)
 {
 	Packet *p = new Packet(ADMIN_PACKET_SERVER_CLIENT_ERROR);
@@ -260,6 +298,10 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendClientError(ClientID clie
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
+/**
+ * Tell the admin that a new company was founded.
+ * @param company_id The company that was founded.
+ */
 NetworkRecvStatus ServerNetworkAdminSocketHandler::SendCompanyNew(CompanyID company_id)
 {
 	Packet *p = new Packet(ADMIN_PACKET_SERVER_COMPANY_NEW);
@@ -270,6 +312,10 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendCompanyNew(CompanyID comp
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
+/**
+ * Send the admin some information about a company.
+ * @param c The company to send the information about.
+ */
 NetworkRecvStatus ServerNetworkAdminSocketHandler::SendCompanyInfo(const Company *c)
 {
 	char company_name[NETWORK_COMPANY_NAME_LENGTH];
@@ -296,6 +342,11 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendCompanyInfo(const Company
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
+
+/**
+ * Send an update about a company.
+ * @param c The company to send the update of.
+ */
 NetworkRecvStatus ServerNetworkAdminSocketHandler::SendCompanyUpdate(const Company *c)
 {
 	char company_name[NETWORK_COMPANY_NAME_LENGTH];
@@ -325,6 +376,11 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendCompanyUpdate(const Compa
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
+/**
+ * Tell the admin that a company got removed.
+ * @param company_id The company that got removed.
+ * @param acrr The reason for removal, e.g. bankruptcy or merger.
+ */
 NetworkRecvStatus ServerNetworkAdminSocketHandler::SendCompanyRemove(CompanyID company_id, AdminCompanyRemoveReason acrr)
 {
 	Packet *p = new Packet(ADMIN_PACKET_SERVER_COMPANY_REMOVE);
@@ -337,6 +393,7 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendCompanyRemove(CompanyID c
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
+/** Send economic information of all companies. */
 NetworkRecvStatus ServerNetworkAdminSocketHandler::SendCompanyEconomy()
 {
 	const Company *company;
@@ -371,6 +428,7 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendCompanyEconomy()
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
+/** Send statistics about the companies. */
 NetworkRecvStatus ServerNetworkAdminSocketHandler::SendCompanyStats()
 {
 	/* Fetch the latest version of the stats. */
@@ -400,6 +458,14 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendCompanyStats()
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
+/**
+ * Send a chat message.
+ * @param action The action associated with the message.
+ * @param desttype The destination type.
+ * @param client_id The origin of the chat message.
+ * @param msg The actual message.
+ * @param data Arbitrary extra data.
+ */
 NetworkRecvStatus ServerNetworkAdminSocketHandler::SendChat(NetworkAction action, DestType desttype, ClientID client_id, const char *msg, int64 data)
 {
 	Packet *p = new Packet(ADMIN_PACKET_SERVER_CHAT);
@@ -414,6 +480,11 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendChat(NetworkAction action
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
+/**
+ * Send the reply of an rcon command.
+ * @param colour The colour of the text.
+ * @param result The result of the command.
+ */
 NetworkRecvStatus ServerNetworkAdminSocketHandler::SendRcon(uint16 colour, const char *result)
 {
 	Packet *p = new Packet(ADMIN_PACKET_SERVER_RCON);
@@ -425,7 +496,7 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendRcon(uint16 colour, const
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
-DEF_ADMIN_RECEIVE_COMMAND(Server, ADMIN_PACKET_ADMIN_RCON)
+NetworkRecvStatus ServerNetworkAdminSocketHandler::Receive_ADMIN_RCON(Packet *p)
 {
 	if (this->status == ADMIN_STATUS_INACTIVE) return this->SendError(NETWORK_ERROR_NOT_EXPECTED);
 
@@ -441,6 +512,11 @@ DEF_ADMIN_RECEIVE_COMMAND(Server, ADMIN_PACKET_ADMIN_RCON)
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
+/**
+ * Send console output of other clients.
+ * @param origin The origin of the string.
+ * @param string The string that's put on the console.
+ */
 NetworkRecvStatus ServerNetworkAdminSocketHandler::SendConsole(const char *origin, const char *string)
 {
 	/* If the length of both strings, plus the 2 '\0' terminations and 3 bytes of the packet
@@ -458,6 +534,7 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendConsole(const char *origi
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
+/** Send the names of the commands. */
 NetworkRecvStatus ServerNetworkAdminSocketHandler::SendCmdNames()
 {
 	Packet *p = new Packet(ADMIN_PACKET_SERVER_CMD_NAMES);
@@ -487,6 +564,11 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendCmdNames()
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
+/**
+ * Send a command for logging purposes.
+ * @param client_id The client executing the command.
+ * @param cp The command that would be executed.
+ */
 NetworkRecvStatus ServerNetworkAdminSocketHandler::SendCmdLogging(ClientID client_id, const CommandPacket *cp)
 {
 	Packet *p = new Packet(ADMIN_PACKET_SERVER_CMD_LOGGING);
@@ -509,7 +591,7 @@ NetworkRecvStatus ServerNetworkAdminSocketHandler::SendCmdLogging(ClientID clien
  * Receiving functions
  ************/
 
-DEF_ADMIN_RECEIVE_COMMAND(Server, ADMIN_PACKET_ADMIN_JOIN)
+NetworkRecvStatus ServerNetworkAdminSocketHandler::Receive_ADMIN_JOIN(Packet *p)
 {
 	if (this->status != ADMIN_STATUS_INACTIVE) return this->SendError(NETWORK_ERROR_NOT_EXPECTED);
 
@@ -535,13 +617,13 @@ DEF_ADMIN_RECEIVE_COMMAND(Server, ADMIN_PACKET_ADMIN_JOIN)
 	return this->SendProtocol();
 }
 
-DEF_ADMIN_RECEIVE_COMMAND(Server, ADMIN_PACKET_ADMIN_QUIT)
+NetworkRecvStatus ServerNetworkAdminSocketHandler::Receive_ADMIN_QUIT(Packet *p)
 {
 	/* The admin is leaving nothing else to do */
 	return this->CloseConnection();
 }
 
-DEF_ADMIN_RECEIVE_COMMAND(Server, ADMIN_PACKET_ADMIN_UPDATE_FREQUENCY)
+NetworkRecvStatus ServerNetworkAdminSocketHandler::Receive_ADMIN_UPDATE_FREQUENCY(Packet *p)
 {
 	if (this->status == ADMIN_STATUS_INACTIVE) return this->SendError(NETWORK_ERROR_NOT_EXPECTED);
 
@@ -559,7 +641,7 @@ DEF_ADMIN_RECEIVE_COMMAND(Server, ADMIN_PACKET_ADMIN_UPDATE_FREQUENCY)
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
-DEF_ADMIN_RECEIVE_COMMAND(Server, ADMIN_PACKET_ADMIN_POLL)
+NetworkRecvStatus ServerNetworkAdminSocketHandler::Receive_ADMIN_POLL(Packet *p)
 {
 	if (this->status == ADMIN_STATUS_INACTIVE) return this->SendError(NETWORK_ERROR_NOT_EXPECTED);
 
@@ -622,7 +704,7 @@ DEF_ADMIN_RECEIVE_COMMAND(Server, ADMIN_PACKET_ADMIN_POLL)
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
-DEF_ADMIN_RECEIVE_COMMAND(Server, ADMIN_PACKET_ADMIN_CHAT)
+NetworkRecvStatus ServerNetworkAdminSocketHandler::Receive_ADMIN_CHAT(Packet *p)
 {
 	if (this->status == ADMIN_STATUS_INACTIVE) return this->SendError(NETWORK_ERROR_NOT_EXPECTED);
 
@@ -655,7 +737,7 @@ DEF_ADMIN_RECEIVE_COMMAND(Server, ADMIN_PACKET_ADMIN_CHAT)
 
 /**
  * Notify the admin network of a new client (if they did opt in for the respective update).
- * @param ci the client info.
+ * @param cs the client info.
  * @param new_client if this is a new client, send the respective packet too.
  */
 void NetworkAdminClientInfo(const NetworkClientSocket *cs, bool new_client)
