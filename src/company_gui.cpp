@@ -209,7 +209,7 @@ static void DrawYearColumn(const Rect &r, int year, const Money (*tbl)[EXPENSES_
 		if (et == INVALID_EXPENSES) {
 			Money cost = subtotal;
 			subtotal = 0;
-			GfxFillRect(r.left, y, r.right, y, 215);
+			GfxFillRect(r.left, y, r.right, y, PC_BLACK);
 			y += EXP_LINESPACE;
 			DrawPrice(cost, r.left, r.right, y);
 			y += FONT_HEIGHT_NORMAL + EXP_BLOCKSPACE;
@@ -222,7 +222,7 @@ static void DrawYearColumn(const Rect &r, int year, const Money (*tbl)[EXPENSES_
 		}
 	}
 
-	GfxFillRect(r.left, y, r.right, y, 215);
+	GfxFillRect(r.left, y, r.right, y, PC_BLACK);
 	y += EXP_LINESPACE;
 	DrawPrice(sum, r.left, r.right, y);
 }
@@ -385,7 +385,7 @@ struct CompanyFinancesWindow : Window {
 			}
 
 			case CFW_LOAN_LINE:
-				GfxFillRect(r.left, r.top, r.right, r.top, 215);
+				GfxFillRect(r.left, r.top, r.right, r.top, PC_BLACK);
 				break;
 		}
 	}
@@ -2068,6 +2068,10 @@ static const WindowDesc _company_desc(
 	_nested_company_widgets, lengthof(_nested_company_widgets)
 );
 
+/**
+ * Show the window with the overview of the company.
+ * @param company The company to show the window for.
+ */
 void ShowCompany(CompanyID company)
 {
 	if (!Company::IsValidID(company)) return;
@@ -2175,7 +2179,10 @@ static const WindowDesc _buy_company_desc(
 	_nested_buy_company_widgets, lengthof(_nested_buy_company_widgets)
 );
 
-
+/**
+ * Show the query to buy another company.
+ * @param company The company to buy.
+ */
 void ShowBuyCompanyDialog(CompanyID company)
 {
 	AllocateWindowDescFront<BuyCompanyWindow>(&_buy_company_desc, company);
