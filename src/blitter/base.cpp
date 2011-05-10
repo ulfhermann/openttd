@@ -36,6 +36,12 @@ void Blitter::DrawLine(void *video, int x, int y, int x2, int y2, int screen_wid
 		stepx = 1;
 	}
 
+	if (dx == 0 && dy == 0) {
+		/* The algorithm below cannot handle this special case; make it work at least for line width 1 */
+		if (x >= 0 && x < screen_width && y >= 0 && y < screen_height) this->SetPixel(video, x, y, colour);
+		return;
+	}
+
 	int frac_diff = width * max(dx, dy);
 	if (width > 1) {
 		/* compute frac_diff = width * sqrt(dx*dx + dy*dy)
@@ -63,7 +69,7 @@ void Blitter::DrawLine(void *video, int x, int y, int x2, int y2, int screen_wid
 			frac_low += dx;
 			y_low -= stepy;
 		}
-		while (frac_high - dx / 2 > 0) {
+		while (frac_high - dx / 2 >= 0) {
 			frac_high -= dx;
 			y_high += stepy;
 		}
@@ -97,7 +103,7 @@ void Blitter::DrawLine(void *video, int x, int y, int x2, int y2, int screen_wid
 			frac_low += dy;
 			x_low -= stepx;
 		}
-		while (frac_high - dy / 2 > 0) {
+		while (frac_high - dy / 2 >= 0) {
 			frac_high -= dy;
 			x_high += stepx;
 		}

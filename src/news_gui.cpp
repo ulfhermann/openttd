@@ -335,12 +335,12 @@ struct NewsWindow : Window {
 
 	void DrawNewsBorder(const Rect &r) const
 	{
-		GfxFillRect(r.left,  r.top,    r.right, r.bottom, 0xF);
+		GfxFillRect(r.left,  r.top,    r.right, r.bottom, PC_WHITE);
 
-		GfxFillRect(r.left,  r.top,    r.left,  r.bottom, 0xD7);
-		GfxFillRect(r.right, r.top,    r.right, r.bottom, 0xD7);
-		GfxFillRect(r.left,  r.top,    r.right, r.top,    0xD7);
-		GfxFillRect(r.left,  r.bottom, r.right, r.bottom, 0xD7);
+		GfxFillRect(r.left,  r.top,    r.left,  r.bottom, PC_BLACK);
+		GfxFillRect(r.right, r.top,    r.right, r.bottom, PC_BLACK);
+		GfxFillRect(r.left,  r.top,    r.right, r.top,    PC_BLACK);
+		GfxFillRect(r.left,  r.bottom, r.right, r.bottom, PC_BLACK);
 	}
 
 	virtual Point OnInitialPosition(const WindowDesc *desc, int16 sm_width, int16 sm_height, int window_number)
@@ -425,7 +425,7 @@ struct NewsWindow : Window {
 				break;
 
 			case NTW_VEH_BKGND:
-				GfxFillRect(r.left, r.top, r.right, r.bottom, 10);
+				GfxFillRect(r.left, r.top, r.right, r.bottom, PC_GREY);
 				break;
 
 			case NTW_VEH_NAME:
@@ -1392,6 +1392,9 @@ static const WindowDesc _message_options_desc(
 	_nested_message_options_widgets, lengthof(_nested_message_options_widgets)
 );
 
+/**
+ * Show the settings window for news messages.
+ */
 void ShowMessageOptions()
 {
 	DeleteWindowById(WC_GAME_OPTIONS, 0);
