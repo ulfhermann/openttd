@@ -180,9 +180,35 @@ extern DrawPixelInfo *_cur_dpi;
  */
 extern byte _colour_gradient[COLOUR_END][8];
 
-extern PaletteType _use_palette;
 extern bool _palette_remap_grf[];
-extern const byte *_palette_remap;
-extern const byte *_palette_reverse_remap;
+
+/**
+ * Return the colour for a particular greyscale level.
+ * @param level Intensity, 0 = black, 15 = white
+ * @return colour
+ */
+#define GREY_SCALE(level) (level)
+
+static const uint8 PC_BLACK              = GREY_SCALE(1);  ///< Black palette colour.
+static const uint8 PC_DARK_GREY          = GREY_SCALE(6);  ///< Dark grey palette colour.
+static const uint8 PC_GREY               = GREY_SCALE(10); ///< Grey palette colour.
+static const uint8 PC_WHITE              = GREY_SCALE(15); ///< White palette colour.
+
+static const uint8 PC_VERY_DARK_RED      = 0xB2;           ///< Almost-black red palette colour.
+static const uint8 PC_DARK_RED           = 0xB4;           ///< Dark red palette colour.
+static const uint8 PC_RED                = 0xB8;           ///< Red palette colour.
+
+static const uint8 PC_VERY_DARK_BROWN    = 0x56;           ///< Almost-black brown palette colour.
+
+static const uint8 PC_ORANGE             = 0xC2;           ///< Orange palette colour.
+
+static const uint8 PC_YELLOW             = 0xBF;           ///< Yellow palette colour.
+static const uint8 PC_LIGHT_YELLOW       = 0x44;           ///< Light yellow palette colour.
+static const uint8 PC_VERY_LIGHT_YELLOW  = 0x45;           ///< Almost-white yellow palette colour.
+
+static const uint8 PC_GREEN              = 0xD0;           ///< Green palette colour.
+
+static const uint8 PC_DARK_BLUE          = 0x9D;           ///< Dark blue palette colour.
+static const uint8 PC_LIGHT_BLUE         = 0x98;           ///< Light blue palette colour.
 
 #endif /* GFX_FUNC_H */
