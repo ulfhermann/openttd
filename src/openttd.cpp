@@ -71,6 +71,7 @@
 
 #include "table/strings.h"
 
+/** Error message to show when switching modes. */
 StringID _switch_mode_errorstr;
 
 void CallLandscapeTick();
@@ -174,10 +175,6 @@ static void ShowHelp()
 		"  -f                  = Fork into the background (dedicated only)\n"
 #endif
 #endif /* ENABLE_NETWORK */
-		"  -i palette          = Force to use the DOS (0) or Windows (1) palette\n"
-		"                          (defines default setting when adding newgrfs)\n"
-		"                        Default value (2) lets OpenTTD use the palette\n"
-		"                          specified in graphics set file (see below)\n"
 		"  -I graphics_set     = Force the graphics set (see below)\n"
 		"  -S sounds_set       = Force the sounds set (see below)\n"
 		"  -M music_set        = Force the music set (see below)\n"
@@ -364,7 +361,6 @@ static const OptionData _options[] = {
 	 GETOPT_SHORT_VALUE('t'),
 	GETOPT_SHORT_OPTVAL('d'),
 	 GETOPT_SHORT_NOVAL('e'),
-	GETOPT_SHORT_OPTVAL('i'),
 	GETOPT_SHORT_OPTVAL('g'),
 	 GETOPT_SHORT_VALUE('G'),
 	 GETOPT_SHORT_VALUE('c'),
@@ -465,13 +461,6 @@ int ttd_main(int argc, char *argv[])
 				break;
 			}
 		case 'e': _switch_mode = SM_EDITOR; break;
-		case 'i':
-			/* there is an argument, it is not empty, and it is exactly 1 char long */
-			if (!StrEmpty(mgo.opt) && mgo.opt[1] == '\0') {
-				_use_palette = (PaletteType)(mgo.opt[0] - '0');
-				if (_use_palette <= MAX_PAL) break;
-			}
-			usererror("Valid value for '-i' is 0, 1 or 2");
 		case 'g':
 			if (mgo.opt != NULL) {
 				strecpy(_file_to_saveload.name, mgo.opt, lastof(_file_to_saveload.name));
