@@ -54,6 +54,11 @@ private:
 	}
 
 public:
+	/**
+	 * Construct the window.
+	 * @param desc The description of the window.
+	 * @param window_number The window number, in this case the waypoint's ID.
+	 */
 	WaypointWindow(const WindowDesc *desc, WindowNumber window_number) : Window()
 	{
 		this->wp = Waypoint::Get(window_number);
@@ -150,6 +155,7 @@ public:
 
 };
 
+/** The widgets of the waypoint view. */
 static const NWidgetPart _nested_waypoint_view_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_GREY),
@@ -170,6 +176,7 @@ static const NWidgetPart _nested_waypoint_view_widgets[] = {
 	EndContainer(),
 };
 
+/** The description of the waypoint view. */
 static const WindowDesc _waypoint_view_desc(
 	WDP_AUTO, 260, 118,
 	WC_WAYPOINT_VIEW, WC_NONE,
@@ -177,6 +184,10 @@ static const WindowDesc _waypoint_view_desc(
 	_nested_waypoint_view_widgets, lengthof(_nested_waypoint_view_widgets)
 );
 
+/**
+ * Show the window for the given waypoint.
+ * @param wp The waypoint to show the window for.
+ */
 void ShowWaypointWindow(const Waypoint *wp)
 {
 	AllocateWindowDescFront<WaypointWindow>(&_waypoint_view_desc, wp->index);

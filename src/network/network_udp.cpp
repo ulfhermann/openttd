@@ -34,6 +34,7 @@
 
 #include "core/udp.h"
 
+/** Mutex for all out threaded udp resoltion and such. */
 static ThreadMutex *_network_udp_mutex = ThreadMutex::New();
 
 /** Session key to register ourselves to the master server */
@@ -49,16 +50,21 @@ NetworkUDPSocketHandler *_udp_master_socket = NULL; ///< udp master socket
 
 ///*** Communication with the masterserver ***/
 
+/** Helper class for connecting to the master server. */
 class MasterNetworkUDPSocketHandler : public NetworkUDPSocketHandler {
 protected:
-	DECLARE_UDP_RECEIVE_COMMAND(PACKET_UDP_MASTER_ACK_REGISTER);
-	DECLARE_UDP_RECEIVE_COMMAND(PACKET_UDP_MASTER_SESSION_KEY);
+	virtual void Receive_MASTER_ACK_REGISTER(Packet *p, NetworkAddress *client_addr);
+	virtual void Receive_MASTER_SESSION_KEY(Packet *p, NetworkAddress *client_addr);
 public:
+	/**
+	 * Create the socket.
+	 * @param addresses The addresses to bind on.
+	 */
 	MasterNetworkUDPSocketHandler(NetworkAddressList *addresses) : NetworkUDPSocketHandler(addresses) {}
 	virtual ~MasterNetworkUDPSocketHandler() {}
 };
 
-DEF_UDP_RECEIVE_COMMAND(Master, PACKET_UDP_MASTER_ACK_REGISTER)
+void MasterNetworkUDPSocketHandler::Receive_MASTER_ACK_REGISTER(Packet *p, NetworkAddress *client_addr)
 {
 	_network_advertise_retries = 0;
 	DEBUG(net, 2, "[udp] advertising on master server successful (%s)", NetworkAddress::AddressFamilyAsString(client_addr->GetAddress()->ss_family));
@@ -67,7 +73,7 @@ DEF_UDP_RECEIVE_COMMAND(Master, PACKET_UDP_MASTER_ACK_REGISTER)
 	if (!_settings_client.network.server_advertise) NetworkUDPRemoveAdvertise(false);
 }
 
-DEF_UDP_RECEIVE_COMMAND(Master, PACKET_UDP_MASTER_SESSION_KEY)
+void MasterNetworkUDPSocketHandler::Receive_MASTER_SESSION_KEY(Packet *p, NetworkAddress *client_addr)
 {
 	_session_key = p->Recv_uint64();
 	DEBUG(net, 2, "[udp] received new session key from master server (%s)", NetworkAddress::AddressFamilyAsString(client_addr->GetAddress()->ss_family));
@@ -75,17 +81,22 @@ DEF_UDP_RECEIVE_COMMAND(Master, PACKET_UDP_MASTER_SESSION_KEY)
 
 ///*** Communication with clients (we are server) ***/
 
+/** Helper class for handling all server side communication. */
 class ServerNetworkUDPSocketHandler : public NetworkUDPSocketHandler {
 protected:
-	DECLARE_UDP_RECEIVE_COMMAND(PACKET_UDP_CLIENT_FIND_SERVER);
-	DECLARE_UDP_RECEIVE_COMMAND(PACKET_UDP_CLIENT_DETAIL_INFO);
-	DECLARE_UDP_RECEIVE_COMMAND(PACKET_UDP_CLIENT_GET_NEWGRFS);
+	virtual void Receive_CLIENT_FIND_SERVER(Packet *p, NetworkAddress *client_addr);
+	virtual void Receive_CLIENT_DETAIL_INFO(Packet *p, NetworkAddress *client_addr);
+	virtual void Receive_CLIENT_GET_NEWGRFS(Packet *p, NetworkAddress *client_addr);
 public:
+	/**
+	 * Create the socket.
+	 * @param addresses The addresses to bind on.
+	 */
 	ServerNetworkUDPSocketHandler(NetworkAddressList *addresses) : NetworkUDPSocketHandler(addresses) {}
 	virtual ~ServerNetworkUDPSocketHandler() {}
 };
 
-DEF_UDP_RECEIVE_COMMAND(Server, PACKET_UDP_CLIENT_FIND_SERVER)
+void ServerNetworkUDPSocketHandler::Receive_CLIENT_FIND_SERVER(Packet *p, NetworkAddress *client_addr)
 {
 	/* Just a fail-safe.. should never happen */
 	if (!_network_udp_server) {
@@ -125,7 +136,7 @@ DEF_UDP_RECEIVE_COMMAND(Server, PACKET_UDP_CLIENT_FIND_SERVER)
 	DEBUG(net, 2, "[udp] queried from %s", client_addr->GetHostname());
 }
 
-DEF_UDP_RECEIVE_COMMAND(Server, PACKET_UDP_CLIENT_DETAIL_INFO)
+void ServerNetworkUDPSocketHandler::Receive_CLIENT_DETAIL_INFO(Packet *p, NetworkAddress *client_addr)
 {
 	/* Just a fail-safe.. should never happen */
 	if (!_network_udp_server) return;
@@ -192,7 +203,7 @@ DEF_UDP_RECEIVE_COMMAND(Server, PACKET_UDP_CLIENT_DETAIL_INFO)
  * in_reply and in_reply_count are used to keep a list of GRFs to
  * send in the reply.
  */
-DEF_UDP_RECEIVE_COMMAND(Server, PACKET_UDP_CLIENT_GET_NEWGRFS)
+void ServerNetworkUDPSocketHandler::Receive_CLIENT_GET_NEWGRFS(Packet *p, NetworkAddress *client_addr)
 {
 	uint8 num_grfs;
 	uint i;
@@ -246,17 +257,18 @@ DEF_UDP_RECEIVE_COMMAND(Server, PACKET_UDP_CLIENT_GET_NEWGRFS)
 
 ///*** Communication with servers (we are client) ***/
 
+/** Helper class for handling all client side communication. */
 class ClientNetworkUDPSocketHandler : public NetworkUDPSocketHandler {
 protected:
-	DECLARE_UDP_RECEIVE_COMMAND(PACKET_UDP_SERVER_RESPONSE);
-	DECLARE_UDP_RECEIVE_COMMAND(PACKET_UDP_MASTER_RESPONSE_LIST);
-	DECLARE_UDP_RECEIVE_COMMAND(PACKET_UDP_SERVER_NEWGRFS);
+	virtual void Receive_SERVER_RESPONSE(Packet *p, NetworkAddress *client_addr);
+	virtual void Receive_MASTER_RESPONSE_LIST(Packet *p, NetworkAddress *client_addr);
+	virtual void Receive_SERVER_NEWGRFS(Packet *p, NetworkAddress *client_addr);
 	virtual void HandleIncomingNetworkGameInfoGRFConfig(GRFConfig *config);
 public:
 	virtual ~ClientNetworkUDPSocketHandler() {}
 };
 
-DEF_UDP_RECEIVE_COMMAND(Client, PACKET_UDP_SERVER_RESPONSE)
+void ClientNetworkUDPSocketHandler::Receive_SERVER_RESPONSE(Packet *p, NetworkAddress *client_addr)
 {
 	NetworkGameList *item;
 
@@ -322,7 +334,7 @@ DEF_UDP_RECEIVE_COMMAND(Client, PACKET_UDP_SERVER_RESPONSE)
 	UpdateNetworkGameWindow(false);
 }
 
-DEF_UDP_RECEIVE_COMMAND(Client, PACKET_UDP_MASTER_RESPONSE_LIST)
+void ClientNetworkUDPSocketHandler::Receive_MASTER_RESPONSE_LIST(Packet *p, NetworkAddress *client_addr)
 {
 	/* packet begins with the protocol version (uint8)
 	 * then an uint16 which indicates how many
@@ -358,7 +370,7 @@ DEF_UDP_RECEIVE_COMMAND(Client, PACKET_UDP_MASTER_RESPONSE_LIST)
 }
 
 /** The return of the client's request of the names of some NewGRFs */
-DEF_UDP_RECEIVE_COMMAND(Client, PACKET_UDP_SERVER_NEWGRFS)
+void ClientNetworkUDPSocketHandler::Receive_SERVER_NEWGRFS(Packet *p, NetworkAddress *client_addr)
 {
 	uint8 num_grfs;
 	uint i;
@@ -413,7 +425,7 @@ void ClientNetworkUDPSocketHandler::HandleIncomingNetworkGameInfoGRFConfig(GRFCo
 	SetBit(config->flags, GCF_COPY);
 }
 
-/* Broadcast to all ips */
+/** Broadcast to all ips */
 static void NetworkUDPBroadCast(NetworkUDPSocketHandler *socket)
 {
 	for (NetworkAddress *addr = _broadcast_list.Begin(); addr != _broadcast_list.End(); addr++) {
@@ -426,7 +438,7 @@ static void NetworkUDPBroadCast(NetworkUDPSocketHandler *socket)
 }
 
 
-/* Request the the server-list from the master server */
+/** Request the the server-list from the master server */
 void NetworkUDPQueryMasterServer()
 {
 	Packet p(PACKET_UDP_CLIENT_GET_LIST);
@@ -441,7 +453,7 @@ void NetworkUDPQueryMasterServer()
 	DEBUG(net, 2, "[udp] master server queried at %s", out_addr.GetAddressAsString());
 }
 
-/* Find all servers */
+/** Find all servers */
 void NetworkUDPSearchGame()
 {
 	/* We are still searching.. */
@@ -456,6 +468,12 @@ void NetworkUDPSearchGame()
 /** Simpler wrapper struct for NetworkUDPQueryServerThread */
 struct NetworkUDPQueryServerInfo : NetworkAddress {
 	bool manually; ///< Did we connect manually or not?
+
+	/**
+	 * Create the structure.
+	 * @param address The address of the server to query.
+	 * @param manually Whether the address was entered manually.
+	 */
 	NetworkUDPQueryServerInfo(const NetworkAddress &address, bool manually) :
 		NetworkAddress(address),
 		manually(manually)
@@ -488,6 +506,11 @@ static void NetworkUDPQueryServerThread(void *pntr)
 	delete info;
 }
 
+/**
+ * Query a specific server.
+ * @param address The address of the server.
+ * @param manually Whether the address was entered manually.
+ */
 void NetworkUDPQueryServer(NetworkAddress address, bool manually)
 {
 	NetworkUDPQueryServerInfo *info = new NetworkUDPQueryServerInfo(address, manually);
@@ -496,6 +519,10 @@ void NetworkUDPQueryServer(NetworkAddress address, bool manually)
 	}
 }
 
+/**
+ * Thread entry point for de-advertising.
+ * @param pntr unused.
+ */
 static void NetworkUDPRemoveAdvertiseThread(void *pntr)
 {
 	DEBUG(net, 1, "[udp] removing advertise from master server");
@@ -528,6 +555,10 @@ void NetworkUDPRemoveAdvertise(bool blocking)
 	}
 }
 
+/**
+ * Thread entry point for advertising.
+ * @param pntr unused.
+ */
 static void NetworkUDPAdvertiseThread(void *pntr)
 {
 	/* Find somewhere to send */
@@ -564,8 +595,10 @@ static void NetworkUDPAdvertiseThread(void *pntr)
 	_network_udp_mutex->EndCritical();
 }
 
-/* Register us to the master server
- *   This function checks if it needs to send an advertise */
+/**
+ * Register us to the master server
+ *   This function checks if it needs to send an advertise
+ */
 void NetworkUDPAdvertise()
 {
 	/* Check if we should send an advertise */
@@ -593,6 +626,7 @@ void NetworkUDPAdvertise()
 	}
 }
 
+/** Initialize the whole UDP bit. */
 void NetworkUDPInitialize()
 {
 	/* If not closed, then do it. */
@@ -618,6 +652,7 @@ void NetworkUDPInitialize()
 	_network_udp_mutex->EndCritical();
 }
 
+/** Close all UDP related stuff. */
 void NetworkUDPClose()
 {
 	_network_udp_mutex->BeginCritical();
