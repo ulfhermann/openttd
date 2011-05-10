@@ -2028,6 +2028,8 @@ void Vehicle::RefreshNextHopsStats()
 	while (next != NULL && cur->CanLeaveWithCargo(true)) {
 		next = this->orders.list->GetNextStoppingOrder(this,
 				this->orders.list->GetNext(next), ++hops);
+		if (next == NULL) break;
+
 		if (next->IsType(OT_GOTO_DEPOT)) {
 			/* handle refit by dropping some vehicles. */
 			CargoID new_cid = next->GetRefitCargo();
@@ -2069,7 +2071,7 @@ void Vehicle::RefreshNextHopsStats()
 				}
 				if (v->type == VEH_SHIP) break; // ships too
 			}
-		} else if (next != NULL) {
+		} else {
 			StationID next_station = next->GetDestination();
 			Station *st = Station::GetIfValid(cur->GetDestination());
 			if (st != NULL && next_station != INVALID_STATION && next_station != st->index) {
