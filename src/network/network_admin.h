@@ -21,18 +21,19 @@
 extern AdminIndex _redirect_console_to_admin;
 
 class ServerNetworkAdminSocketHandler;
+/** Pool with all admin connections. */
 typedef Pool<ServerNetworkAdminSocketHandler, AdminIndex, 2, MAX_ADMINS, PT_NADMIN> NetworkAdminSocketPool;
 extern NetworkAdminSocketPool _networkadminsocket_pool;
 
 /** Class for handling the server side of the game connection. */
 class ServerNetworkAdminSocketHandler : public NetworkAdminSocketPool::PoolItem<&_networkadminsocket_pool>, public NetworkAdminSocketHandler, public TCPListenHandler<ServerNetworkAdminSocketHandler, ADMIN_PACKET_SERVER_FULL, ADMIN_PACKET_SERVER_BANNED> {
 protected:
-	DECLARE_ADMIN_RECEIVE_COMMAND(ADMIN_PACKET_ADMIN_JOIN);
-	DECLARE_ADMIN_RECEIVE_COMMAND(ADMIN_PACKET_ADMIN_QUIT);
-	DECLARE_ADMIN_RECEIVE_COMMAND(ADMIN_PACKET_ADMIN_UPDATE_FREQUENCY);
-	DECLARE_ADMIN_RECEIVE_COMMAND(ADMIN_PACKET_ADMIN_POLL);
-	DECLARE_ADMIN_RECEIVE_COMMAND(ADMIN_PACKET_ADMIN_CHAT);
-	DECLARE_ADMIN_RECEIVE_COMMAND(ADMIN_PACKET_ADMIN_RCON);
+	virtual NetworkRecvStatus Receive_ADMIN_JOIN(Packet *p);
+	virtual NetworkRecvStatus Receive_ADMIN_QUIT(Packet *p);
+	virtual NetworkRecvStatus Receive_ADMIN_UPDATE_FREQUENCY(Packet *p);
+	virtual NetworkRecvStatus Receive_ADMIN_POLL(Packet *p);
+	virtual NetworkRecvStatus Receive_ADMIN_CHAT(Packet *p);
+	virtual NetworkRecvStatus Receive_ADMIN_RCON(Packet *p);
 
 	NetworkRecvStatus SendProtocol();
 public:
@@ -82,7 +83,17 @@ public:
 	}
 };
 
+/**
+ * Iterate over all the sockets from a given starting point.
+ * @param var The variable to iterate with.
+ * @param start The start of the iteration.
+ */
 #define FOR_ALL_ADMIN_SOCKETS_FROM(var, start) FOR_ALL_ITEMS_FROM(ServerNetworkAdminSocketHandler, adminsocket_index, var, start)
+
+/**
+ * Iterate over all the sockets.
+ * @param var The variable to iterate with.
+ */
 #define FOR_ALL_ADMIN_SOCKETS(var) FOR_ALL_ADMIN_SOCKETS_FROM(var, 0)
 
 void NetworkAdminClientInfo(const NetworkClientSocket *cs, bool new_client = false);
