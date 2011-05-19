@@ -160,9 +160,9 @@ public:
 		return end - data;
 	}
 
-	FORCEINLINE bool HasData() const
+	FORCEINLINE bool HasData(size_t count = 1) const
 	{
-		return data < end;
+		return data + count <= end;
 	}
 
 	FORCEINLINE byte *Data()
@@ -280,6 +280,34 @@ static void ClearTemporaryNewGRFData(GRFFile *gf)
 	free(gf->spritegroups);
 	gf->spritegroups = NULL;
 	gf->spritegroups_count = 0;
+}
+
+/**
+ * Disable a GRF
+ * @param message Error message or STR_NULL
+ * @param config GRFConfig to disable, NULL for current
+ * @return Error message of the GRF for further customisation
+ */
+static GRFError *DisableGrf(StringID message = STR_NULL, GRFConfig *config = NULL)
+{
+	GRFFile *file;
+	if (config != NULL) {
+		file = GetFileByGRFID(config->ident.grfid);
+	} else {
+		config = _cur_grfconfig;
+		file = _cur_grffile;
+	}
+
+	config->status = GCS_DISABLED;
+	if (file != NULL) ClearTemporaryNewGRFData(file);
+	if (config == _cur_grfconfig) _skip_sprites = -1;
+
+	if (message != STR_NULL) {
+		delete config->error;
+		config->error = new GRFError(STR_NEWGRF_ERROR_MSG_FATAL, message);
+	}
+
+	return config->error;
 }
 
 
@@ -447,6 +475,40 @@ static void MapSpriteMappingRecolour(PalSpriteID *grf_sprite)
 	if (HasBit(grf_sprite->sprite, 15)) {
 		ClrBit(grf_sprite->sprite, 15);
 		SetBit(grf_sprite->sprite, PALETTE_MODIFIER_COLOUR);
+	}
+}
+
+/**
+ * Read a sprite and a palette from the GRF and convert them into a format
+ * suitable to OpenTTD.
+ * @param buf                 Input stream.
+ * @param invert_action1_flag Set to true, if palette bit 15 means 'not from action 1'.
+ * @param action1_offset      Offset to add to action 1 sprites.
+ * @param action1_pitch       Factor to multiply action 1 sprite indices with.
+ * @param action1_max         Maximal valid action 1 index.
+ * @param [out] grf_sprite    Read sprite and palette.
+ */
+static void ReadSpriteLayoutSprite(ByteReader *buf, bool invert_action1_flag, uint action1_offset, uint action1_pitch, uint action1_max, PalSpriteID *grf_sprite)
+{
+	grf_sprite->sprite = buf->ReadWord();
+	grf_sprite->pal = buf->ReadWord();
+
+	MapSpriteMappingRecolour(grf_sprite);
+
+	bool custom_sprite = HasBit(grf_sprite->pal, 15) != invert_action1_flag;
+	ClrBit(grf_sprite->pal, 15);
+	if (custom_sprite) {
+		/* Use sprite from Action 1 */
+		uint index = GB(grf_sprite->sprite, 0, 14);
+		if (action1_pitch == 0 || index >= action1_max) {
+			grfmsg(1, "ReadSpriteLayoutSprite: Spritelayout uses undefined custom spriteset %d", index);
+			grf_sprite->sprite = SPR_IMG_QUERY;
+			grf_sprite->pal = PAL_NONE;
+		} else {
+			SpriteID sprite = action1_offset + index * action1_pitch;
+			SB(grf_sprite->sprite, 0, SPRITE_WIDTH, sprite);
+			SetBit(grf_sprite->sprite, SPRITE_MODIFIER_CUSTOM_SPRITE);
+		}
 	}
 }
 
@@ -1193,34 +1255,29 @@ static ChangeInfoResult StationChangeInfo(uint stid, int numinfo, int prop, Byte
 			}
 
 			case 0x09: // Define sprite layout
+				delete[] statspec->renderdata; // delete earlier loaded stuff
+
 				statspec->tiles = buf->ReadExtendedByte();
-				statspec->renderdata = CallocT<DrawTileSprites>(statspec->tiles);
+				statspec->renderdata = new NewGRFSpriteLayout[statspec->tiles];
 
 				for (uint t = 0; t < statspec->tiles; t++) {
-					DrawTileSprites *dts = &statspec->renderdata[t];
-					uint seq_count = 0;
+					NewGRFSpriteLayout *dts = &statspec->renderdata[t];
 
-					dts->seq = NULL;
-					dts->ground.sprite = buf->ReadWord();
-					dts->ground.pal = buf->ReadWord();
-					if (dts->ground.sprite == 0 && dts->ground.pal == 0) {
+					if (buf->HasData(4) && *(uint32*)buf->Data() == 0) {
+						buf->Skip(4);
 						extern const DrawTileSprites _station_display_datas_rail[8];
-						dts->ground = _station_display_datas_rail[t % 8].ground;
-						dts->seq = CopyDrawTileSeqStruct(_station_display_datas_rail[t % 8].seq);
+						dts->Clone(&_station_display_datas_rail[t % 8]);
 						continue;
 					}
-					if (HasBit(dts->ground.pal, 15)) {
-						/* Use sprite from Action 1 */
-						ClrBit(dts->ground.pal, 15);
-						SetBit(dts->ground.sprite, SPRITE_MODIFIER_CUSTOM_SPRITE);
-					}
 
-					MapSpriteMappingRecolour(&dts->ground);
+					ReadSpriteLayoutSprite(buf, false, 0, 1, UINT_MAX, &dts->ground);
 
+					static SmallVector<DrawTileSeqStruct, 8> tmp_layout;
+					tmp_layout.Clear();
 					for (;;) {
 						/* no relative bounding box support */
-						dts->seq = ReallocT(const_cast<DrawTileSeqStruct *>(dts->seq), ++seq_count);
-						DrawTileSeqStruct *dtss = const_cast<DrawTileSeqStruct *>(&dts->seq[seq_count - 1]);
+						DrawTileSeqStruct *dtss = tmp_layout.Append();
+						MemSetT(dtss, 0);
 
 						dtss->delta_x = buf->ReadByte();
 						if (dtss->IsTerminator()) break;
@@ -1229,18 +1286,10 @@ static ChangeInfoResult StationChangeInfo(uint stid, int numinfo, int prop, Byte
 						dtss->size_x = buf->ReadByte();
 						dtss->size_y = buf->ReadByte();
 						dtss->size_z = buf->ReadByte();
-						dtss->image.sprite = buf->ReadWord();
-						dtss->image.pal = buf->ReadWord();
 
-						if (HasBit(dtss->image.pal, 15)) {
-							ClrBit(dtss->image.pal, 15);
-						} else {
-							/* Use sprite from Action 1 (yes, this is inverse to above) */
-							SetBit(dtss->image.sprite, SPRITE_MODIFIER_CUSTOM_SPRITE);
-						}
-
-						MapSpriteMappingRecolour(&dtss->image);
+						ReadSpriteLayoutSprite(buf, true, 0, 1, UINT_MAX, &dtss->image);
 					}
+					dts->Clone(tmp_layout.Begin());
 				}
 				break;
 
@@ -1253,11 +1302,12 @@ static ChangeInfoResult StationChangeInfo(uint stid, int numinfo, int prop, Byte
 					continue;
 				}
 
+				delete[] statspec->renderdata; // delete earlier loaded stuff
+
 				statspec->tiles = srcstatspec->tiles;
-				statspec->renderdata = MallocT<DrawTileSprites>(statspec->tiles);
+				statspec->renderdata = new NewGRFSpriteLayout[statspec->tiles];
 				for (uint t = 0; t < statspec->tiles; t++) {
-					statspec->renderdata[t].ground = srcstatspec->renderdata[t].ground;
-					statspec->renderdata[t].seq = CopyDrawTileSeqStruct(srcstatspec->renderdata[t].seq);
+					statspec->renderdata[t].Clone(&srcstatspec->renderdata[t]);
 				}
 				break;
 			}
@@ -3488,11 +3538,7 @@ static bool HandleChangeInfoResult(const char *caller, ChangeInfoResult cir, uin
 
 		case CIR_INVALID_ID:
 			/* No debug message for an invalid ID, as it has already been output */
-			_skip_sprites = -1;
-			_cur_grfconfig->status = GCS_DISABLED;
-			delete _cur_grfconfig->error;
-			_cur_grfconfig->error  = new GRFError(STR_NEWGRF_ERROR_MSG_FATAL);
-			_cur_grfconfig->error->message  = (cir == CIR_INVALID_ID) ? STR_NEWGRF_ERROR_INVALID_ID : STR_NEWGRF_ERROR_UNKNOWN_PROPERTY;
+			DisableGrf(cir == CIR_INVALID_ID ? STR_NEWGRF_ERROR_INVALID_ID : STR_NEWGRF_ERROR_UNKNOWN_PROPERTY);
 			return true;
 	}
 }
@@ -3923,58 +3969,17 @@ static void NewSpriteGroup(ByteReader *buf)
 					act_group = group;
 					/* num_building_stages should be 1, if we are only using non-custom sprites */
 					group->num_building_stages = max((uint8)1, num_spriteset_ents);
-					group->dts = CallocT<DrawTileSprites>(1);
 
 					/* Groundsprite */
-					group->dts->ground.sprite = buf->ReadWord();
-					group->dts->ground.pal    = buf->ReadWord();
+					ReadSpriteLayoutSprite(buf, false, _cur_grffile->spriteset_start, num_spriteset_ents, num_spritesets, &group->dts.ground);
 
-					/* Remap transparent/colour modifier bits */
-					MapSpriteMappingRecolour(&group->dts->ground);
-
-					if (HasBit(group->dts->ground.pal, 15)) {
-						/* Bit 31 set means this is a custom sprite, so rewrite it to the
-						 * last spriteset defined. */
-						uint spriteset = GB(group->dts->ground.sprite, 0, 14);
-						if (num_spriteset_ents == 0 || spriteset >= num_spritesets) {
-							grfmsg(1, "NewSpriteGroup: Spritelayout uses undefined custom spriteset %d", spriteset);
-							group->dts->ground.sprite = SPR_IMG_QUERY;
-							group->dts->ground.pal = PAL_NONE;
-						} else {
-							SpriteID sprite = _cur_grffile->spriteset_start + spriteset * num_spriteset_ents;
-							SB(group->dts->ground.sprite, 0, SPRITE_WIDTH, sprite);
-							ClrBit(group->dts->ground.pal, 15);
-							SetBit(group->dts->ground.sprite, SPRITE_MODIFIER_CUSTOM_SPRITE);
-						}
-					}
-
-					group->dts->seq = CallocT<DrawTileSeqStruct>(num_building_sprites + 1);
-
+					group->dts.Allocate(num_building_sprites);
 					for (i = 0; i < num_building_sprites; i++) {
-						DrawTileSeqStruct *seq = const_cast<DrawTileSeqStruct*>(&group->dts->seq[i]);
+						DrawTileSeqStruct *seq = const_cast<DrawTileSeqStruct*>(&group->dts.seq[i]);
 
-						seq->image.sprite = buf->ReadWord();
-						seq->image.pal    = buf->ReadWord();
+						ReadSpriteLayoutSprite(buf, false, _cur_grffile->spriteset_start, num_spriteset_ents, num_spritesets, &seq->image);
 						seq->delta_x = buf->ReadByte();
 						seq->delta_y = buf->ReadByte();
-
-						MapSpriteMappingRecolour(&seq->image);
-
-						if (HasBit(seq->image.pal, 15)) {
-							/* Bit 31 set means this is a custom sprite, so rewrite it to the
-							 * last spriteset defined. */
-							uint spriteset = GB(seq->image.sprite, 0, 14);
-							if (num_spriteset_ents == 0 || spriteset >= num_spritesets) {
-								grfmsg(1, "NewSpriteGroup: Spritelayout uses undefined custom spriteset %d", spriteset);
-								seq->image.sprite = SPR_IMG_QUERY;
-								seq->image.pal = PAL_NONE;
-							} else {
-								SpriteID sprite = _cur_grffile->spriteset_start + spriteset * num_spriteset_ents;
-								SB(seq->image.sprite, 0, SPRITE_WIDTH, sprite);
-								ClrBit(seq->image.pal, 15);
-								SetBit(seq->image.sprite, SPRITE_MODIFIER_CUSTOM_SPRITE);
-							}
-						}
 
 						if (type > 0) {
 							seq->delta_z = buf->ReadByte();
@@ -3985,10 +3990,6 @@ static void NewSpriteGroup(ByteReader *buf)
 						seq->size_y = buf->ReadByte();
 						seq->size_z = buf->ReadByte();
 					}
-
-					/* Set the terminator value. */
-					const_cast<DrawTileSeqStruct *>(group->dts->seq)[i].MakeTerminator();
-
 					break;
 				}
 
@@ -5215,12 +5216,8 @@ static void CfgApply(ByteReader *buf)
  */
 static void DisableStaticNewGRFInfluencingNonStaticNewGRFs(GRFConfig *c)
 {
-	delete c->error;
-	c->status = GCS_DISABLED;
-	c->error  = new GRFError(STR_NEWGRF_ERROR_MSG_FATAL, STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC);
-	c->error->data = strdup(_cur_grfconfig->GetName());
-
-	ClearTemporaryNewGRFData(GetFileByGRFID(c->ident.grfid));
+	GRFError *error = DisableGrf(STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC, c);
+	error->data = strdup(_cur_grfconfig->GetName());
 }
 
 /* Action 0x07
@@ -5382,8 +5379,7 @@ static void SkipIf(ByteReader *buf)
 
 		/* If an action 8 hasn't been encountered yet, disable the grf. */
 		if (_cur_grfconfig->status != (_cur_stage < GLS_RESERVE ? GCS_INITIALISED : GCS_ACTIVATED)) {
-			_cur_grfconfig->status = GCS_DISABLED;
-			ClearTemporaryNewGRFData(_cur_grffile);
+			DisableGrf();
 		}
 	}
 }
@@ -5432,11 +5428,7 @@ static void GRFInfo(ByteReader *buf)
 	const char *name = buf->ReadString();
 
 	if (_cur_stage < GLS_RESERVE && _cur_grfconfig->status != GCS_UNKNOWN) {
-		_cur_grfconfig->status = GCS_DISABLED;
-		delete _cur_grfconfig->error;
-		_cur_grfconfig->error  = new GRFError(STR_NEWGRF_ERROR_MSG_FATAL, STR_NEWGRF_ERROR_MULTIPLE_ACTION_8);
-
-		_skip_sprites = -1;
+		DisableGrf(STR_NEWGRF_ERROR_MULTIPLE_ACTION_8);
 		return;
 	}
 
@@ -5561,9 +5553,7 @@ static void GRFLoadError(ByteReader *buf)
 	} else if (severity == 3) {
 		/* This is a fatal error, so make sure the GRF is deactivated and no
 		 * more of it gets loaded. */
-		_cur_grfconfig->status = GCS_DISABLED;
-		ClearTemporaryNewGRFData(_cur_grffile);
-		_skip_sprites = -1;
+		DisableGrf();
 	}
 
 	if (message_id >= lengthof(msgstr) && message_id != 0xFF) {
@@ -5745,9 +5735,7 @@ static uint32 PerformGRM(uint32 *grm, uint16 num_ids, uint16 count, uint8 op, ui
 	if (op != 4 && op != 5) {
 		/* Deactivate GRF */
 		grfmsg(0, "ParamSet: GRM: Unable to allocate %d %s, deactivating", count, type);
-		_cur_grfconfig->status = GCS_DISABLED;
-		ClearTemporaryNewGRFData(_cur_grffile);
-		_skip_sprites = -1;
+		DisableGrf(STR_NEWGRF_ERROR_GRM_FAILED);
 		return UINT_MAX;
 	}
 
@@ -5822,9 +5810,7 @@ static void ParamSet(ByteReader *buf)
 							/* Check if the allocated sprites will fit below the original sprite limit */
 							if (_cur_spriteid + count >= 16384) {
 								grfmsg(0, "ParamSet: GRM: Unable to allocate %d sprites; try changing NewGRF order", count);
-								_cur_grfconfig->status = GCS_DISABLED;
-								ClearTemporaryNewGRFData(_cur_grffile);
-								_skip_sprites = -1;
+								DisableGrf(STR_NEWGRF_ERROR_GRM_FAILED);
 								return;
 							}
 
@@ -6101,7 +6087,8 @@ static void GRFInhibit(ByteReader *buf)
 		/* Unset activation flag */
 		if (file != NULL && file != _cur_grfconfig) {
 			grfmsg(2, "GRFInhibit: Deactivating file '%s'", file->filename);
-			file->status = GCS_DISABLED;
+			GRFError *error = DisableGrf(STR_NEWGRF_ERROR_FORCEFULLY_DISABLED, file);
+			error->data = strdup(_cur_grfconfig->GetName());
 		}
 	}
 }
@@ -6172,9 +6159,7 @@ static void FeatureTownName(ByteReader *buf)
 				if (townname->nbparts[ref_id] == 0) {
 					grfmsg(0, "FeatureTownName: definition 0x%02X doesn't exist, deactivating", ref_id);
 					DelGRFTownName(grfid);
-					_cur_grfconfig->status = GCS_DISABLED;
-					ClearTemporaryNewGRFData(_cur_grffile);
-					_skip_sprites = -1;
+					DisableGrf(STR_NEWGRF_ERROR_INVALID_ID);
 					return;
 				}
 
@@ -6449,16 +6434,12 @@ static void TranslateGRFStrings(ByteReader *buf)
 	if (c->status == GCS_INITIALISED) {
 		/* If the file is not active but will be activated later, give an error
 		 * and disable this file. */
-		delete _cur_grfconfig->error;
-		_cur_grfconfig->error = new GRFError(STR_NEWGRF_ERROR_MSG_FATAL, STR_NEWGRF_ERROR_LOAD_AFTER);
+		GRFError *error = DisableGrf(STR_NEWGRF_ERROR_LOAD_AFTER);
 
 		char tmp[256];
 		GetString(tmp, STR_NEWGRF_ERROR_AFTER_TRANSLATED_FILE, lastof(tmp));
-		_cur_grfconfig->error->data = strdup(tmp);
+		error->data = strdup(tmp);
 
-		_cur_grfconfig->status = GCS_DISABLED;
-		ClearTemporaryNewGRFData(_cur_grffile);
-		_skip_sprites = -1;
 		return;
 	}
 
@@ -7059,10 +7040,7 @@ static void ResetCustomStations()
 			if (stations[i] == NULL) continue;
 			StationSpec *statspec = stations[i];
 
-			for (uint t = 0; t < statspec->tiles; t++) {
-				free((void*)statspec->renderdata[t].seq);
-			}
-			free(statspec->renderdata);
+			delete[] statspec->renderdata;
 
 			/* Release platforms and layouts */
 			if (!statspec->copied_layouts) {
@@ -7902,11 +7880,7 @@ static void DecodeSpecialSprite(byte *buf, uint num, GrfLoadingStage stage)
 		}
 	} catch (...) {
 		grfmsg(1, "DecodeSpecialSprite: Tried to read past end of pseudo-sprite data");
-
-		_skip_sprites = -1;
-		_cur_grfconfig->status = GCS_DISABLED;
-		delete _cur_grfconfig->error;
-		_cur_grfconfig->error  = new GRFError(STR_NEWGRF_ERROR_MSG_FATAL, STR_NEWGRF_ERROR_READ_BOUNDS);
+		DisableGrf(STR_NEWGRF_ERROR_READ_BOUNDS);
 	}
 }
 
@@ -7981,9 +7955,7 @@ void LoadNewGRFFile(GRFConfig *config, uint file_index, GrfLoadingStage stage)
 		} else {
 			if (_skip_sprites == 0) {
 				grfmsg(0, "LoadNewGRFFile: Unexpected sprite, disabling");
-				config->status = GCS_DISABLED;
-				delete config->error;
-				config->error  = new GRFError(STR_NEWGRF_ERROR_MSG_FATAL, STR_NEWGRF_ERROR_UNEXPECTED_SPRITE);
+				DisableGrf(STR_NEWGRF_ERROR_UNEXPECTED_SPRITE);
 				break;
 			}
 
