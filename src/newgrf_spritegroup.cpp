@@ -35,12 +35,6 @@ RandomizedSpriteGroup::~RandomizedSpriteGroup()
 	free((void*)this->groups);
 }
 
-TileLayoutSpriteGroup::~TileLayoutSpriteGroup()
-{
-	free((void*)this->dts->seq);
-	free(this->dts);
-}
-
 TemporaryStorageArray<int32, 0x110> _temp_store;
 
 
