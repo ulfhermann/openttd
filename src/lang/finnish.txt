@@ -2471,6 +2471,8 @@ STR_NEWGRF_ERROR_CORRUPT_SPRITE                                 :{YELLOW}{STRING
 STR_NEWGRF_ERROR_MULTIPLE_ACTION_8                              :Sisältää useamman Action 8 -kohdan
 STR_NEWGRF_ERROR_READ_BOUNDS                                    :Luku pseudo-spriten ohi
 STR_NEWGRF_ERROR_MISSING_SPRITES                                :{WHITE}Käytössä olevasta perusgrafiikkapaketista puuttuu spritejä.{}Ole hyvä ja päivitä perusgrafiikkapaketti
+STR_NEWGRF_ERROR_GRM_FAILED                                     :Pyydetyt GRF-resurssit eivät ole saatavilla
+STR_NEWGRF_ERROR_FORCEFULLY_DISABLED                            :{4:STRING} poisti käytöstä NewGRF:n {2:STRING}
 
 # NewGRF related 'general' warnings
 STR_NEWGRF_POPUP_CAUTION_CAPTION                                :{WHITE}Varoitus!
@@ -3234,7 +3236,7 @@ STR_ORDER_STOP_ORDER                                            :(Pysähdy)
 
 STR_ORDER_GO_TO_STATION                                         :{STRING} {STATION} {STRING}
 
-STR_ORDER_AUTOMATIC                                             :(Automaattinen)
+STR_ORDER_IMPLICIT                                              :(Ehdoton)
 
 STR_ORDER_FULL_LOAD                                             :(Täysi lastaus)
 STR_ORDER_FULL_LOAD_ANY                                         :(Lastaa täyteen mitä tahansa rahtia)
