@@ -464,7 +464,7 @@ int ttd_main(int argc, char *argv[])
 		case 'g':
 			if (mgo.opt != NULL) {
 				strecpy(_file_to_saveload.name, mgo.opt, lastof(_file_to_saveload.name));
-				_switch_mode = SM_LOAD;
+				_switch_mode = SM_LOAD_GAME;
 				_file_to_saveload.mode = SL_LOAD;
 
 				/* if the file doesn't exist or it is not a valid savegame, let the saveload code show an error */
@@ -862,10 +862,10 @@ void SwitchToMode(SwitchMode new_mode)
 {
 #ifdef ENABLE_NETWORK
 	/* If we are saving something, the network stays in his current state */
-	if (new_mode != SM_SAVE) {
+	if (new_mode != SM_SAVE_GAME) {
 		/* If the network is active, make it not-active */
 		if (_networking) {
-			if (_network_server && (new_mode == SM_LOAD || new_mode == SM_NEWGAME || new_mode == SM_RESTARTGAME)) {
+			if (_network_server && (new_mode == SM_LOAD_GAME || new_mode == SM_NEWGAME || new_mode == SM_RESTARTGAME)) {
 				NetworkReboot();
 			} else {
 				NetworkDisconnect();
@@ -891,7 +891,7 @@ void SwitchToMode(SwitchMode new_mode)
 	}
 #endif /* ENABLE_NETWORK */
 	/* Make sure all AI controllers are gone at quiting game */
-	if (new_mode != SM_SAVE) AI::KillAll();
+	if (new_mode != SM_SAVE_GAME) AI::KillAll();
 
 	switch (new_mode) {
 		case SM_EDITOR: // Switch to scenario editor
@@ -908,7 +908,7 @@ void SwitchToMode(SwitchMode new_mode)
 			MakeNewGame(false, new_mode == SM_NEWGAME);
 			break;
 
-		case SM_LOAD: { // Load game, Play Scenario
+		case SM_LOAD_GAME: { // Load game, Play Scenario
 			ResetGRFConfig(true);
 			ResetWindowSystem();
 
@@ -972,7 +972,7 @@ void SwitchToMode(SwitchMode new_mode)
 			}
 			break;
 
-		case SM_SAVE: // Save game
+		case SM_SAVE_GAME: // Save game.
 			/* Make network saved games on pause compatible to singleplayer */
 			if (SaveOrLoad(_file_to_saveload.name, SL_SAVE, NO_DIRECTORY) != SL_OK) {
 				SetDParamStr(0, GetSaveLoadErrorString());
@@ -980,6 +980,11 @@ void SwitchToMode(SwitchMode new_mode)
 			} else {
 				DeleteWindowById(WC_SAVELOAD, 0);
 			}
+			break;
+
+		case SM_SAVE_HEIGHTMAP: // Save heightmap.
+			MakeHeightmapScreenshot(_file_to_saveload.name);
+			DeleteWindowById(WC_SAVELOAD, 0);
 			break;
 
 		case SM_GENRANDLAND: // Generate random land within scenario editor
