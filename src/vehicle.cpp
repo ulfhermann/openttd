@@ -899,8 +899,18 @@ static void DoDrawVehicle(const Vehicle *v)
 
 	if (v->vehstatus & VS_DEFPAL) pal = (v->vehstatus & VS_CRASHED) ? PALETTE_CRASH : GetVehiclePalette(v);
 
+	/* Check whether the vehicle shall be transparent due to the game state */
+	bool shadowed = (v->vehstatus & VS_SHADOW);
+
+	if (v->type == VEH_EFFECT) {
+		/* Check whether the vehicle shall be transparent/invisible due to GUI settings.
+		 * However, transparent smoke and bubbles look weird, so always hide them. */
+		TransparencyOption to = EffectVehicle::From(v)->GetTransparencyOption();
+		if (to != TO_INVALID && (IsTransparencySet(to) || IsInvisibilitySet(to))) return;
+	}
+
 	AddSortableSpriteToDraw(image, pal, v->x_pos + v->x_offs, v->y_pos + v->y_offs,
-		v->x_extent, v->y_extent, v->z_extent, v->z_pos, (v->vehstatus & VS_SHADOW) != 0);
+		v->x_extent, v->y_extent, v->z_extent, v->z_pos, shadowed);
 }
 
 /**
@@ -1865,7 +1875,7 @@ void Vehicle::BeginLoading()
 				in_list->GetDestination() != this->last_station_visited)) {
 			bool suppress_implicit_orders = HasBit(this->GetGroundVehicleFlags(), GVF_SUPPRESS_IMPLICIT_ORDERS);
 			/* Do not create consecutive duplicates of implicit orders */
-			Order *prev_order = this->cur_implicit_order_index > 0 ? this->GetOrder(this->cur_implicit_order_index - 1) : NULL;
+			Order *prev_order = this->cur_implicit_order_index > 0 ? this->GetOrder(this->cur_implicit_order_index - 1) : (this->GetNumOrders() > 1 ? this->GetLastOrder() : NULL);
 			if (prev_order == NULL ||
 					(!prev_order->IsType(OT_IMPLICIT) && !prev_order->IsType(OT_GOTO_STATION)) ||
 					prev_order->GetDestination() != this->last_station_visited) {
