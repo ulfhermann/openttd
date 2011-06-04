@@ -191,7 +191,7 @@ static const NWidgetPart _nested_save_dialog_widgets[] = {
 	EndContainer(),
 };
 
-/* Colours for fios types */
+/** Colours for fios types, indexed by #FiosType. */
 const TextColour _fios_colours[] = {
 	TC_LIGHT_BLUE, TC_DARK_GREEN,  TC_DARK_GREEN, TC_ORANGE, TC_LIGHT_BROWN,
 	TC_ORANGE,     TC_LIGHT_BROWN, TC_ORANGE,     TC_ORANGE, TC_YELLOW
@@ -206,6 +206,7 @@ void BuildFileList()
 		case SLD_LOAD_SCENARIO:
 		case SLD_SAVE_SCENARIO:
 			FiosGetScenarioList(_saveload_mode); break;
+		case SLD_SAVE_HEIGHTMAP:
 		case SLD_LOAD_HEIGHTMAP:
 			FiosGetHeightmapList(_saveload_mode); break;
 
@@ -245,6 +246,7 @@ private:
 	Scrollbar *vscroll;
 public:
 
+	/** Generate a default save filename. */
 	void GenerateFileName()
 	{
 		GenerateDefaultSaveName(this->edit_str_buf, &this->edit_str_buf[this->edit_str_size - 1]);
@@ -258,6 +260,7 @@ public:
 			STR_SAVELOAD_SAVE_CAPTION,
 			STR_SAVELOAD_SAVE_SCENARIO,
 			STR_SAVELOAD_LOAD_HEIGHTMAP,
+			STR_SAVELOAD_SAVE_HEIGHTMAP,
 		};
 		assert((uint)mode < lengthof(saveload_captions));
 
@@ -265,6 +268,7 @@ public:
 		 * by current file mode */
 		switch (mode) {
 			case SLD_SAVE_GAME:     this->GenerateFileName(); break;
+			case SLD_SAVE_HEIGHTMAP:
 			case SLD_SAVE_SCENARIO: strecpy(this->edit_str_buf, "UNNAMED", &this->edit_str_buf[edit_str_size - 1]); break;
 			default:                break;
 		}
@@ -304,6 +308,7 @@ public:
 				FioGetDirectory(o_dir.name, lengthof(o_dir.name), SCENARIO_DIR);
 				break;
 
+			case SLD_SAVE_HEIGHTMAP:
 			case SLD_LOAD_HEIGHTMAP:
 				FioGetDirectory(o_dir.name, lengthof(o_dir.name), HEIGHTMAP_DIR);
 				break;
@@ -313,7 +318,7 @@ public:
 		}
 
 		/* Focus the edit box by default in the save windows */
-		if (_saveload_mode == SLD_SAVE_GAME || _saveload_mode == SLD_SAVE_SCENARIO) {
+		if (_saveload_mode == SLD_SAVE_GAME || _saveload_mode == SLD_SAVE_SCENARIO || _saveload_mode == SLD_SAVE_HEIGHTMAP) {
 			this->SetFocusedWidget(SLWW_SAVE_OSK_TITLE);
 		}
 	}
@@ -498,7 +503,7 @@ public:
 		this->vscroll->SetCount(_fios_items.Length());
 		this->DrawWidgets();
 
-		if (_saveload_mode == SLD_SAVE_GAME || _saveload_mode == SLD_SAVE_SCENARIO) {
+		if (_saveload_mode == SLD_SAVE_GAME || _saveload_mode == SLD_SAVE_SCENARIO || _saveload_mode == SLD_SAVE_HEIGHTMAP) {
 			this->DrawEditBox(SLWW_SAVE_OSK_TITLE);
 		}
 	}
@@ -527,7 +532,7 @@ public:
 
 			case SLWW_LOAD_BUTTON:
 				if (this->selected != NULL && !_load_check_data.HasErrors() && (_load_check_data.grf_compatibility != GLC_NOT_FOUND || _settings_client.gui.UserIsAllowedToChangeNewGRFs())) {
-					_switch_mode = (_game_mode == GM_EDITOR) ? SM_LOAD_SCENARIO : SM_LOAD;
+					_switch_mode = (_game_mode == GM_EDITOR) ? SM_LOAD_SCENARIO : SM_LOAD_GAME;
 
 					const char *name = FiosBrowseTo(this->selected);
 					SetFiosType(this->selected->type);
@@ -564,7 +569,7 @@ public:
 
 							this->InvalidateData(1);
 						}
-						if (_saveload_mode == SLD_SAVE_GAME || _saveload_mode == SLD_SAVE_SCENARIO) {
+						if (_saveload_mode == SLD_SAVE_GAME || _saveload_mode == SLD_SAVE_SCENARIO || _saveload_mode == SLD_SAVE_HEIGHTMAP) {
 							/* Copy clicked name to editbox */
 							ttd_strlcpy(this->text.buf, file->title, this->text.max_bytes);
 							UpdateTextBufferSize(&this->text);
@@ -611,7 +616,7 @@ public:
 
 	virtual void OnMouseLoop()
 	{
-		if (_saveload_mode == SLD_SAVE_GAME || _saveload_mode == SLD_SAVE_SCENARIO) {
+		if (_saveload_mode == SLD_SAVE_GAME || _saveload_mode == SLD_SAVE_SCENARIO || _saveload_mode == SLD_SAVE_HEIGHTMAP) {
 			this->HandleEditBox(SLWW_SAVE_OSK_TITLE);
 		}
 	}
@@ -624,7 +629,7 @@ public:
 		}
 
 		EventState state = ES_NOT_HANDLED;
-		if ((_saveload_mode == SLD_SAVE_GAME || _saveload_mode == SLD_SAVE_SCENARIO) &&
+		if ((_saveload_mode == SLD_SAVE_GAME || _saveload_mode == SLD_SAVE_SCENARIO || _saveload_mode == SLD_SAVE_HEIGHTMAP) &&
 				this->HandleEditBoxKey(SLWW_SAVE_OSK_TITLE, key, keycode, state) == HEBR_CONFIRM) {
 			this->HandleButtonClick(SLWW_SAVE_GAME);
 		}
@@ -635,8 +640,8 @@ public:
 	virtual void OnTimeout()
 	{
 		/* This test protects against using widgets 11 and 12 which are only available
-		 * in those two saveload mode */
-		if (!(_saveload_mode == SLD_SAVE_GAME || _saveload_mode == SLD_SAVE_SCENARIO)) return;
+		 * in those saveload modes. */
+		if (!(_saveload_mode == SLD_SAVE_GAME || _saveload_mode == SLD_SAVE_SCENARIO || _saveload_mode == SLD_SAVE_HEIGHTMAP)) return;
 
 		if (this->IsWidgetLowered(SLWW_DELETE_SELECTION)) { // Delete button clicked
 			if (!FiosDelete(this->text.buf)) {
@@ -649,8 +654,13 @@ public:
 
 			UpdateTextBufferSize(&this->text);
 		} else if (this->IsWidgetLowered(SLWW_SAVE_GAME)) { // Save button clicked
-			_switch_mode = SM_SAVE;
-			FiosMakeSavegameName(_file_to_saveload.name, this->text.buf, sizeof(_file_to_saveload.name));
+			if (_saveload_mode  == SLD_SAVE_GAME || _saveload_mode == SLD_SAVE_SCENARIO) {
+				_switch_mode = SM_SAVE_GAME;
+				FiosMakeSavegameName(_file_to_saveload.name, this->text.buf, sizeof(_file_to_saveload.name));
+			} else {
+				_switch_mode = SM_SAVE_HEIGHTMAP;
+				FiosMakeHeightmapName(_file_to_saveload.name, this->text.buf, sizeof(_file_to_saveload.name));
+			}
 
 			/* In the editor set up the vehicle engines correctly (date might have changed) */
 			if (_game_mode == GM_EDITOR) StartupEngines();
@@ -726,13 +736,18 @@ static const WindowDesc _save_dialog_desc(
  * So each entry, as expressed by the related comment, is based on the enum
  */
 static const FileType _file_modetotype[] = {
-	FT_SAVEGAME,  ///< used for SLD_LOAD_GAME
-	FT_SCENARIO,  ///< used for SLD_LOAD_SCENARIO
-	FT_SAVEGAME,  ///< used for SLD_SAVE_GAME
-	FT_SCENARIO,  ///< used for SLD_SAVE_SCENARIO
-	FT_HEIGHTMAP, ///< used for SLD_LOAD_HEIGHTMAP
+	FT_SAVEGAME,  // used for SLD_LOAD_GAME
+	FT_SCENARIO,  // used for SLD_LOAD_SCENARIO
+	FT_SAVEGAME,  // used for SLD_SAVE_GAME
+	FT_SCENARIO,  // used for SLD_SAVE_SCENARIO
+	FT_HEIGHTMAP, // used for SLD_LOAD_HEIGHTMAP
+	FT_HEIGHTMAP, // used for SLD_SAVE_HEIGHTMAP
 };
 
+/**
+ * Launch save/load dialog in the given mode.
+ * @param mode Save/load mode.
+ */
 void ShowSaveLoadDialog(SaveLoadDialogMode mode)
 {
 	DeleteWindowById(WC_SAVELOAD, 0);
@@ -741,6 +756,7 @@ void ShowSaveLoadDialog(SaveLoadDialogMode mode)
 	switch (mode) {
 		case SLD_SAVE_GAME:
 		case SLD_SAVE_SCENARIO:
+		case SLD_SAVE_HEIGHTMAP:
 			sld = &_save_dialog_desc; break;
 		case SLD_LOAD_HEIGHTMAP:
 			sld = &_load_heightmap_dialog_desc; break;
