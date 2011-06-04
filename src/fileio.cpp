@@ -17,6 +17,7 @@
 #include "tar_type.h"
 #ifdef WIN32
 #include <windows.h>
+# define access _taccess
 #elif defined(__HAIKU__)
 #include <Path.h>
 #include <storage/FindDirectory.h>
@@ -262,6 +263,24 @@ bool FioCheckFileExists(const char *filename, Subdirectory subdir)
 
 	FioFCloseFile(f);
 	return true;
+}
+
+/**
+ * Test whether the fiven filename exists.
+ * @param filename the file to test.
+ * @return true if and only if the file exists.
+ */
+bool FileExists(const char *filename)
+{
+#if defined(WINCE)
+	/* There is always one platform that doesn't support basic commands... */
+	HANDLE hand = CreateFile(OTTD2FS(filename), 0, 0, NULL, OPEN_EXISTING, 0, NULL);
+	if (hand == INVALID_HANDLE_VALUE) return 1;
+	CloseHandle(hand);
+	return 0;
+#else
+	return access(OTTD2FS(filename), 0) == 0;
+#endif
 }
 
 /**
