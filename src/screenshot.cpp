@@ -27,6 +27,8 @@
 
 #include "table/strings.h"
 
+static const char * const SCREENSHOT_NAME = "screenshot"; ///< Default filename of a saved screenshot.
+static const char * const HEIGHTMAP_NAME  = "heightmap";  ///< Default filename of a saved heightmap.
 
 char _screenshot_format_name[8];      ///< Extension of the current screenshot format (corresponds with #_cur_screenshot_format).
 uint _num_screenshot_formats;         ///< Number of available screenshot formats.
@@ -575,6 +577,12 @@ static const ScreenshotFormat _screenshot_formats[] = {
 	{"PCX", "pcx", &MakePCXImage},
 };
 
+/** Get filename extension of current screenshot file format. */
+const char *GetCurrentScreenshotExtension()
+{
+	return _screenshot_formats[_cur_screenshot_format].extension;
+}
+
 /** Initialize screenshot format information on startup, with #_screenshot_format_name filled from the loadsave code. */
 void InitializeScreenshotFormats()
 {
@@ -679,16 +687,17 @@ static void LargeWorldCallback(void *userdata, void *buf, uint y, uint pitch, ui
 
 /**
  * Construct a pathname for a screenshot file.
- * @param ext Extension to use.
+ * @param default_fn Default filename.
+ * @param ext        Extension to use.
  * @return Pathname for a screenshot file.
  */
-static const char *MakeScreenshotName(const char *ext)
+static const char *MakeScreenshotName(const char *default_fn, const char *ext)
 {
 	bool generate = StrEmpty(_screenshot_name);
 
 	if (generate) {
 		if (_game_mode == GM_EDITOR || _game_mode == GM_MENU || _local_company == COMPANY_SPECTATOR) {
-			strecpy(_screenshot_name, "screenshot", lastof(_screenshot_name));
+			strecpy(_screenshot_name, default_fn, lastof(_screenshot_name));
 		} else {
 			GenerateDefaultSaveName(_screenshot_name, lastof(_screenshot_name));
 		}
@@ -717,7 +726,8 @@ static const char *MakeScreenshotName(const char *ext)
 static bool MakeSmallScreenshot()
 {
 	const ScreenshotFormat *sf = _screenshot_formats + _cur_screenshot_format;
-	return sf->proc(MakeScreenshotName(sf->extension), CurrentScreenCallback, NULL, _screen.width, _screen.height, BlitterFactoryBase::GetCurrentBlitter()->GetScreenDepth(), _cur_palette);
+	return sf->proc(MakeScreenshotName(SCREENSHOT_NAME, sf->extension), CurrentScreenCallback, NULL, _screen.width, _screen.height,
+			BlitterFactoryBase::GetCurrentBlitter()->GetScreenDepth(), _cur_palette);
 }
 
 /** Make a zoomed-in screenshot of the currently visible area. */
@@ -737,7 +747,8 @@ static bool MakeZoomedInScreenshot()
 	vp.height = vp.virtual_height;
 
 	const ScreenshotFormat *sf = _screenshot_formats + _cur_screenshot_format;
-	return sf->proc(MakeScreenshotName(sf->extension), LargeWorldCallback, &vp, vp.width, vp.height, BlitterFactoryBase::GetCurrentBlitter()->GetScreenDepth(), _cur_palette);
+	return sf->proc(MakeScreenshotName(SCREENSHOT_NAME, sf->extension), LargeWorldCallback, &vp, vp.width, vp.height,
+			BlitterFactoryBase::GetCurrentBlitter()->GetScreenDepth(), _cur_palette);
 }
 
 /** Make a screenshot of the whole map. */
@@ -762,7 +773,50 @@ static bool MakeWorldScreenshot()
 	vp.height = vp.virtual_height;
 
 	sf = _screenshot_formats + _cur_screenshot_format;
-	return sf->proc(MakeScreenshotName(sf->extension), LargeWorldCallback, &vp, vp.width, vp.height, BlitterFactoryBase::GetCurrentBlitter()->GetScreenDepth(), _cur_palette);
+	return sf->proc(MakeScreenshotName(SCREENSHOT_NAME, sf->extension), LargeWorldCallback, &vp, vp.width, vp.height,
+			BlitterFactoryBase::GetCurrentBlitter()->GetScreenDepth(), _cur_palette);
+}
+
+/**
+ * Callback for generating a heightmap. Supports 8bpp grayscale only.
+ * @param userdata Pointer to user data.
+ * @param buf      Destination buffer.
+ * @param y        Line number of the first line to write.
+ * @param pitch    Number of pixels to write (1 byte for 8bpp, 4 bytes for 32bpp). @see Colour
+ * @param n        Number of lines to write.
+ * @see ScreenshotCallback
+ */
+static void HeightmapCallback(void *userdata, void *buffer, uint y, uint pitch, uint n)
+{
+	byte *buf = (byte *)buffer;
+	while (n > 0) {
+		TileIndex ti = TileXY(MapMaxX(), y);
+		for (uint x = MapMaxX(); true; x--) {
+			*buf = 16 * TileHeight(ti);
+			buf++;
+			if (x == 0) break;
+			ti = TILE_ADDXY(ti, -1, 0);
+		}
+		y++;
+		n--;
+	}
+}
+
+/**
+ * Make a heightmap of the current map.
+ * @param filename Filename to use for saving.
+ */
+bool MakeHeightmapScreenshot(const char *filename)
+{
+	Colour palette[256];
+	for (uint i = 0; i < lengthof(palette); i++) {
+		palette[i].a = 0xff;
+		palette[i].r = i;
+		palette[i].g = i;
+		palette[i].b = i;
+	}
+	const ScreenshotFormat *sf = _screenshot_formats + _cur_screenshot_format;
+	return sf->proc(filename, HeightmapCallback, NULL, MapSizeX(), MapSizeY(), 8, palette);
 }
 
 /**
@@ -799,6 +853,12 @@ bool MakeScreenshot(ScreenshotType t, const char *name)
 		case SC_WORLD:
 			ret = MakeWorldScreenshot();
 			break;
+
+		case SC_HEIGHTMAP: {
+			const ScreenshotFormat *sf = _screenshot_formats + _cur_screenshot_format;
+			ret = MakeHeightmapScreenshot(MakeScreenshotName(HEIGHTMAP_NAME, sf->extension));
+			break;
+		}
 
 		default:
 			NOT_REACHED();
