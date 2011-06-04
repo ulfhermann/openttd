@@ -531,31 +531,56 @@ static bool BubbleTick(EffectVehicle *v)
 typedef void EffectInitProc(EffectVehicle *v);
 typedef bool EffectTickProc(EffectVehicle *v);
 
+/** Functions to initialise an effect vehicle after construction. */
 static EffectInitProc * const _effect_init_procs[] = {
-	ChimneySmokeInit,
-	SteamSmokeInit,
-	DieselSmokeInit,
-	ElectricSparkInit,
-	SmokeInit,
-	ExplosionLargeInit,
-	BreakdownSmokeInit,
-	ExplosionSmallInit,
-	BulldozerInit,
-	BubbleInit,
+	ChimneySmokeInit,   // EV_CHIMNEY_SMOKE
+	SteamSmokeInit,     // EV_STEAM_SMOKE
+	DieselSmokeInit,    // EV_DIESEL_SMOKE
+	ElectricSparkInit,  // EV_ELECTRIC_SPARK
+	SmokeInit,          // EV_CRASH_SMOKE
+	ExplosionLargeInit, // EV_EXPLOSION_LARGE
+	BreakdownSmokeInit, // EV_BREAKDOWN_SMOKE
+	ExplosionSmallInit, // EV_EXPLOSION_SMALL
+	BulldozerInit,      // EV_BULLDOZER
+	BubbleInit,         // EV_BUBBLE
+	SmokeInit,          // EV_BREAKDOWN_SMOKE_AIRCRAFT
+	SmokeInit,          // EV_COPPER_MINE_SMOKE
 };
+assert_compile(lengthof(_effect_init_procs) == EV_END);
 
+/** Functions for controling effect vehicles at each tick. */
 static EffectTickProc * const _effect_tick_procs[] = {
-	ChimneySmokeTick,
-	SteamSmokeTick,
-	DieselSmokeTick,
-	ElectricSparkTick,
-	SmokeTick,
-	ExplosionLargeTick,
-	BreakdownSmokeTick,
-	ExplosionSmallTick,
-	BulldozerTick,
-	BubbleTick,
+	ChimneySmokeTick,   // EV_CHIMNEY_SMOKE
+	SteamSmokeTick,     // EV_STEAM_SMOKE
+	DieselSmokeTick,    // EV_DIESEL_SMOKE
+	ElectricSparkTick,  // EV_ELECTRIC_SPARK
+	SmokeTick,          // EV_CRASH_SMOKE
+	ExplosionLargeTick, // EV_EXPLOSION_LARGE
+	BreakdownSmokeTick, // EV_BREAKDOWN_SMOKE
+	ExplosionSmallTick, // EV_EXPLOSION_SMALL
+	BulldozerTick,      // EV_BULLDOZER
+	BubbleTick,         // EV_BUBBLE
+	SmokeTick,          // EV_BREAKDOWN_SMOKE_AIRCRAFT
+	SmokeTick,          // EV_COPPER_MINE_SMOKE
 };
+assert_compile(lengthof(_effect_tick_procs) == EV_END);
+
+/** Transparency options affecting the effects. */
+static const TransparencyOption _effect_transparency_options[] = {
+	TO_INDUSTRIES,      // EV_CHIMNEY_SMOKE
+	TO_INVALID,         // EV_STEAM_SMOKE
+	TO_INVALID,         // EV_DIESEL_SMOKE
+	TO_INVALID,         // EV_ELECTRIC_SPARK
+	TO_INVALID,         // EV_CRASH_SMOKE
+	TO_INVALID,         // EV_EXPLOSION_LARGE
+	TO_INVALID,         // EV_BREAKDOWN_SMOKE
+	TO_INVALID,         // EV_EXPLOSION_SMALL
+	TO_INVALID,         // EV_BULLDOZER
+	TO_INDUSTRIES,      // EV_BUBBLE
+	TO_INVALID,         // EV_BREAKDOWN_SMOKE_AIRCRAFT
+	TO_INDUSTRIES,      // EV_COPPER_MINE_SMOKE
+};
+assert_compile(lengthof(_effect_transparency_options) == EV_END);
 
 
 /**
@@ -628,4 +653,13 @@ void EffectVehicle::UpdateDeltaXY(Direction direction)
 	this->x_extent      = 1;
 	this->y_extent      = 1;
 	this->z_extent      = 1;
+}
+
+/**
+ * Determines the transparency option affecting the effect.
+ * @return Transparency option, or TO_INVALID if none.
+ */
+TransparencyOption EffectVehicle::GetTransparencyOption() const
+{
+	return _effect_transparency_options[this->subtype];
 }
