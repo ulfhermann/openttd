@@ -16,12 +16,11 @@
 #include "fios.h"
 #include "fileio_func.h"
 #include "tar_type.h"
+#include "screenshot.h"
 #include "string_func.h"
 #include <sys/stat.h>
 
-#ifdef WIN32
-# define access _taccess
-#else
+#ifndef WIN32
 # include <unistd.h>
 #endif /* WIN32 */
 
@@ -63,7 +62,7 @@ int CDECL CompareFiosItems(const FiosItem *da, const FiosItem *db)
 	return r;
 }
 
-/** Clear the list */
+/** Free the list of savegames. */
 void FiosFreeSavegameList()
 {
 	_fios_items.Clear();
@@ -84,9 +83,9 @@ StringID FiosGetDescText(const char **path, uint64 *total_free)
 }
 
 /**
- * Browse to a new path based on the passed \a item.
- * @param *item #FiosItem object telling us what to do.
- * @return A string if we have given a file as a target, otherwise \c NULL.
+ * Browse to a new path based on the passed \a item, starting at #_fios_path.
+ * @param *item Item telling us what to do.
+ * @return A filename w/path if we reached a file, otherwise \c NULL.
  */
 const char *FiosBrowseTo(const FiosItem *item)
 {
@@ -142,51 +141,76 @@ const char *FiosBrowseTo(const FiosItem *item)
 	return NULL;
 }
 
-void FiosMakeSavegameName(char *buf, const char *name, size_t size)
+/**
+ * Construct a filename from its components in destination buffer \a buf.
+ * @param buf Destination buffer.
+ * @param path Directory path, may be \c NULL.
+ * @param name Filename.
+ * @param ext Filename extension (use \c "" for no extension).
+ * @param size Size of \a buf.
+ */
+static void FiosMakeFilename(char *buf, const char *path, const char *name, const char *ext, size_t size)
 {
-	const char *extension, *period;
-
-	extension = (_game_mode == GM_EDITOR) ? ".scn" : ".sav";
+	const char *period;
 
 	/* Don't append the extension if it is already there */
 	period = strrchr(name, '.');
-	if (period != NULL && strcasecmp(period, extension) == 0) extension = "";
+	if (period != NULL && strcasecmp(period, ext) == 0) ext = "";
 #if  defined(__MORPHOS__) || defined(__AMIGAOS__)
-	if (_fios_path != NULL) {
-		unsigned char sepchar = _fios_path[(strlen(_fios_path) - 1)];
+	if (path != NULL) {
+		unsigned char sepchar = path[(strlen(path) - 1)];
 
 		if (sepchar != ':' && sepchar != '/') {
-			snprintf(buf, size, "%s" PATHSEP "%s%s", _fios_path, name, extension);
+			snprintf(buf, size, "%s" PATHSEP "%s%s", path, name, ext);
 		} else {
-			snprintf(buf, size, "%s%s%s", _fios_path, name, extension);
+			snprintf(buf, size, "%s%s%s", path, name, ext);
 		}
 	} else {
-		snprintf(buf, size, "%s%s", name, extension);
+		snprintf(buf, size, "%s%s", name, ext);
 	}
 #else
-	snprintf(buf, size, "%s" PATHSEP "%s%s", _fios_path, name, extension);
+	snprintf(buf, size, "%s" PATHSEP "%s%s", path, name, ext);
 #endif
 }
 
+/**
+ * Make a save game or scenario filename from a name.
+ * @param buf Destination buffer for saving the filename.
+ * @param name Name of the file.
+ * @param size Length of buffer \a buf.
+ */
+void FiosMakeSavegameName(char *buf, const char *name, size_t size)
+{
+	const char *extension = (_game_mode == GM_EDITOR) ? ".scn" : ".sav";
+
+	FiosMakeFilename(buf, _fios_path, name, extension, size);
+}
+
+/**
+ * Construct a filename for a height map.
+ * @param buf Destination buffer.
+ * @param name Filename.
+ * @param size Size of \a buf.
+ */
+void FiosMakeHeightmapName(char *buf, const char *name, size_t size)
+{
+	char ext[5];
+	ext[0] = '.';
+	strecpy(ext + 1, GetCurrentScreenshotExtension(), lastof(ext));
+
+	FiosMakeFilename(buf, _fios_path, name, ext, size);
+}
+
+/**
+ * Delete a file.
+ * @param name Filename to delete.
+ */
 bool FiosDelete(const char *name)
 {
 	char filename[512];
 
 	FiosMakeSavegameName(filename, name, lengthof(filename));
 	return unlink(filename) == 0;
-}
-
-bool FileExists(const char *filename)
-{
-#if defined(WINCE)
-	/* There is always one platform that doesn't support basic commands... */
-	HANDLE hand = CreateFile(OTTD2FS(filename), 0, 0, NULL, OPEN_EXISTING, 0, NULL);
-	if (hand == INVALID_HANDLE_VALUE) return 1;
-	CloseHandle(hand);
-	return 0;
-#else
-	return access(OTTD2FS(filename), 0) == 0;
-#endif
 }
 
 typedef FiosType fios_getlist_callback_proc(SaveLoadDialogMode mode, const char *filename, const char *ext, char *title, const char *last);
@@ -394,7 +418,6 @@ FiosType FiosGetSavegameListCallback(SaveLoadDialogMode mode, const char *file, 
 /**
  * Get a list of savegames.
  * @param mode Save/load mode.
- * @return A pointer to an array of FiosItem representing all the files to be shown in the save/load dialog.
  * @see FiosGetFileList
  */
 void FiosGetSavegameList(SaveLoadDialogMode mode)
@@ -446,7 +469,6 @@ static FiosType FiosGetScenarioListCallback(SaveLoadDialogMode mode, const char 
 /**
  * Get a list of scenarios.
  * @param mode Save/load mode.
- * @return A pointer to an array of FiosItem representing all the files to be shown in the save/load dialog.
  * @see FiosGetFileList
  */
 void FiosGetScenarioList(SaveLoadDialogMode mode)
@@ -511,7 +533,10 @@ static FiosType FiosGetHeightmapListCallback(SaveLoadDialogMode mode, const char
 	return type;
 }
 
-/* Get a list of Heightmaps */
+/**
+ * Get a list of heightmaps.
+ * @param mode Save/load mode.
+ */
 void FiosGetHeightmapList(SaveLoadDialogMode mode)
 {
 	static char *fios_hmap_path = NULL;
