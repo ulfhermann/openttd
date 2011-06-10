@@ -934,13 +934,20 @@ static Money DeliverGoods(int num_pieces, CargoID cargo_type, StationID dest, Ti
 {
 	assert(num_pieces > 0);
 
-	const Station *st = Station::Get(dest);
+	Station *st = Station::Get(dest);
 
 	/* Give the goods to the industry. */
 	uint accepted = DeliverGoodsToIndustry(st, cargo_type, num_pieces, src_type == ST_INDUSTRY ? src : INVALID_INDUSTRY);
 
 	/* If this cargo type is always accepted, accept all */
 	if (HasBit(st->always_accepted, cargo_type)) accepted = num_pieces;
+
+	/* Update station statistics */
+	if (accepted > 0) {
+		SetBit(st->goods[cargo_type].acceptance_pickup, GoodsEntry::GES_EVER_ACCEPTED);
+		SetBit(st->goods[cargo_type].acceptance_pickup, GoodsEntry::GES_CURRENT_MONTH);
+		SetBit(st->goods[cargo_type].acceptance_pickup, GoodsEntry::GES_ACCEPTED_BIGTICK);
+	}
 
 	/* Update company statistics */
 	company->cur_economy.delivered_cargo += accepted;
@@ -1255,9 +1262,9 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 			if (ge->cargo.Count() > prev_count) {
 				/* something has been transferred. The station windows need updating. */
 				dirty_station = true;
-				if (!HasBit(ge->acceptance_pickup, GoodsEntry::PICKUP)) {
+				if (!HasBit(ge->acceptance_pickup, GoodsEntry::GES_PICKUP)) {
 					InvalidateWindowData(WC_STATION_LIST, last_visited);
-					SetBit(ge->acceptance_pickup, GoodsEntry::PICKUP);
+					SetBit(ge->acceptance_pickup, GoodsEntry::GES_PICKUP);
 				}
 			}
 

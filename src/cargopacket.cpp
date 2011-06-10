@@ -573,12 +573,12 @@ void VehicleCargoList::SwapReserved()
 /**
  * Moves the given amount of cargo from a vehicle to a station.
  * Depending on the value of flags the side effects of this function differ:
- *  - OUFB_UNLOAD_IF_POSSIBLE and dest->acceptance_pickup & GoodsEntry::ACCEPTANCE:
+ *  - OUFB_UNLOAD_IF_POSSIBLE and dest->acceptance_pickup & GoodsEntry::GES_ACCEPTANCE:
  *  	packets are accepted here and may be unloaded and/or delivered (=destroyed);
  *  	if not using cargodist: all packets are unloaded and delivered
  *  	if using cargodist: only packets which have this station as final destination are unloaded and delivered.
  *  	if using cargodist: other packets may or may not be unloaded, depending on next_station.
- *  	if GoodsEntry::ACCEPTANCE is not set and using cargodist: packets may still be unloaded, but not delivered.
+ *  	if GoodsEntry::GES_ACCEPTANCE is not set and using cargodist: packets may still be unloaded, but not delivered.
  *  - OUFB_UNLOAD: unload all packets unconditionally;
  *  	if OUF_UNLOAD_IF_POSSIBLE set and OUFB_TRANSFER not set: also deliver packets (no matter if using cargodist).
  *  - OUFB_TRANSFER: don't deliver any packets;
@@ -728,7 +728,7 @@ void VehicleCargoList::AgeCargo()
 FORCEINLINE byte StationCargoList::GetUnloadFlags(OrderUnloadFlags order_flags)
 {
 	byte flags = 0;
-	if (HasBit(this->station->goods[this->cargo].acceptance_pickup, GoodsEntry::ACCEPTANCE)) {
+	if (HasBit(this->station->goods[this->cargo].acceptance_pickup, GoodsEntry::GES_ACCEPTANCE)) {
 		flags |= UL_ACCEPTED;
 	}
 	if (order_flags & OUFB_UNLOAD) {

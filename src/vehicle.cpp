@@ -1971,7 +1971,7 @@ void Vehicle::CancelReservation(StationID next, Station *st)
 			DEBUG(misc, 1, "cancelling cargo reservation");
 			GoodsEntry &ge = st->goods[v->cargo_type];
 			cargo.Unreserve(next, &ge.cargo);
-			SetBit(ge.acceptance_pickup, GoodsEntry::PICKUP);
+			SetBit(ge.acceptance_pickup, GoodsEntry::GES_PICKUP);
 		}
 	}
 }
