@@ -210,7 +210,7 @@ NodeID LinkGraphComponent::AddNode(Station *st)
 	}
 
 	this->nodes[this->num_nodes].Init(st->index, good.supply,
-			HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
+			HasBit(good.acceptance_pickup, GoodsEntry::GES_ACCEPTANCE));
 
 	std::vector<Edge> &new_edges = this->edges[this->num_nodes];
 
