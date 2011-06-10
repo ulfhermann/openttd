@@ -933,13 +933,20 @@ static Money DeliverGoods(int num_pieces, CargoID cargo_type, StationID dest, Ti
 {
 	assert(num_pieces > 0);
 
-	const Station *st = Station::Get(dest);
+	Station *st = Station::Get(dest);
 
 	/* Give the goods to the industry. */
 	uint accepted = DeliverGoodsToIndustry(st, cargo_type, num_pieces, src_type == ST_INDUSTRY ? src : INVALID_INDUSTRY);
 
 	/* If this cargo type is always accepted, accept all */
 	if (HasBit(st->always_accepted, cargo_type)) accepted = num_pieces;
+
+	/* Update station statistics */
+	if (accepted > 0) {
+		SetBit(st->goods[cargo_type].acceptance_pickup, GoodsEntry::GES_EVER_ACCEPTED);
+		SetBit(st->goods[cargo_type].acceptance_pickup, GoodsEntry::GES_CURRENT_MONTH);
+		SetBit(st->goods[cargo_type].acceptance_pickup, GoodsEntry::GES_ACCEPTED_BIGTICK);
+	}
 
 	/* Update company statistics */
 	company->cur_economy.delivered_cargo += accepted;
@@ -1182,7 +1189,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 
 			payment->SetCargo(v->cargo_type);
 
-			if (HasBit(ge->acceptance_pickup, GoodsEntry::ACCEPTANCE) && !(u->current_order.GetUnloadType() & OUFB_TRANSFER)) {
+			if (HasBit(ge->acceptance_pickup, GoodsEntry::GES_ACCEPTANCE) && !(u->current_order.GetUnloadType() & OUFB_TRANSFER)) {
 				/* The cargo has reached its final destination, the packets may now be destroyed */
 				remaining = v->cargo.MoveTo<StationCargoList>(NULL, amount_unloaded, VehicleCargoList::MTA_FINAL_DELIVERY, payment, last_visited);
 
@@ -1197,9 +1204,9 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 			 * accept cargo that was loaded at the same station. */
 			if ((u->current_order.GetUnloadType() & (OUFB_UNLOAD | OUFB_TRANSFER)) && (!accepted || v->cargo.Count() == cargo_count)) {
 				remaining = v->cargo.MoveTo(&ge->cargo, amount_unloaded, u->current_order.GetUnloadType() & OUFB_TRANSFER ? VehicleCargoList::MTA_TRANSFER : VehicleCargoList::MTA_UNLOAD, payment);
-				if (!HasBit(ge->acceptance_pickup, GoodsEntry::PICKUP)) {
+				if (!HasBit(ge->acceptance_pickup, GoodsEntry::GES_PICKUP)) {
 					InvalidateWindowData(WC_STATION_LIST, last_visited);
-					SetBit(ge->acceptance_pickup, GoodsEntry::PICKUP);
+					SetBit(ge->acceptance_pickup, GoodsEntry::GES_PICKUP);
 				}
 
 				dirty_vehicle = dirty_station = true;
