@@ -287,10 +287,18 @@ typedef std::map<StationID, FlowStatSet> FlowStatMap; ///< Flow descriptions by 
 
 uint GetMovingAverageLength(const Station *from, const Station *to);
 
+/**
+ * Stores station stats for a single cargo.
+ */
 struct GoodsEntry {
-	enum AcceptancePickup {
-		ACCEPTANCE,
-		PICKUP
+	/** Status of this cargo for the station. */
+	enum GoodsEntryStatus {
+		GES_ACCEPTANCE,       ///< This cargo is currently being accepted by the station.
+		GES_PICKUP,           ///< This cargo has been picked up at this station at least once.
+		GES_EVER_ACCEPTED,    ///< The cargo has been accepted at least once.
+		GES_LAST_MONTH,       ///< The cargo was accepted last month.
+		GES_CURRENT_MONTH,    ///< The cargo was accepted this month.
+		GES_ACCEPTED_BIGTICK, ///< The cargo has been accepted since the last periodic processing.
 	};
 
 	GoodsEntry() :
@@ -304,17 +312,17 @@ struct GoodsEntry {
 		last_component(INVALID_LINKGRAPH_COMPONENT)
 	{}
 
-	byte acceptance_pickup;
-	byte days_since_pickup;
-	byte rating;
-	byte last_speed;
-	byte last_age;
-	byte amount_fract;                   ///< Fractional part of the amount in the cargo list.
-	StationCargoList cargo;              ///< The cargo packets of cargo waiting in this station.
-	uint supply;                         ///< Cargo supplied last month.
-	uint supply_new;                     ///< Cargo supplied so far this month.
-	FlowStatMap flows;                   ///< Planned flows through this station.
-	LinkStatMap link_stats;              ///< Capacities and usage statistics for outgoing links.
+	byte acceptance_pickup; ///< Status of this cargo, see #GoodsEntryStatus.
+	byte days_since_pickup; ///< Number of days since the last pickup for this cargo (up to 255).
+	byte rating;            ///< Station rating for this cargo.
+	byte last_speed;        ///< Maximum speed of the last vehicle that picked up this cargo (up to 255).
+	byte last_age;          ///< Age in years of the last vehicle that picked up this cargo.
+	byte amount_fract;      ///< Fractional part of the amount in the cargo list
+	StationCargoList cargo; ///< The cargo packets of cargo waiting in this station
+	uint supply;            ///< Cargo supplied last month.
+	uint supply_new;        ///< Cargo supplied so far this month.
+	FlowStatMap flows;      ///< Planned flows through this station.
+	LinkStatMap link_stats; ///< Capacities and usage statistics for outgoing links.
 	LinkGraphComponentID last_component; ///< Component this station was last part of in this cargo's link graph.
 	FlowStat GetSumFlowVia(StationID via) const;
 

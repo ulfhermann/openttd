@@ -362,7 +362,7 @@ static void Load_STNS()
 			SlObject(ge, GetGoodsDesc());
 			SwapPackets(ge);
 			if (IsSavegameVersionBefore(68)) {
-				SB(ge->acceptance_pickup, GoodsEntry::ACCEPTANCE, 1, HasBit(_waiting_acceptance, 15));
+				SB(ge->acceptance_pickup, GoodsEntry::GES_ACCEPTANCE, 1, HasBit(_waiting_acceptance, 15));
 				if (GB(_waiting_acceptance, 0, 12) != 0) {
 					/* In old versions, enroute_from used 0xFF as INVALID_STATION */
 					StationID source = (IsSavegameVersionBefore(7) && _cargo_source == 0xFF) ? INVALID_STATION : _cargo_source;
@@ -376,7 +376,7 @@ static void Load_STNS()
 					/* Don't construct the packet with station here, because that'll fail with old savegames */
 					CargoPacket *cp = new CargoPacket(GB(_waiting_acceptance, 0, 12), _cargo_days, source, _cargo_source_xy, _cargo_source_xy, _cargo_feeder_share);
 					ge->cargo.Append(INVALID_STATION, cp);
-					SB(ge->acceptance_pickup, GoodsEntry::PICKUP, 1, 1);
+					SB(ge->acceptance_pickup, GoodsEntry::GES_PICKUP, 1, 1);
 				}
 			}
 		}
