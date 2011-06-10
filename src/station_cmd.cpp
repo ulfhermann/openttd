@@ -447,7 +447,7 @@ static uint GetAcceptanceMask(const Station *st)
 	uint mask = 0;
 
 	for (CargoID i = 0; i < NUM_CARGO; i++) {
-		if (HasBit(st->goods[i].acceptance_pickup, GoodsEntry::ACCEPTANCE)) mask |= 1 << i;
+		if (HasBit(st->goods[i].acceptance_pickup, GoodsEntry::GES_ACCEPTANCE)) mask |= 1 << i;
 	}
 	return mask;
 }
@@ -589,7 +589,7 @@ void UpdateStationAcceptance(Station *st, bool show_msg)
 			amt = 0;
 		}
 
-		SB(st->goods[i].acceptance_pickup, GoodsEntry::ACCEPTANCE, 1, amt >= 8);
+		SB(st->goods[i].acceptance_pickup, GoodsEntry::GES_ACCEPTANCE, 1, amt >= 8);
 	}
 
 	/* Only show a message in case the acceptance was actually changed. */
@@ -3002,6 +3002,13 @@ static bool StationHandleBigTick(BaseStation *st)
 		return false;
 	}
 
+	if (Station::IsExpected(st)) {
+		for (CargoID i = 0; i < NUM_CARGO; i++) {
+			ClrBit(Station::From(st)->goods[i].acceptance_pickup, GoodsEntry::GES_ACCEPTED_BIGTICK);
+		}
+	}
+
+
 	if ((st->facilities & FACIL_WAYPOINT) == 0) UpdateStationAcceptance(Station::From(st), true);
 
 	return true;
@@ -3026,12 +3033,12 @@ static void UpdateStationRating(Station *st)
 		/* Slowly increase the rating back to his original level in the case we
 		 *  didn't deliver cargo yet to this station. This happens when a bribe
 		 *  failed while you didn't moved that cargo yet to a station. */
-		if (!HasBit(ge->acceptance_pickup, GoodsEntry::PICKUP) && ge->rating < INITIAL_STATION_RATING) {
+		if (!HasBit(ge->acceptance_pickup, GoodsEntry::GES_PICKUP) && ge->rating < INITIAL_STATION_RATING) {
 			ge->rating++;
 		}
 
 		/* Only change the rating if we are moving this cargo */
-		if (HasBit(ge->acceptance_pickup, GoodsEntry::PICKUP)) {
+		if (HasBit(ge->acceptance_pickup, GoodsEntry::GES_PICKUP)) {
 			byte_inc_sat(&ge->days_since_pickup);
 
 			bool skip = false;
@@ -3255,13 +3262,18 @@ void OnTick_Station()
 	}
 }
 
+/** Monthly loop for stations. */
 void StationMonthlyLoop()
 {
 	Station *st;
+
 	FOR_ALL_STATIONS(st) {
-		for(int goods_index = 0; goods_index < NUM_CARGO; ++goods_index) {
-			st->goods[goods_index].supply = st->goods[goods_index].supply_new;
-			st->goods[goods_index].supply_new = 0;
+		for (CargoID i = 0; i < NUM_CARGO; i++) {
+			GoodsEntry *ge = &st->goods[i];
+			SB(ge->acceptance_pickup, GoodsEntry::GES_LAST_MONTH, 1, GB(ge->acceptance_pickup, GoodsEntry::GES_CURRENT_MONTH, 1));
+			ClrBit(ge->acceptance_pickup, GoodsEntry::GES_CURRENT_MONTH);
+			ge->supply = ge->supply_new;
+			ge->supply_new = 0;
 		}
 	}
 }
@@ -3302,9 +3314,9 @@ static uint UpdateStationWaiting(Station *st, CargoID type, uint amount, SourceT
 	ge.cargo.Append(new CargoPacket(st->index, st->xy, amount, source_type, source_id));
 	ge.supply_new += amount;
 
-	if (!HasBit(ge.acceptance_pickup, GoodsEntry::PICKUP)) {
+	if (!HasBit(ge.acceptance_pickup, GoodsEntry::GES_PICKUP)) {
 		InvalidateWindowData(WC_STATION_LIST, st->index);
-		SetBit(ge.acceptance_pickup, GoodsEntry::PICKUP);
+		SetBit(ge.acceptance_pickup, GoodsEntry::GES_PICKUP);
 	}
 
 	TriggerStationAnimation(st, st->xy, SAT_NEW_CARGO, type);
