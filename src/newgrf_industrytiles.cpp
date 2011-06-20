@@ -148,6 +148,31 @@ static void IndustryTileSetTriggers(const ResolverObject *object, int triggers)
 	}
 }
 
+/**
+ * Store a value into the persistent storage of the object's parent.
+ * @param object Object that we want to query.
+ * @param pos Position in the persistent storage to use.
+ * @param value Value to store.
+ */
+void IndustryTileStorePSA(ResolverObject *object, uint pos, int32 value)
+{
+	Industry *ind = object->u.industry.ind;
+	if (object->scope != VSG_SCOPE_PARENT || ind->index == INVALID_INDUSTRY) return;
+
+	if (ind->psa == NULL) {
+		/* There is no need to create a storage if the value is zero. */
+		if (value == 0) return;
+
+		/* Create storage on first modification. */
+		const IndustrySpec *indsp = GetIndustrySpec(ind->type);
+		uint32 grfid = (indsp->grf_prop.grffile != NULL) ? indsp->grf_prop.grffile->grfid : 0;
+		assert(PersistentStorage::CanAllocateItem());
+		ind->psa = new PersistentStorage(grfid);
+	}
+
+	ind->psa->StoreValue(pos, value);
+}
+
 static void NewIndustryTileResolver(ResolverObject *res, IndustryGfx gfx, TileIndex tile, Industry *indus)
 {
 	res->GetRandomBits = IndustryTileGetRandomBits;
@@ -155,8 +180,8 @@ static void NewIndustryTileResolver(ResolverObject *res, IndustryGfx gfx, TileIn
 	res->SetTriggers   = IndustryTileSetTriggers;
 	res->GetVariable   = IndustryTileGetVariable;
 	res->ResolveReal   = IndustryTileResolveReal;
+	res->StorePSA      = IndustryTileStorePSA;
 
-	res->psa             = &indus->psa;
 	res->u.industry.tile = tile;
 	res->u.industry.ind  = indus;
 	res->u.industry.gfx  = gfx;
@@ -297,9 +322,9 @@ CommandCost PerformIndustryTileSlopeCheck(TileIndex ind_base_tile, TileIndex ind
 }
 
 /* Simple wrapper for GetHouseCallback to keep the animation unified. */
-uint16 GetSimpleIndustryCallback(CallbackID callback, uint32 param1, uint32 param2, const IndustryTileSpec *spec, const Industry *ind, TileIndex tile)
+uint16 GetSimpleIndustryCallback(CallbackID callback, uint32 param1, uint32 param2, const IndustryTileSpec *spec, Industry *ind, TileIndex tile)
 {
-	return GetIndustryTileCallback(callback, param1, param2, spec - GetIndustryTileSpec(0), const_cast<Industry *>(ind), tile);
+	return GetIndustryTileCallback(callback, param1, param2, spec - GetIndustryTileSpec(0), ind, tile);
 }
 
 /** Helper class for animation control. */
