@@ -254,12 +254,12 @@ static uint32 GetDistanceFromNearbyHouse(uint8 parameter, TileIndex tile, HouseI
  */
 static uint32 HouseGetVariable(const ResolverObject *object, byte variable, byte parameter, bool *available)
 {
-	const Town *town = object->u.house.town;
+	Town *town = object->u.house.town;
 	TileIndex tile   = object->u.house.tile;
 	HouseID house_id = object->u.house.house_id;
 
 	if (object->scope == VSG_SCOPE_PARENT) {
-		return TownGetVariable(variable, parameter, available, town);
+		return TownGetVariable(variable, parameter, available, town, object->grffile);
 	}
 
 	switch (variable) {
@@ -344,7 +344,7 @@ static uint32 HouseGetVariable(const ResolverObject *object, byte variable, byte
 			if (house_id < NEW_HOUSE_OFFSET) return 0;
 			/* Checking the grffile information via HouseSpec doesn't work
 			 * in case the newgrf was removed. */
-			return _house_mngr.mapping_ID[house_id].grfid;
+			return _house_mngr.GetGRFID(house_id);
 		}
 	}
 
@@ -361,17 +361,33 @@ static const SpriteGroup *HouseResolveReal(const ResolverObject *object, const R
 }
 
 /**
+ * Store a value into the persistent storage of the object's parent.
+ * @param object Object that we want to query.
+ * @param pos Position in the persistent storage to use.
+ * @param value Value to store.
+ */
+void HouseStorePSA(ResolverObject *object, uint pos, int32 value)
+{
+	/* Houses have no persistent storage. */
+	if (object->scope != VSG_SCOPE_PARENT || object->u.house.not_yet_constructed) return;
+
+	/* Pass the request on to the town of the house */
+	TownStorePSA(object->u.house.town, object->grffile, pos, value);
+}
+
+/**
  * NewHouseResolver():
  *
  * Returns a resolver object to be used with feature 07 spritegroups.
  */
-static void NewHouseResolver(ResolverObject *res, HouseID house_id, TileIndex tile, const Town *town)
+static void NewHouseResolver(ResolverObject *res, HouseID house_id, TileIndex tile, Town *town)
 {
 	res->GetRandomBits = HouseGetRandomBits;
 	res->GetTriggers   = HouseGetTriggers;
 	res->SetTriggers   = HouseSetTriggers;
 	res->GetVariable   = HouseGetVariable;
 	res->ResolveReal   = HouseResolveReal;
+	res->StorePSA      = HouseStorePSA;
 
 	res->u.house.tile     = tile;
 	res->u.house.town     = town;
@@ -390,7 +406,7 @@ static void NewHouseResolver(ResolverObject *res, HouseID house_id, TileIndex ti
 	res->grffile         = (hs != NULL ? hs->grf_prop.grffile : NULL);
 }
 
-uint16 GetHouseCallback(CallbackID callback, uint32 param1, uint32 param2, HouseID house_id, const Town *town, TileIndex tile, bool not_yet_constructed, uint8 initial_random_bits)
+uint16 GetHouseCallback(CallbackID callback, uint32 param1, uint32 param2, HouseID house_id, Town *town, TileIndex tile, bool not_yet_constructed, uint8 initial_random_bits)
 {
 	ResolverObject object;
 	const SpriteGroup *group;
@@ -469,7 +485,7 @@ void DrawNewHouseTile(TileInfo *ti, HouseID house_id)
 }
 
 /* Simple wrapper for GetHouseCallback to keep the animation unified. */
-uint16 GetSimpleHouseCallback(CallbackID callback, uint32 param1, uint32 param2, const HouseSpec *spec, const Town *town, TileIndex tile)
+uint16 GetSimpleHouseCallback(CallbackID callback, uint32 param1, uint32 param2, const HouseSpec *spec, Town *town, TileIndex tile)
 {
 	return GetHouseCallback(callback, param1, param2, spec - HouseSpec::Get(0), town, tile);
 }

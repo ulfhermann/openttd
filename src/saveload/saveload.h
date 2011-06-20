@@ -88,6 +88,7 @@ enum SLRefType {
 	REF_ENGINE_RENEWS = 6, ///< Load/save a reference to an engine renewal (autoreplace).
 	REF_CARGO_PACKET  = 7, ///< Load/save a reference to a cargo packet.
 	REF_ORDERLIST     = 8, ///< Load/save a reference to an orderlist.
+	REF_STORAGE       = 9, ///< Load/save a reference to a persistent storage.
 };
 
 /** Flags of a chunk. */
@@ -551,7 +552,7 @@ extern bool _do_autosave;
  * SL_TRUNK is always the current trunk version.
  */
 enum SaveLoadVersions {
-	SL_TRUNK = 160,
+	SL_TRUNK = 161,
 	SL_RESERVATION = SL_TRUNK + 10,
 
 	/** Highest possible savegame version. */
