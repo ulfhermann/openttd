@@ -1177,7 +1177,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 	v->cur_speed = 0;
 
 	CargoPayment *payment = v->cargo_payment;
-
+	
 	for (; v != NULL; v = v->Next()) {
 		if (v->cargo_cap == 0) continue;
 
@@ -1339,7 +1339,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 			SetBit(cargo_not_full, v->cargo_type);
 		}
 	}
-
+	
 	/* Only set completely_emptied, if we just unloaded all remaining cargo */
 	completely_emptied &= anything_unloaded;
 
@@ -1375,6 +1375,9 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 			} else if (cargo_not_full != 0) {
 				finished_loading = false;
 			}
+
+			/* Refresh next hop stats if we're full loading to avoid deadlocks. */
+			if (!finished_loading) v->RefreshNextHopsStats();
 		}
 		unloading_time = 20;
 

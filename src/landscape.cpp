@@ -1004,6 +1004,7 @@ void OnTick_Station();
 void OnTick_Industry();
 
 void OnTick_Companies();
+void OnTick_LinkGraph();
 
 void CallLandscapeTick()
 {
@@ -1013,4 +1014,5 @@ void CallLandscapeTick()
 	OnTick_Industry();
 
 	OnTick_Companies();
+	OnTick_LinkGraph();
 }

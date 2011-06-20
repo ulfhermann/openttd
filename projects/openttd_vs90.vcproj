@@ -576,6 +576,22 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\linkgraph\demands.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\linkgraph\flowmapper.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\linkgraph\linkgraph.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\linkgraph\mcf.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\map.cpp"
 				>
 			</File>
@@ -1092,6 +1108,26 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\linkgraph\demands.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\linkgraph\flowmapper.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\linkgraph\linkgraph.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\linkgraph\linkgraph_type.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\linkgraph\mcf.h"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\livery.h"
 				>
 			</File>
@@ -1105,6 +1141,14 @@
 			</File>
 			<File
 				RelativePath=".\..\src\mixer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\moving_average.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\moving_average.cpp"
 				>
 			</File>
 			<File
@@ -2189,6 +2233,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\saveload\labelmaps_sl.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\saveload\linkgraph_sl.cpp"
 				>
 			</File>
 			<File

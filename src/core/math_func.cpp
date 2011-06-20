@@ -46,3 +46,24 @@ int GreatestCommonDivisor(int a, int b)
 	return a;
 
 }
+
+/**
+ * Deterministic approximate division.
+ * Cancels out division errors stemming from the integer nature of the division over multiple runs.
+ * @param a Dividend.
+ * @param b Divisor.
+ * @return a/b or (a/b)+1.
+ */
+int DivideApprox(int a, int b)
+{
+	int random_like = ((a + b) * (a - b)) % b;
+
+	int remainder = a % b;
+
+	int ret = a / b;
+	if (abs(random_like) < abs(remainder)) {
+		ret += ((a < 0) ^ (b < 0)) ? -1 : 1;
+	}
+
+	return ret;
+}

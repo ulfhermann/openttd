@@ -30,6 +30,7 @@ void AfterLoadVehicles(bool part_of_load);
 void AfterLoadStations();
 void AfterLoadRoadStops();
 void AfterLoadLabelMaps();
+void AfterLoadLinkGraphs();
 void UpdateHousesAndTowns();
 
 void UpdateOldAircraft();

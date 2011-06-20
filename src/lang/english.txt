@@ -1327,11 +1327,25 @@ STR_CONFIG_SETTING_LARGER_TOWNS_DISABLED                        :{LTBLUE}Proport
 STR_CONFIG_SETTING_CITY_SIZE_MULTIPLIER                         :{LTBLUE}Initial city size multiplier: {ORANGE}{STRING1}
 STR_CONFIG_SETTING_MODIFIED_ROAD_REBUILD                        :{LTBLUE}Remove absurd road-elements during the road construction: {ORANGE}{STRING1}
 
+STR_CONFIG_SETTING_LINKGRAPH_INTERVAL                           :{LTBLUE}Link graph recalculation interval: {ORANGE}{STRING1} days
+STR_CONFIG_SETTING_DISTRIBUTION_SYMMETRIC                       :symmetric
+STR_CONFIG_SETTING_DISTRIBUTION_ASYMMETRIC                      :asymmetric
+STR_CONFIG_SETTING_DISTRIBUTION_MANUAL                          :manual
+STR_CONFIG_SETTING_DISTRIBUTION_PAX                             :{LTBLUE}Distribution for passengers: {ORANGE}{STRING1}
+STR_CONFIG_SETTING_DISTRIBUTION_MAIL                            :{LTBLUE}Distribution for mail: {ORANGE}{STRING1}
+STR_CONFIG_SETTING_DISTRIBUTION_ARMOURED                        :{LTBLUE}Distribution for the ARMOURED cargo class: {ORANGE}{STRING1}
+STR_CONFIG_SETTING_DISTRIBUTION_DEFAULT                         :{LTBLUE}Distribution for other cargo classes: {ORANGE}{STRING1}
+STR_CONFIG_SETTING_LINKGRAPH_ACCURACY                           :{LTBLUE}Accuracy when calculating things on the link graph: {ORANGE}{STRING1}
+STR_CONFIG_SETTING_DEMAND_DISTANCE                              :{LTBLUE}Effect of distance on demands: {ORANGE}{STRING1}%
+STR_CONFIG_SETTING_DEMAND_SIZE                                  :{LTBLUE}Effect of remote station's popularity on symmetric demands: {ORANGE}{STRING1}%
+STR_CONFIG_SETTING_SHORT_PATH_SATURATION                        :{LTBLUE}Saturation of short paths before using capacious paths: {ORANGE}{STRING1}%
+
 STR_CONFIG_SETTING_GUI                                          :{ORANGE}Interface
 STR_CONFIG_SETTING_CONSTRUCTION                                 :{ORANGE}Construction
 STR_CONFIG_SETTING_VEHICLES                                     :{ORANGE}Vehicles
 STR_CONFIG_SETTING_STATIONS                                     :{ORANGE}Stations
 STR_CONFIG_SETTING_ECONOMY                                      :{ORANGE}Economy
+STR_CONFIG_SETTING_LINKGRAPH                                    :{ORANGE}Link graph
 STR_CONFIG_SETTING_AI                                           :{ORANGE}Competitors
 STR_CONFIG_SETTING_DISPLAY_OPTIONS                              :{ORANGE}Display options
 STR_CONFIG_SETTING_INTERACTION                                  :{ORANGE}Interaction

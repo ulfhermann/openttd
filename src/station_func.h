@@ -18,6 +18,7 @@
 #include "road_type.h"
 #include "cargo_type.h"
 #include "company_type.h"
+#include "vehicle_type.h"
 
 void ModifyStationRatingAround(TileIndex tile, Owner owner, int amount, uint radius);
 
@@ -45,5 +46,11 @@ bool IsStationTileBlocked(TileIndex tile);
 bool IsStationTileElectrifiable(TileIndex tile);
 
 void UpdateAirportsNoise();
+
+void IncreaseStats(Station *st, const Vehicle *v, StationID next_station_id);
+
+void IncreaseStats(Station *st, CargoID cargo, StationID next_station_id, uint capacity, uint usage);
+
+void DeleteStaleFlows(StationID at, CargoID c_id, StationID to);
 
 #endif /* STATION_FUNC_H */
