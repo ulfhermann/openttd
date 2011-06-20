@@ -15,6 +15,7 @@
 #include "../roadstop_base.h"
 #include "../vehicle_base.h"
 #include "../newgrf_station.h"
+#include "../newgrf.h"
 
 #include "saveload.h"
 #include "table/strings.h"
@@ -429,6 +430,8 @@ static const SaveLoad _base_station_desc[] = {
 	      SLE_END()
 };
 
+static OldPersistentStorage _old_st_persistent_storage;
+
 static const SaveLoad _station_desc[] = {
 	SLE_WRITEBYTE(Station, facilities,                 FACIL_NONE),
 	SLE_ST_INCLUDE(),
@@ -447,7 +450,8 @@ static const SaveLoad _station_desc[] = {
 	  SLE_CONDVAR(Station, airport.layout,             SLE_UINT8,                 145, SL_MAX_VERSION),
 	      SLE_VAR(Station, airport.flags,              SLE_UINT64),
 	  SLE_CONDVAR(Station, airport.rotation,           SLE_UINT8,                 145, SL_MAX_VERSION),
-	  SLE_CONDARR(Station, airport.psa.storage,        SLE_UINT32, 16,            145, SL_MAX_VERSION),
+	 SLEG_CONDARR(_old_st_persistent_storage.storage,  SLE_UINT32, 16,            145, 160),
+	  SLE_CONDREF(Station, airport.psa,                REF_STORAGE,               161, SL_MAX_VERSION),
 
 	      SLE_VAR(Station, indtype,                    SLE_UINT8),
 
@@ -490,27 +494,27 @@ static void RealSave_STNN(BaseStation *bst)
 
 	if (!waypoint) {
 		Station *st = Station::From(bst);
-		for (CargoID c = 0; c < NUM_CARGO; c++) {
-			_num_dests = (uint32)st->goods[c].cargo.Packets()->MapSize();
-			_num_links = (uint16)st->goods[c].link_stats.size();
+		for (CargoID i = 0; i < NUM_CARGO; i++) {
+			_num_dests = (uint32)st->goods[i].cargo.Packets()->MapSize();
+			_num_links = (uint16)st->goods[i].link_stats.size();
 			_num_flows = 0;
-			for (FlowStatMap::const_iterator it(st->goods[c].flows.begin()); it != st->goods[c].flows.end(); ++it) {
+			for (FlowStatMap::const_iterator it(st->goods[i].flows.begin()); it != st->goods[i].flows.end(); ++it) {
 				_num_flows += (uint32)it->second.size();
 			}
-			SlObject(&st->goods[c], GetGoodsDesc());
-			for (LinkStatMap::const_iterator it(st->goods[c].link_stats.begin()); it != st->goods[c].link_stats.end(); ++it) {
+			SlObject(&st->goods[i], GetGoodsDesc());
+			for (LinkStatMap::const_iterator it(st->goods[i].link_stats.begin()); it != st->goods[i].link_stats.end(); ++it) {
 				_station_id = it->first;
 				LinkStat ls(it->second); // make a copy to avoid constness problems
 				SlObject(&ls, GetLinkStatDesc());
 			}
-			for (FlowStatMap::const_iterator outer_it(st->goods[c].flows.begin()); outer_it != st->goods[c].flows.end(); ++outer_it) {
+			for (FlowStatMap::const_iterator outer_it(st->goods[i].flows.begin()); outer_it != st->goods[i].flows.end(); ++outer_it) {
 				_station_id = outer_it->first;
 				for (FlowStatSet::const_iterator inner_it(outer_it->second.begin()); inner_it != outer_it->second.end(); ++inner_it) {
 					FlowStat fs(*inner_it); // make a copy to avoid constness problems
 					SlObject(&fs, GetFlowStatDesc());
 				}
 			}
-			for (StationCargoPacketMap::ConstMapIterator it(st->goods[c].cargo.Packets()->begin()); it != st->goods[c].cargo.Packets()->end(); ++it) {
+			for (StationCargoPacketMap::ConstMapIterator it(st->goods[i].cargo.Packets()->begin()); it != st->goods[i].cargo.Packets()->end(); ++it) {
 				SlObject(const_cast<StationCargoPacketMap::value_type *>(&(*it)), _cargo_list_desc);
 			}
 		}
@@ -543,27 +547,35 @@ static void Load_STNN()
 
 		if (!waypoint) {
 			Station *st = Station::From(bst);
-			for (CargoID c = 0; c < NUM_CARGO; c++) {
-				SlObject(&st->goods[c], GetGoodsDesc());
+
+			/* Before savegame version 161, persistent storages were not stored in a pool. */
+			if (IsSavegameVersionBefore(161) && !IsSavegameVersionBefore(145) && st->facilities & FACIL_AIRPORT) {
+				/* Store the old persistent storage. The GRFID will be added later. */
+				assert(PersistentStorage::CanAllocateItem());
+				st->airport.psa = new PersistentStorage(0);
+				memcpy(st->airport.psa->storage, _old_st_persistent_storage.storage, sizeof(st->airport.psa->storage));
+			}
+
+			for (CargoID i = 0; i < NUM_CARGO; i++) {
+				SlObject(&st->goods[i], GetGoodsDesc());
 				LinkStat ls(1);
-				for (uint16 i = 0; i < _num_links; ++i) {
+				for (uint16 j = 0; j < _num_links; ++j) {
 					SlObject(&ls, GetLinkStatDesc());
 					assert(ls.IsValid());
-					st->goods[c].link_stats.insert(
-						std::make_pair(_station_id, ls));
+					st->goods[i].link_stats.insert(std::make_pair(_station_id, ls));
 				}
 				FlowStat fs;
-				for (uint32 i = 0; i < _num_flows; ++i) {
+				for (uint32 j = 0; j < _num_flows; ++j) {
 					SlObject(&fs, GetFlowStatDesc());
-					st->goods[c].flows[_station_id].insert(fs);
+					st->goods[i].flows[_station_id].insert(fs);
 				}
 				if (IsSavegameVersionBefore(SL_CARGOMAP -1)) {
-					SwapPackets(&st->goods[c]);
+					SwapPackets(&st->goods[i]);
 				} else {
 					StationCargoPair pair;
-					for (uint i = 0; i < _num_dests; ++i) {
+					for (uint j = 0; j < _num_dests; ++j) {
 						SlObject(&pair, _cargo_list_desc);
-						const_cast<StationCargoPacketMap &>(*(st->goods[c].cargo.Packets()))[pair.first].swap(pair.second);
+						const_cast<StationCargoPacketMap &>(*(st->goods[i].cargo.Packets()))[pair.first].swap(pair.second);
 						assert(pair.second.empty());
 					}
 				}
