@@ -66,6 +66,7 @@ class NIHVehicle : public NIHelper {
 	const void *GetInstance(uint index)const             { return Vehicle::Get(index); }
 	const void *GetSpec(uint index) const                { return Engine::Get(Vehicle::Get(index)->engine_type); }
 	void SetStringParameters(uint index) const           { this->SetSimpleStringParameters(STR_VEHICLE_NAME, index); }
+	uint32 GetGRFID(uint index) const                    { return (this->IsInspectable(index)) ? Engine::Get(Vehicle::Get(index)->engine_type)->grf_prop.grffile->grfid : 0; }
 	void Resolve(ResolverObject *ro, uint32 index) const { extern void GetVehicleResolver(ResolverObject *ro, uint index); GetVehicleResolver(ro, index); }
 };
 
@@ -74,8 +75,6 @@ static const NIFeature _nif_vehicle = {
 	_nic_vehicles,
 	_niv_vehicles,
 	new NIHVehicle(),
-	0,
-	0
 };
 
 
@@ -124,6 +123,7 @@ class NIHStation : public NIHelper {
 	const void *GetInstance(uint index)const             { return NULL; }
 	const void *GetSpec(uint index) const                { return GetStationSpec(index); }
 	void SetStringParameters(uint index) const           { this->SetObjectAtStringParameters(STR_STATION_NAME, GetStationIndex(index), index); }
+	uint32 GetGRFID(uint index) const                    { return (this->IsInspectable(index)) ? GetStationSpec(index)->grf_prop.grffile->grfid : 0; }
 	void Resolve(ResolverObject *ro, uint32 index) const { extern void GetStationResolver(ResolverObject *ro, uint index); GetStationResolver(ro, index); }
 };
 
@@ -132,8 +132,6 @@ static const NIFeature _nif_station = {
 	_nic_stations,
 	_niv_stations,
 	new NIHStation(),
-	0,
-	0
 };
 
 
@@ -185,6 +183,7 @@ class NIHHouse : public NIHelper {
 	const void *GetInstance(uint index)const             { return NULL; }
 	const void *GetSpec(uint index) const                { return HouseSpec::Get(GetHouseType(index)); }
 	void SetStringParameters(uint index) const           { this->SetObjectAtStringParameters(STR_TOWN_NAME, GetTownIndex(index), index); }
+	uint32 GetGRFID(uint index) const                    { return (this->IsInspectable(index)) ? HouseSpec::Get(GetHouseType(index))->grf_prop.grffile->grfid : 0; }
 	void Resolve(ResolverObject *ro, uint32 index) const { extern void GetHouseResolver(ResolverObject *ro, uint index); GetHouseResolver(ro, index); }
 };
 
@@ -193,8 +192,6 @@ static const NIFeature _nif_house = {
 	_nic_house,
 	_niv_house,
 	new NIHHouse(),
-	0,
-	0
 };
 
 
@@ -231,6 +228,7 @@ class NIHIndustryTile : public NIHelper {
 	const void *GetInstance(uint index)const             { return NULL; }
 	const void *GetSpec(uint index) const                { return GetIndustryTileSpec(GetIndustryGfx(index)); }
 	void SetStringParameters(uint index) const           { this->SetObjectAtStringParameters(STR_INDUSTRY_NAME, GetIndustryIndex(index), index); }
+	uint32 GetGRFID(uint index) const                    { return (this->IsInspectable(index)) ? GetIndustryTileSpec(GetIndustryGfx(index))->grf_prop.grffile->grfid : 0; }
 	void Resolve(ResolverObject *ro, uint32 index) const { extern void GetIndustryTileResolver(ResolverObject *ro, uint index); GetIndustryTileResolver(ro, index); }
 };
 
@@ -239,8 +237,6 @@ static const NIFeature _nif_industrytile = {
 	_nic_industrytiles,
 	_niv_industrytiles,
 	new NIHIndustryTile(),
-	0,
-	0
 };
 
 
@@ -298,7 +294,16 @@ class NIHIndustry : public NIHelper {
 	const void *GetInstance(uint index)const             { return Industry::Get(index); }
 	const void *GetSpec(uint index) const                { return GetIndustrySpec(Industry::Get(index)->type); }
 	void SetStringParameters(uint index) const           { this->SetSimpleStringParameters(STR_INDUSTRY_NAME, index); }
+	uint32 GetGRFID(uint index) const                    { return (this->IsInspectable(index)) ? GetIndustrySpec(Industry::Get(index)->type)->grf_prop.grffile->grfid : 0; }
 	void Resolve(ResolverObject *ro, uint32 index) const { extern void GetIndustryResolver(ResolverObject *ro, uint index); GetIndustryResolver(ro, index); }
+	uint GetPSASize(uint index, uint32 grfid) const      { return cpp_lengthof(PersistentStorage, storage); }
+
+	int32 *GetPSAFirstPosition(uint index, uint32 grfid) const
+	{
+		Industry *i = (Industry *)this->GetInstance(index);
+		if (i->psa == NULL) return NULL;
+		return (int32 *)(&i->psa->storage);
+	}
 };
 
 static const NIFeature _nif_industry = {
@@ -306,8 +311,6 @@ static const NIFeature _nif_industry = {
 	_nic_industries,
 	_niv_industries,
 	new NIHIndustry(),
-	cpp_lengthof(Industry, psa.storage),
-	cpp_offsetof(Industry, psa.storage)
 };
 
 
@@ -349,6 +352,7 @@ class NIHObject : public NIHelper {
 	const void *GetInstance(uint index)const             { return Object::GetByTile(index); }
 	const void *GetSpec(uint index) const                { return ObjectSpec::GetByTile(index); }
 	void SetStringParameters(uint index) const           { this->SetObjectAtStringParameters(STR_NEWGRF_INSPECT_CAPTION_OBJECT_AT_OBJECT, INVALID_STRING_ID, index); }
+	uint32 GetGRFID(uint index) const                    { return (this->IsInspectable(index)) ? ObjectSpec::GetByTile(index)->grf_prop.grffile->grfid : 0; }
 	void Resolve(ResolverObject *ro, uint32 index) const { extern void GetObjectResolver(ResolverObject *ro, uint index); GetObjectResolver(ro, index); }
 };
 
@@ -357,8 +361,6 @@ static const NIFeature _nif_object = {
 	_nic_objects,
 	_niv_objects,
 	new NIHObject(),
-	0,
-	0
 };
 
 
@@ -377,6 +379,7 @@ class NIHRailType : public NIHelper {
 	const void *GetInstance(uint index)const             { return NULL; }
 	const void *GetSpec(uint index) const                { return NULL; }
 	void SetStringParameters(uint index) const           { this->SetObjectAtStringParameters(STR_NEWGRF_INSPECT_CAPTION_OBJECT_AT_RAIL_TYPE, INVALID_STRING_ID, index); }
+	uint32 GetGRFID(uint index) const                    { return 0; }
 	void Resolve(ResolverObject *ro, uint32 index) const { extern void GetRailTypeResolver(ResolverObject *ro, uint index); GetRailTypeResolver(ro, index); }
 };
 
@@ -385,8 +388,6 @@ static const NIFeature _nif_railtype = {
 	NULL,
 	_niv_railtypes,
 	new NIHRailType(),
-	0,
-	0
 };
 
 
@@ -407,6 +408,7 @@ class NIHAirportTile : public NIHelper {
 	const void *GetInstance(uint index)const             { return NULL; }
 	const void *GetSpec(uint index) const                { return AirportTileSpec::Get(GetAirportGfx(index)); }
 	void SetStringParameters(uint index) const           { this->SetObjectAtStringParameters(STR_STATION_NAME, GetStationIndex(index), index); }
+	uint32 GetGRFID(uint index) const                    { return (this->IsInspectable(index)) ? AirportTileSpec::Get(GetAirportGfx(index))->grf_prop.grffile->grfid : 0; }
 	void Resolve(ResolverObject *ro, uint32 index) const { extern void GetAirportTileTypeResolver(ResolverObject *ro, uint index); GetAirportTileTypeResolver(ro, index); }
 };
 
@@ -415,8 +417,6 @@ static const NIFeature _nif_airporttile = {
 	_nic_airporttiles,
 	_niv_industrytiles, // Yes, they share this (at least now)
 	new NIHAirportTile(),
-	0,
-	0
 };
 
 
@@ -441,7 +441,22 @@ class NIHTown : public NIHelper {
 	const void *GetInstance(uint index)const             { return Town::Get(index); }
 	const void *GetSpec(uint index) const                { return NULL; }
 	void SetStringParameters(uint index) const           { this->SetSimpleStringParameters(STR_TOWN_NAME, index); }
-	uint Resolve(uint index, uint var, uint param, bool *avail) const { return TownGetVariable(var, param, avail, Town::Get(index)); }
+	uint32 GetGRFID(uint index) const                    { return 0; }
+	uint Resolve(uint index, uint var, uint param, bool *avail) const { return TownGetVariable(var, param, avail, Town::Get(index), NULL); }
+	bool PSAWithParameter() const                        { return true; }
+	uint GetPSASize(uint index, uint32 grfid) const      { return cpp_lengthof(PersistentStorage, storage); }
+
+	int32 *GetPSAFirstPosition(uint index, uint32 grfid) const
+	{
+		Town *t = Town::Get(index);
+
+		std::list<PersistentStorage *>::iterator iter;
+		for (iter = t->psa_list.begin(); iter != t->psa_list.end(); iter++) {
+			if ((*iter)->grfid == grfid) return (int32 *)(&(*iter)->storage[0]);
+		}
+
+		return NULL;
+	}
 };
 
 static const NIFeature _nif_town = {
@@ -449,8 +464,6 @@ static const NIFeature _nif_town = {
 	NULL,
 	_niv_towns,
 	new NIHTown(),
-	0,
-	0
 };
 
 /** Table with all NIFeatures. */
