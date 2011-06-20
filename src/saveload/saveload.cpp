@@ -225,6 +225,7 @@
  *  158   21933
  *  159   21962
  *  160   21974
+ *  161   22567
  */
 extern const uint16 SAVEGAME_VERSION = SL_CARGOMAP; ///< Current savegame version of OpenTTD.
 
@@ -405,6 +406,7 @@ extern const ChunkHandler _labelmaps_chunk_handlers[];
 extern const ChunkHandler _linkgraph_chunk_handlers[];
 extern const ChunkHandler _airport_chunk_handlers[];
 extern const ChunkHandler _object_chunk_handlers[];
+extern const ChunkHandler _persistent_storage_chunk_handlers[];
 
 /** Array of all chunks in a savegame, \c NULL terminated. */
 static const ChunkHandler * const _chunk_handlers[] = {
@@ -436,6 +438,7 @@ static const ChunkHandler * const _chunk_handlers[] = {
 	_linkgraph_chunk_handlers,
 	_airport_chunk_handlers,
 	_object_chunk_handlers,
+	_persistent_storage_chunk_handlers,
 	NULL,
 };
 
@@ -1175,9 +1178,10 @@ static size_t ReferenceToInt(const void *obj, SLRefType rt)
 		case REF_TOWN:      return ((const     Town*)obj)->index + 1;
 		case REF_ORDER:     return ((const    Order*)obj)->index + 1;
 		case REF_ROADSTOPS: return ((const RoadStop*)obj)->index + 1;
-		case REF_ENGINE_RENEWS: return ((const EngineRenew*)obj)->index + 1;
-		case REF_CARGO_PACKET:  return ((const CargoPacket*)obj)->index + 1;
-		case REF_ORDERLIST:     return ((const   OrderList*)obj)->index + 1;
+		case REF_ENGINE_RENEWS: return ((const       EngineRenew*)obj)->index + 1;
+		case REF_CARGO_PACKET:  return ((const       CargoPacket*)obj)->index + 1;
+		case REF_ORDERLIST:     return ((const         OrderList*)obj)->index + 1;
+		case REF_STORAGE:       return ((const PersistentStorage*)obj)->index + 1;
 		default: NOT_REACHED();
 	}
 }
@@ -1246,6 +1250,10 @@ static void *IntToReference(size_t index, SLRefType rt)
 		case REF_CARGO_PACKET:
 			if (CargoPacket::IsValidID(index)) return CargoPacket::Get(index);
 			SlErrorCorrupt("Referencing invalid CargoPacket");
+
+		case REF_STORAGE:
+			if (PersistentStorage::IsValidID(index)) return PersistentStorage::Get(index);
+			SlErrorCorrupt("Referencing invalid PersistentStorage");
 
 		default: NOT_REACHED();
 	}

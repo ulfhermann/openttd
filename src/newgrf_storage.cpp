@@ -11,10 +11,22 @@
 
 #include "stdafx.h"
 #include "newgrf_storage.h"
+#include "core/pool_func.hpp"
 #include <set>
 
+PersistentStoragePool _persistent_storage_pool("PersistentStorage");
+INSTANTIATE_POOL_METHODS(PersistentStorage)
+
 /** The changed storage arrays */
-static std::set<BaseStorageArray*> _changed_storage_arrays;
+static std::set<BaseStorageArray*> *_changed_storage_arrays = new std::set<BaseStorageArray*>;
+
+/**
+ * Remove references to use.
+ */
+BaseStorageArray::~BaseStorageArray()
+{
+	_changed_storage_arrays->erase(this);
+}
 
 /**
  * Add the changed storage array to the list of changed arrays.
@@ -24,7 +36,7 @@ static std::set<BaseStorageArray*> _changed_storage_arrays;
  */
 void AddChangedStorage(BaseStorageArray *storage)
 {
-	_changed_storage_arrays.insert(storage);
+	_changed_storage_arrays->insert(storage);
 }
 
 /**
@@ -40,10 +52,10 @@ void AddChangedStorage(BaseStorageArray *storage)
 void ClearStorageChanges(bool keep_changes)
 {
 	/* Loop over all changes arrays */
-	for (std::set<BaseStorageArray*>::iterator it = _changed_storage_arrays.begin(); it != _changed_storage_arrays.end(); it++) {
+	for (std::set<BaseStorageArray*>::iterator it = _changed_storage_arrays->begin(); it != _changed_storage_arrays->end(); it++) {
 		(*it)->ClearChanges(keep_changes);
 	}
 
 	/* And then clear that array */
-	_changed_storage_arrays.clear();
+	_changed_storage_arrays->clear();
 }
