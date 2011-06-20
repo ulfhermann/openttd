@@ -264,7 +264,7 @@ static uint32 StationGetVariable(const ResolverObject *object, byte variable, by
 
 	if (object->scope == VSG_SCOPE_PARENT) {
 		/* Pass the request on to the town of the station */
-		const Town *t;
+		Town *t;
 
 		if (st != NULL) {
 			t = st->town;
@@ -275,7 +275,7 @@ static uint32 StationGetVariable(const ResolverObject *object, byte variable, by
 			return UINT_MAX;
 		}
 
-		return TownGetVariable(variable, parameter, available, t);
+		return TownGetVariable(variable, parameter, available, t, object->grffile);
 	}
 
 	if (st == NULL) {
@@ -517,13 +517,29 @@ static const SpriteGroup *StationResolveReal(const ResolverObject *object, const
 }
 
 
-static void NewStationResolver(ResolverObject *res, const StationSpec *statspec, const BaseStation *st, TileIndex tile)
+/**
+ * Store a value into the persistent storage of the object's parent.
+ * @param object Object that we want to query.
+ * @param pos Position in the persistent storage to use.
+ * @param value Value to store.
+ */
+void StationStorePSA(ResolverObject *object, uint pos, int32 value)
+{
+	/* Stations have no persistent storage. */
+	BaseStation *st = object->u.station.st;
+	if (object->scope != VSG_SCOPE_PARENT || st == NULL) return;
+
+	TownStorePSA(st->town, object->grffile, pos, value);
+}
+
+static void NewStationResolver(ResolverObject *res, const StationSpec *statspec, BaseStation *st, TileIndex tile)
 {
 	res->GetRandomBits = StationGetRandomBits;
 	res->GetTriggers   = StationGetTriggers;
 	res->SetTriggers   = StationSetTriggers;
 	res->GetVariable   = StationGetVariable;
 	res->ResolveReal   = StationResolveReal;
+	res->StorePSA      = StationStorePSA;
 
 	res->u.station.st       = st;
 	res->u.station.statspec = statspec;
@@ -585,7 +601,7 @@ static const SpriteGroup *ResolveStation(ResolverObject *object)
  * @param var10 Value to put in variable 10; normally 0; 1 when resolving the groundsprite and SSF_SEPARATE_GROUND is set.
  * @return First sprite of the Action 1 spriteset ot use, minus an offset of 0x42D to accommodate for weird NewGRF specs.
  */
-SpriteID GetCustomStationRelocation(const StationSpec *statspec, const BaseStation *st, TileIndex tile, uint32 var10)
+SpriteID GetCustomStationRelocation(const StationSpec *statspec, BaseStation *st, TileIndex tile, uint32 var10)
 {
 	const SpriteGroup *group;
 	ResolverObject object;
@@ -607,7 +623,7 @@ SpriteID GetCustomStationRelocation(const StationSpec *statspec, const BaseStati
  * @param edge_info Information about northern tile edges; whether they need foundations or merge into adjacent tile's foundations.
  * @return First sprite of a set of foundation sprites for various slopes.
  */
-SpriteID GetCustomStationFoundationRelocation(const StationSpec *statspec, const BaseStation *st, TileIndex tile, uint layout, uint edge_info)
+SpriteID GetCustomStationFoundationRelocation(const StationSpec *statspec, BaseStation *st, TileIndex tile, uint layout, uint edge_info)
 {
 	const SpriteGroup *group;
 	ResolverObject object;
@@ -623,7 +639,7 @@ SpriteID GetCustomStationFoundationRelocation(const StationSpec *statspec, const
 }
 
 
-uint16 GetStationCallback(CallbackID callback, uint32 param1, uint32 param2, const StationSpec *statspec, const BaseStation *st, TileIndex tile)
+uint16 GetStationCallback(CallbackID callback, uint32 param1, uint32 param2, const StationSpec *statspec, BaseStation *st, TileIndex tile)
 {
 	const SpriteGroup *group;
 	ResolverObject object;
@@ -866,7 +882,7 @@ void AnimateStationTile(TileIndex tile)
 	StationAnimationBase::AnimateTile(ss, BaseStation::GetByTile(tile), tile, HasBit(ss->flags, SSF_CB141_RANDOM_BITS));
 }
 
-void TriggerStationAnimation(const BaseStation *st, TileIndex tile, StationAnimationTrigger trigger, CargoID cargo_type)
+void TriggerStationAnimation(BaseStation *st, TileIndex tile, StationAnimationTrigger trigger, CargoID cargo_type)
 {
 	/* List of coverage areas for each animation trigger */
 	static const TriggerArea tas[] = {
