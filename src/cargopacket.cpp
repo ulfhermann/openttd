@@ -486,6 +486,20 @@ void VehicleCargoList::InvalidateCache()
 	}
 }
 
+/**
+ * Assign the cargo list to a goods entry.
+ * @param station the station the cargo list is assigned to
+ * @param cargo the cargo the list is assigned to
+ */
+void StationCargoList::AssignTo(Station *station, CargoID cargo)
+{
+	assert(this->station == NULL);
+	assert(station != NULL && cargo != INVALID_CARGO);
+	this->station = station;
+	this->cargo = cargo;
+}
+
+
 /*
  * We have to instantiate everything we want to be usable.
  */
