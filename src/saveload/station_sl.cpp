@@ -15,6 +15,7 @@
 #include "../roadstop_base.h"
 #include "../vehicle_base.h"
 #include "../newgrf_station.h"
+#include "../newgrf.h"
 
 #include "saveload.h"
 #include "table/strings.h"
@@ -369,6 +370,8 @@ static const SaveLoad _base_station_desc[] = {
 	      SLE_END()
 };
 
+static OldPersistentStorage _old_st_persistent_storage;
+
 static const SaveLoad _station_desc[] = {
 	SLE_WRITEBYTE(Station, facilities,                 FACIL_NONE),
 	SLE_ST_INCLUDE(),
@@ -387,7 +390,8 @@ static const SaveLoad _station_desc[] = {
 	  SLE_CONDVAR(Station, airport.layout,             SLE_UINT8,                 145, SL_MAX_VERSION),
 	      SLE_VAR(Station, airport.flags,              SLE_UINT64),
 	  SLE_CONDVAR(Station, airport.rotation,           SLE_UINT8,                 145, SL_MAX_VERSION),
-	  SLE_CONDARR(Station, airport.psa.storage,        SLE_UINT32, 16,            145, SL_MAX_VERSION),
+	 SLEG_CONDARR(_old_st_persistent_storage.storage,  SLE_UINT32, 16,            145, 160),
+	  SLE_CONDREF(Station, airport.psa,                REF_STORAGE,               161, SL_MAX_VERSION),
 
 	      SLE_VAR(Station, indtype,                    SLE_UINT8),
 
@@ -430,10 +434,10 @@ static void RealSave_STNN(BaseStation *bst)
 
 	if (!waypoint) {
 		Station *st = Station::From(bst);
-		for (CargoID c = 0; c < NUM_CARGO; c++) {
-			_num_links = (uint16)st->goods[c].link_stats.size();
-			SlObject(&st->goods[c], GetGoodsDesc());
-			for (LinkStatMap::const_iterator it(st->goods[c].link_stats.begin()); it != st->goods[c].link_stats.end(); ++it) {
+		for (CargoID i = 0; i < NUM_CARGO; i++) {
+			_num_links = (uint16)st->goods[i].link_stats.size();
+			SlObject(&st->goods[i], GetGoodsDesc());
+			for (LinkStatMap::const_iterator it(st->goods[i].link_stats.begin()); it != st->goods[i].link_stats.end(); ++it) {
 				_station_id = it->first;
 				LinkStat ls(it->second); // make a copy to avoid constness problems
 				SlObject(&ls, GetLinkStatDesc());
@@ -468,14 +472,22 @@ static void Load_STNN()
 
 		if (!waypoint) {
 			Station *st = Station::From(bst);
-			for (CargoID c = 0; c < NUM_CARGO; c++) {
-				SlObject(&st->goods[c], GetGoodsDesc());
+
+			/* Before savegame version 161, persistent storages were not stored in a pool. */
+			if (IsSavegameVersionBefore(161) && !IsSavegameVersionBefore(145) && st->facilities & FACIL_AIRPORT) {
+				/* Store the old persistent storage. The GRFID will be added later. */
+				assert(PersistentStorage::CanAllocateItem());
+				st->airport.psa = new PersistentStorage(0);
+				memcpy(st->airport.psa->storage, _old_st_persistent_storage.storage, sizeof(st->airport.psa->storage));
+			}
+
+			for (CargoID i = 0; i < NUM_CARGO; i++) {
+				SlObject(&st->goods[i], GetGoodsDesc());
 				LinkStat ls(1);
-				for (uint16 i = 0; i < _num_links; ++i) {
+				for (uint16 j = 0; j < _num_links; ++j) {
 					SlObject(&ls, GetLinkStatDesc());
 					assert(ls.IsValid());
-					st->goods[c].link_stats.insert(
-						std::make_pair(_station_id, ls));
+					st->goods[i].link_stats.insert(std::make_pair(_station_id, ls));
 				}
 			}
 		}
