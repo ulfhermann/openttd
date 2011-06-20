@@ -141,6 +141,13 @@ public:
 	virtual void SetStringParameters(uint index) const = 0;
 
 	/**
+	 * Get the GRFID of the file that includes this item.
+	 * @param index index to check.
+	 * @return GRFID of the item. 0 means that the item is not inspectable.
+	 */
+	virtual uint32 GetGRFID(uint index) const = 0;
+
+	/**
 	 * Resolve (action2) variable for a given index.
 	 * @param index The (instance) index to resolve the variable for.
 	 * @param var   The variable to actually resolve.
@@ -154,6 +161,37 @@ public:
 		memset(&ro, 0, sizeof(ro));
 		this->Resolve(&ro, index);
 		return ro.GetVariable(&ro, var, param, avail);
+	}
+
+	/**
+	 * Used to decide if the PSA needs a parameter or not.
+	 * @return True iff this item has a PSA that requires a parameter.
+	 */
+	virtual bool PSAWithParameter() const
+	{
+		return false;
+	}
+
+	/**
+	 * Allows to know the size of the persistent storage.
+	 * @param index Index of the item.
+	 * @param grfid Parameter for the PSA. Only required for items with parameters.
+	 * @return Size of the persistent storage in indices.
+	 */
+	virtual uint GetPSASize(uint index, uint32 grfid) const
+	{
+		return 0;
+	}
+
+	/**
+	 * Gets the first position of the array containing the persistent storage.
+	 * @param index Index of the item.
+	 * @param grfid Parameter for the PSA. Only required for items with parameters.
+	 * @return Pointer to the first position of the storage array or NULL if not present.
+	 */
+	virtual int32 *GetPSAFirstPosition(uint index, uint32 grfid) const
+	{
+		return NULL;
 	}
 
 protected:
@@ -199,8 +237,6 @@ struct NIFeature {
 	const NICallback *callbacks;  ///< The callbacks associated with this feature.
 	const NIVariable *variables;  ///< The variables associated with this feature.
 	const NIHelper   *helper;     ///< The class container all helper functions.
-	uint psa_size;                ///< The size of the persistent storage in indices.
-	size_t psa_offset;            ///< Offset to the array in the PSA.
 };
 
 /* Load all the NewGRF debug data; externalised as it is just a huge bunch of tables. */
@@ -257,6 +293,9 @@ struct NewGRFInspectWindow : Window {
 	/** The value for the variable 60 parameters. */
 	static byte var60params[GSF_FAKE_END][0x20];
 
+	/** GRFID of the caller of this window, 0 if it has no caller. */
+	uint32 caller_grfid;
+
 	/** The currently editted parameter, to update the right one. */
 	byte current_edit_param;
 
@@ -270,6 +309,16 @@ struct NewGRFInspectWindow : Window {
 	static bool HasVariableParameter(uint variable)
 	{
 		return IsInsideBS(variable, 0x60, 0x20);
+	}
+
+	/**
+	 * Set the GRFID of the item opening this window.
+	 * @param grfid GRFID of the item opening this window, or 0 if not opened by other window.
+	 */
+	void SetCallerGRFID(uint32 grfid)
+	{
+		this->caller_grfid = grfid;
+		this->SetDirty();
 	}
 
 	NewGRFInspectWindow(const WindowDesc *desc, WindowNumber wno) : Window()
@@ -348,11 +397,16 @@ struct NewGRFInspectWindow : Window {
 			}
 		}
 
-		if (nif->psa_size != 0) {
-			this->DrawString(r, i++, "Persistent storage:");
-			assert(nif->psa_size % 4 == 0);
-			int32 *psa = (int32*)((byte*)base + nif->psa_offset);
-			for (uint j = 0; j < nif->psa_size; j += 4, psa += 4) {
+		uint psa_size = nih->GetPSASize(index, this->caller_grfid);
+		int32 *psa = nih->GetPSAFirstPosition(index, this->caller_grfid);
+		if (psa_size != 0 && psa != NULL) {
+			if (nih->PSAWithParameter()) {
+				this->DrawString(r, i++, "Persistent storage [%08X]:", BSWAP32(this->caller_grfid));
+			} else {
+				this->DrawString(r, i++, "Persistent storage:");
+			}
+			assert(psa_size % 4 == 0);
+			for (uint j = 0; j < psa_size; j += 4, psa += 4) {
 				this->DrawString(r, i++, "  %i: %i %i %i %i", j, psa[0], psa[1], psa[2], psa[3]);
 			}
 		}
@@ -421,8 +475,9 @@ struct NewGRFInspectWindow : Window {
 	{
 		switch (widget) {
 			case NIW_PARENT: {
-				uint index = GetFeatureHelper(this->window_number)->GetParent(GetFeatureIndex(this->window_number));
-				::ShowNewGRFInspectWindow((GrfSpecFeature)GB(index, 24, 8), GetFeatureIndex(index));
+				const NIHelper *nih   = GetFeatureHelper(this->window_number);
+				uint index = nih->GetParent(GetFeatureIndex(this->window_number));
+				::ShowNewGRFInspectWindow((GrfSpecFeature)GB(index, 24, 8), GetFeatureIndex(index), nih->GetGRFID(GetFeatureIndex(this->window_number)));
 				break;
 			}
 
@@ -495,13 +550,16 @@ static const WindowDesc _newgrf_inspect_desc(
  * we want to inspect.
  * @param feature The feature we want to inspect.
  * @param index   The index/identifier of the feature to inspect.
+ * @param grfid   GRFID of the item opening this window, or 0 if not opened by other window.
  */
-void ShowNewGRFInspectWindow(GrfSpecFeature feature, uint index)
+void ShowNewGRFInspectWindow(GrfSpecFeature feature, uint index, const uint32 grfid)
 {
 	if (!IsNewGRFInspectable(feature, index)) return;
 
 	WindowNumber wno = GetInspectWindowNumber(feature, index);
-	AllocateWindowDescFront<NewGRFInspectWindow>(&_newgrf_inspect_desc, wno);
+	NewGRFInspectWindow *w = AllocateWindowDescFront<NewGRFInspectWindow>(&_newgrf_inspect_desc, wno);
+	if (w == NULL) w = (NewGRFInspectWindow *)FindWindowById(WC_NEWGRF_INSPECT, wno);
+	w->SetCallerGRFID(grfid);
 }
 
 /**

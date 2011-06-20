@@ -32,7 +32,7 @@
 static inline uint32 GetRegister(uint i)
 {
 	extern TemporaryStorageArray<int32, 0x110> _temp_store;
-	return _temp_store.Get(i);
+	return _temp_store.GetValue(i);
 }
 
 /**
@@ -43,7 +43,7 @@ static inline uint32 GetRegister(uint i)
 static inline void ClearRegister(uint i)
 {
 	extern TemporaryStorageArray<int32, 0x110> _temp_store;
-	_temp_store.Store(i, 0);
+	_temp_store.StoreValue(i, 0);
 }
 
 /* List of different sprite group types */
@@ -314,8 +314,6 @@ struct ResolverObject {
 	VarSpriteGroupScope scope;  ///< Scope of currently resolved DeterministicSpriteGroup resp. RandomizedSpriteGroup
 	byte count;                 ///< Additional scope for RandomizedSpriteGroup
 
-	BaseStorageArray *psa;      ///< The persistent storage array of this resolved object.
-
 	const GRFFile *grffile;     ///< GRFFile the resolved SpriteGroup belongs to
 
 	union {
@@ -330,13 +328,13 @@ struct ResolverObject {
 		} canal;
 		struct {
 			TileIndex tile;
-			const struct BaseStation *st;
+			struct BaseStation *st;
 			const struct StationSpec *statspec;
 			CargoID cargo_type;
 		} station;
 		struct {
 			TileIndex tile;
-			const Town *town;
+			Town *town;                    ///< Town of this house
 			HouseID house_id;
 			uint16 initial_random_bits;    ///< Random bits during construction checks
 			bool not_yet_constructed;      ///< True for construction check
@@ -365,13 +363,13 @@ struct ResolverObject {
 			TileContext context;           ///< Are we resolving sprites for the upper halftile, or on a bridge?
 		} routes;
 		struct {
-			const struct Station *st;      ///< Station of the airport for which the callback is run, or NULL for build gui.
+			struct Station *st;            ///< Station of the airport for which the callback is run, or NULL for build gui.
 			byte airport_id;               ///< Type of airport for which the callback is run
 			byte layout;                   ///< Layout of the airport to build.
 			TileIndex tile;                ///< Tile for the callback, only valid for airporttile callbacks.
 		} airport;
 		struct {
-			const struct Object *o;        ///< The object the callback is ran for.
+			struct Object *o;              ///< The object the callback is ran for.
 			TileIndex tile;                ///< The tile related to the object.
 			uint8 view;                    ///< The view of the object.
 		} object;
@@ -382,6 +380,7 @@ struct ResolverObject {
 	void (*SetTriggers)(const struct ResolverObject*, int);
 	uint32 (*GetVariable)(const struct ResolverObject*, byte, byte, bool*);
 	const SpriteGroup *(*ResolveReal)(const struct ResolverObject*, const RealSpriteGroup*);
+	void (*StorePSA)(struct ResolverObject*, uint, int32);
 };
 
 #endif /* NEWGRF_SPRITEGROUP_H */
