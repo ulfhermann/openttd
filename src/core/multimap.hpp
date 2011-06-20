@@ -309,18 +309,25 @@ public:
 	/**
 	 * Erase the value pointed to by an iterator. The iterator may be invalid afterwards.
 	 * @param it Iterator pointing at some value.
+	 * @return Iterator to the element after the deleted one (or invalid).
 	 */
-	void erase(iterator it)
+	iterator erase(iterator it)
 	{
 		List &list = it.map_iter->second;
 		assert(!list.empty());
-		if (it.ListValid()) {
-			list.erase(it.list_iter);
+		if (it.list_valid) {
+			it.list_iter = list.erase(it.list_iter);
 		} else {
 			list.erase(list.begin());
 		}
 
-		if (list.empty()) this->Map::erase(it.map_iter);
+		if (list.empty()) {
+			this->Map::erase(it.map_iter++);
+		} else if (it.list_iter == list.end()) {
+			++it.map_iter;
+			it.list_valid = false;
+		}
+		return it;
 	}
 
 	/**

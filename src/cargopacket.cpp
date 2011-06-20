@@ -220,7 +220,7 @@ void CargoList<Tinst, Tcont>::Truncate(uint max_remaining)
 		CargoPacket *cp = *it;
 		if (max_remaining == 0) {
 			/* Nothing should remain, just remove the packets. */
-			this->packets.erase(it++);
+			it = this->packets.erase(it);
 			static_cast<Tinst *>(this)->RemoveFromCache(cp);
 			delete cp;
 			continue;
@@ -265,7 +265,7 @@ void VehicleCargoList::Unreserve(StationID next, StationCargoList *dest)
 		this->RemoveFromCache(cp);
 		this->reserved_count -= cp->count;
 		dest->Append(next, cp);
-		this->reserved.erase(it++);
+		it = this->reserved.erase(it);
 	}
 }
 
@@ -283,7 +283,7 @@ uint VehicleCargoList::LoadReserved(uint max_move)
 		if (cp->count <= max_move) {
 			/* Can move the complete packet */
 			max_move -= cp->count;
-			this->reserved.erase(it++);
+			it = this->reserved.erase(it);
 			this->reserved_count -= cp->count;
 			this->Append(cp, false);
 		} else if (CargoPacket::CanAllocateItem()) {
@@ -365,13 +365,13 @@ CargoPacket *CargoList<Tinst, Tcont>::RemovePacket(Iterator &it, uint cap, TileI
 			this->count -= dropped;
 			this->cargo_days_in_transit -= dropped * packet->days_in_transit;
 			packet->count = cap;
-			this->packets.erase(it++);
+			it = this->packets.erase(it);
 		} else {
 			assert(packet->count == cap);
 			++it;
 		}
 	} else {
-		this->packets.erase(it++);
+		it = this->packets.erase(it);
 	}
 	static_cast<Tinst *>(this)->RemoveFromCache(packet);
 	if (load_place != INVALID_TILE) {
@@ -418,7 +418,7 @@ uint VehicleCargoList::DeliverPacket(Iterator &it, uint cap, CargoPayment *payme
 	uint unloaded = 0;
 	if (p->count <= cap) {
 		payment->PayFinalDelivery(p, p->count);
-		this->packets.erase(it++);
+		it = this->packets.erase(it);
 		this->RemoveFromCache(p);
 		unloaded = p->count;
 		delete p;
@@ -446,7 +446,7 @@ uint VehicleCargoList::KeepPacket(Iterator &it)
 	CargoPacket *cp = *it;
 	this->reserved.push_back(cp);
 	this->reserved_count += cp->count;
-	this->packets.erase(it++);
+	it = this->packets.erase(it);
 	return cp->count;
 }
 
@@ -813,7 +813,7 @@ void StationCargoList::RerouteStalePackets(StationID to)
 	std::pair<Iterator, Iterator> range(this->packets.equal_range(to));
 	for (Iterator it(range.first); it != range.second && it.GetKey() == to;) {
 		CargoPacket *packet = *it;
-		this->packets.erase(it++);
+		it = this->packets.erase(it);
 		StationID next = this->station->goods[this->cargo].UpdateFlowStatsTransfer(packet->source, packet->count, this->station->index);
 		assert(next != to);
 
@@ -857,7 +857,7 @@ void StationCargoList::CountAndTruncate(uint max_remaining, StationCargoAmountMa
 					++it;
 				}
 			} else {
-				this->packets.erase(it++);
+				it = this->packets.erase(it);
 				this->RemoveFromCache(packet);
 				delete packet;
 			}
