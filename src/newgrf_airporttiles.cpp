@@ -221,16 +221,16 @@ static uint32 AirportTileGetRandomBits(const ResolverObject *object)
 	return (st == NULL ? 0 : st->random_bits) | (tile == INVALID_TILE ? 0 : GetStationTileRandomBits(tile) << 16);
 }
 
-static void AirportTileResolver(ResolverObject *res, const AirportTileSpec *ats, TileIndex tile, const Station *st)
+static void AirportTileResolver(ResolverObject *res, const AirportTileSpec *ats, TileIndex tile, Station *st)
 {
 	res->GetRandomBits = AirportTileGetRandomBits;
 	res->GetTriggers   = NULL;
 	res->SetTriggers   = NULL;
 	res->GetVariable   = AirportTileGetVariable;
 	res->ResolveReal   = AirportTileResolveReal;
+	res->StorePSA      = NULL;
 
 	assert(st != NULL);
-	res->psa                  = NULL;
 	res->u.airport.airport_id = st->airport.type;
 	res->u.airport.st         = st;
 	res->u.airport.tile       = tile;
@@ -246,7 +246,7 @@ static void AirportTileResolver(ResolverObject *res, const AirportTileSpec *ats,
 	res->grffile         = ats->grf_prop.grffile;
 }
 
-uint16 GetAirportTileCallback(CallbackID callback, uint32 param1, uint32 param2, const AirportTileSpec *ats, const Station *st, TileIndex tile)
+uint16 GetAirportTileCallback(CallbackID callback, uint32 param1, uint32 param2, const AirportTileSpec *ats, Station *st, TileIndex tile)
 {
 	ResolverObject object;
 	const SpriteGroup *group;

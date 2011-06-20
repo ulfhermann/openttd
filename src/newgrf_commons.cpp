@@ -142,6 +142,16 @@ uint16 OverrideManagerBase::AddEntityID(byte grf_local_id, uint32 grfid, byte su
 }
 
 /**
+ * Gives the GRFID of the file the entity belongs to.
+ * @param entity_id ID of the entity being queried.
+ * @return GRFID.
+ */
+uint32 OverrideManagerBase::GetGRFID(uint16 entity_id) const
+{
+	return mapping_ID[entity_id].grfid;
+}
+
+/**
  * Gives the substitute of the entity, as specified by the grf file
  * @param entity_id of the entity being queried
  * @return mapped id
@@ -526,7 +536,7 @@ uint32 NewGRFSpriteLayout::PrepareLayout(uint32 orig_offset, uint32 newgrf_groun
 	result->image = ground;
 	result->delta_x = 0;
 	result->delta_y = 0;
-	result->delta_z = 0x80;
+	result->delta_z = (int8)0x80;
 
 	const DrawTileSeqStruct *dtss;
 	foreach_draw_tile_seq(dtss, this->seq) {
