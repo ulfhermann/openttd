@@ -2271,6 +2271,9 @@ static CommandCost RemoveAirport(TileIndex tile, DoCommandFlag flags)
 	}
 
 	if (flags & DC_EXEC) {
+		/* Clear the persistent storage. */
+		delete st->airport.psa;
+
 		const AirportSpec *as = st->airport.GetSpec();
 		for (uint i = 0; i < st->airport.GetNumHangars(); ++i) {
 			DeleteWindowById(
@@ -2504,7 +2507,7 @@ static void DrawTile_Station(TileInfo *ti)
 	const RailtypeInfo *rti = NULL;
 	uint32 relocation = 0;
 	uint32 ground_relocation = 0;
-	const BaseStation *st = NULL;
+	BaseStation *st = NULL;
 	const StationSpec *statspec = NULL;
 	uint tile_layout = 0;
 
