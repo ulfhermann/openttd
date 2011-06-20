@@ -13,6 +13,7 @@
 #define NEWGRF_STORAGE_H
 
 #include "core/alloc_func.hpp"
+#include "core/pool_type.hpp"
 
 /**
  * Base class for all NewGRF storage arrays. Nothing fancy, only here
@@ -20,8 +21,7 @@
  */
 struct BaseStorageArray
 {
-	/** The needed destructor */
-	virtual ~BaseStorageArray() {}
+	virtual ~BaseStorageArray();
 
 	/**
 	 * Clear the changes made since the last ClearChanges.
@@ -37,7 +37,7 @@ struct BaseStorageArray
 	 * @param pos   the position to write at
 	 * @param value the value to write
 	 */
-	virtual void Store(uint pos, int32 value) = 0;
+	virtual void StoreValue(uint pos, int32 value) = 0;
 };
 
 /**
@@ -63,6 +63,12 @@ struct PersistentStorageArray : BaseStorageArray {
 		free(this->prev_storage);
 	}
 
+	/** Resets all values to zero. */
+	void ResetToZero()
+	{
+		memset(this->storage, 0, sizeof(this->storage));
+	}
+
 	/**
 	 * Stores some value at a given position.
 	 * If there is no backup of the data that backup is made and then
@@ -70,7 +76,7 @@ struct PersistentStorageArray : BaseStorageArray {
 	 * @param pos   the position to write at
 	 * @param value the value to write
 	 */
-	void Store(uint pos, int32 value)
+	void StoreValue(uint pos, int32 value)
 	{
 		/* Out of the scope of the array */
 		if (pos >= SIZE) return;
@@ -97,7 +103,7 @@ struct PersistentStorageArray : BaseStorageArray {
 	 * @param pos the position to get the data from
 	 * @return the data from that position
 	 */
-	TYPE Get(uint pos) const
+	TYPE GetValue(uint pos) const
 	{
 		/* Out of the scope of the array */
 		if (pos >= SIZE) return 0;
@@ -142,7 +148,7 @@ struct TemporaryStorageArray : BaseStorageArray {
 	 * @param pos   the position to write at
 	 * @param value the value to write
 	 */
-	void Store(uint pos, int32 value)
+	void StoreValue(uint pos, int32 value)
 	{
 		/* Out of the scope of the array */
 		if (pos >= SIZE) return;
@@ -156,7 +162,7 @@ struct TemporaryStorageArray : BaseStorageArray {
 	 * @param pos the position to get the data from
 	 * @return the data from that position
 	 */
-	TYPE Get(uint pos) const
+	TYPE GetValue(uint pos) const
 	{
 		/* Out of the scope of the array */
 		if (pos >= SIZE) return 0;
@@ -172,5 +178,41 @@ struct TemporaryStorageArray : BaseStorageArray {
 
 void AddChangedStorage(BaseStorageArray *storage);
 void ClearStorageChanges(bool keep_changes);
+
+
+typedef PersistentStorageArray<int32, 16> OldPersistentStorage;
+
+typedef uint32 PersistentStorageID;
+
+struct PersistentStorage;
+typedef Pool<PersistentStorage, PersistentStorageID, 1, 0xFF000> PersistentStoragePool;
+
+extern PersistentStoragePool _persistent_storage_pool;
+
+/**
+ * Class for pooled persistent storage of data.
+ * On ClearChanges that data is always zero-ed.
+ */
+struct PersistentStorage : PersistentStorageArray<int32, 16>, PersistentStoragePool::PoolItem<&_persistent_storage_pool> {
+	uint32 grfid; ///< GRFID associated to this persistent storage. A value of zero means "default".
+
+	/** We don't want GCC to zero our struct! It already is zeroed and has an index! */
+	PersistentStorage(const uint32 new_grfid) : grfid(new_grfid)
+	{
+		this->prev_storage = NULL;
+		memset(this->storage, 0, sizeof(this->storage));
+	}
+
+	/** Free the memory used by the persistent storage. */
+	~PersistentStorage()
+	{
+		free(this->prev_storage);
+	}
+};
+
+assert_compile(cpp_lengthof(OldPersistentStorage, storage) == cpp_lengthof(PersistentStorage, storage));
+
+#define FOR_ALL_STORAGES_FROM(var, start) FOR_ALL_ITEMS_FROM(PersistentStorage, storage_index, var, start)
+#define FOR_ALL_STORAGES(var) FOR_ALL_STORAGES_FROM(var, 0)
 
 #endif /* NEWGRF_STORAGE_H */
