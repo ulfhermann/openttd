@@ -190,10 +190,7 @@ static void NewIndustryTileResolver(ResolverObject *res, IndustryGfx gfx, TileIn
 	res->callback        = CBID_NO_CALLBACK;
 	res->callback_param1 = 0;
 	res->callback_param2 = 0;
-	res->last_value      = 0;
-	res->trigger         = 0;
-	res->reseed          = 0;
-	res->count           = 0;
+	res->ResetState();
 
 	const IndustryTileSpec *its = GetIndustryTileSpec(gfx);
 	res->grffile         = (its != NULL ? its->grf_prop.grffile : NULL);
@@ -308,17 +305,18 @@ CommandCost PerformIndustryTileSlopeCheck(TileIndex ind_base_tile, TileIndex ind
 	}
 	if (callback_res == 0x400) return CommandCost();
 
-	/* Copy some parameters from the registers to the error message text ref. stack */
-	SwitchToErrorRefStack();
-	PrepareTextRefStackUsage(4);
-	SwitchToNormalRefStack();
-
+	CommandCost res;
 	switch (callback_res) {
-		case 0x401: return_cmd_error(STR_ERROR_SITE_UNSUITABLE);
-		case 0x402: return_cmd_error(STR_ERROR_CAN_ONLY_BE_BUILT_IN_RAINFOREST);
-		case 0x403: return_cmd_error(STR_ERROR_CAN_ONLY_BE_BUILT_IN_DESERT);
-		default:    return_cmd_error(GetGRFStringID(its->grf_prop.grffile->grfid, 0xD000 + callback_res));
+		case 0x401: res = CommandCost(STR_ERROR_SITE_UNSUITABLE);
+		case 0x402: res = CommandCost(STR_ERROR_CAN_ONLY_BE_BUILT_IN_RAINFOREST);
+		case 0x403: res = CommandCost(STR_ERROR_CAN_ONLY_BE_BUILT_IN_DESERT);
+		default:    res = CommandCost(GetGRFStringID(its->grf_prop.grffile->grfid, 0xD000 + callback_res));
 	}
+
+	/* Copy some parameters from the registers to the error message text ref. stack */
+	res.UseTextRefStack(4);
+
+	return res;
 }
 
 /* Simple wrapper for GetHouseCallback to keep the animation unified. */
@@ -371,7 +369,14 @@ bool StartStopIndustryTileAnimation(const Industry *ind, IndustryAnimationTrigge
 	return ret;
 }
 
-static void DoTriggerIndustryTile(TileIndex tile, IndustryTileTrigger trigger, Industry *ind)
+/**
+ * Trigger random triggers for an industry tile and reseed its random bits.
+ * @param tile Industry tile to trigger.
+ * @param trigger Trigger to trigger.
+ * @param ind Industry of the tile.
+ * @param [in,out] reseed_industry Collects bits to reseed for the industry.
+ */
+static void DoTriggerIndustryTile(TileIndex tile, IndustryTileTrigger trigger, Industry *ind, uint32 &reseed_industry)
 {
 	ResolverObject object;
 
@@ -392,24 +397,55 @@ static void DoTriggerIndustryTile(TileIndex tile, IndustryTileTrigger trigger, I
 
 	byte new_random_bits = Random();
 	byte random_bits = GetIndustryRandomBits(tile);
-	random_bits &= ~object.reseed;
-	random_bits |= new_random_bits & object.reseed;
+	random_bits &= ~object.reseed[VSG_SCOPE_SELF];
+	random_bits |= new_random_bits & object.reseed[VSG_SCOPE_SELF];
 	SetIndustryRandomBits(tile, random_bits);
 	MarkTileDirtyByTile(tile);
+
+	reseed_industry |= object.reseed[VSG_SCOPE_PARENT];
 }
 
+/**
+ * Reseeds the random bits of an industry.
+ * @param ind Industry.
+ * @param reseed Bits to reseed.
+ */
+static void DoReseedIndustry(Industry *ind, uint32 reseed)
+{
+	if (reseed == 0 || ind == NULL) return;
+
+	uint16 random_bits = Random();
+	ind->random &= reseed;
+	ind->random |= random_bits & reseed;
+}
+
+/**
+ * Trigger a random trigger for a single industry tile.
+ * @param tile Industry tile to trigger.
+ * @param trigger Trigger to trigger.
+ */
 void TriggerIndustryTile(TileIndex tile, IndustryTileTrigger trigger)
 {
-	DoTriggerIndustryTile(tile, trigger, Industry::GetByTile(tile));
+	uint32 reseed_industry = 0;
+	Industry *ind = Industry::GetByTile(tile);
+	DoTriggerIndustryTile(tile, trigger, ind, reseed_industry);
+	DoReseedIndustry(ind, reseed_industry);
 }
 
+/**
+ * Trigger a random trigger for all industry tiles.
+ * @param ind Industry to trigger.
+ * @param trigger Trigger to trigger.
+ */
 void TriggerIndustry(Industry *ind, IndustryTileTrigger trigger)
 {
+	uint32 reseed_industry = 0;
 	TILE_AREA_LOOP(tile, ind->location) {
 		if (IsTileType(tile, MP_INDUSTRY) && GetIndustryIndex(tile) == ind->index) {
-			DoTriggerIndustryTile(tile, trigger, ind);
+			DoTriggerIndustryTile(tile, trigger, ind, reseed_industry);
 		}
 	}
+	DoReseedIndustry(ind, reseed_industry);
 }
 
 /**
