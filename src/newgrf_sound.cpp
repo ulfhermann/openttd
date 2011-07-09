@@ -51,6 +51,12 @@ uint GetNumSounds()
 }
 
 
+/**
+ * Checks whether a NewGRF wants to play a different vehicle sound effect.
+ * @param v Vehicle to play sound effect for.
+ * @param event Trigger for the sound effect.
+ * @return false if the default sound effect shall be played instead.
+ */
 bool PlayVehicleSound(const Vehicle *v, VehicleSoundEvent event)
 {
 	const GRFFile *file = GetEngineGRF(v->engine_type);
@@ -63,10 +69,15 @@ bool PlayVehicleSound(const Vehicle *v, VehicleSoundEvent event)
 	if (!HasBit(EngInfo(v->engine_type)->callback_mask, CBM_VEHICLE_SOUND_EFFECT)) return false;
 
 	callback = GetVehicleCallback(CBID_VEHICLE_SOUND_EFFECT, event, 0, v->engine_type, v);
+	/* Play default sound if callback fails */
 	if (callback == CALLBACK_FAILED) return false;
+
 	if (callback >= ORIGINAL_SAMPLE_COUNT) {
 		callback -= ORIGINAL_SAMPLE_COUNT;
-		if (callback > file->num_sounds) return false;
+
+		/* Play no sound if result is out of range */
+		if (callback > file->num_sounds) return true;
+
 		callback += file->sound_offset;
 	}
 
@@ -75,15 +86,20 @@ bool PlayVehicleSound(const Vehicle *v, VehicleSoundEvent event)
 	return true;
 }
 
-bool PlayTileSound(const GRFFile *file, SoundID sound_id, TileIndex tile)
+/**
+ * Play a NewGRF sound effect at the location of a specfic tile.
+ * @param file NewGRF triggering the sound effect.
+ * @param sound_id Sound effect the NewGRF wants to play.
+ * @param tile Location of the effect.
+ */
+void PlayTileSound(const GRFFile *file, SoundID sound_id, TileIndex tile)
 {
 	if (sound_id >= ORIGINAL_SAMPLE_COUNT) {
 		sound_id -= ORIGINAL_SAMPLE_COUNT;
-		if (sound_id > file->num_sounds) return false;
+		if (sound_id > file->num_sounds) return;
 		sound_id += file->sound_offset;
 	}
 
 	assert(sound_id < GetNumSounds());
 	SndPlayTileFx(sound_id, tile);
-	return true;
 }

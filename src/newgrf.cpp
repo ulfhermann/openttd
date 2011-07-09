@@ -1194,10 +1194,11 @@ static ChangeInfoResult ShipVehicleChangeInfo(uint engine, int numinfo, int prop
 				break;
 
 			case 0x14: // Ocean speed fraction
+				svi->ocean_speed_frac = buf->ReadByte();
+				break;
+
 			case 0x15: // Canal speed fraction
-				/** @todo Speed fractions for ships on oceans and canals */
-				buf->ReadByte();
-				ret = CIR_UNHANDLED;
+				svi->canal_speed_frac = buf->ReadByte();
 				break;
 
 			case 0x16: // Retire vehicle early
@@ -1572,7 +1573,7 @@ static ChangeInfoResult StationChangeInfo(uint stid, int numinfo, int prop, Byte
 				statspec->animation.triggers = buf->ReadWord();
 				break;
 
-			case 0x20: // Advanced sprite layout
+			case 0x1A: // Advanced sprite layout
 				statspec->tiles = buf->ReadExtendedByte();
 				delete[] statspec->renderdata; // delete earlier loaded stuff
 				statspec->renderdata = new NewGRFSpriteLayout[statspec->tiles];
@@ -4599,6 +4600,7 @@ static void RailTypeMapSpriteGroup(ByteReader *buf, uint8 idcount)
 			if (railtypes[i] != INVALID_RAILTYPE) {
 				RailtypeInfo *rti = &_railtypes[railtypes[i]];
 
+				rti->grffile[ctype] = _cur_grffile;
 				rti->group[ctype] = _cur_grffile->spritegroups[groupid];
 			}
 		}
