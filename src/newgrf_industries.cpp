@@ -424,10 +424,7 @@ static void NewIndustryResolver(ResolverObject *res, TileIndex tile, Industry *i
 	res->callback        = CBID_NO_CALLBACK;
 	res->callback_param1 = 0;
 	res->callback_param2 = 0;
-	res->last_value      = 0;
-	res->trigger         = 0;
-	res->reseed          = 0;
-	res->count           = 0;
+	res->ResetState();
 
 	const IndustrySpec *indspec = GetIndustrySpec(type);
 	res->grffile         = (indspec != NULL ? indspec->grf_prop.grffile : NULL);
@@ -549,18 +546,18 @@ CommandCost CheckIfCallBackAllowsCreation(TileIndex tile, IndustryType type, uin
 	uint16 result = group->GetCallbackResult();
 	if (result == 0x400 || result == CALLBACK_FAILED) return CommandCost();
 
-	/* Copy some parameters from the registers to the error message text ref. stack */
-	SwitchToErrorRefStack();
-	PrepareTextRefStackUsage(4);
-	SwitchToNormalRefStack();
-
+	CommandCost res;
 	switch (result) {
-		case 0x401: return_cmd_error(STR_ERROR_SITE_UNSUITABLE);
-		case 0x402: return_cmd_error(STR_ERROR_CAN_ONLY_BE_BUILT_IN_RAINFOREST);
-		case 0x403: return_cmd_error(STR_ERROR_CAN_ONLY_BE_BUILT_IN_DESERT);
-		default:    return_cmd_error(GetGRFStringID(indspec->grf_prop.grffile->grfid, 0xD000 + result));
+		case 0x401: res = CommandCost(STR_ERROR_SITE_UNSUITABLE);
+		case 0x402: res = CommandCost(STR_ERROR_CAN_ONLY_BE_BUILT_IN_RAINFOREST);
+		case 0x403: res = CommandCost(STR_ERROR_CAN_ONLY_BE_BUILT_IN_DESERT);
+		default:    res = CommandCost(GetGRFStringID(indspec->grf_prop.grffile->grfid, 0xD000 + result));
 	}
-	NOT_REACHED();
+
+	/* Copy some parameters from the registers to the error message text ref. stack */
+	res.UseTextRefStack(4);
+
+	return res;
 }
 
 /**
