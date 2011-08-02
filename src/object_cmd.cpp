@@ -240,7 +240,8 @@ CommandCost CmdBuildObject(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 			if (callback == CALLBACK_FAILED) {
 				cost.AddCost(CheckBuildableTile(t, 0, allowed_z, false));
 			} else if (callback != 0) {
-				return_cmd_error(STR_ERROR_LAND_SLOPED_IN_WRONG_DIRECTION);
+				/* The meaning of bit 10 is inverted in the result of this callback. */
+				return GetErrorMessageFromLocationCallbackResult(ToggleBit(callback, 10), spec->grf_prop.grffile->grfid, STR_ERROR_LAND_SLOPED_IN_WRONG_DIRECTION);
 			}
 		}
 	}
@@ -424,10 +425,6 @@ static CommandCost ClearTile_Object(TileIndex tile, DoCommandFlag flags)
 	Object *o = Object::GetByTile(tile);
 	TileArea ta = o->location;
 
-	ClearedObjectArea *cleared_area = _cleared_object_areas.Append();
-	cleared_area->first_tile = tile;
-	cleared_area->area = ta;
-
 	CommandCost cost(EXPENSES_CONSTRUCTION, spec->GetClearCost() * ta.w * ta.h / 5);
 	if (spec->flags & OBJECT_FLAG_CLEAR_INCOME) cost.MultiplyCost(-1); // They get an income!
 
@@ -484,6 +481,10 @@ static CommandCost ClearTile_Object(TileIndex tile, DoCommandFlag flags)
 		default:
 			break;
 	}
+
+	ClearedObjectArea *cleared_area = _cleared_object_areas.Append();
+	cleared_area->first_tile = tile;
+	cleared_area->area = ta;
 
 	if (flags & DC_EXEC) ReallyClearObjectTile(o);
 
