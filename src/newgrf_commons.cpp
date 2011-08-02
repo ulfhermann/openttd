@@ -24,6 +24,9 @@
 #include "newgrf_object.h"
 #include "genworld.h"
 #include "newgrf_spritegroup.h"
+#include "newgrf_text.h"
+
+#include "table/strings.h"
 
 /**
  * Constructor of generic class
@@ -410,9 +413,10 @@ uint32 GetTerrainType(TileIndex tile, TileContext context)
  * @param parameter The NewGRF "encoded" offset.
  * @param tile The tile to base the offset from.
  * @param signed_offsets Whether the offsets are to be interpreted as signed or not.
+ * @param axis Axis of a railways station.
  * @return The tile at the offset.
  */
-TileIndex GetNearbyTile(byte parameter, TileIndex tile, bool signed_offsets)
+TileIndex GetNearbyTile(byte parameter, TileIndex tile, bool signed_offsets, Axis axis)
 {
 	int8 x = GB(parameter, 0, 4);
 	int8 y = GB(parameter, 4, 4);
@@ -421,7 +425,8 @@ TileIndex GetNearbyTile(byte parameter, TileIndex tile, bool signed_offsets)
 	if (signed_offsets && y >= 8) y -= 16;
 
 	/* Swap width and height depending on axis for railway stations */
-	if (HasStationTileRail(tile) && GetRailStationAxis(tile) == AXIS_Y) Swap(x, y);
+	if (axis == INVALID_AXIS && HasStationTileRail(tile)) axis = GetRailStationAxis(tile);
+	if (axis == AXIS_Y) Swap(x, y);
 
 	/* Make sure we never roam outside of the map, better wrap in that case */
 	return TILE_MASK(tile + TileDiffXY(x, y));
@@ -442,8 +447,38 @@ uint32 GetNearbyTileInformation(TileIndex tile)
 
 	uint z;
 	Slope tileh = GetTileSlope(tile, &z);
-	byte terrain_type = GetTerrainType(tile) << 2 | (tile_type == MP_WATER ? 1 : 0) << 1;
+	/* Return 0 if the tile is a land tile */
+	byte terrain_type = (HasTileWaterClass(tile) ? (GetWaterClass(tile) + 1) & 3 : 0) << 5 | GetTerrainType(tile) << 2 | (tile_type == MP_WATER ? 1 : 0) << 1;
 	return tile_type << 24 | z << 16 | terrain_type << 8 | tileh;
+}
+
+/**
+ * Get the error message from a shape/location/slope check callback result.
+ * @param cb_res Callback result to translate. If bit 10 is set this is a standard error message, otherwise a NewGRF provided string.
+ * @param grfid grfID to use to resolve a custom error message.
+ * @param default_error Error message to use for the generic error.
+ * @return CommandCost indicating success or the error message.
+ */
+CommandCost GetErrorMessageFromLocationCallbackResult(uint16 cb_res, uint32 grfid, StringID default_error)
+{
+	CommandCost res;
+	switch (cb_res) {
+		case 0x400: return res; // No error.
+		case 0x401: res = CommandCost(default_error); break;
+		case 0x402: res = CommandCost(STR_ERROR_CAN_ONLY_BE_BUILT_IN_RAINFOREST); break;
+		case 0x403: res = CommandCost(STR_ERROR_CAN_ONLY_BE_BUILT_IN_DESERT); break;
+		case 0x404: res = CommandCost(STR_ERROR_CAN_ONLY_BE_BUILT_ABOVE_SNOW_LINE); break;
+		case 0x405: res = CommandCost(STR_ERROR_CAN_ONLY_BE_BUILT_BELOW_SNOW_LINE); break;
+		case 0x406: res = CommandCost(STR_ERROR_CAN_T_BUILD_ON_SEA); break;
+		case 0x407: res = CommandCost(STR_ERROR_CAN_T_BUILD_ON_CANAL); break;
+		case 0x408: res = CommandCost(STR_ERROR_CAN_T_BUILD_ON_RIVER); break;
+		default:    res = CommandCost(GetGRFStringID(grfid, 0xD000 + cb_res)); break;
+	}
+
+	/* Copy some parameters from the registers to the error message text ref. stack */
+	res.UseTextRefStack(4);
+
+	return res;
 }
 
 /* static */ SmallVector<DrawTileSeqStruct, 8> NewGRFSpriteLayout::result_seq;
