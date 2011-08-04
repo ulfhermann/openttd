@@ -228,7 +228,7 @@
  *  161   22567
  *  162   22713
  */
-extern const uint16 SAVEGAME_VERSION = SL_RESERVATION; ///< Current savegame version of OpenTTD.
+extern const uint16 SAVEGAME_VERSION = SL_FLOWMAP; ///< Current savegame version of OpenTTD.
 
 SavegameType _savegame_type; ///< type of savegame we are loading
 
