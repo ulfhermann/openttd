@@ -1723,8 +1723,13 @@ static void SetSelectionTilesDirty()
 		int bot_y = top_y;
 
 		do {
-			Point top = RemapCoords2(top_x, top_y); // topmost dirty point
-			Point bot = RemapCoords2(bot_x + TILE_SIZE - 1, bot_y + TILE_SIZE - 1); // bottommost point
+			/* topmost dirty point */
+			TileIndex top_tile = TileVirtXY(top_x, top_y);
+			Point top = RemapCoords(top_x, top_y, GetTileMaxZ(top_tile));
+
+			/* bottommost point */
+			TileIndex bottom_tile = TileVirtXY(bot_x, bot_y);
+			Point bot = RemapCoords(bot_x + TILE_SIZE, bot_y + TILE_SIZE, GetTileZ(bottom_tile)); // bottommost point
 
 			/* the 'x' coordinate of 'top' and 'bot' is the same (and always in the same distance from tile middle),
 			 * tile height/slope affects only the 'y' on-screen coordinate! */
@@ -2786,11 +2791,11 @@ calc_heightdiff_single_direction:;
 					}
 				}
 
-				if (t0 != 1 || t1 != 1) {
+				if (dx != 1 || dy != 1) {
 					int heightdiff = CalcHeightdiff(style, 0, t0, t1);
 
-					params[index++] = dx;
-					params[index++] = dy;
+					params[index++] = dx - (style & HT_POINT ? 1 : 0);
+					params[index++] = dy - (style & HT_POINT ? 1 : 0);
 					if (heightdiff != 0) params[index++] = heightdiff;
 				}
 
