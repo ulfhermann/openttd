@@ -317,15 +317,16 @@ public:
 		assert(!list.empty());
 		if (it.list_valid) {
 			it.list_iter = list.erase(it.list_iter);
+			/* This can't be the first list element as otherwise list_valid would have
+			 * to be false. So the list cannot be empty here.
+			 */
+			if (it.list_iter == list.end()) {
+				++it.map_iter;
+				it.list_valid = false;
+			}
 		} else {
 			list.erase(list.begin());
-		}
-
-		if (list.empty()) {
-			this->Map::erase(it.map_iter++);
-		} else if (it.list_iter == list.end()) {
-			++it.map_iter;
-			it.list_valid = false;
+			if (list.empty()) this->Map::erase(it.map_iter++);
 		}
 		return it;
 	}
