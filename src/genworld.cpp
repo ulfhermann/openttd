@@ -12,7 +12,6 @@
 #include "stdafx.h"
 #include "landscape.h"
 #include "company_func.h"
-#include "thread/thread.h"
 #include "genworld.h"
 #include "gfxinit.h"
 #include "window_func.h"
@@ -24,7 +23,7 @@
 #include "engine_func.h"
 #include "newgrf_storage.h"
 #include "water.h"
-#include "blitter/factory.hpp"
+#include "video/video_driver.hpp"
 #include "tilehighlight_func.h"
 #include "saveload/saveload.h"
 #include "void_map.h"
@@ -32,6 +31,7 @@
 #include "newgrf.h"
 #include "core/random_func.hpp"
 #include "core/backup_type.hpp"
+#include "progress.h"
 
 #include "table/sprites.h"
 
@@ -53,11 +53,6 @@ void InitializeGame(uint size_x, uint size_y, bool reset_date, bool reset_settin
  *  in the genworld.h and genworld.cpp! -- TrueLight
  */
 GenWorldInfo _gw;
-
-/** Rights for the map generation */
-ThreadMutex *_genworld_mapgen_mutex = ThreadMutex::New();
-/** Rights for the painting */
-ThreadMutex *_genworld_paint_mutex = ThreadMutex::New();
 
 /** Whether we are generating the map or not. */
 bool _generating_world;
@@ -82,12 +77,12 @@ static void CleanupGeneration()
 	if (_cursor.sprite == SPR_CURSOR_ZZZ) SetMouseCursor(SPR_CURSOR_MOUSE, PAL_NONE);
 	/* Show all vital windows again, because we have hidden them */
 	if (_gw.threaded && _game_mode != GM_MENU) ShowVitalWindows();
-	_gw.active   = false;
+	SetModalProgress(false);
 	_gw.proc     = NULL;
 	_gw.abortp   = NULL;
 	_gw.threaded = false;
 
-	DeleteWindowById(WC_GENERATE_PROGRESS_WINDOW, 0);
+	DeleteWindowById(WC_MODAL_PROGRESS, 0);
 	MarkWholeScreenDirty();
 }
 
@@ -101,7 +96,7 @@ static void _GenerateWorld(void *)
 
 	try {
 		_generating_world = true;
-		_genworld_mapgen_mutex->BeginCritical();
+		_modal_progress_work_mutex->BeginCritical();
 		if (_network_dedicated) DEBUG(net, 0, "Generating map, please wait...");
 		/* Set the Random() seed to generation_seed so we produce the same map with the same seed */
 		if (_settings_game.game_creation.generation_seed == GENERATE_NEW_SEED) _settings_game.game_creation.generation_seed = _settings_newgame.game_creation.generation_seed = InteractiveRandom();
@@ -177,7 +172,7 @@ static void _GenerateWorld(void *)
 		IncreaseGeneratingWorldProgress(GWP_GAME_START);
 
 		CleanupGeneration();
-		_genworld_mapgen_mutex->EndCritical();
+		_modal_progress_work_mutex->EndCritical();
 
 		ShowNewGRFError();
 
@@ -192,7 +187,7 @@ static void _GenerateWorld(void *)
 	} catch (...) {
 		if (_cur_company.IsValid()) _cur_company.Restore();
 		_generating_world = false;
-		_genworld_mapgen_mutex->EndCritical();
+		_modal_progress_work_mutex->EndCritical();
 		throw;
 	}
 }
@@ -225,15 +220,15 @@ void WaitTillGeneratedWorld()
 {
 	if (_gw.thread == NULL) return;
 
-	_genworld_mapgen_mutex->EndCritical();
-	_genworld_paint_mutex->EndCritical();
+	_modal_progress_work_mutex->EndCritical();
+	_modal_progress_paint_mutex->EndCritical();
 	_gw.quit_thread = true;
 	_gw.thread->Join();
 	delete _gw.thread;
 	_gw.thread   = NULL;
 	_gw.threaded = false;
-	_genworld_mapgen_mutex->BeginCritical();
-	_genworld_paint_mutex->BeginCritical();
+	_modal_progress_work_mutex->BeginCritical();
+	_modal_progress_paint_mutex->BeginCritical();
 }
 
 /**
@@ -280,11 +275,11 @@ void HandleGeneratingWorldAbortion()
  */
 void GenerateWorld(GenWorldMode mode, uint size_x, uint size_y, bool reset_settings)
 {
-	if (_gw.active) return;
+	if (HasModalProgress()) return;
 	_gw.mode   = mode;
 	_gw.size_x = size_x;
 	_gw.size_y = size_y;
-	_gw.active = true;
+	SetModalProgress(true);
 	_gw.abort  = false;
 	_gw.abortp = NULL;
 	_gw.lc     = _local_company;
@@ -314,13 +309,12 @@ void GenerateWorld(GenWorldMode mode, uint size_x, uint size_y, bool reset_setti
 		_gw.thread = NULL;
 	}
 
-	if (BlitterFactoryBase::GetCurrentBlitter()->GetScreenDepth() == 0 ||
-			!ThreadObject::New(&_GenerateWorld, NULL, &_gw.thread)) {
+	if (!_video_driver->HasGUI() || !ThreadObject::New(&_GenerateWorld, NULL, &_gw.thread)) {
 		DEBUG(misc, 1, "Cannot create genworld thread, reverting to single-threaded mode");
 		_gw.threaded = false;
-		_genworld_mapgen_mutex->EndCritical();
+		_modal_progress_work_mutex->EndCritical();
 		_GenerateWorld(NULL);
-		_genworld_mapgen_mutex->BeginCritical();
+		_modal_progress_work_mutex->BeginCritical();
 		return;
 	}
 
