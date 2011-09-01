@@ -735,6 +735,7 @@ STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :Wyświetlanie n
 STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :Wyświetlanie nazw stacji
 STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :Wyświetlanie nazw pkt. orientacyjnych
 STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :Wyświetlanie napisów
+STR_SETTINGS_MENU_SHOW_COMPETITOR_SIGNS                         :Znaki konkurentów i nazwy są wyświetlane
 STR_SETTINGS_MENU_FULL_ANIMATION                                :Pełna animacja
 STR_SETTINGS_MENU_FULL_DETAIL                                   :Wszystkie detale
 STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :Przeźroczyste budynki
@@ -827,6 +828,7 @@ STR_ABOUT_MENU_ZOOMIN_SCREENSHOT                                :Zrzut powiększ
 STR_ABOUT_MENU_GIANT_SCREENSHOT                                 :Zrzut ekranu całej mapy
 STR_ABOUT_MENU_ABOUT_OPENTTD                                    :Info o 'OpenTTD'
 STR_ABOUT_MENU_SPRITE_ALIGNER                                   :Wyrównywanie sprite-ów
+STR_ABOUT_MENU_TOGGLE_BOUNDING_BOXES                            :Wł./wył. ramki
 ############ range ends here
 
 ############ range for days starts (also used for the place in the highscore window)
@@ -1242,7 +1244,7 @@ STR_GAME_OPTIONS_CURRENCY_UNITS_DROPDOWN_TOOLTIP                :{BLACK}Wybór w
 STR_GAME_OPTIONS_CURRENCY_GBP                                   :Funty (£)
 STR_GAME_OPTIONS_CURRENCY_USD                                   :Dolary ($)
 STR_GAME_OPTIONS_CURRENCY_EUR                                   :Euro (€)
-STR_GAME_OPTIONS_CURRENCY_YEN                                   :Jeny (¥)
+STR_GAME_OPTIONS_CURRENCY_JPY                                   :Jeny (¥)
 STR_GAME_OPTIONS_CURRENCY_ATS                                   :Szyling austriacki (ATS)
 STR_GAME_OPTIONS_CURRENCY_BEF                                   :Frank belgijski (BEF)
 STR_GAME_OPTIONS_CURRENCY_CHF                                   :Frank szwajcarski (CHF)
@@ -1436,6 +1438,11 @@ STR_SEA_LEVEL_MEDIUM                                            :Średni
 STR_SEA_LEVEL_HIGH                                              :Wysoki
 STR_SEA_LEVEL_CUSTOM                                            :Własny
 STR_SEA_LEVEL_CUSTOM_PERCENTAGE                                 :Własny ({NUM}%)
+
+STR_RIVERS_NONE                                                 :Żaden
+STR_RIVERS_FEW                                                  :Kilka
+STR_RIVERS_MODERATE                                             :Średni
+STR_RIVERS_LOT                                                  :Sporo
 
 STR_DISASTER_NONE                                               :Brak
 STR_DISASTER_REDUCED                                            :Zredukowane
@@ -1773,6 +1780,8 @@ STR_INTRO_TOOLTIP_NEWGRF_SETTINGS                               :{BLACK}Wyświet
 STR_INTRO_TOOLTIP_ONLINE_CONTENT                                :{BLACK}Poszukaj nowych lub zaktualizowanych dodatków do pobrania
 STR_INTRO_TOOLTIP_AI_SETTINGS                                   :{BLACK}Wyświetl ustawienia SI
 STR_INTRO_TOOLTIP_QUIT                                          :{BLACK}Wyjdź z 'OpenTTD'
+
+STR_INTRO_TRANSLATION                                           :{BLACK}Tej wersji językowej brakuje jeszcze {NUM} wpis{P "" y ów}. Możesz pomóc ulepszyć nam OpenTTD rejestrując się jako tłumacz. Szczegóły znajdziesz w pliku readme.txt.
 
 # Quit window
 STR_QUIT_CAPTION                                                :{WHITE}Wyjście
@@ -2695,6 +2704,7 @@ STR_MAPGEN_LAND_GENERATOR                                       :{BLACK}Generato
 STR_MAPGEN_TREE_PLACER                                          :{BLACK}Algorytm drzew:
 STR_MAPGEN_TERRAIN_TYPE                                         :{BLACK}Typ terenu:
 STR_MAPGEN_QUANTITY_OF_SEA_LAKES                                :{BLACK}Poziom wody:
+STR_MAPGEN_QUANTITY_OF_RIVERS                                   :{BLACK}Rzeki:
 STR_MAPGEN_SMOOTHNESS                                           :{BLACK}Gładkość:
 STR_MAPGEN_VARIETY                                              :{BLACK}Różnorodność:
 STR_MAPGEN_GENERATE                                             :{WHITE}Stwórz
@@ -2739,6 +2749,7 @@ STR_GENERATION_ABORT_MESSAGE                                    :{YELLOW}Czy na 
 STR_GENERATION_PROGRESS                                         :{WHITE}Ukończono w {NUM} %
 STR_GENERATION_PROGRESS_NUM                                     :{BLACK}{NUM} / {NUM}
 STR_GENERATION_WORLD_GENERATION                                 :{BLACK}Tworzenie świata
+STR_GENERATION_RIVER_GENERATION                                 :{BLACK}Generator rzek
 STR_GENERATION_TREE_GENERATION                                  :{BLACK}Tworzenie drzew
 STR_GENERATION_OBJECT_GENERATION                                :{BLACK}Tworzenie obiektów
 STR_GENERATION_CLEARING_TILES                                   :{BLACK}Tworzenie terenów skalistych i nierówności
@@ -2891,6 +2902,11 @@ STR_NEWGRF_INVALID_CARGO_ABBREV                                 :??
 STR_NEWGRF_INVALID_CARGO_QUANTITY                               :{COMMA} of <nieprawidłowy ładunek>
 STR_NEWGRF_INVALID_ENGINE                                       :<nieprawidłowy model pojazdu>
 STR_NEWGRF_INVALID_INDUSTRYTYPE                                 :<nieprawidłowy przemysł>
+
+# NewGRF scanning window
+STR_NEWGRF_SCAN_CAPTION                                         :{WHITE}Skanowanie NewGRFów
+STR_NEWGRF_SCAN_MESSAGE                                         :{BLACK}Skanuje NewGRFy. Może to zająć chwilę w zależności od ilości...
+STR_NEWGRF_SCAN_STATUS                                          :{BLACK}Przeskanowano {NUM} NewGRF{P "" y ów} z około {NUM} NewGRFów
 
 # Sign list window
 STR_SIGN_LIST_CAPTION                                           :{WHITE}Lista napisów - {COMMA} napis{P "" y ów}
