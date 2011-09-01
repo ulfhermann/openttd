@@ -237,15 +237,16 @@ static void FioFreeHandle()
  * Open a slotted file.
  * @param slot Index to assign.
  * @param filename Name of the file at the disk.
- */
-void FioOpenFile(int slot, const char *filename)
+ * @param subdir The sub directory to search this file in.
+  */
+void FioOpenFile(int slot, const char *filename, Subdirectory subdir)
 {
 	FILE *f;
 
 #if defined(LIMITED_FDS)
 	FioFreeHandle();
 #endif /* LIMITED_FDS */
-	f = FioFOpenFile(filename);
+	f = FioFOpenFile(filename, "rb", subdir);
 	if (f == NULL) usererror("Cannot open file '%s'", filename);
 	uint32 pos = ftell(f);
 
@@ -267,7 +268,7 @@ void FioOpenFile(int slot, const char *filename)
 	FioSeekToFile(slot, pos);
 }
 
-static const char * const _subdirs[NUM_SUBDIRS] = {
+static const char * const _subdirs[] = {
 	"",
 	"save" PATHSEP,
 	"save" PATHSEP "autosave" PATHSEP,
@@ -275,10 +276,12 @@ static const char * const _subdirs[NUM_SUBDIRS] = {
 	"scenario" PATHSEP "heightmap" PATHSEP,
 	"gm" PATHSEP,
 	"data" PATHSEP,
+	"data" PATHSEP,
 	"lang" PATHSEP,
 	"ai" PATHSEP,
 	"ai" PATHSEP "library" PATHSEP,
 };
+assert_compile(lengthof(_subdirs) == NUM_SUBDIRS);
 
 const char *_searchpaths[NUM_SEARCHPATHS];
 TarList _tar_list;
@@ -636,7 +639,7 @@ static void SimplifyFileName(char *name)
 
 	DEBUG(misc, 1, "Scanning for tars");
 	TarScanner fs;
-	uint num = fs.Scan(".tar", DATA_DIR, false);
+	uint num = fs.Scan(".tar", NEWGRF_DIR, false);
 	num += fs.Scan(".tar", AI_DIR, false);
 	num += fs.Scan(".tar", AI_LIBRARY_DIR, false);
 	num += fs.Scan(".tar", SCENARIO_DIR, false);
@@ -1156,7 +1159,7 @@ void DeterminePaths(const char *exe)
 	FioCreateDirectory(_searchpaths[SP_AUTODOWNLOAD_DIR]);
 
 	/* Create the directory for each of the types of content */
-	const Subdirectory dirs[] = { SCENARIO_DIR, HEIGHTMAP_DIR, DATA_DIR, AI_DIR, AI_LIBRARY_DIR, GM_DIR };
+	const Subdirectory dirs[] = { SCENARIO_DIR, HEIGHTMAP_DIR, NEWGRF_DIR, AI_DIR, AI_LIBRARY_DIR, GM_DIR };
 	for (uint i = 0; i < lengthof(dirs); i++) {
 		char *tmp = str_fmt("%s%s", _searchpaths[SP_AUTODOWNLOAD_DIR], _subdirs[dirs[i]]);
 		FioCreateDirectory(tmp);
@@ -1228,6 +1231,19 @@ void *ReadFileToMem(const char *filename, size_t *lenp, size_t maxsize)
 	return mem;
 }
 
+/**
+ * Helper to see whether a given filename matches the extension.
+ * @param extension The extension to look for.
+ * @param filename  The filename to look in for the extension.
+ * @return True iff the extension is NULL, or the filename ends with it.
+ */
+static bool MatchesExtension(const char *extension, const char *filename)
+{
+	if (extension == NULL) return true;
+
+	const char *ext = strrchr(filename, extension[0]);
+	return ext != NULL && strcasecmp(ext, extension) == 0;
+}
 
 /**
  * Scan a single directory (and recursively its children) and add
@@ -1265,15 +1281,7 @@ static uint ScanPath(FileScanner *fs, const char *extension, const char *path, s
 			num += ScanPath(fs, extension, filename, basepath_length, recursive);
 		} else if (S_ISREG(sb.st_mode)) {
 			/* File */
-			if (extension != NULL) {
-				char *ext = strrchr(filename, '.');
-
-				/* If no extension or extension isn't .grf, skip the file */
-				if (ext == NULL) continue;
-				if (strcasecmp(ext, extension) != 0) continue;
-			}
-
-			if (fs->AddFile(filename, basepath_length)) num++;
+			if (MatchesExtension(extension, filename) && fs->AddFile(filename, basepath_length)) num++;
 		}
 	}
 
@@ -1293,15 +1301,7 @@ static uint ScanTar(FileScanner *fs, const char *extension, TarFileList::iterato
 	uint num = 0;
 	const char *filename = (*tar).first.c_str();
 
-	if (extension != NULL) {
-		const char *ext = strrchr(filename, '.');
-
-		/* If no extension or extension isn't .grf, skip the file */
-		if (ext == NULL) return false;
-		if (strcasecmp(ext, extension) != 0) return false;
-	}
-
-	if (fs->AddFile(filename, 0)) num++;
+	if (MatchesExtension(extension, filename) && fs->AddFile(filename, 0)) num++;
 
 	return num;
 }
@@ -1317,6 +1317,8 @@ static uint ScanTar(FileScanner *fs, const char *extension, TarFileList::iterato
  */
 uint FileScanner::Scan(const char *extension, Subdirectory sd, bool tars, bool recursive)
 {
+	this->subdir = sd;
+
 	Searchpath sp;
 	char path[MAX_PATH];
 	TarFileList::iterator tar;
