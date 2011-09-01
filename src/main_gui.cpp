@@ -18,7 +18,7 @@
 #include "viewport_func.h"
 #include "command_func.h"
 #include "console_gui.h"
-#include "genworld.h"
+#include "progress.h"
 #include "transparency_gui.h"
 #include "map_func.h"
 #include "sound_func.h"
@@ -282,7 +282,7 @@ struct MainWindow : Window
 		 * generating the world, otherwise they create threading
 		 * problem during the generating, resulting in random
 		 * assertions that are hard to trigger and debug */
-		if (IsGeneratingWorld()) return ES_NOT_HANDLED;
+		if (HasModalProgress()) return ES_NOT_HANDLED;
 
 		switch (num) {
 			case GHK_ABANDON:
