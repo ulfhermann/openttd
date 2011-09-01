@@ -40,6 +40,7 @@
 #include "ai/ai_config.hpp"
 #include "settings_func.h"
 #include "genworld.h"
+#include "progress.h"
 #include "group.h"
 #include "strings_func.h"
 #include "date_func.h"
@@ -272,18 +273,22 @@ static void ShutdownGame()
 	FioCloseAll();
 }
 
-static void LoadIntroGame()
+/**
+ * Load the introduction game.
+ * @param load_newgrfs Whether to load the NewGRFs or not.
+ */
+static void LoadIntroGame(bool load_newgrfs = true)
 {
 	_game_mode = GM_MENU;
 
-	ResetGRFConfig(false);
+	if (load_newgrfs) ResetGRFConfig(false);
 
 	/* Setup main window */
 	ResetWindowSystem();
 	SetupColoursAndInitialWindow();
 
 	/* Load the default opening screen savegame */
-	if (SaveOrLoad("opntitle.dat", SL_LOAD, DATA_DIR) != SL_OK) {
+	if (SaveOrLoad("opntitle.dat", SL_LOAD, BASESET_DIR) != SL_OK) {
 		GenerateWorld(GWM_EMPTY, 64, 64); // if failed loading, make empty world.
 		WaitTillGeneratedWorld();
 		SetLocalCompany(COMPANY_SPECTATOR);
@@ -325,6 +330,84 @@ void MakeNewgameSettingsLive()
 	}
 #endif /* ENABLE_AI */
 }
+
+/** Callback structure of statements to be executed after the NewGRF scan. */
+struct AfterNewGRFScan : NewGRFScanCallback {
+	Year startyear;                    ///< The start year.
+	uint generation_seed;              ///< Seed for the new game.
+	char *dedicated_host;              ///< Hostname for the dedicated server.
+	uint16 dedicated_port;             ///< Port for the dedicated server.
+	char *network_conn;                ///< Information about the server to connect to, or NULL.
+	const char *join_server_password;  ///< The password to join the server with.
+	const char *join_company_password; ///< The password to join the company with.
+
+	AfterNewGRFScan() :
+			startyear(INVALID_YEAR), generation_seed(GENERATE_NEW_SEED),
+			dedicated_host(NULL), dedicated_port(0), network_conn(NULL),
+			join_server_password(NULL), join_company_password(NULL)
+	{
+	}
+
+	virtual void OnNewGRFsScanned()
+	{
+		ResetGRFConfig(false);
+
+		CheckConfig();
+		LoadFromHighScore();
+		LoadHotkeysFromConfig();
+
+		if (startyear != INVALID_YEAR) _settings_newgame.game_creation.starting_year = startyear;
+		if (generation_seed != GENERATE_NEW_SEED) _settings_newgame.game_creation.generation_seed = generation_seed;
+
+#if defined(ENABLE_NETWORK)
+		if (dedicated_host != NULL) {
+			_network_bind_list.Clear();
+			*_network_bind_list.Append() = strdup(dedicated_host);
+		}
+		if (dedicated_port != 0) _settings_client.network.server_port = dedicated_port;
+#endif /* ENABLE_NETWORK */
+
+		/* initialize the ingame console */
+		IConsoleInit();
+		_cursor.in_window = true;
+		InitializeGUI();
+		IConsoleCmdExec("exec scripts/autoexec.scr 0");
+
+		/* Make sure _settings is filled with _settings_newgame if we switch to a game directly */
+		if (_switch_mode != SM_NONE) MakeNewgameSettingsLive();
+
+#ifdef ENABLE_NETWORK
+		if (_network_available && network_conn != NULL) {
+			const char *port = NULL;
+			const char *company = NULL;
+			uint16 rport = NETWORK_DEFAULT_PORT;
+			CompanyID join_as = COMPANY_NEW_COMPANY;
+
+			ParseConnectionString(&company, &port, network_conn);
+
+			if (company != NULL) {
+				join_as = (CompanyID)atoi(company);
+
+				if (join_as != COMPANY_SPECTATOR) {
+					join_as--;
+					if (join_as >= MAX_COMPANIES) {
+						delete this;
+						return;
+					}
+				}
+			}
+			if (port != NULL) rport = atoi(port);
+
+			LoadIntroGame();
+			_switch_mode = SM_NONE;
+			NetworkClientConnectGame(NetworkAddress(network_conn, rport), join_as, join_server_password, join_company_password);
+		}
+#endif /* ENABLE_NETWORK */
+
+		/* After the scan we're not used anymore. */
+		delete this;
+	}
+};
 
 #if defined(UNIX) && !defined(__MORPHOS__)
 extern void DedicatedFork();
@@ -372,18 +455,11 @@ int ttd_main(int argc, char *argv[])
 	char *sounds_set = NULL;
 	char *music_set = NULL;
 	Dimension resolution = {0, 0};
-	Year startyear = INVALID_YEAR;
-	uint generation_seed = GENERATE_NEW_SEED;
 	bool save_config = true;
+	AfterNewGRFScan *scanner = new AfterNewGRFScan();
 #if defined(ENABLE_NETWORK)
 	bool dedicated = false;
-	bool network   = false;
-	char *network_conn = NULL;
 	char *debuglog_conn = NULL;
-	char *dedicated_host = NULL;
-	uint16 dedicated_port = 0;
-	char *join_server_password = NULL;
-	char *join_company_password = NULL;
 
 	extern bool _dedicated_forks;
 	_dedicated_forks = false;
@@ -424,27 +500,26 @@ int ttd_main(int argc, char *argv[])
 				const char *temp = NULL;
 				const char *port = NULL;
 				ParseConnectionString(&temp, &port, mgo.opt);
-				if (!StrEmpty(mgo.opt)) dedicated_host = mgo.opt;
-				if (port != NULL) dedicated_port = atoi(port);
+				if (!StrEmpty(mgo.opt)) scanner->dedicated_host = mgo.opt;
+				if (port != NULL) scanner->dedicated_port = atoi(port);
 			}
 			break;
 		case 'f': _dedicated_forks = true; break;
 		case 'n':
-			network = true;
-			network_conn = mgo.opt; // optional IP parameter, NULL if unset
+			scanner->network_conn = mgo.opt; // optional IP parameter, NULL if unset
 			break;
 		case 'l':
 			debuglog_conn = mgo.opt;
 			break;
 		case 'p':
-			join_server_password = mgo.opt;
+			scanner->join_server_password = mgo.opt;
 			break;
 		case 'P':
-			join_company_password = mgo.opt;
+			scanner->join_company_password = mgo.opt;
 			break;
 #endif /* ENABLE_NETWORK */
 		case 'r': ParseResolution(&resolution, mgo.opt); break;
-		case 't': startyear = atoi(mgo.opt); break;
+		case 't': scanner->startyear = atoi(mgo.opt); break;
 		case 'd': {
 #if defined(WIN32)
 				CreateConsole();
@@ -471,11 +546,11 @@ int ttd_main(int argc, char *argv[])
 
 			_switch_mode = SM_NEWGAME;
 			/* Give a random map if no seed has been given */
-			if (generation_seed == GENERATE_NEW_SEED) {
-				generation_seed = InteractiveRandom();
+			if (scanner->generation_seed == GENERATE_NEW_SEED) {
+				scanner->generation_seed = InteractiveRandom();
 			}
 			break;
-		case 'G': generation_seed = atoi(mgo.opt); break;
+		case 'G': scanner->generation_seed = atoi(mgo.opt); break;
 		case 'c': _config_file = strdup(mgo.opt); break;
 		case 'x': save_config = false; break;
 		case 'h':
@@ -496,6 +571,7 @@ int ttd_main(int argc, char *argv[])
 		BaseSounds::FindSets();
 		BaseMusic::FindSets();
 		ShowHelp();
+		delete scanner;
 		return 0;
 	}
 
@@ -509,22 +585,22 @@ int ttd_main(int argc, char *argv[])
 	BaseSounds::FindSets();
 	BaseMusic::FindSets();
 
-#if defined(ENABLE_NETWORK) && defined(UNIX) && !defined(__MORPHOS__)
+#if defined(ENABLE_NETWORK)
+	if (dedicated) DEBUG(net, 0, "Starting dedicated version %s", _openttd_revision);
+	if (_dedicated_forks && !dedicated) _dedicated_forks = false;
+
+#if defined(UNIX) && !defined(__MORPHOS__)
 	/* We must fork here, or we'll end up without some resources we need (like sockets) */
 	if (_dedicated_forks) DedicatedFork();
+#endif
 #endif
 
 	TarScanner::DoScan();
 	AI::Initialize();
 	LoadFromConfig();
 	AI::Uninitialize(true);
-	CheckConfig();
-	LoadFromHighScore();
-	LoadHotkeysFromConfig();
 
 	if (resolution.width != 0) { _cur_resolution = resolution; }
-	if (startyear != INVALID_YEAR) _settings_newgame.game_creation.starting_year = startyear;
-	if (generation_seed != GENERATE_NEW_SEED) _settings_newgame.game_creation.generation_seed = generation_seed;
 
 	/*
 	 * The width and height must be at least 1 pixel and width times
@@ -533,16 +609,6 @@ int ttd_main(int argc, char *argv[])
 	 */
 	_cur_resolution.width  = ClampU(_cur_resolution.width,  1, UINT16_MAX);
 	_cur_resolution.height = ClampU(_cur_resolution.height, 1, UINT16_MAX);
-
-#if defined(ENABLE_NETWORK)
-	if (dedicated) DEBUG(net, 0, "Starting dedicated version %s", _openttd_revision);
-	if (dedicated_host != NULL) {
-		_network_bind_list.Clear();
-		*_network_bind_list.Append() = strdup(dedicated_host);
-	}
-	if (dedicated_port != 0) _settings_client.network.server_port = dedicated_port;
-	if (_dedicated_forks && !dedicated) _dedicated_forks = false;
-#endif /* ENABLE_NETWORK */
 
 	/* enumerate language files */
 	InitializeLanguagePacks();
@@ -647,54 +713,18 @@ int ttd_main(int argc, char *argv[])
 	}
 #endif /* ENABLE_NETWORK */
 
-	ScanNewGRFFiles();
-
-	ResetGRFConfig(false);
-
-	/* Make sure _settings is filled with _settings_newgame if we switch to a game directly */
-	if (_switch_mode != SM_NONE) MakeNewgameSettingsLive();
-
-	/* initialize the ingame console */
-	IConsoleInit();
-	_cursor.in_window = true;
-	InitializeGUI();
-	IConsoleCmdExec("exec scripts/autoexec.scr 0");
-
 	/* Take our initial lock on whatever we might want to do! */
-	_genworld_paint_mutex->BeginCritical();
-	_genworld_mapgen_mutex->BeginCritical();
+	_modal_progress_paint_mutex->BeginCritical();
+	_modal_progress_work_mutex->BeginCritical();
 
 	GenerateWorld(GWM_EMPTY, 64, 64); // Make the viewport initialization happy
 	WaitTillGeneratedWorld();
 
+	LoadIntroGame(false);
+
 	CheckForMissingGlyphsInLoadedLanguagePack();
 
-#ifdef ENABLE_NETWORK
-	if (network && _network_available) {
-		if (network_conn != NULL) {
-			const char *port = NULL;
-			const char *company = NULL;
-			uint16 rport = NETWORK_DEFAULT_PORT;
-			CompanyID join_as = COMPANY_NEW_COMPANY;
-
-			ParseConnectionString(&company, &port, network_conn);
-
-			if (company != NULL) {
-				join_as = (CompanyID)atoi(company);
-
-				if (join_as != COMPANY_SPECTATOR) {
-					join_as--;
-					if (join_as >= MAX_COMPANIES) return false;
-				}
-			}
-			if (port != NULL) rport = atoi(port);
-
-			LoadIntroGame();
-			_switch_mode = SM_NONE;
-			NetworkClientConnectGame(NetworkAddress(network_conn, rport), join_as, join_server_password, join_company_password);
-		}
-	}
-#endif /* ENABLE_NETWORK */
+	ScanNewGRFFiles(scanner);
 
 	_video_driver->MainLoop();
 
@@ -738,7 +768,7 @@ static void MakeNewGameDone()
 	SettingsDisableElrail(_settings_game.vehicle.disable_elrails);
 
 	/* In a dedicated server, the server does not play */
-	if (_network_dedicated || BlitterFactoryBase::GetCurrentBlitter()->GetScreenDepth() == 0) {
+	if (!_video_driver->HasGUI()) {
 		SetLocalCompany(COMPANY_SPECTATOR);
 		IConsoleCmdExec("exec scripts/game_start.scr 0");
 		return;
@@ -1121,7 +1151,7 @@ void StateGameLoop()
 		CallWindowTickEvent();
 		return;
 	}
-	if (IsGeneratingWorld()) return;
+	if (HasModalProgress()) return;
 
 	ClearStorageChanges(false);
 
@@ -1209,7 +1239,7 @@ void GameLoop()
 	}
 
 	/* switch game mode? */
-	if (_switch_mode != SM_NONE) {
+	if (_switch_mode != SM_NONE && !HasModalProgress()) {
 		SwitchToMode(_switch_mode);
 		_switch_mode = SM_NONE;
 	}
@@ -1225,7 +1255,7 @@ void GameLoop()
 	/* Check for UDP stuff */
 	if (_network_available) NetworkUDPGameLoop();
 
-	if (_networking && !IsGeneratingWorld()) {
+	if (_networking && !HasModalProgress()) {
 		/* Multiplayer */
 		NetworkGameLoop();
 	} else {

@@ -285,7 +285,7 @@ STR_SORT_BY_RATING_MIN                                          :Valutazione min
 STR_SORT_BY_ENGINE_ID                                           :EngineID (ordine classico)
 STR_SORT_BY_COST                                                :Costo
 STR_SORT_BY_POWER                                               :Potenza
-STR_SORT_BY_TRACTIVE_EFFORT                                     :Forza di trazione
+STR_SORT_BY_TRACTIVE_EFFORT                                     :Sforzo di trazione
 STR_SORT_BY_INTRO_DATE                                          :Data introduzione
 STR_SORT_BY_RUNNING_COST                                        :Costo d'esercizio
 STR_SORT_BY_POWER_VS_RUNNING_COST                               :Potenza / Costo d'esercizio
@@ -863,34 +863,34 @@ STR_GAME_OPTIONS_CURRENCY_UNITS_FRAME                           :{BLACK}Valuta
 STR_GAME_OPTIONS_CURRENCY_UNITS_DROPDOWN_TOOLTIP                :{BLACK}Selezione della valuta
 
 ############ start of currency region
-STR_GAME_OPTIONS_CURRENCY_GBP                                   :Sterlina (£)
-STR_GAME_OPTIONS_CURRENCY_USD                                   :Dollaro ($)
-STR_GAME_OPTIONS_CURRENCY_EUR                                   :Euro (€)
-STR_GAME_OPTIONS_CURRENCY_YEN                                   :Yen (¥)
-STR_GAME_OPTIONS_CURRENCY_ATS                                   :Scellino Austriaco (ATS)
-STR_GAME_OPTIONS_CURRENCY_BEF                                   :Franco Belga (BEF)
-STR_GAME_OPTIONS_CURRENCY_CHF                                   :Franco Svizzero (CHF)
-STR_GAME_OPTIONS_CURRENCY_CZK                                   :Corona Ceca (CZK)
-STR_GAME_OPTIONS_CURRENCY_DEM                                   :Marco Tedesco (DEM)
-STR_GAME_OPTIONS_CURRENCY_DKK                                   :Corona Danese (DKK)
-STR_GAME_OPTIONS_CURRENCY_ESP                                   :Peseta (ESP)
-STR_GAME_OPTIONS_CURRENCY_FIM                                   :Marco Finlandese (FIM)
-STR_GAME_OPTIONS_CURRENCY_FRF                                   :Franco Francese (FRF)
-STR_GAME_OPTIONS_CURRENCY_GRD                                   :Dracma Greca (GRD)
-STR_GAME_OPTIONS_CURRENCY_HUF                                   :Forint Ungherese (HUF)
-STR_GAME_OPTIONS_CURRENCY_ISK                                   :Corona Islandese (ISK)
-STR_GAME_OPTIONS_CURRENCY_ITL                                   :Lira Italiana (ITL)
-STR_GAME_OPTIONS_CURRENCY_NLG                                   :Fiorino Olandese (NLG)
-STR_GAME_OPTIONS_CURRENCY_NOK                                   :Corona Norvegese (NOK)
-STR_GAME_OPTIONS_CURRENCY_PLN                                   :Zloty Polacco (PLN)
-STR_GAME_OPTIONS_CURRENCY_RON                                   :Leu Rumeno (RON)
-STR_GAME_OPTIONS_CURRENCY_RUR                                   :Rublo Russo (RUR)
-STR_GAME_OPTIONS_CURRENCY_SIT                                   :Tolar Sloveno (SIT)
-STR_GAME_OPTIONS_CURRENCY_SEK                                   :Corona Svedese (SEK)
-STR_GAME_OPTIONS_CURRENCY_TRY                                   :Lira Turca (TRY)
-STR_GAME_OPTIONS_CURRENCY_SKK                                   :Corona Slovacca (SKK)
-STR_GAME_OPTIONS_CURRENCY_BRL                                   :Real Brasiliano (BRL)
-STR_GAME_OPTIONS_CURRENCY_EEK                                   :Corona Èstone (EEK)
+STR_GAME_OPTIONS_CURRENCY_GBP                                   :Sterlina britannica (GBP)
+STR_GAME_OPTIONS_CURRENCY_USD                                   :Dollaro americano (USD)
+STR_GAME_OPTIONS_CURRENCY_EUR                                   :Euro (EUR)
+STR_GAME_OPTIONS_CURRENCY_JPY                                   :Yen giapponese (JPY)
+STR_GAME_OPTIONS_CURRENCY_ATS                                   :Scellino austriaco (ATS)
+STR_GAME_OPTIONS_CURRENCY_BEF                                   :Franco belga (BEF)
+STR_GAME_OPTIONS_CURRENCY_CHF                                   :Franco svizzero (CHF)
+STR_GAME_OPTIONS_CURRENCY_CZK                                   :Corona ceca (CZK)
+STR_GAME_OPTIONS_CURRENCY_DEM                                   :Marco tedesco (DEM)
+STR_GAME_OPTIONS_CURRENCY_DKK                                   :Corona danese (DKK)
+STR_GAME_OPTIONS_CURRENCY_ESP                                   :Peseta spagnola (ESP)
+STR_GAME_OPTIONS_CURRENCY_FIM                                   :Marco finlandese (FIM)
+STR_GAME_OPTIONS_CURRENCY_FRF                                   :Franco francese (FRF)
+STR_GAME_OPTIONS_CURRENCY_GRD                                   :Dracma greca (GRD)
+STR_GAME_OPTIONS_CURRENCY_HUF                                   :Forint ungherese (HUF)
+STR_GAME_OPTIONS_CURRENCY_ISK                                   :Corona islandese (ISK)
+STR_GAME_OPTIONS_CURRENCY_ITL                                   :Lira italiana (ITL)
+STR_GAME_OPTIONS_CURRENCY_NLG                                   :Fiorino olandese (NLG)
+STR_GAME_OPTIONS_CURRENCY_NOK                                   :Corona norvegese (NOK)
+STR_GAME_OPTIONS_CURRENCY_PLN                                   :Zloty polacco (PLN)
+STR_GAME_OPTIONS_CURRENCY_RON                                   :Leu rumeno (RON)
+STR_GAME_OPTIONS_CURRENCY_RUR                                   :Rublo russo (RUR)
+STR_GAME_OPTIONS_CURRENCY_SIT                                   :Tolar sloveno (SIT)
+STR_GAME_OPTIONS_CURRENCY_SEK                                   :Corona svedese (SEK)
+STR_GAME_OPTIONS_CURRENCY_TRY                                   :Lira turca (TRY)
+STR_GAME_OPTIONS_CURRENCY_SKK                                   :Corona slovacca (SKK)
+STR_GAME_OPTIONS_CURRENCY_BRL                                   :Real brasiliano (BRL)
+STR_GAME_OPTIONS_CURRENCY_EEK                                   :Corona éstone (EEK)
 STR_GAME_OPTIONS_CURRENCY_CUSTOM                                :Personalizzata...
 ############ end of currency region
 
@@ -1060,6 +1060,11 @@ STR_SEA_LEVEL_MEDIUM                                            :Medio
 STR_SEA_LEVEL_HIGH                                              :Alto
 STR_SEA_LEVEL_CUSTOM                                            :Personalizzato
 STR_SEA_LEVEL_CUSTOM_PERCENTAGE                                 :Personalizzato ({NUM}%)
+
+STR_RIVERS_NONE                                                 :Nessuno
+STR_RIVERS_FEW                                                  :Pochi
+STR_RIVERS_MODERATE                                             :Normali
+STR_RIVERS_LOT                                                  :Molti
 
 STR_DISASTER_NONE                                               :Nessuno
 STR_DISASTER_REDUCED                                            :Ridotti
@@ -1419,6 +1424,8 @@ STR_INTRO_TOOLTIP_NEWGRF_SETTINGS                               :{BLACK}Mostra l
 STR_INTRO_TOOLTIP_ONLINE_CONTENT                                :{BLACK}Controlla la disponibilità di contenuti nuovi o aggiornati da scaricare
 STR_INTRO_TOOLTIP_AI_SETTINGS                                   :{BLACK}Mostra le impostazioni dell'intelligenza artificiale
 STR_INTRO_TOOLTIP_QUIT                                          :{BLACK}Esci da 'OpenTTD'
+
+STR_INTRO_TRANSLATION                                           :{BLACK}A questa traduzione mancano {NUM} string{P a he}. Aiutaci a migliorare OpenTTD iscrivendoti come traduttore. Vedi readme.txt per dettagli.
 
 # Quit window
 STR_QUIT_CAPTION                                                :{WHITE}Esci
@@ -2341,6 +2348,7 @@ STR_MAPGEN_LAND_GENERATOR                                       :{BLACK}Generato
 STR_MAPGEN_TREE_PLACER                                          :{BLACK}Algoritmo alberi:
 STR_MAPGEN_TERRAIN_TYPE                                         :{BLACK}Tipo di terreno:
 STR_MAPGEN_QUANTITY_OF_SEA_LAKES                                :{BLACK}Livello del mare:
+STR_MAPGEN_QUANTITY_OF_RIVERS                                   :{BLACK}Fiumi:
 STR_MAPGEN_SMOOTHNESS                                           :{BLACK}Levigatezza:
 STR_MAPGEN_VARIETY                                              :{BLACK}Varietà del terreno:
 STR_MAPGEN_GENERATE                                             :{WHITE}Genera
@@ -2385,6 +2393,7 @@ STR_GENERATION_ABORT_MESSAGE                                    :{YELLOW}Si è s
 STR_GENERATION_PROGRESS                                         :{WHITE}{NUM}% completato
 STR_GENERATION_PROGRESS_NUM                                     :{BLACK}{NUM} / {NUM}
 STR_GENERATION_WORLD_GENERATION                                 :{BLACK}Generazione mondo
+STR_GENERATION_RIVER_GENERATION                                 :{BLACK}Generazione fiumi
 STR_GENERATION_TREE_GENERATION                                  :{BLACK}Generazione alberi
 STR_GENERATION_OBJECT_GENERATION                                :{BLACK}Generazione oggetti inamovibili
 STR_GENERATION_CLEARING_TILES                                   :{BLACK}Generazione aree brulle e rocciose
@@ -2537,6 +2546,12 @@ STR_NEWGRF_INVALID_CARGO_ABBREV                                 :??
 STR_NEWGRF_INVALID_CARGO_QUANTITY                               :{COMMA} di <carico non valido>
 STR_NEWGRF_INVALID_ENGINE                                       :<modello di veicolo non valido>
 STR_NEWGRF_INVALID_INDUSTRYTYPE                                 :<industria non valida>
+
+# NewGRF scanning window
+STR_NEWGRF_SCAN_CAPTION                                         :{WHITE}Scansione NewGRF
+STR_NEWGRF_SCAN_MESSAGE                                         :{BLACK}Scansione dei NewGRF in corso. A seconda della quantità, questa operazione può richiedere molto tempo...
+STR_NEWGRF_SCAN_STATUS                                          :{BLACK}{NUM} NewGRF esaminat{P o i} su un totale stimato di {NUM} NewGRF
+STR_NEWGRF_SCAN_ARCHIVES                                        :Ricerca di archivi
 
 # Sign list window
 STR_SIGN_LIST_CAPTION                                           :{WHITE}Elenco cartelli - {COMMA} cartell{P o i}
@@ -2845,6 +2860,8 @@ STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :Nuovo aeromobil
 STR_PURCHASE_INFO_COST_WEIGHT                                   :{BLACK}Costo: {GOLD}{CURRENCY}{BLACK} Peso: {GOLD}{WEIGHT_S}
 STR_PURCHASE_INFO_SPEED_POWER                                   :{BLACK}Velocità: {GOLD}{VELOCITY}{BLACK} Potenza: {GOLD}{POWER}
 STR_PURCHASE_INFO_SPEED                                         :{BLACK}Velocità: {GOLD}{VELOCITY}
+STR_PURCHASE_INFO_SPEED_OCEAN                                   :{BLACK}Velocità sull'oceano: {GOLD}{VELOCITY}
+STR_PURCHASE_INFO_SPEED_CANAL                                   :{BLACK}Velocità su canali/fiumi: {GOLD}{VELOCITY}
 STR_PURCHASE_INFO_RUNNINGCOST                                   :{BLACK}Costo d'esercizio: {GOLD}{CURRENCY}/anno
 STR_PURCHASE_INFO_CAPACITY                                      :{BLACK}Capacità: {GOLD}{CARGO} {STRING}
 STR_PURCHASE_INFO_REFITTABLE                                    :(riadattabile)
@@ -2858,7 +2875,7 @@ STR_PURCHASE_INFO_PWAGPOWER_PWAGWEIGHT                          :{BLACK}Vagoni a
 STR_PURCHASE_INFO_REFITTABLE_TO                                 :{BLACK}Riadattabile per: {GOLD}
 STR_PURCHASE_INFO_ALL_TYPES                                     :Tutti i tipi di carico
 STR_PURCHASE_INFO_ALL_BUT                                       :Tutto tranne {GOLD}
-STR_PURCHASE_INFO_MAX_TE                                        :{BLACK}Forza di trazione massima: {GOLD}{FORCE}
+STR_PURCHASE_INFO_MAX_TE                                        :{BLACK}Sforzo di trazione massimo: {GOLD}{FORCE}
 
 STR_BUY_VEHICLE_TRAIN_LIST_TOOLTIP                              :{BLACK}Elenco di selezione dei veicoli ferroviari - fare clic su un veicolo per informazioni
 STR_BUY_VEHICLE_ROAD_VEHICLE_LIST_TOOLTIP                       :{BLACK}Elenco selezione automezzi - fare clic su un veicolo per informazioni
@@ -2976,7 +2993,7 @@ STR_ENGINE_PREVIEW_MONORAIL_LOCOMOTIVE                          :{G=f}motrice mo
 STR_ENGINE_PREVIEW_MAGLEV_LOCOMOTIVE                            :{G=f}motrice maglev
 
 STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER                      :{BLACK}Costo: {CURRENCY} Peso: {WEIGHT_S}{}Velocità: {VELOCITY}  Potenza: {POWER}{}Costo d'esercizio: {CURRENCY}/anno{}Capacità: {CARGO}
-STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER_MAX_TE               :{BLACK}Costo: {CURRENCY} Peso: {WEIGHT_S}{}Velocità: {VELOCITY}  Potenza: {POWER}{}  F.T. max.: {6:FORCE}{}Costo d'esercizio: {4:CURRENCY}/anno{}Capacità: {5:CARGO}
+STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER_MAX_TE               :{BLACK}Costo: {CURRENCY} Peso: {WEIGHT_S}{}Velocità: {VELOCITY}  Potenza: {POWER}{}  S.T. max.: {6:FORCE}{}Costo d'esercizio: {4:CURRENCY}/anno{}Capacità: {5:CARGO}
 STR_ENGINE_PREVIEW_COST_MAX_SPEED_CAPACITY_CAPACITY_RUNCOST     :{BLACK}Costo: {CURRENCY} Velocità max.: {VELOCITY}{}Capacità: {CARGO}, {CARGO}{}Costo d'esercizio: {CURRENCY}/anno
 STR_ENGINE_PREVIEW_COST_MAX_SPEED_CAPACITY_RUNCOST              :{BLACK}Costo: {CURRENCY} Velocità max.: {VELOCITY}{}Capacità: {CARGO}{}Costo d'esercizio: {CURRENCY}/anno
 
@@ -3093,7 +3110,7 @@ STR_VEHICLE_INFO_AGE_RED                                        :{RED}{COMMA} an
 
 STR_VEHICLE_INFO_MAX_SPEED                                      :{BLACK}Velocità max.: {LTBLUE}{VELOCITY}
 STR_VEHICLE_INFO_WEIGHT_POWER_MAX_SPEED                         :{BLACK}Peso: {LTBLUE}{WEIGHT_S} {BLACK}Potenza: {LTBLUE}{POWER}{BLACK} Velocità max.: {LTBLUE}{VELOCITY}
-STR_VEHICLE_INFO_WEIGHT_POWER_MAX_SPEED_MAX_TE                  :{BLACK}Peso: {LTBLUE}{WEIGHT_S} {BLACK}Potenza: {LTBLUE}{POWER}{BLACK} Velocità max.: {LTBLUE}{VELOCITY} {BLACK}F.T. max.: {LTBLUE}{FORCE}
+STR_VEHICLE_INFO_WEIGHT_POWER_MAX_SPEED_MAX_TE                  :{BLACK}Peso: {LTBLUE}{WEIGHT_S} {BLACK}Potenza: {LTBLUE}{POWER}{BLACK} Velocità max.: {LTBLUE}{VELOCITY} {BLACK}S.T. max.: {LTBLUE}{FORCE}
 
 STR_VEHICLE_INFO_PROFIT_THIS_YEAR_LAST_YEAR                     :{BLACK}Profitto quest'anno: {LTBLUE}{CURRENCY} (anno scorso: {CURRENCY})
 STR_VEHICLE_INFO_RELIABILITY_BREAKDOWNS                         :{BLACK}Affidabilità: {LTBLUE}{COMMA}%  {BLACK}Guasti dall'ultima manutenzione: {LTBLUE}{COMMA}
