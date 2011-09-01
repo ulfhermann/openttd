@@ -25,10 +25,10 @@
 #include "landscape_type.h"
 #include "querystring_gui.h"
 #include "town.h"
-#include "thread/thread.h"
 #include "settings_func.h"
 #include "core/geometry_func.hpp"
 #include "core/random_func.hpp"
+#include "progress.h"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -92,6 +92,7 @@ enum GenerateLandscapeWindowWidgets {
 
 	GLAND_TERRAIN_PULLDOWN,    ///< Dropdown 'Terrain type'
 	GLAND_WATER_PULLDOWN,      ///< Dropdown 'Sea level'
+	GLAND_RIVER_PULLDOWN,      ///< Dropdown 'Rivers'
 	GLAND_SMOOTHNESS_PULLDOWN, ///< Dropdown 'Smoothness'
 	GLAND_VARIETY_PULLDOWN,    ///< Dropdown 'Variety distribution'
 
@@ -181,6 +182,10 @@ static const NWidgetPart _nested_generate_landscape_widgets[] = {
 					EndContainer(),
 				EndContainer(),
 				NWidget(WWT_TEXTBTN, COLOUR_ORANGE, GLAND_RANDOM_BUTTON), SetDataTip(STR_MAPGEN_RANDOM, STR_MAPGEN_RANDOM_HELP), SetFill(1, 0),
+				NWidget(NWID_HORIZONTAL), SetPIP(0, 3, 0),
+					NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_QUANTITY_OF_RIVERS, STR_NULL), SetFill(1, 1),
+					NWidget(WWT_DROPDOWN, COLOUR_ORANGE, GLAND_RIVER_PULLDOWN), SetDataTip(STR_JUST_STRING, STR_NULL), SetFill(1, 0),
+				EndContainer(),
 				NWidget(NWID_SPACER), SetFill(1, 1),
 				NWidget(WWT_TEXTBTN, COLOUR_GREEN, GLAND_GENERATE_BUTTON), SetMinimalSize(84, 30), SetDataTip(STR_MAPGEN_GENERATE, STR_NULL), SetFill(1, 0),
 			EndContainer(),
@@ -331,6 +336,7 @@ static DropDownList *BuildMapsizeDropDown()
 
 static const StringID _elevations[]  = {STR_TERRAIN_TYPE_VERY_FLAT, STR_TERRAIN_TYPE_FLAT, STR_TERRAIN_TYPE_HILLY, STR_TERRAIN_TYPE_MOUNTAINOUS, INVALID_STRING_ID};
 static const StringID _sea_lakes[]   = {STR_SEA_LEVEL_VERY_LOW, STR_SEA_LEVEL_LOW, STR_SEA_LEVEL_MEDIUM, STR_SEA_LEVEL_HIGH, STR_SEA_LEVEL_CUSTOM, INVALID_STRING_ID};
+static const StringID _rivers[]      = {STR_RIVERS_NONE, STR_RIVERS_FEW, STR_RIVERS_MODERATE, STR_RIVERS_LOT, INVALID_STRING_ID};
 static const StringID _smoothness[]  = {STR_CONFIG_SETTING_ROUGHNESS_OF_TERRAIN_VERY_SMOOTH, STR_CONFIG_SETTING_ROUGHNESS_OF_TERRAIN_SMOOTH, STR_CONFIG_SETTING_ROUGHNESS_OF_TERRAIN_ROUGH, STR_CONFIG_SETTING_ROUGHNESS_OF_TERRAIN_VERY_ROUGH, INVALID_STRING_ID};
 static const StringID _tree_placer[] = {STR_CONFIG_SETTING_TREE_PLACER_NONE, STR_CONFIG_SETTING_TREE_PLACER_ORIGINAL, STR_CONFIG_SETTING_TREE_PLACER_IMPROVED, INVALID_STRING_ID};
 static const StringID _rotation[]    = {STR_CONFIG_SETTING_HEIGHTMAP_ROTATION_COUNTER_CLOCKWISE, STR_CONFIG_SETTING_HEIGHTMAP_ROTATION_CLOCKWISE, INVALID_STRING_ID};
@@ -404,6 +410,7 @@ struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 				}
 				break;
 
+			case GLAND_RIVER_PULLDOWN:      SetDParam(0, _rivers[_settings_newgame.game_creation.amount_of_rivers]); break;
 			case GLAND_SMOOTHNESS_PULLDOWN: SetDParam(0, _smoothness[_settings_newgame.game_creation.tgen_smoothness]); break;
 			case GLAND_VARIETY_PULLDOWN:    SetDParam(0, _variety[_settings_newgame.game_creation.variety]); break;
 			case GLAND_BORDERS_RANDOM:      SetDParam(0, (_settings_newgame.game_creation.water_borders == BORDERS_RANDOM) ? STR_MAPGEN_BORDER_RANDOMIZE : STR_MAPGEN_BORDER_MANUAL); break;
@@ -517,6 +524,7 @@ struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 				*size = GetStringBoundingBox(STR_SEA_LEVEL_CUSTOM_PERCENTAGE);
 				break;
 
+			case GLAND_RIVER_PULLDOWN:      strs = _rivers; break;
 			case GLAND_SMOOTHNESS_PULLDOWN: strs = _smoothness; break;
 			case GLAND_VARIETY_PULLDOWN:    strs = _variety; break;
 			case GLAND_HEIGHTMAP_ROTATION_PULLDOWN: strs = _rotation; break;
@@ -691,6 +699,10 @@ struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 				break;
 			}
 
+			case GLAND_RIVER_PULLDOWN: // Amount of rivers
+				ShowDropDownMenu(this, _rivers, _settings_newgame.game_creation.amount_of_rivers, GLAND_RIVER_PULLDOWN, 0, 0);
+				break;
+
 			case GLAND_SMOOTHNESS_PULLDOWN: // Map smoothness
 				ShowDropDownMenu(this, _smoothness, _settings_newgame.game_creation.tgen_smoothness, GLAND_SMOOTHNESS_PULLDOWN, 0, 0);
 				break;
@@ -761,6 +773,7 @@ struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 			case GLAND_MAPSIZE_X_PULLDOWN:     _settings_newgame.game_creation.map_x = index; break;
 			case GLAND_MAPSIZE_Y_PULLDOWN:     _settings_newgame.game_creation.map_y = index; break;
 			case GLAND_TREE_PULLDOWN:          _settings_newgame.game_creation.tree_placer = index; break;
+			case GLAND_RIVER_PULLDOWN:         _settings_newgame.game_creation.amount_of_rivers = index; break;
 			case GLAND_SMOOTHNESS_PULLDOWN:    _settings_newgame.game_creation.tgen_smoothness = index;  break;
 			case GLAND_VARIETY_PULLDOWN:       _settings_newgame.game_creation.variety = index; break;
 			case GLAND_LANDSCAPE_PULLDOWN:     _settings_newgame.game_creation.land_generator = index; break;
@@ -1202,7 +1215,7 @@ static const NWidgetPart _nested_generate_progress_widgets[] = {
 
 static const WindowDesc _generate_progress_desc(
 	WDP_CENTER, 0, 0,
-	WC_GENERATE_PROGRESS_WINDOW, WC_NONE,
+	WC_MODAL_PROGRESS, WC_NONE,
 	WDF_UNCLICK_BUTTONS,
 	_nested_generate_progress_widgets, lengthof(_nested_generate_progress_widgets)
 );
@@ -1220,6 +1233,7 @@ static GenWorldStatus _gws;
 static const StringID _generation_class_table[]  = {
 	STR_GENERATION_WORLD_GENERATION,
 	STR_SCENEDIT_TOOLBAR_LANDSCAPE_GENERATION,
+	STR_GENERATION_RIVER_GENERATION,
 	STR_GENERATION_CLEARING_TILES,
 	STR_SCENEDIT_TOOLBAR_TOWN_GENERATION,
 	STR_SCENEDIT_TOOLBAR_INDUSTRY_GENERATION,
@@ -1236,7 +1250,7 @@ static void AbortGeneratingWorldCallback(Window *w, bool confirmed)
 {
 	if (confirmed) {
 		AbortGeneratingWorld();
-	} else if (IsGeneratingWorld() && !IsGeneratingWorldAborted()) {
+	} else if (HasModalProgress() && !IsGeneratingWorldAborted()) {
 		SetMouseCursor(SPR_CURSOR_ZZZ, PAL_NONE);
 	}
 }
@@ -1324,14 +1338,14 @@ void PrepareGenerateWorldProgress()
  */
 void ShowGenerateWorldProgress()
 {
-	if (BringWindowToFrontById(WC_GENERATE_PROGRESS_WINDOW, 0)) return;
+	if (BringWindowToFrontById(WC_MODAL_PROGRESS, 0)) return;
 	new GenerateProgressWindow();
 }
 
 static void _SetGeneratingWorldProgress(GenWorldProgress cls, uint progress, uint total)
 {
-	static const int percent_table[GWP_CLASS_COUNT + 1] = {0, 5, 15, 20, 40, 60, 65, 80, 85, 99, 100 };
-
+	static const int percent_table[] = {0, 5, 14, 17, 20, 40, 60, 65, 80, 85, 99, 100 };
+	assert_compile(lengthof(percent_table) == GWP_CLASS_COUNT + 1);
 	assert(cls < GWP_CLASS_COUNT);
 
 	/* Do not run this function if we aren't in a thread */
@@ -1351,7 +1365,7 @@ static void _SetGeneratingWorldProgress(GenWorldProgress cls, uint progress, uin
 	}
 
 	/* Don't update the screen too often. So update it once in every once in a while... */
-	if (!_network_dedicated && _gws.timer != 0 && _realtime_tick - _gws.timer < GENWORLD_REDRAW_TIMEOUT) return;
+	if (!_network_dedicated && _gws.timer != 0 && _realtime_tick - _gws.timer < MODAL_PROGRESS_REDRAW_TIMEOUT) return;
 
 	/* Percentage is about the number of completed tasks, so 'current - 1' */
 	_gws.percent = percent_table[cls] + (percent_table[cls + 1] - percent_table[cls]) * (_gws.current == 0 ? 0 : _gws.current - 1) / _gws.total;
@@ -1375,17 +1389,17 @@ static void _SetGeneratingWorldProgress(GenWorldProgress cls, uint progress, uin
 		return;
 	}
 
-	SetWindowDirty(WC_GENERATE_PROGRESS_WINDOW, 0);
+	SetWindowDirty(WC_MODAL_PROGRESS, 0);
 	MarkWholeScreenDirty();
 
 	/* Release the rights to the map generator, and acquire the rights to the
 	 * paint thread. The 'other' thread already has the paint thread rights so
 	 * this ensures us that we are waiting until the paint thread is done
 	 * before we reacquire the mapgen rights */
-	_genworld_mapgen_mutex->EndCritical();
-	_genworld_paint_mutex->BeginCritical();
-	_genworld_mapgen_mutex->BeginCritical();
-	_genworld_paint_mutex->EndCritical();
+	_modal_progress_work_mutex->EndCritical();
+	_modal_progress_paint_mutex->BeginCritical();
+	_modal_progress_work_mutex->BeginCritical();
+	_modal_progress_paint_mutex->EndCritical();
 
 	_gws.timer = _realtime_tick;
 }
