@@ -112,6 +112,8 @@ struct GUISettings {
 	bool   station_show_coverage;            ///< whether to highlight coverage area
 	bool   persistent_buildingtools;         ///< keep the building tools active after usage
 	bool   expenses_layout;                  ///< layout of expenses window
+	uint32 last_newgrf_count;                ///< the numbers of NewGRFs we found during the last scan
+	byte   missing_strings_threshold;        ///< the number of missing strings before showing the warning
 
 	uint16 console_backlog_timeout;          ///< the minimum amount of time items should be in the console backlog before they will be removed in ~3 seconds granularity.
 	uint16 console_backlog_length;           ///< the minimum amount of items in the console backlog before items will be removed.
@@ -225,6 +227,9 @@ struct GameCreationSettings {
 	uint16 custom_town_number;               ///< manually entered number of towns
 	byte   variety;                          ///< variety level applied to TGP
 	byte   custom_sea_level;                 ///< manually entered percentage of water in the map
+	byte   min_river_length;                 ///< the minimum river length
+	byte   river_route_random;               ///< the amount of randomicity for the route finding
+	byte   amount_of_rivers;                 ///< the amount of rivers
 };
 
 /** Settings related to construction in-game */

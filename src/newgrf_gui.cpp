@@ -511,7 +511,7 @@ enum ShowNewGRFStateWidgets {
 /**
  * Window for showing NewGRF files
  */
-struct NewGRFWindow : public QueryStringBaseWindow {
+struct NewGRFWindow : public QueryStringBaseWindow, NewGRFScanCallback {
 	typedef GUIList<const GRFConfig *> GUIGRFConfigList;
 
 	static const uint EDITBOX_MAX_SIZE   =  50;
@@ -985,15 +985,17 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 			case SNGRFS_RESCAN_FILES:
 			case SNGRFS_RESCAN_FILES2:
 				TarScanner::DoScan();
-				ScanNewGRFFiles();
-				this->avail_sel = NULL;
-				this->avail_pos = -1;
-				this->avails.ForceRebuild();
-				this->InvalidateData(GOID_NEWGRF_RESCANNED);
-				this->DeleteChildWindows(WC_QUERY_STRING); // Remove the parameter query window
-				InvalidateWindowClassesData(WC_SAVELOAD);
+				ScanNewGRFFiles(this);
 				break;
 		}
+	}
+
+	virtual void OnNewGRFsScanned()
+	{
+		this->avail_sel = NULL;
+		this->avail_pos = -1;
+		this->avails.ForceRebuild();
+		this->DeleteChildWindows(WC_QUERY_STRING); // Remove the parameter query window
 	}
 
 	virtual void OnDropdownSelect(int widget, int index)
@@ -1684,4 +1686,129 @@ void ShowNewGRFSettings(bool editable, bool show_params, bool exec_changes, GRFC
 {
 	DeleteWindowByClass(WC_GAME_OPTIONS);
 	new NewGRFWindow(&_newgrf_desc, editable, show_params, exec_changes, config);
+}
+
+/** The widgets for the scan progress. */
+enum ScanProgressWindowWidgets {
+	SPWW_PROGRESS_BAR,  ///< Simple progress bar.
+	GPWW_PROGRESS_TEXT, ///< Text explaining what is happening.
+};
+
+/** Widgets for the progress window. */
+static const NWidgetPart _nested_scan_progress_widgets[] = {
+	NWidget(WWT_CAPTION, COLOUR_GREY), SetDataTip(STR_NEWGRF_SCAN_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+	NWidget(WWT_PANEL, COLOUR_GREY),
+		NWidget(NWID_HORIZONTAL), SetPIP(20, 0, 20),
+			NWidget(NWID_VERTICAL), SetPIP(11, 8, 11),
+				NWidget(WWT_LABEL, INVALID_COLOUR), SetDataTip(STR_NEWGRF_SCAN_MESSAGE, STR_NULL), SetFill(1, 0),
+				NWidget(WWT_EMPTY, INVALID_COLOUR, SPWW_PROGRESS_BAR), SetFill(1, 0),
+				NWidget(WWT_EMPTY, INVALID_COLOUR, GPWW_PROGRESS_TEXT), SetFill(1, 0),
+			EndContainer(),
+		EndContainer(),
+	EndContainer(),
+};
+
+/** Description of the widgets and other settings of the window. */
+static const WindowDesc _scan_progress_desc(
+	WDP_CENTER, 0, 0,
+	WC_MODAL_PROGRESS, WC_NONE,
+	WDF_UNCLICK_BUTTONS,
+	_nested_scan_progress_widgets, lengthof(_nested_scan_progress_widgets)
+);
+
+/** Window for showing the progress of NewGRF scanning. */
+struct ScanProgressWindow : public Window {
+	char *last_name; ///< The name of the last 'seen' NewGRF.
+	int scanned;     ///< The number of NewGRFs that we have seen.
+
+	/** Create the window. */
+	ScanProgressWindow() : Window(), last_name(NULL), scanned(0)
+	{
+		this->InitNested(&_scan_progress_desc);
+	}
+
+	/** Free the last name buffer. */
+	~ScanProgressWindow()
+	{
+		free(last_name);
+	}
+
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
+	{
+		switch (widget) {
+			case SPWW_PROGRESS_BAR: {
+				SetDParam(0, 100);
+				*size = GetStringBoundingBox(STR_GENERATION_PROGRESS);
+				/* We need some spacing for the 'border' */
+				size->height += 8;
+				size->width += 8;
+				break;
+			}
+
+			case GPWW_PROGRESS_TEXT:
+				SetDParam(0, 9999);
+				SetDParam(1, 9999);
+				/* We really don't know the width. We could determine it by scanning the NewGRFs,
+				 * but this is the status window for scanning them... */
+				size->width = max(400U, GetStringBoundingBox(STR_NEWGRF_SCAN_STATUS).width);
+				size->height = FONT_HEIGHT_NORMAL * 2 + WD_PAR_VSEP_NORMAL;
+				break;
+		}
+	}
+
+	virtual void DrawWidget(const Rect &r, int widget) const
+	{
+		switch (widget) {
+			case SPWW_PROGRESS_BAR: {
+				/* Draw the % complete with a bar and a text */
+				DrawFrameRect(r.left, r.top, r.right, r.bottom, COLOUR_GREY, FR_BORDERONLY);
+				uint percent = scanned * 100 / max(1U, _settings_client.gui.last_newgrf_count);
+				DrawFrameRect(r.left + 1, r.top + 1, (int)((r.right - r.left - 2) * percent / 100) + r.left + 1, r.bottom - 1, COLOUR_MAUVE, FR_NONE);
+				SetDParam(0, percent);
+				DrawString(r.left, r.right, r.top + 5, STR_GENERATION_PROGRESS, TC_FROMSTRING, SA_HOR_CENTER);
+				break;
+			}
+
+			case GPWW_PROGRESS_TEXT:
+				SetDParam(0, this->scanned);
+				SetDParam(1, _settings_client.gui.last_newgrf_count);
+				DrawString(r.left, r.right, r.top, STR_NEWGRF_SCAN_STATUS, TC_FROMSTRING, SA_HOR_CENTER);
+
+				DrawString(r.left, r.right, r.top + FONT_HEIGHT_NORMAL + WD_PAR_VSEP_NORMAL, this->last_name == NULL ? "" : this->last_name, TC_BLACK, SA_HOR_CENTER);
+				break;
+		}
+	}
+
+	/**
+	 * Update the NewGRF scan status.
+	 * @param num  The number of NewGRFs scanned so far.
+	 * @param name The name of the last scanned NewGRF.
+	 */
+	void UpdateNewGRFScanStatus(uint num, const char *name)
+	{
+		free(this->last_name);
+		if (name == NULL) {
+			char buf[256];
+			GetString(buf, STR_NEWGRF_SCAN_ARCHIVES, lastof(buf));
+			this->last_name = strdup(buf);
+		} else {
+			this->last_name = strdup(name);
+		}
+		this->scanned = num;
+		if (num > _settings_client.gui.last_newgrf_count) _settings_client.gui.last_newgrf_count = num;
+
+		this->SetDirty();
+	}
+};
+
+/**
+ * Update the NewGRF scan status.
+ * @param num  The number of NewGRFs scanned so far.
+ * @param name The name of the last scanned NewGRF.
+ */
+void UpdateNewGRFScanStatus(uint num, const char *name)
+{
+	ScanProgressWindow *w  = dynamic_cast<ScanProgressWindow *>(FindWindowByClass(WC_MODAL_PROGRESS));
+	if (w == NULL) w = new ScanProgressWindow();
+	w->UpdateNewGRFScanStatus(num, name);
 }

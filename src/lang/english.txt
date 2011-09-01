@@ -275,7 +275,7 @@ STR_SORT_BY_MAX_SPEED                                           :Maximum speed
 STR_SORT_BY_MODEL                                               :Model
 STR_SORT_BY_VALUE                                               :Value
 STR_SORT_BY_LENGTH                                              :Length
-STR_SORT_BY_LIFE_TIME                                           :Remaining life time
+STR_SORT_BY_LIFE_TIME                                           :Remaining lifetime
 STR_SORT_BY_TIMETABLE_DELAY                                     :Timetable delay
 STR_SORT_BY_FACILITY                                            :Station type
 STR_SORT_BY_WAITING                                             :Waiting cargo value
@@ -872,26 +872,26 @@ STR_GAME_OPTIONS_CURRENCY_UNITS_FRAME                           :{BLACK}Currency
 STR_GAME_OPTIONS_CURRENCY_UNITS_DROPDOWN_TOOLTIP                :{BLACK}Currency units selection
 
 ############ start of currency region
-STR_GAME_OPTIONS_CURRENCY_GBP                                   :Pounds (£)
-STR_GAME_OPTIONS_CURRENCY_USD                                   :Dollars ($)
-STR_GAME_OPTIONS_CURRENCY_EUR                                   :Euro (€)
-STR_GAME_OPTIONS_CURRENCY_YEN                                   :Yen (¥)
+STR_GAME_OPTIONS_CURRENCY_GBP                                   :British Pound (GBP)
+STR_GAME_OPTIONS_CURRENCY_USD                                   :American Dollar (USD)
+STR_GAME_OPTIONS_CURRENCY_EUR                                   :Euro (EUR)
+STR_GAME_OPTIONS_CURRENCY_JPY                                   :Japanese Yen (JPY)
 STR_GAME_OPTIONS_CURRENCY_ATS                                   :Austrian Shilling (ATS)
 STR_GAME_OPTIONS_CURRENCY_BEF                                   :Belgian Franc (BEF)
 STR_GAME_OPTIONS_CURRENCY_CHF                                   :Swiss Franc (CHF)
 STR_GAME_OPTIONS_CURRENCY_CZK                                   :Czech Koruna (CZK)
 STR_GAME_OPTIONS_CURRENCY_DEM                                   :Deutschmark (DEM)
 STR_GAME_OPTIONS_CURRENCY_DKK                                   :Danish Krone (DKK)
-STR_GAME_OPTIONS_CURRENCY_ESP                                   :Peseta (ESP)
+STR_GAME_OPTIONS_CURRENCY_ESP                                   :Spanish Peseta (ESP)
 STR_GAME_OPTIONS_CURRENCY_FIM                                   :Finnish Markka (FIM)
-STR_GAME_OPTIONS_CURRENCY_FRF                                   :Franc (FRF)
+STR_GAME_OPTIONS_CURRENCY_FRF                                   :French Franc (FRF)
 STR_GAME_OPTIONS_CURRENCY_GRD                                   :Greek Drachma (GRD)
 STR_GAME_OPTIONS_CURRENCY_HUF                                   :Hungarian Forint (HUF)
 STR_GAME_OPTIONS_CURRENCY_ISK                                   :Icelandic Krona (ISK)
 STR_GAME_OPTIONS_CURRENCY_ITL                                   :Italian Lira (ITL)
 STR_GAME_OPTIONS_CURRENCY_NLG                                   :Dutch Guilder (NLG)
 STR_GAME_OPTIONS_CURRENCY_NOK                                   :Norwegian Krone (NOK)
-STR_GAME_OPTIONS_CURRENCY_PLN                                   :Polish Zloty (PLN)
+STR_GAME_OPTIONS_CURRENCY_PLN                                   :Polish Złoty (PLN)
 STR_GAME_OPTIONS_CURRENCY_RON                                   :Romanian Leu (RON)
 STR_GAME_OPTIONS_CURRENCY_RUR                                   :Russian Rubles (RUR)
 STR_GAME_OPTIONS_CURRENCY_SIT                                   :Slovenian Tolar (SIT)
@@ -1070,6 +1070,11 @@ STR_SEA_LEVEL_HIGH                                              :High
 STR_SEA_LEVEL_CUSTOM                                            :Custom
 STR_SEA_LEVEL_CUSTOM_PERCENTAGE                                 :Custom ({NUM}%)
 
+STR_RIVERS_NONE                                                 :None
+STR_RIVERS_FEW                                                  :Few
+STR_RIVERS_MODERATE                                             :Medium
+STR_RIVERS_LOT                                                  :Many
+
 STR_DISASTER_NONE                                               :None
 STR_DISASTER_REDUCED                                            :Reduced
 STR_DISASTER_NORMAL                                             :Normal
@@ -1124,8 +1129,8 @@ STR_CONFIG_SETTING_TRAIN_LENGTH                                 :{LTBLUE}Maximum
 STR_CONFIG_SETTING_SMOKE_AMOUNT                                 :{LTBLUE}Amount of vehicle smoke/sparks: {ORANGE}{STRING1}
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL                     :{LTBLUE}Train acceleration model: {ORANGE}{STRING1}
 STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL              :{LTBLUE}Road vehicle acceleration model: {ORANGE}{STRING1}
-STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Slope steepness for trains {ORANGE}{STRING1}%
-STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}Slope steepness for road vehicles {ORANGE}{STRING1}%
+STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Slope steepness for trains: {ORANGE}{STRING1}%
+STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}Slope steepness for road vehicles: {ORANGE}{STRING1}%
 STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Forbid trains and ships from making 90° turns: {ORANGE}{STRING1}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Allow to join stations not directly adjacent: {ORANGE}{STRING1}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Use improved loading algorithm: {ORANGE}{STRING1}
@@ -1420,6 +1425,8 @@ STR_INTRO_TOOLTIP_NEWGRF_SETTINGS                               :{BLACK}Display 
 STR_INTRO_TOOLTIP_ONLINE_CONTENT                                :{BLACK}Check for new and updated content to download
 STR_INTRO_TOOLTIP_AI_SETTINGS                                   :{BLACK}Display AI settings
 STR_INTRO_TOOLTIP_QUIT                                          :{BLACK}Quit 'OpenTTD'
+
+STR_INTRO_TRANSLATION                                           :{BLACK}This translation misses {NUM} string{P "" s}. Please help make OpenTTD better by signing up as translator. See readme.txt for details.
 
 # Quit window
 STR_QUIT_CAPTION                                                :{WHITE}Quit
@@ -2342,6 +2349,7 @@ STR_MAPGEN_LAND_GENERATOR                                       :{BLACK}Land gen
 STR_MAPGEN_TREE_PLACER                                          :{BLACK}Tree algorithm:
 STR_MAPGEN_TERRAIN_TYPE                                         :{BLACK}Terrain type:
 STR_MAPGEN_QUANTITY_OF_SEA_LAKES                                :{BLACK}Sea level:
+STR_MAPGEN_QUANTITY_OF_RIVERS                                   :{BLACK}Rivers:
 STR_MAPGEN_SMOOTHNESS                                           :{BLACK}Smoothness:
 STR_MAPGEN_VARIETY                                              :{BLACK}Variety distribution:
 STR_MAPGEN_GENERATE                                             :{WHITE}Generate
@@ -2386,6 +2394,7 @@ STR_GENERATION_ABORT_MESSAGE                                    :{YELLOW}Do you 
 STR_GENERATION_PROGRESS                                         :{WHITE}{NUM}% complete
 STR_GENERATION_PROGRESS_NUM                                     :{BLACK}{NUM} / {NUM}
 STR_GENERATION_WORLD_GENERATION                                 :{BLACK}World generation
+STR_GENERATION_RIVER_GENERATION                                 :{BLACK}River generation
 STR_GENERATION_TREE_GENERATION                                  :{BLACK}Tree generation
 STR_GENERATION_OBJECT_GENERATION                                :{BLACK}Object generation
 STR_GENERATION_CLEARING_TILES                                   :{BLACK}Rough and rocky area generation
@@ -2538,6 +2547,12 @@ STR_NEWGRF_INVALID_CARGO_ABBREV                                 :??
 STR_NEWGRF_INVALID_CARGO_QUANTITY                               :{COMMA} of <invalid cargo>
 STR_NEWGRF_INVALID_ENGINE                                       :<invalid vehicle model>
 STR_NEWGRF_INVALID_INDUSTRYTYPE                                 :<invalid industry>
+
+# NewGRF scanning window
+STR_NEWGRF_SCAN_CAPTION                                         :{WHITE}Scanning NewGRFs
+STR_NEWGRF_SCAN_MESSAGE                                         :{BLACK}Scanning NewGRFs. Depending on the amount this can take a while...
+STR_NEWGRF_SCAN_STATUS                                          :{BLACK}{NUM} NewGRF{P "" s} scanned out of an estimated {NUM} NewGRF{P "" s}
+STR_NEWGRF_SCAN_ARCHIVES                                        :Scanning for archives
 
 # Sign list window
 STR_SIGN_LIST_CAPTION                                           :{WHITE}Sign List - {COMMA} Sign{P "" s}
@@ -2870,6 +2885,8 @@ STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :New Aircraft
 STR_PURCHASE_INFO_COST_WEIGHT                                   :{BLACK}Cost: {GOLD}{CURRENCY}{BLACK} Weight: {GOLD}{WEIGHT_S}
 STR_PURCHASE_INFO_SPEED_POWER                                   :{BLACK}Speed: {GOLD}{VELOCITY}{BLACK} Power: {GOLD}{POWER}
 STR_PURCHASE_INFO_SPEED                                         :{BLACK}Speed: {GOLD}{VELOCITY}
+STR_PURCHASE_INFO_SPEED_OCEAN                                   :{BLACK}Speed on ocean: {GOLD}{VELOCITY}
+STR_PURCHASE_INFO_SPEED_CANAL                                   :{BLACK}Speed on canal/river: {GOLD}{VELOCITY}
 STR_PURCHASE_INFO_RUNNINGCOST                                   :{BLACK}Running Cost: {GOLD}{CURRENCY}/yr
 STR_PURCHASE_INFO_CAPACITY                                      :{BLACK}Capacity: {GOLD}{CARGO} {STRING}
 STR_PURCHASE_INFO_REFITTABLE                                    :(refittable)
@@ -3230,12 +3247,15 @@ STR_ORDER_DROP_HALT_DEPOT                                       :Stop
 STR_ORDER_SERVICE_TOOLTIP                                       :{BLACK}Skip this order unless a service is needed
 
 STR_ORDER_CONDITIONAL_VARIABLE_TOOLTIP                          :{BLACK}Vehicle data to base jumping on
+
+# Conditional order variables, must follow order of OrderConditionVariable enum
 STR_ORDER_CONDITIONAL_LOAD_PERCENTAGE                           :Load percentage
 STR_ORDER_CONDITIONAL_RELIABILITY                               :Reliability
 STR_ORDER_CONDITIONAL_MAX_SPEED                                 :Maximum speed
-STR_ORDER_CONDITIONAL_AGE                                       :Vehicle age (years)
+STR_ORDER_CONDITIONAL_AGE                                       :Age (years)
 STR_ORDER_CONDITIONAL_REQUIRES_SERVICE                          :Requires service
 STR_ORDER_CONDITIONAL_UNCONDITIONALLY                           :Always
+STR_ORDER_CONDITIONAL_REMAINING_LIFETIME                        :Remaining lifetime (years)
 
 STR_ORDER_CONDITIONAL_COMPARATOR_TOOLTIP                        :{BLACK}How to compare the vehicle data to the given value
 STR_ORDER_CONDITIONAL_COMPARATOR_EQUALS                         :is equal to
