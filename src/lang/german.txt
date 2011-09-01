@@ -862,24 +862,24 @@ STR_GAME_OPTIONS_CURRENCY_UNITS_FRAME                           :{BLACK}Währung
 STR_GAME_OPTIONS_CURRENCY_UNITS_DROPDOWN_TOOLTIP                :{BLACK}Währung auswählen
 
 ############ start of currency region
-STR_GAME_OPTIONS_CURRENCY_GBP                                   :Engl. Pfund (GBP)
+STR_GAME_OPTIONS_CURRENCY_GBP                                   :Englische Pfund (GBP)
 STR_GAME_OPTIONS_CURRENCY_USD                                   :US-Dollar (USD)
 STR_GAME_OPTIONS_CURRENCY_EUR                                   :Euro (EUR)
-STR_GAME_OPTIONS_CURRENCY_YEN                                   :Jap. Yen (JPY)
-STR_GAME_OPTIONS_CURRENCY_ATS                                   :Österreich. Schilling (ATS)
+STR_GAME_OPTIONS_CURRENCY_JPY                                   :Japanische Yen (JPY)
+STR_GAME_OPTIONS_CURRENCY_ATS                                   :Österreichische Schilling (ATS)
 STR_GAME_OPTIONS_CURRENCY_BEF                                   :Belgische Francs (BEF)
 STR_GAME_OPTIONS_CURRENCY_CHF                                   :Schweizer Franken (CHF)
 STR_GAME_OPTIONS_CURRENCY_CZK                                   :Tschechische Kronen (CZK)
 STR_GAME_OPTIONS_CURRENCY_DEM                                   :Deutsche Mark (DEM)
 STR_GAME_OPTIONS_CURRENCY_DKK                                   :Dänische Kronen (DKK)
-STR_GAME_OPTIONS_CURRENCY_ESP                                   :Span. Peseten (ESP)
+STR_GAME_OPTIONS_CURRENCY_ESP                                   :Spanische Peseten (ESP)
 STR_GAME_OPTIONS_CURRENCY_FIM                                   :Finnische Mark(FIM)
-STR_GAME_OPTIONS_CURRENCY_FRF                                   :Frz. Francs (FRF)
-STR_GAME_OPTIONS_CURRENCY_GRD                                   :Griech. Drachmen (GRD)
+STR_GAME_OPTIONS_CURRENCY_FRF                                   :Französische Francs (FRF)
+STR_GAME_OPTIONS_CURRENCY_GRD                                   :Griechische Drachmen (GRD)
 STR_GAME_OPTIONS_CURRENCY_HUF                                   :Ungarische Forint (HUF)
 STR_GAME_OPTIONS_CURRENCY_ISK                                   :Isländische Kronen (ISK)
 STR_GAME_OPTIONS_CURRENCY_ITL                                   :Italienische Lire (ITL)
-STR_GAME_OPTIONS_CURRENCY_NLG                                   :Niederländ. Gulden (NLG)
+STR_GAME_OPTIONS_CURRENCY_NLG                                   :Niederländische Gulden (NLG)
 STR_GAME_OPTIONS_CURRENCY_NOK                                   :Norwegische Kronen (NOK)
 STR_GAME_OPTIONS_CURRENCY_PLN                                   :Polnische Zloty (PLN)
 STR_GAME_OPTIONS_CURRENCY_RON                                   :Rumänische Lei (RON)
@@ -889,7 +889,7 @@ STR_GAME_OPTIONS_CURRENCY_SEK                                   :Schwedische Kro
 STR_GAME_OPTIONS_CURRENCY_TRY                                   :Türkische Lire (TRY)
 STR_GAME_OPTIONS_CURRENCY_SKK                                   :Slowakische Kronen (SKK)
 STR_GAME_OPTIONS_CURRENCY_BRL                                   :Brasilianische Reais (BRL)
-STR_GAME_OPTIONS_CURRENCY_EEK                                   :Estnische Krone (EEK)
+STR_GAME_OPTIONS_CURRENCY_EEK                                   :Estnische Kronen (EEK)
 STR_GAME_OPTIONS_CURRENCY_CUSTOM                                :Eigene...
 ############ end of currency region
 
@@ -1059,6 +1059,11 @@ STR_SEA_LEVEL_MEDIUM                                            :Mittel
 STR_SEA_LEVEL_HIGH                                              :Hoch
 STR_SEA_LEVEL_CUSTOM                                            :Individuell
 STR_SEA_LEVEL_CUSTOM_PERCENTAGE                                 :Individuell ({NUM}%)
+
+STR_RIVERS_NONE                                                 :Keine
+STR_RIVERS_FEW                                                  :Wenige
+STR_RIVERS_MODERATE                                             :einige
+STR_RIVERS_LOT                                                  :Viele
 
 STR_DISASTER_NONE                                               :Keine
 STR_DISASTER_REDUCED                                            :Verringert
@@ -1396,6 +1401,8 @@ STR_INTRO_TOOLTIP_NEWGRF_SETTINGS                               :{BLACK}NewGRF-E
 STR_INTRO_TOOLTIP_ONLINE_CONTENT                                :{BLACK}Prüfe auf neue oder aktualisierte Erweiterungen zum Herunterladen
 STR_INTRO_TOOLTIP_AI_SETTINGS                                   :{BLACK}Einstellungen für KI anzeigen und / oder ändern
 STR_INTRO_TOOLTIP_QUIT                                          :{BLACK}'OpenTTD' beenden
+
+STR_INTRO_TRANSLATION                                           :{BLACK}Dieser Übersetzung fehlen {NUM} String{P "" s}. Bitte hilf, OpenTTD zu verbessern und melde Dich als Übersetzer an. Siehe readme.txt für weitere Details.
 
 # Quit window
 STR_QUIT_CAPTION                                                :{WHITE}Verlassen
@@ -2318,6 +2325,7 @@ STR_MAPGEN_LAND_GENERATOR                                       :{BLACK}Landgene
 STR_MAPGEN_TREE_PLACER                                          :{BLACK}Baumalgorithmus:
 STR_MAPGEN_TERRAIN_TYPE                                         :{BLACK}Landschaftstyp:
 STR_MAPGEN_QUANTITY_OF_SEA_LAKES                                :{BLACK}Gewässermenge:
+STR_MAPGEN_QUANTITY_OF_RIVERS                                   :{BLACK}Flüsse:
 STR_MAPGEN_SMOOTHNESS                                           :{BLACK}Gleichmäßigkeit:
 STR_MAPGEN_VARIETY                                              :{BLACK}Größe der Geländeformen:
 STR_MAPGEN_GENERATE                                             :{WHITE}Erzeugen
@@ -2362,6 +2370,7 @@ STR_GENERATION_ABORT_MESSAGE                                    :{YELLOW}Soll di
 STR_GENERATION_PROGRESS                                         :{WHITE}{NUM}% abgeschlossen
 STR_GENERATION_PROGRESS_NUM                                     :{BLACK}{NUM} / {NUM}
 STR_GENERATION_WORLD_GENERATION                                 :{BLACK}Spielfeld wird erzeugt
+STR_GENERATION_RIVER_GENERATION                                 :{BLACK}Flußgenerierung
 STR_GENERATION_TREE_GENERATION                                  :{BLACK}Bäume werden erzeugt
 STR_GENERATION_OBJECT_GENERATION                                :{BLACK}Unbewegliche Objekte werden erzeugt
 STR_GENERATION_CLEARING_TILES                                   :{BLACK}Raue, felsige Landschaft wird erzeugt
@@ -2514,6 +2523,12 @@ STR_NEWGRF_INVALID_CARGO_ABBREV                                 :??
 STR_NEWGRF_INVALID_CARGO_QUANTITY                               :{COMMA} of <ungültige Frachtart>
 STR_NEWGRF_INVALID_ENGINE                                       :<ungültiger Fahrzeugtyp>
 STR_NEWGRF_INVALID_INDUSTRYTYPE                                 :<ungültige Industrie>
+
+# NewGRF scanning window
+STR_NEWGRF_SCAN_CAPTION                                         :{WHITE}NewGRFs scannen
+STR_NEWGRF_SCAN_MESSAGE                                         :{BLACK}NewGRFs scannen. Abhängig von deren Anzahl kann dieses ein wenig dauern...
+STR_NEWGRF_SCAN_STATUS                                          :{BLACK}{NUM} NewGRF{P "" s} von geschätzten {NUM} NewGRF{P "" s} gescannt
+STR_NEWGRF_SCAN_ARCHIVES                                        :Scannen nach Archivdateien
 
 # Sign list window
 STR_SIGN_LIST_CAPTION                                           :{WHITE}Schilderliste ({COMMA} Schild{P "" er})
@@ -2822,6 +2837,8 @@ STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :Neue Flugzeuge
 STR_PURCHASE_INFO_COST_WEIGHT                                   :{BLACK}Kosten: {GOLD}{CURRENCY}{BLACK} Gewicht: {GOLD}{WEIGHT_S}
 STR_PURCHASE_INFO_SPEED_POWER                                   :{BLACK}Geschw.: {GOLD}{VELOCITY}{BLACK} Leistung: {GOLD}{POWER}
 STR_PURCHASE_INFO_SPEED                                         :{BLACK}Geschwindigkeit: {GOLD}{VELOCITY}
+STR_PURCHASE_INFO_SPEED_OCEAN                                   :{BLACK}Geschwindigkeit auf dem Meer: {GOLD}{VELOCITY}
+STR_PURCHASE_INFO_SPEED_CANAL                                   :{BLACK}Geschwindigkeit auf Kanälen und Flüssen: {GOLD}{VELOCITY}
 STR_PURCHASE_INFO_RUNNINGCOST                                   :{BLACK}Betriebskosten: {GOLD}{CURRENCY} pro Jahr
 STR_PURCHASE_INFO_CAPACITY                                      :{BLACK}Kapazität: {GOLD}{CARGO} {STRING}
 STR_PURCHASE_INFO_REFITTABLE                                    :(umrüstbar)
@@ -3182,12 +3199,15 @@ STR_ORDER_DROP_HALT_DEPOT                                       :Stopp
 STR_ORDER_SERVICE_TOOLTIP                                       :{BLACK}Überspringe diesen Auftrag, sofern keine Wartung benötigt wird
 
 STR_ORDER_CONDITIONAL_VARIABLE_TOOLTIP                          :{BLACK}Fahrzeuginformation, welche für den Sprung ausgewertet wird
+
+# Conditional order variables, must follow order of OrderConditionVariable enum
 STR_ORDER_CONDITIONAL_LOAD_PERCENTAGE                           :Ladezustand (Prozent)
 STR_ORDER_CONDITIONAL_RELIABILITY                               :Zuverlässigkeit
 STR_ORDER_CONDITIONAL_MAX_SPEED                                 :Höchstgeschwindigkeit
 STR_ORDER_CONDITIONAL_AGE                                       :Fahrzeugalter (Jahre)
 STR_ORDER_CONDITIONAL_REQUIRES_SERVICE                          :Benötigt Inspektion
 STR_ORDER_CONDITIONAL_UNCONDITIONALLY                           :Immer
+STR_ORDER_CONDITIONAL_REMAINING_LIFETIME                        :Verbleibende Laufzeit (Jahre)
 
 STR_ORDER_CONDITIONAL_COMPARATOR_TOOLTIP                        :{BLACK}Vergleich der Farzeuginformation mit eingegebenen Wert
 STR_ORDER_CONDITIONAL_COMPARATOR_EQUALS                         :gleich
