@@ -12,7 +12,7 @@
 #include "stdafx.h"
 #include "gfx_func.h"
 #include "fontcache.h"
-#include "genworld.h"
+#include "progress.h"
 #include "zoom_func.h"
 #include "blitter/factory.hpp"
 #include "video/video_driver.hpp"
@@ -1554,17 +1554,23 @@ void DrawDirtyBlocks()
 	int x;
 	int y;
 
-	if (IsGeneratingWorld()) {
+	if (HasModalProgress()) {
 		/* We are generating the world, so release our rights to the map and
 		 * painting while we are waiting a bit. */
-		_genworld_paint_mutex->EndCritical();
-		_genworld_mapgen_mutex->EndCritical();
+		_modal_progress_paint_mutex->EndCritical();
+		_modal_progress_work_mutex->EndCritical();
 
 		/* Wait a while and update _realtime_tick so we are given the rights */
-		CSleep(GENWORLD_REDRAW_TIMEOUT);
-		_realtime_tick += GENWORLD_REDRAW_TIMEOUT;
-		_genworld_paint_mutex->BeginCritical();
-		_genworld_mapgen_mutex->BeginCritical();
+		if (!IsFirstModalProgressLoop()) CSleep(MODAL_PROGRESS_REDRAW_TIMEOUT);
+		_realtime_tick += MODAL_PROGRESS_REDRAW_TIMEOUT;
+		_modal_progress_paint_mutex->BeginCritical();
+		_modal_progress_work_mutex->BeginCritical();
+
+		extern void SwitchToMode(SwitchMode new_mode);
+		if (_switch_mode != SM_NONE && !HasModalProgress()) {
+			SwitchToMode(_switch_mode);
+			_switch_mode = SM_NONE;
+		}
 	}
 
 	y = 0;
