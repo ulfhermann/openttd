@@ -14,6 +14,7 @@
 
 #include "cargotype.h"
 #include "rail_type.h"
+#include "fileio_type.h"
 
 enum GrfLoadingStage {
 	GLS_FILESCAN,
@@ -79,25 +80,6 @@ struct GRFFile {
 	uint32 grfid;
 	byte grf_version;
 
-	/* A sprite group contains all sprites of a given vehicle (or multiple
-	 * vehicles) when carrying given cargo. It consists of several sprite
-	 * sets.  Group ids are refered as "cargo id"s by TTDPatch
-	 * documentation, contributing to the global confusion.
-	 *
-	 * A sprite set contains all sprites of a given vehicle carrying given
-	 * cargo at a given *stage* - that is usually its load stage. Ie. you
-	 * can have a spriteset for an empty wagon, wagon full of coal,
-	 * half-filled wagon etc.  Each spriteset contains eight sprites (one
-	 * per direction) or four sprites if the vehicle is symmetric. */
-
-	SpriteID spriteset_start;
-	int spriteset_numsets;
-	int spriteset_numents;
-	int spriteset_feature;
-
-	int spritegroups_count;
-	struct SpriteGroup **spritegroups;
-
 	uint sound_offset;
 	uint16 num_sounds;
 
@@ -158,7 +140,7 @@ struct GRFLoadedFeatures {
 /* Indicates which are the newgrf features currently loaded ingame */
 extern GRFLoadedFeatures _loaded_newgrf_features;
 
-void LoadNewGRFFile(struct GRFConfig *config, uint file_index, GrfLoadingStage stage);
+void LoadNewGRFFile(struct GRFConfig *config, uint file_index, GrfLoadingStage stage, Subdirectory subdir);
 void LoadNewGRF(uint load_index, uint file_index);
 void ReloadNewGRFData(); // in saveload/afterload.cpp
 void ResetNewGRFData();
