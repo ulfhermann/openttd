@@ -17,6 +17,7 @@
 #include "console_gui.h"
 #include "viewport_func.h"
 #include "genworld.h"
+#include "progress.h"
 #include "blitter/factory.hpp"
 #include "zoom_func.h"
 #include "vehicle_base.h"
@@ -468,6 +469,27 @@ static void DispatchMouseWheelEvent(Window *w, NWidgetCore *nwid, int wheel)
 }
 
 /**
+ * Returns whether a window may be shown or not.
+ * @param w The window to consider.
+ * @return True iff it may be shown, otherwise false.
+ */
+static bool MayBeShown(const Window *w)
+{
+	/* If we're not modal, everything is okay. */
+	if (!HasModalProgress()) return true;
+
+	switch (w->window_class) {
+		case WC_MAIN_WINDOW:    ///< The background, i.e. the game.
+		case WC_MODAL_PROGRESS: ///< The actual progress window.
+		case WC_QUERY_STRING:   ///< The abort window.
+			return true;
+
+		default:
+			return false;
+	}
+}
+
+/**
  * Generate repaint events for the visible part of window w within the rectangle.
  *
  * The function goes recursively upwards in the window stack, and splits the rectangle
@@ -483,11 +505,12 @@ static void DrawOverlappedWindow(Window *w, int left, int top, int right, int bo
 {
 	const Window *v;
 	FOR_ALL_WINDOWS_FROM_BACK_FROM(v, w->z_front) {
-		if (right > v->left &&
+		if (MayBeShown(v) &&
+				right > v->left &&
 				bottom > v->top &&
 				left < v->left + v->width &&
 				top < v->top + v->height) {
-			/* v and rectangle intersect with eeach other */
+			/* v and rectangle intersect with each other */
 			int x;
 
 			if (left < (x = v->left)) {
@@ -545,7 +568,8 @@ void DrawOverlappedWindowForAll(int left, int top, int right, int bottom)
 	_cur_dpi = &bk;
 
 	FOR_ALL_WINDOWS_FROM_BACK(w) {
-		if (right > w->left &&
+		if (MayBeShown(w) &&
+				right > w->left &&
 				bottom > w->top &&
 				left < w->left + w->width &&
 				top < w->top + w->height) {
@@ -1326,7 +1350,7 @@ Window *FindWindowFromPt(int x, int y)
 {
 	Window *w;
 	FOR_ALL_WINDOWS_FROM_FRONT(w) {
-		if (IsInsideBS(x, w->left, w->width) && IsInsideBS(y, w->top, w->height)) {
+		if (MayBeShown(w) && IsInsideBS(x, w->left, w->width) && IsInsideBS(y, w->top, w->height)) {
 			return w;
 		}
 	}
@@ -1997,7 +2021,7 @@ void HandleKeypress(uint32 raw_key)
 {
 	/* World generation is multithreaded and messes with companies.
 	 * But there is no company related window open anyway, so _current_company is not used. */
-	assert(IsGeneratingWorld() || IsLocalCompany());
+	assert(HasModalProgress() || IsLocalCompany());
 
 	/* Setup event */
 	uint16 key     = GB(raw_key,  0, 16);
@@ -2063,7 +2087,7 @@ static int _input_events_this_tick = 0;
  */
 static void HandleAutoscroll()
 {
-	if (_settings_client.gui.autoscroll && _game_mode != GM_MENU && !IsGeneratingWorld()) {
+	if (_settings_client.gui.autoscroll && _game_mode != GM_MENU && !HasModalProgress()) {
 		int x = _cursor.pos.x;
 		int y = _cursor.pos.y;
 		Window *w = FindWindowFromPt(x, y);
@@ -2158,7 +2182,7 @@ static void MouseLoop(MouseClick click, int mousewheel)
 {
 	/* World generation is multithreaded and messes with companies.
 	 * But there is no company related window open anyway, so _current_company is not used. */
-	assert(IsGeneratingWorld() || IsLocalCompany());
+	assert(HasModalProgress() || IsLocalCompany());
 
 	HandlePlacePresize();
 	UpdateTileSelection();
@@ -2182,8 +2206,8 @@ static void MouseLoop(MouseClick click, int mousewheel)
 	if (click != MC_HOVER && !MaybeBringWindowToFront(w)) return;
 	ViewPort *vp = IsPtInWindowViewport(w, x, y);
 
-	/* Don't allow any action in a viewport if either in menu of in generating world */
-	if (vp != NULL && (_game_mode == GM_MENU || IsGeneratingWorld())) return;
+	/* Don't allow any action in a viewport if either in menu or when having a modal progress window */
+	if (vp != NULL && (_game_mode == GM_MENU || HasModalProgress())) return;
 
 	if (mousewheel != 0) {
 		/* Send mousewheel event to window */
@@ -2248,7 +2272,7 @@ void HandleMouseEvents()
 {
 	/* World generation is multithreaded and messes with companies.
 	 * But there is no company related window open anyway, so _current_company is not used. */
-	assert(IsGeneratingWorld() || IsLocalCompany());
+	assert(HasModalProgress() || IsLocalCompany());
 
 	static int double_click_time = 0;
 	static Point double_click_pos = {0, 0};
@@ -2355,7 +2379,7 @@ void InputLoop()
 {
 	/* World generation is multithreaded and messes with companies.
 	 * But there is no company related window open anyway, so _current_company is not used. */
-	assert(IsGeneratingWorld() || IsLocalCompany());
+	assert(HasModalProgress() || IsLocalCompany());
 
 	CheckSoftLimit();
 	HandleKeyScrolling();

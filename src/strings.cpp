@@ -713,8 +713,8 @@ static char *FormatString(char *buff, const char *str_arg, StringParameters *arg
 				break;
 			}
 
-			case SCC_NEWGRF_PRINT_STRING_ID: {
-				StringID substr = args->GetInt32(SCC_NEWGRF_PRINT_STRING_ID);
+			case SCC_NEWGRF_PRINT_WORD_STRING_ID: {
+				StringID substr = args->GetInt32(SCC_NEWGRF_PRINT_WORD_STRING_ID);
 				str_stack.push(GetStringPtr(substr));
 				break;
 			}
@@ -1657,7 +1657,10 @@ static bool GetLanguageFileHeader(const char *file, LanguagePackHeader *hdr)
 	bool ret = read == 1 && hdr->IsValid();
 
 	/* Convert endianness for the windows language ID */
-	if (ret) hdr->winlangid = FROM_LE16(hdr->winlangid);
+	if (ret) {
+		hdr->missing = FROM_LE16(hdr->missing);
+		hdr->winlangid = FROM_LE16(hdr->winlangid);
+	}
 	return ret;
 }
 
