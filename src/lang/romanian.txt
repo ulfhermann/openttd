@@ -864,7 +864,7 @@ STR_GAME_OPTIONS_CURRENCY_UNITS_DROPDOWN_TOOLTIP                :{BLACK}Alege un
 STR_GAME_OPTIONS_CURRENCY_GBP                                   :Liră sterlină (£)
 STR_GAME_OPTIONS_CURRENCY_USD                                   :Dolar american ($)
 STR_GAME_OPTIONS_CURRENCY_EUR                                   :Euro (€)
-STR_GAME_OPTIONS_CURRENCY_YEN                                   :Yen japonez (¥)
+STR_GAME_OPTIONS_CURRENCY_JPY                                   :Yen japonez (¥)
 STR_GAME_OPTIONS_CURRENCY_ATS                                   :Şiling austriac (ATS)
 STR_GAME_OPTIONS_CURRENCY_BEF                                   :Franc belgian (BEF)
 STR_GAME_OPTIONS_CURRENCY_CHF                                   :Franc elveţian (CHF)
@@ -1058,6 +1058,11 @@ STR_SEA_LEVEL_MEDIUM                                            :Mediu
 STR_SEA_LEVEL_HIGH                                              :Ridicat
 STR_SEA_LEVEL_CUSTOM                                            :Personalizat
 STR_SEA_LEVEL_CUSTOM_PERCENTAGE                                 :Personalizat ({NUM}%)
+
+STR_RIVERS_NONE                                                 :Deloc
+STR_RIVERS_FEW                                                  :Puţine
+STR_RIVERS_MODERATE                                             :Mediu
+STR_RIVERS_LOT                                                  :Multe
 
 STR_DISASTER_NONE                                               :Deloc
 STR_DISASTER_REDUCED                                            :Redus
@@ -1395,6 +1400,8 @@ STR_INTRO_TOOLTIP_NEWGRF_SETTINGS                               :{BLACK}Afişeaz
 STR_INTRO_TOOLTIP_ONLINE_CONTENT                                :{BLACK}Verifică dacă există resurse noi sau actualizate pentru descărcare
 STR_INTRO_TOOLTIP_AI_SETTINGS                                   :{BLACK}Afişează setările pentru Inteligenţa Artificială
 STR_INTRO_TOOLTIP_QUIT                                          :{BLACK}Ieşi din 'OpenTTD'
+
+STR_INTRO_TRANSLATION                                           :{BLACK}Acestei traduceri îi lipses{P 0 "te" "c"} {NUM} text{P "" e}. Te rugăm să ajuti la îmbunătățirea OpenTTD înrolându-te ca traducător. Citește fișierul readme.txt pentru detalii.
 
 # Quit window
 STR_QUIT_CAPTION                                                :{WHITE}Ieşire din joc
@@ -2317,6 +2324,7 @@ STR_MAPGEN_LAND_GENERATOR                                       :{BLACK}Generato
 STR_MAPGEN_TREE_PLACER                                          :{BLACK}Algoritm arbore:
 STR_MAPGEN_TERRAIN_TYPE                                         :{BLACK}Tip teren:
 STR_MAPGEN_QUANTITY_OF_SEA_LAKES                                :{BLACK}Nivelul mării:
+STR_MAPGEN_QUANTITY_OF_RIVERS                                   :{BLACK}Râuri:
 STR_MAPGEN_SMOOTHNESS                                           :{BLACK}Netezime:
 STR_MAPGEN_VARIETY                                              :{BLACK}Distribuţia varietăţii:
 STR_MAPGEN_GENERATE                                             :{WHITE}Generează
@@ -2361,6 +2369,7 @@ STR_GENERATION_ABORT_MESSAGE                                    :{YELLOW}Sigur d
 STR_GENERATION_PROGRESS                                         :{WHITE}{NUM}% efectuat
 STR_GENERATION_PROGRESS_NUM                                     :{BLACK}{NUM} / {NUM}
 STR_GENERATION_WORLD_GENERATION                                 :{BLACK}Generare lume
+STR_GENERATION_RIVER_GENERATION                                 :{BLACK}Generarea râurilor
 STR_GENERATION_TREE_GENERATION                                  :{BLACK}Generare arbori
 STR_GENERATION_OBJECT_GENERATION                                :{BLACK}Generare fixă
 STR_GENERATION_CLEARING_TILES                                   :{BLACK}Generare zonă dură şi pietroasă
@@ -2513,6 +2522,12 @@ STR_NEWGRF_INVALID_CARGO_ABBREV                                 :??
 STR_NEWGRF_INVALID_CARGO_QUANTITY                               :{COMMA} de <cargo invalid>
 STR_NEWGRF_INVALID_ENGINE                                       :<model vehicul invalid>
 STR_NEWGRF_INVALID_INDUSTRYTYPE                                 :<tip de industrie invalid>
+
+# NewGRF scanning window
+STR_NEWGRF_SCAN_CAPTION                                         :{WHITE}Scanez resursele NewGRF
+STR_NEWGRF_SCAN_MESSAGE                                         :{BLACK}Se scanează resursele NewGRF. În funcție de numărul acestora, această operație poate dura un timp...
+STR_NEWGRF_SCAN_STATUS                                          :{BLACK}{NUM} resurs{P 0 "ă" "e"}NewGRF scanat{P "ă" "e"} din aproximativ {NUM} resurs{P "ă" "e"} NewGRF disponibil{P "ă" "e"}
+STR_NEWGRF_SCAN_ARCHIVES                                        :Scanez pentru arhive
 
 # Sign list window
 STR_SIGN_LIST_CAPTION                                           :{WHITE}Lista de semne - {COMMA} Semne
@@ -2821,6 +2836,8 @@ STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :Aeronavă nouă
 STR_PURCHASE_INFO_COST_WEIGHT                                   :{BLACK}Cost: {GOLD}{CURRENCY}{BLACK} Greutate: {GOLD}{WEIGHT_S}
 STR_PURCHASE_INFO_SPEED_POWER                                   :{BLACK}Viteză: {GOLD}{VELOCITY}{BLACK} Putere: {GOLD}{POWER}
 STR_PURCHASE_INFO_SPEED                                         :{BLACK}Viteză: {GOLD}{VELOCITY}
+STR_PURCHASE_INFO_SPEED_OCEAN                                   :{BLACK}Viteza pe ocean: {GOLD}{VELOCITY}
+STR_PURCHASE_INFO_SPEED_CANAL                                   :{BLACK}Viteza pe canal/râu: {GOLD}{VELOCITY}
 STR_PURCHASE_INFO_RUNNINGCOST                                   :{BLACK}Cost de rulare: {GOLD}{CURRENCY}/an
 STR_PURCHASE_INFO_CAPACITY                                      :{BLACK}Capacitate: {GOLD}{CARGO} {STRING}
 STR_PURCHASE_INFO_REFITTABLE                                    :(suportă alte mărfuri)

@@ -16,6 +16,7 @@
 #include "core/alloc_type.hpp"
 #include "core/smallmap_type.hpp"
 #include "misc/countedptr.hpp"
+#include "fileio_type.h"
 
 /** GRF config bit flags */
 enum GCF_Flags {
@@ -188,7 +189,15 @@ extern GRFConfig *_grfconfig;         ///< First item in list of current GRF set
 extern GRFConfig *_grfconfig_newgame; ///< First item in list of default GRF set up
 extern GRFConfig *_grfconfig_static;  ///< First item in list of static GRF set up
 
-void ScanNewGRFFiles();
+/** Callback for NewGRF scanning. */
+struct NewGRFScanCallback {
+	/** Make sure the right destructor gets called. */
+	virtual ~NewGRFScanCallback() {}
+	/** Called whenever the NewGRF scan completed. */
+	virtual void OnNewGRFsScanned() = 0;
+};
+
+void ScanNewGRFFiles(NewGRFScanCallback *callback);
 void CheckForMissingSprites();
 const GRFConfig *FindGRFConfig(uint32 grfid, FindGRFConfigMode mode, const uint8 *md5sum = NULL, uint32 desired_version = 0);
 GRFConfig *GetGRFConfig(uint32 grfid, uint32 mask = 0xFFFFFFFF);
@@ -198,7 +207,7 @@ void AppendToGRFConfigList(GRFConfig **dst, GRFConfig *el);
 void ClearGRFConfigList(GRFConfig **config);
 void ResetGRFConfig(bool defaults);
 GRFListCompatibility IsGoodGRFConfigList(GRFConfig *grfconfig);
-bool FillGRFDetails(GRFConfig *config, bool is_static);
+bool FillGRFDetails(GRFConfig *config, bool is_static, Subdirectory subdir = NEWGRF_DIR);
 char *GRFBuildParamList(char *dst, const GRFConfig *c, const char *last);
 
 /* In newgrf_gui.cpp */
@@ -209,5 +218,7 @@ void ShowNewGRFSettings(bool editable, bool show_params, bool exec_changes, GRFC
 #define UNKNOWN_GRF_NAME_PLACEHOLDER "<Unknown>"
 GRFTextWrapper *FindUnknownGRFName(uint32 grfid, uint8 *md5sum, bool create);
 #endif /* ENABLE_NETWORK */
+
+void UpdateNewGRFScanStatus(uint num, const char *name);
 
 #endif /* NEWGRF_CONFIG_H */

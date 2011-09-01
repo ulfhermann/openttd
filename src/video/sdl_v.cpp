@@ -19,7 +19,7 @@
 #include "../blitter/factory.hpp"
 #include "../network/network.h"
 #include "../thread/thread.h"
-#include "../genworld.h"
+#include "../progress.h"
 #include "../core/random_func.hpp"
 #include "../core/math_func.hpp"
 #include "sdl_v.h"
@@ -594,7 +594,7 @@ void VideoDriver_SDL::MainLoop()
 		}
 
 		/* End of the critical part. */
-		if (_draw_threaded && !IsGeneratingWorld()) {
+		if (_draw_threaded && !HasModalProgress()) {
 			_draw_mutex->SendSignal();
 		} else {
 			/* Oh, we didn't have threads, then just draw unthreaded */
