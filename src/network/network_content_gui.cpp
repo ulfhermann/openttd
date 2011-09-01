@@ -94,8 +94,6 @@ public:
 				case CONTENT_TYPE_AI:
 				case CONTENT_TYPE_AI_LIBRARY:
 					AI::Rescan();
-					SetWindowClassesDirty(WC_AI_DEBUG);
-					InvalidateWindowData(WC_AI_LIST, 0, 1);
 					break;
 
 				case CONTENT_TYPE_BASE_GRAPHICS:
@@ -114,10 +112,7 @@ public:
 					break;
 
 				case CONTENT_TYPE_NEWGRF:
-					ScanNewGRFFiles();
-					/* Yes... these are the NewGRF windows */
-					InvalidateWindowClassesData(WC_SAVELOAD);
-					InvalidateWindowData(WC_GAME_OPTIONS, 0, GOID_NEWGRF_RESCANNED);
+					ScanNewGRFFiles(NULL);
 					break;
 
 				case CONTENT_TYPE_SCENARIO:
