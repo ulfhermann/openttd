@@ -17,6 +17,8 @@
 #include "gfx_func.h"
 #include "newgrf_text.h"
 #include "window_func.h"
+#include "progress.h"
+#include "video/video_driver.hpp"
 
 #include "fileio_func.h"
 #include "fios.h"
@@ -280,9 +282,10 @@ bool UpdateNewGRFConfigPalette(int32 p1)
 /**
  * Calculate the MD5 sum for a GRF, and store it in the config.
  * @param config GRF to compute.
+ * @param subdir The subdirectory to look in.
  * @return MD5 sum was successfully computed
  */
-static bool CalcGRFMD5Sum(GRFConfig *config)
+static bool CalcGRFMD5Sum(GRFConfig *config, Subdirectory subdir)
 {
 	FILE *f;
 	Md5 checksum;
@@ -290,7 +293,7 @@ static bool CalcGRFMD5Sum(GRFConfig *config)
 	size_t len, size;
 
 	/* open the file */
-	f = FioFOpenFile(config->filename, "rb", DATA_DIR, &size);
+	f = FioFOpenFile(config->filename, "rb", subdir, &size);
 	if (f == NULL) return false;
 
 	/* calculate md5sum */
@@ -310,17 +313,18 @@ static bool CalcGRFMD5Sum(GRFConfig *config)
  * Find the GRFID of a given grf, and calculate its md5sum.
  * @param config    grf to fill.
  * @param is_static grf is static.
+ * @param subdir    the subdirectory to search in.
  * @return Operation was successfully completed.
  */
-bool FillGRFDetails(GRFConfig *config, bool is_static)
+bool FillGRFDetails(GRFConfig *config, bool is_static, Subdirectory subdir)
 {
-	if (!FioCheckFileExists(config->filename)) {
+	if (!FioCheckFileExists(config->filename, subdir)) {
 		config->status = GCS_NOT_FOUND;
 		return false;
 	}
 
 	/* Find and load the Action 8 information */
-	LoadNewGRFFile(config, CONFIG_SLOT, GLS_FILESCAN);
+	LoadNewGRFFile(config, CONFIG_SLOT, GLS_FILESCAN, subdir);
 	config->SetSuitablePalette();
 
 	/* Skip if the grfid is 0 (not read) or 0xFFFFFFFF (ttdp system grf) */
@@ -328,13 +332,13 @@ bool FillGRFDetails(GRFConfig *config, bool is_static)
 
 	if (is_static) {
 		/* Perform a 'safety scan' for static GRFs */
-		LoadNewGRFFile(config, 62, GLS_SAFETYSCAN);
+		LoadNewGRFFile(config, 62, GLS_SAFETYSCAN, subdir);
 
 		/* GCF_UNSAFE is set if GLS_SAFETYSCAN finds unsafe actions */
 		if (HasBit(config->flags, GCF_UNSAFE)) return false;
 	}
 
-	return CalcGRFMD5Sum(config);
+	return CalcGRFMD5Sum(config, subdir);
 }
 
 
@@ -527,14 +531,25 @@ compatible_grf:
 
 /** Helper for scanning for files with GRF as extension */
 class GRFFileScanner : FileScanner {
+	uint next_update; ///< The next (realtime tick) we do update the screen.
+	uint num_scanned; ///< The number of GRFs we have scanned.
+
 public:
+	GRFFileScanner() : next_update(_realtime_tick), num_scanned(0)
+	{
+	}
+
 	/* virtual */ bool AddFile(const char *filename, size_t basepath_length);
 
 	/** Do the scan for GRFs. */
 	static uint DoScan()
 	{
 		GRFFileScanner fs;
-		return fs.Scan(".grf", DATA_DIR);
+		int ret = fs.Scan(".grf", NEWGRF_DIR);
+		/* The number scanned and the number returned may not be the same;
+		 * duplicate NewGRFs and base sets are ignored in the return value. */
+		_settings_client.gui.last_newgrf_count = fs.num_scanned;
+		return ret;
 	}
 };
 
@@ -571,6 +586,22 @@ bool GRFFileScanner::AddFile(const char *filename, size_t basepath_length)
 		added = false;
 	}
 
+	this->num_scanned++;
+	if (this->next_update <= _realtime_tick) {
+		_modal_progress_work_mutex->EndCritical();
+		_modal_progress_paint_mutex->BeginCritical();
+
+		const char *name = NULL;
+		if (c->name != NULL) name = GetGRFStringFromGRFText(c->name->text);
+		if (name == NULL) name = c->filename;
+		UpdateNewGRFScanStatus(this->num_scanned, name);
+
+		_modal_progress_work_mutex->BeginCritical();
+		_modal_progress_paint_mutex->EndCritical();
+
+		this->next_update = _realtime_tick + 200;
+	}
+
 	if (!added) {
 		/* File couldn't be opened, or is either not a NewGRF or is a
 		 * 'system' NewGRF or it's already known, so forget about it. */
@@ -594,9 +625,14 @@ static int CDECL GRFSorter(GRFConfig * const *p1, GRFConfig * const *p2)
 	return strcasecmp(c1->GetName(), c2->GetName());
 }
 
-/** Scan for all NewGRFs. */
-void ScanNewGRFFiles()
+/**
+ * Really perform the scan for all NewGRFs.
+ * @param callback The callback to call after the scanning is complete.
+ */
+void DoScanNewGRFFiles(void *callback)
 {
+	_modal_progress_work_mutex->BeginCritical();
+
 	ClearGRFConfigList(&_all_grfs);
 
 	TarScanner::DoScan();
@@ -605,35 +641,69 @@ void ScanNewGRFFiles()
 	uint num = GRFFileScanner::DoScan();
 
 	DEBUG(grf, 1, "Scan complete, found %d files", num);
-	if (num == 0 || _all_grfs == NULL) return;
+	if (num != 0 && _all_grfs != NULL) {
+		/* Sort the linked list using quicksort.
+		* For that we first have to make an array, then sort and
+		* then remake the linked list. */
+		GRFConfig **to_sort = MallocT<GRFConfig*>(num);
 
-	/* Sort the linked list using quicksort.
-	 * For that we first have to make an array, then sort and
-	 * then remake the linked list. */
-	GRFConfig **to_sort = MallocT<GRFConfig*>(num);
+		uint i = 0;
+		for (GRFConfig *p = _all_grfs; p != NULL; p = p->next, i++) {
+			to_sort[i] = p;
+		}
+		/* Number of files is not necessarily right */
+		num = i;
 
-	uint i = 0;
-	for (GRFConfig *p = _all_grfs; p != NULL; p = p->next, i++) {
-		to_sort[i] = p;
-	}
-	/* Number of files is not necessarily right */
-	num = i;
+		QSortT(to_sort, num, &GRFSorter);
 
-	QSortT(to_sort, num, &GRFSorter);
+		for (i = 1; i < num; i++) {
+			to_sort[i - 1]->next = to_sort[i];
+		}
+		to_sort[num - 1]->next = NULL;
+		_all_grfs = to_sort[0];
 
-	for (i = 1; i < num; i++) {
-		to_sort[i - 1]->next = to_sort[i];
-	}
-	to_sort[num - 1]->next = NULL;
-	_all_grfs = to_sort[0];
-
-	free(to_sort);
+		free(to_sort);
 
 #ifdef ENABLE_NETWORK
-	NetworkAfterNewGRFScan();
+		NetworkAfterNewGRFScan();
 #endif
+	}
+
+	_modal_progress_work_mutex->EndCritical();
+	_modal_progress_paint_mutex->BeginCritical();
+
+	/* Yes... these are the NewGRF windows */
+	InvalidateWindowClassesData(WC_SAVELOAD, 0, true);
+	InvalidateWindowData(WC_GAME_OPTIONS, 0, GOID_NEWGRF_RESCANNED, true);
+	if (callback != NULL) ((NewGRFScanCallback*)callback)->OnNewGRFsScanned();
+
+	DeleteWindowByClass(WC_MODAL_PROGRESS);
+	SetModalProgress(false);
+	MarkWholeScreenDirty();
+	_modal_progress_paint_mutex->EndCritical();
 }
 
+/**
+ * Scan for all NewGRFs.
+ * @param callback The callback to call after the scanning is complete.
+ */
+void ScanNewGRFFiles(NewGRFScanCallback *callback)
+{
+	/* First set the modal progress. This ensures that it will eventually let go of the paint mutex. */
+	SetModalProgress(true);
+	/* Only then can we really start, especially by marking the whole screen dirty. Get those other windows hidden!. */
+	MarkWholeScreenDirty();
+
+	if (!_video_driver->HasGUI() || !ThreadObject::New(&DoScanNewGRFFiles, callback, NULL)) {
+		_modal_progress_work_mutex->EndCritical();
+		_modal_progress_paint_mutex->EndCritical();
+		DoScanNewGRFFiles(callback);
+		_modal_progress_paint_mutex->BeginCritical();
+		_modal_progress_work_mutex->BeginCritical();
+	} else {
+		UpdateNewGRFScanStatus(0, NULL);
+	}
+}
 
 /**
  * Find a NewGRF in the scanned list.

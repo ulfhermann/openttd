@@ -1009,7 +1009,7 @@ STR_GAME_OPTIONS_CURRENCY_UNITS_DROPDOWN_TOOLTIP                :{BLACK}Смен
 STR_GAME_OPTIONS_CURRENCY_GBP                                   :Английский фунт (£)
 STR_GAME_OPTIONS_CURRENCY_USD                                   :Доллар США ($)
 STR_GAME_OPTIONS_CURRENCY_EUR                                   :Евро (€)
-STR_GAME_OPTIONS_CURRENCY_YEN                                   :Японская иена (¥)
+STR_GAME_OPTIONS_CURRENCY_JPY                                   :Японская иена (¥)
 STR_GAME_OPTIONS_CURRENCY_ATS                                   :Австрийский шиллинг (ATS)
 STR_GAME_OPTIONS_CURRENCY_BEF                                   :Бельгийский франк (BEF)
 STR_GAME_OPTIONS_CURRENCY_CHF                                   :Швейцарский франк (CHF)
@@ -1212,6 +1212,11 @@ STR_SEA_LEVEL_HIGH                                              :Большое
 STR_SEA_LEVEL_HIGH.p                                            :Высокие
 STR_SEA_LEVEL_CUSTOM                                            :Заданный
 STR_SEA_LEVEL_CUSTOM_PERCENTAGE                                 :Заданный ({NUM}%)
+
+STR_RIVERS_NONE                                                 :Нет
+STR_RIVERS_FEW                                                  :Малое
+STR_RIVERS_MODERATE                                             :Среднее
+STR_RIVERS_LOT                                                  :Большое
 
 STR_DISASTER_NONE                                               :Выключено
 STR_DISASTER_REDUCED                                            :Умеренная
@@ -1417,7 +1422,7 @@ STR_CONFIG_SETTING_AI_BUILDS_AIRCRAFT                           :{LTBLUE}Не д
 STR_CONFIG_SETTING_AI_BUILDS_SHIPS                              :{LTBLUE}Не допускать постройки кораблей компьютером: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_AI_IN_MULTIPLAYER                            :{LTBLUE}Разрешить ИИ в сетевой игре: {ORANGE}{STRING}
-STR_CONFIG_SETTING_AI_MAX_OPCODES                               :{LTBLUE}Число тактов перед остановкой ИИ: {ORANGE}{STRING}
+STR_CONFIG_SETTING_AI_MAX_OPCODES                               :{LTBLUE}Количество тактов перед остановкой ИИ: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_SERVINT_ISPERCENT                            :{LTBLUE}Интервал обслуживания в процентах: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SERVINT_TRAINS                               :{LTBLUE}Интервал обслуживания поездов: {ORANGE}{STRING} д{P 0:1 ень ня ней}/%
@@ -1472,8 +1477,8 @@ STR_CONFIG_SETTING_TOOLBAR_POS                                  :{LTBLUE}Пол�
 STR_CONFIG_SETTING_STATUSBAR_POS                                :{LTBLUE}Расположение строки состояния: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SNAP_RADIUS                                  :{LTBLUE}Радиус прилипания окон: {ORANGE}{STRING} пикс.
 STR_CONFIG_SETTING_SNAP_RADIUS_DISABLED                         :{LTBLUE}Радиус прилипания окон: {ORANGE}отключено
-STR_CONFIG_SETTING_SOFT_LIMIT                                   :{LTBLUE}Макс. число открытых окон (не «приклеенных»): {ORANGE}{STRING}
-STR_CONFIG_SETTING_SOFT_LIMIT_DISABLED                          :{LTBLUE}Макс. число открытых окон (не «приклеенных»): {ORANGE}не ограничено
+STR_CONFIG_SETTING_SOFT_LIMIT                                   :{LTBLUE}Макс. количество открытых окон (не «приклеенных»): {ORANGE}{STRING}
+STR_CONFIG_SETTING_SOFT_LIMIT_DISABLED                          :{LTBLUE}Макс. количество открытых окон (не «приклеенных»): {ORANGE}не ограничено
 STR_CONFIG_SETTING_TOWN_GROWTH                                  :{LTBLUE}Скорость роста городов: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TOWN_GROWTH_NONE                             :нет
 STR_CONFIG_SETTING_TOWN_GROWTH_SLOW                             :низкая
@@ -1551,6 +1556,8 @@ STR_INTRO_TOOLTIP_NEWGRF_SETTINGS                               :{BLACK}Пока
 STR_INTRO_TOOLTIP_ONLINE_CONTENT                                :{BLACK}Найти новый и обновлённый контент для загрузки
 STR_INTRO_TOOLTIP_AI_SETTINGS                                   :{BLACK}Показать настройки искусственного интеллекта
 STR_INTRO_TOOLTIP_QUIT                                          :{BLACK}Выйти из OpenTTD
+
+STR_INTRO_TRANSLATION                                           :{BLACK}На этот язык не переведен{P 0 а ы о} {NUM} строк{P а и ""}. Вы можете помочь проекту, зарегистрировавшись как переводчик. Инструкции в файле readme.txt.
 
 # Quit window
 STR_QUIT_CAPTION                                                :{WHITE}Выход
@@ -1757,7 +1764,7 @@ STR_NETWORK_START_SERVER_NUMBER_OF_CLIENTS                      :{BLACK}Макс
 STR_NETWORK_START_SERVER_NUMBER_OF_CLIENTS_TOOLTIP              :{BLACK}Выбор максимального числа клиентов. Не все места должны быть заняты
 STR_NETWORK_START_SERVER_COMPANIES_SELECT                       :{BLACK}{NUM} компани{P я и й}
 STR_NETWORK_START_SERVER_NUMBER_OF_COMPANIES                    :{BLACK}Макс. компаний:
-STR_NETWORK_START_SERVER_NUMBER_OF_COMPANIES_TOOLTIP            :{BLACK}Ограничить максимальное число компаний на сервере
+STR_NETWORK_START_SERVER_NUMBER_OF_COMPANIES_TOOLTIP            :{BLACK}Ограничить максимальное количество компаний на сервере
 STR_NETWORK_START_SERVER_SPECTATORS_SELECT                      :{BLACK}{NUM} наблюдател{P ь я ей}
 STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS                   :{BLACK}Макс. наблюдателей:
 STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS_TOOLTIP           :{BLACK}Ограничить максимальное количество наблюдателей на сервере
@@ -2101,10 +2108,10 @@ STR_WAYPOINT_GRAPHICS_TOOLTIP                                   :{BLACK}Выбо
 STR_STATION_BUILD_RAIL_CAPTION                                  :{WHITE}Выбор ж/д станции
 STR_STATION_BUILD_ORIENTATION                                   :{BLACK}Направление
 STR_STATION_BUILD_RAILROAD_ORIENTATION_TOOLTIP                  :{BLACK}Выберите направление ж/д станции
-STR_STATION_BUILD_NUMBER_OF_TRACKS                              :{BLACK}Число путей
-STR_STATION_BUILD_NUMBER_OF_TRACKS_TOOLTIP                      :{BLACK}Выберите число платформ ж/д станции
+STR_STATION_BUILD_NUMBER_OF_TRACKS                              :{BLACK}Количество путей
+STR_STATION_BUILD_NUMBER_OF_TRACKS_TOOLTIP                      :{BLACK}Укажите количество платформ ж/д станции
 STR_STATION_BUILD_PLATFORM_LENGTH                               :{BLACK}Длина платформы
-STR_STATION_BUILD_PLATFORM_LENGTH_TOOLTIP                       :{BLACK}Выберите длину ж/д станции
+STR_STATION_BUILD_PLATFORM_LENGTH_TOOLTIP                       :{BLACK}Укажите длину ж/д станции
 STR_STATION_BUILD_DRAG_DROP                                     :{BLACK}Участок
 STR_STATION_BUILD_DRAG_DROP_TOOLTIP                             :{BLACK}Постройка станции на указанном игроком участке
 
@@ -2479,7 +2486,7 @@ STR_SAVELOAD_OSKTITLE                                           :{BLACK}Введ
 STR_MAPGEN_WORLD_GENERATION_CAPTION                             :{WHITE}Создание мира
 STR_MAPGEN_MAPSIZE                                              :{BLACK}Размер карты:
 STR_MAPGEN_BY                                                   :{BLACK}×
-STR_MAPGEN_NUMBER_OF_TOWNS                                      :{BLACK}Число городов:
+STR_MAPGEN_NUMBER_OF_TOWNS                                      :{BLACK}Количество городов:
 STR_MAPGEN_DATE                                                 :{BLACK}Дата:
 STR_MAPGEN_NUMBER_OF_INDUSTRIES                                 :{BLACK}Кол-во предпр.:
 STR_MAPGEN_SNOW_LINE_HEIGHT                                     :{BLACK}Снеговая линия:
@@ -2493,6 +2500,7 @@ STR_MAPGEN_LAND_GENERATOR                                       :{BLACK}Гене
 STR_MAPGEN_TREE_PLACER                                          :{BLACK}Генератор лесов:
 STR_MAPGEN_TERRAIN_TYPE                                         :{BLACK}Тип ландшафта:
 STR_MAPGEN_QUANTITY_OF_SEA_LAKES                                :{BLACK}Количество морей и озёр:
+STR_MAPGEN_QUANTITY_OF_RIVERS                                   :{BLACK}Кол-во рек:
 STR_MAPGEN_SMOOTHNESS                                           :{BLACK}Гладкость:
 STR_MAPGEN_VARIETY                                              :{BLACK}Разнообразие ландшафта:
 STR_MAPGEN_GENERATE                                             :{WHITE}Создать
@@ -2506,7 +2514,7 @@ STR_MAPGEN_SOUTHWEST                                            :{BLACK}Юго-�
 STR_MAPGEN_BORDER_FREEFORM                                      :{BLACK}Свободный
 STR_MAPGEN_BORDER_WATER                                         :{BLACK}Водный
 STR_MAPGEN_BORDER_RANDOM                                        :{BLACK}Случайно
-STR_MAPGEN_BORDER_RANDOMIZE                                     :{BLACK}Случайный
+STR_MAPGEN_BORDER_RANDOMIZE                                     :{BLACK}Случайно
 STR_MAPGEN_BORDER_MANUAL                                        :{BLACK}Вручную
 
 STR_MAPGEN_HEIGHTMAP_ROTATION                                   :{BLACK}Поворот карты:
@@ -2537,6 +2545,7 @@ STR_GENERATION_ABORT_MESSAGE                                    :{YELLOW}Вы с
 STR_GENERATION_PROGRESS                                         :{WHITE}{NUM}% готово
 STR_GENERATION_PROGRESS_NUM                                     :{BLACK}{NUM} / {NUM}
 STR_GENERATION_WORLD_GENERATION                                 :{BLACK}Создание мира
+STR_GENERATION_RIVER_GENERATION                                 :{BLACK}Создание рек
 STR_GENERATION_TREE_GENERATION                                  :{BLACK}Высадка лесов
 STR_GENERATION_OBJECT_GENERATION                                :{BLACK}Создание объектов
 STR_GENERATION_CLEARING_TILES                                   :{BLACK}Расстановка декораций и камней
@@ -2689,6 +2698,12 @@ STR_NEWGRF_INVALID_CARGO_ABBREV                                 :??
 STR_NEWGRF_INVALID_CARGO_QUANTITY                               :{COMMA} <неизвестного груза>
 STR_NEWGRF_INVALID_ENGINE                                       :<неправильная модель>
 STR_NEWGRF_INVALID_INDUSTRYTYPE                                 :<неизвестное предприятие>
+
+# NewGRF scanning window
+STR_NEWGRF_SCAN_CAPTION                                         :{WHITE}Сканирование NewGRF
+STR_NEWGRF_SCAN_MESSAGE                                         :{BLACK}Идёт сканирование NewGRF. Это займёт некоторое время...
+STR_NEWGRF_SCAN_STATUS                                          :{BLACK}Просканирован{P 0 "" о о} {NUM} из {NUM} модул{P я ей ей} NewGRF
+STR_NEWGRF_SCAN_ARCHIVES                                        :Поиск архивов
 
 # Sign list window
 STR_SIGN_LIST_CAPTION                                           :{WHITE}Список табличек - {COMMA} таблич{P ка ки ек}
@@ -2997,6 +3012,8 @@ STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :Новый ав
 STR_PURCHASE_INFO_COST_WEIGHT                                   :{BLACK}Цена: {GOLD}{CURRENCY}{BLACK} Вес: {GOLD}{WEIGHT_S}
 STR_PURCHASE_INFO_SPEED_POWER                                   :{BLACK}Скорость: {GOLD}{VELOCITY}{BLACK} Мощность: {GOLD}{POWER}
 STR_PURCHASE_INFO_SPEED                                         :{BLACK}Скорость: {GOLD}{VELOCITY}
+STR_PURCHASE_INFO_SPEED_OCEAN                                   :{BLACK}Скорость в океане: {GOLD}{VELOCITY}
+STR_PURCHASE_INFO_SPEED_CANAL                                   :{BLACK}Скорость в канале/реке: {GOLD}{VELOCITY}
 STR_PURCHASE_INFO_RUNNINGCOST                                   :{BLACK}Стоимость обслуживания: {GOLD}{CURRENCY}/год
 STR_PURCHASE_INFO_CAPACITY                                      :{BLACK}Ёмкость: {GOLD}{CARGO} {STRING}
 STR_PURCHASE_INFO_REFITTABLE                                    :(переоб.)
@@ -3367,12 +3384,15 @@ STR_ORDER_DROP_HALT_DEPOT                                       :Стоп
 STR_ORDER_SERVICE_TOOLTIP                                       :{BLACK}Пропустить это задание, если обслуживание не требуется
 
 STR_ORDER_CONDITIONAL_VARIABLE_TOOLTIP                          :{BLACK}Параметр транспорта для сравнения
+
+# Conditional order variables, must follow order of OrderConditionVariable enum
 STR_ORDER_CONDITIONAL_LOAD_PERCENTAGE                           :Процент погрузки
 STR_ORDER_CONDITIONAL_RELIABILITY                               :Надёжность
 STR_ORDER_CONDITIONAL_MAX_SPEED                                 :Макс. скорость
 STR_ORDER_CONDITIONAL_AGE                                       :Возраст (лет)
 STR_ORDER_CONDITIONAL_REQUIRES_SERVICE                          :Требуется обслуживание
 STR_ORDER_CONDITIONAL_UNCONDITIONALLY                           :Всегда
+STR_ORDER_CONDITIONAL_REMAINING_LIFETIME                        :Оставшийся срок службы (лет)
 
 STR_ORDER_CONDITIONAL_COMPARATOR_TOOLTIP                        :{BLACK}Условие перехода
 STR_ORDER_CONDITIONAL_COMPARATOR_EQUALS                         :равно
@@ -3923,7 +3943,7 @@ STR_ERROR_CAN_T_SELL_ROAD_VEHICLE                               :{WHITE}Не у�
 STR_ERROR_CAN_T_SELL_SHIP                                       :{WHITE}Не удалось продать корабль...
 STR_ERROR_CAN_T_SELL_AIRCRAFT                                   :{WHITE}Не удалось продать самолёт...
 
-STR_ERROR_RAIL_VEHICLE_NOT_AVAILABLE                            :{WHITE}Локомотив недоступен
+STR_ERROR_RAIL_VEHICLE_NOT_AVAILABLE                            :{WHITE}Локомотив и/или вагон недоступен
 STR_ERROR_ROAD_VEHICLE_NOT_AVAILABLE                            :{WHITE}Автотранспорт недоступен
 STR_ERROR_SHIP_NOT_AVAILABLE                                    :{WHITE}Корабль недоступен
 STR_ERROR_AIRCRAFT_NOT_AVAILABLE                                :{WHITE}Авиатранспорт недоступен
