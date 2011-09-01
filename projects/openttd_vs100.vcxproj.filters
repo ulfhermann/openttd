@@ -252,6 +252,9 @@
     <ClCompile Include="..\src\pbs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\progress.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\rail.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -775,6 +778,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\pbs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\progress.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\querystring_gui.h">
