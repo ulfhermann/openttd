@@ -971,12 +971,11 @@ static bool GrowTownWithBridge(const Town *t, const TileIndex tile, const DiagDi
 	assert(bridge_dir < DIAGDIR_END);
 
 	const Slope slope = GetTileSlope(tile, NULL);
-	if (slope == SLOPE_FLAT) return false; // no slope, no bridge
 
 	/* Make sure the direction is compatible with the slope.
 	 * Well we check if the slope has an up bit set in the
 	 * reverse direction. */
-	if (slope & InclinedSlope(bridge_dir)) return false;
+	if (slope != SLOPE_FLAT && slope & InclinedSlope(bridge_dir)) return false;
 
 	/* Assure that the bridge is connectable to the start side */
 	if (!(GetTownRoadBits(TileAddByDiagDir(tile, ReverseDiagDir(bridge_dir))) & DiagDirToRoadBits(bridge_dir))) return false;
@@ -986,13 +985,25 @@ static bool GrowTownWithBridge(const Town *t, const TileIndex tile, const DiagDi
 	TileIndex bridge_tile = tile; // Used to store the other waterside
 
 	const int delta = TileOffsByDiagDir(bridge_dir);
-	do {
-		if (bridge_length++ >= 11) {
-			/* Max 11 tile long bridges */
-			return false;
-		}
-		bridge_tile += delta;
-	} while (TileX(bridge_tile) != 0 && TileY(bridge_tile) != 0 && IsWaterTile(bridge_tile));
+
+	if (slope == SLOPE_FLAT) {
+		/* Bridges starting on flat tiles are only allowed when crossing rivers. */
+		do {
+			if (bridge_length++ >= 4) {
+				/* Allow to cross rivers, not big lakes. */
+				return false;
+			}
+			bridge_tile += delta;
+		} while (IsValidTile(bridge_tile) && IsWaterTile(bridge_tile) && !IsSea(bridge_tile));
+	} else {
+		do {
+			if (bridge_length++ >= 11) {
+				/* Max 11 tile long bridges */
+				return false;
+			}
+			bridge_tile += delta;
+		} while (IsValidTile(bridge_tile) && IsWaterTile(bridge_tile));
+	}
 
 	/* no water tiles in between? */
 	if (bridge_length == 1) return false;
@@ -1420,8 +1431,6 @@ static void DoCreateTown(Town *t, TileIndex tile, uint32 townnameparts, TownSize
 	t->act_pass = 0;
 	t->act_mail = 0;
 
-	t->pct_pass_transported = 0;
-	t->pct_mail_transported = 0;
 	t->fund_buildings_months = 0;
 	t->new_act_food = 0;
 	t->new_act_water = 0;
@@ -2793,16 +2802,11 @@ static void UpdateTownGrowRate(Town *t)
 
 static void UpdateTownAmounts(Town *t)
 {
-	/* Using +1 here to prevent overflow and division by zero */
-	t->pct_pass_transported = t->new_act_pass * 256 / (t->new_max_pass + 1);
-
 	t->max_pass = t->new_max_pass; t->new_max_pass = 0;
 	t->act_pass = t->new_act_pass; t->new_act_pass = 0;
 	t->act_food = t->new_act_food; t->new_act_food = 0;
 	t->act_water = t->new_act_water; t->new_act_water = 0;
 
-	/* Using +1 here to prevent overflow and division by zero */
-	t->pct_mail_transported = t->new_act_mail * 256 / (t->new_max_mail + 1);
 	t->max_mail = t->new_max_mail; t->new_max_mail = 0;
 	t->act_mail = t->new_act_mail; t->new_act_mail = 0;
 

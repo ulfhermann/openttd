@@ -112,7 +112,7 @@ STR_QUANTITY_FRUIT                                              :{WEIGHT} میو
 STR_QUANTITY_DIAMONDS                                           :{COMMA} بسته{P "" های} الماس
 STR_QUANTITY_FOOD                                               :{WEIGHT} غذا
 STR_QUANTITY_PAPER                                              :{WEIGHT} کاغذ
-STR_QUANTITY_GOLD                                               :{COMMA} بسته{P "" s} طلا
+STR_QUANTITY_GOLD                                               :{COMMA} بسته‌ی طلا
 STR_QUANTITY_WATER                                              :{VOLUME} آب
 STR_QUANTITY_WHEAT                                              :{WEIGHT} گندم
 STR_QUANTITY_RUBBER                                             :{VOLUME} کائوچو
@@ -339,7 +339,7 @@ STR_SCENEDIT_TOOLBAR_PLACE_OBJECT                               :{BLACK}قرار
 STR_SCENEDIT_FILE_MENU_SAVE_SCENARIO                            :ذخیره سناریو
 STR_SCENEDIT_FILE_MENU_LOAD_SCENARIO                            :بارگزاری سناریو
 STR_SCENEDIT_FILE_MENU_SAVE_HEIGHTMAP                           :ذخیره heightmap
-STR_SCENEDIT_FILE_MENU_LOAD_HEIGHTMAP                           :بارگزاری heightmap
+STR_SCENEDIT_FILE_MENU_LOAD_HEIGHTMAP                           :بارگزاری نقشه پستی/بلندی
 STR_SCENEDIT_FILE_MENU_QUIT_EDITOR                              :خارج شدن از محیط طراحی
 STR_SCENEDIT_FILE_MENU_SEPARATOR                                :
 STR_SCENEDIT_FILE_MENU_QUIT                                     :خروج
@@ -2110,7 +2110,7 @@ STR_RESET_LANDSCAPE_CONFIRMATION_TEXT                           :{WHITE}آیا �
 STR_FOUND_TOWN_CAPTION                                          :{WHITE}طراحی مشخصات شهر ها
 STR_FOUND_TOWN_NEW_TOWN_BUTTON                                  :{BLACK}شهر جدید
 STR_FOUND_TOWN_NEW_TOWN_TOOLTIP                                 :{BLACK}ساختن شهر جدید
-STR_FOUND_TOWN_RANDOM_TOWN_BUTTON                               :{BLACK}شهر صادفی
+STR_FOUND_TOWN_RANDOM_TOWN_BUTTON                               :{BLACK}شهر تصادفی
 STR_FOUND_TOWN_RANDOM_TOWN_TOOLTIP                              :{BLACK}شهری در مکانی تصادفی بساز
 STR_FOUND_TOWN_MANY_RANDOM_TOWNS                                :{BLACK}تعدادی شهر با محل و جمعیت تصادفی
 STR_FOUND_TOWN_RANDOM_TOWNS_TOOLTIP                             :{BLACK}پوشاندن نقشه با شهرهای تصادفی
@@ -2144,33 +2144,86 @@ STR_FUND_INDUSTRY_SELECTION_TOOLTIP                             :{BLACK}صنعت
 STR_FUND_INDUSTRY_MANY_RANDOM_INDUSTRIES                        :ساخت صنایع بسیار به طور تصادفی
 STR_FUND_INDUSTRY_MANY_RANDOM_INDUSTRIES_TOOLTIP                :{BLACK}پر کردن نقشه با صنایع با محل تصادفی
 STR_FUND_INDUSTRY_INDUSTRY_BUILD_COST                           :{BLACK}خرج: {YELLOW}{CURRENCY}
+STR_FUND_INDUSTRY_PROSPECT_NEW_INDUSTRY                         :{BLACK}دورنما
 STR_FUND_INDUSTRY_BUILD_NEW_INDUSTRY                            :{BLACK}ساخت
 STR_FUND_INDUSTRY_FUND_NEW_INDUSTRY                             :{BLACK}سرمایه گذاری
 
 # Industry cargoes window
+STR_INDUSTRY_CARGOES_INDUSTRY_CAPTION                           :{WHITE}زنجیره ساخت برای صنعت {STRING}
+STR_INDUSTRY_CARGOES_CARGO_CAPTION                              :{WHITE}زنجیره ساخت برای بار {STRING}
+STR_INDUSTRY_CARGOES_PRODUCERS                                  :{WHITE}در حال ساخت صنایع
+STR_INDUSTRY_CARGOES_CUSTOMERS                                  :{WHITE}قبول کردن صنایع
+STR_INDUSTRY_CARGOES_HOUSES                                     :{WHITE}خانه ها
+STR_INDUSTRY_CARGOES_INDUSTRY_TOOLTIP                           :{BLACK}روی صنایع کلیک کنید تا تولید کننده و مشتریان را ببینید
+STR_INDUSTRY_CARGOES_CARGO_TOOLTIP                              :{BLACK}{STRING}{}روی بار کلیک کنید تا تولیدکنندگان و مشتریان آنرا ببینید
+STR_INDUSTRY_DISPLAY_CHAIN                                      :{BLACK}نمایش زنجیره
+STR_INDUSTRY_DISPLAY_CHAIN_TOOLTIP                              :{BLACK}نمایش صنایعی که بار را تولید و قبول می کنند
+STR_INDUSTRY_CARGOES_NOTIFY_SMALLMAP                            :{BLACK}پیوند به نقشه کوچک
+STR_INDUSTRY_CARGOES_NOTIFY_SMALLMAP_TOOLTIP                    :{BLACK}انتخاب صنایع نشان داده شده در نقشه کوچک
 
 # Land area window
 STR_LAND_AREA_INFORMATION_CAPTION                               :{WHITE}اطلاعات زمین
 STR_LAND_AREA_INFORMATION_COST_TO_CLEAR_N_A                     :{BLACK}هزینه پاک کردن: {LTBLUE}0
 STR_LAND_AREA_INFORMATION_COST_TO_CLEAR                         :{BLACK}هزینه پاک کردن: {RED}{CURRENCY}
+STR_LAND_AREA_INFORMATION_REVENUE_WHEN_CLEARED                  :{BLACK}درآمد زمان پاکسازی: {LTBLUE}{CURRENCY}
 STR_LAND_AREA_INFORMATION_OWNER_N_A                             :0
 STR_LAND_AREA_INFORMATION_OWNER                                 :{BLACK}مالک: {LTBLUE}{STRING}
+STR_LAND_AREA_INFORMATION_ROAD_OWNER                            :{BLACK}مالک جاده: {LTBLUE}{STRING}
+STR_LAND_AREA_INFORMATION_TRAM_OWNER                            :{BLACK}مالک راه تراموا: {LTBLUE}{STRING}
+STR_LAND_AREA_INFORMATION_RAIL_OWNER                            :{BLACK}مالک ریل راه آهن: {LTBLUE}{STRING}
+STR_LAND_AREA_INFORMATION_LOCAL_AUTHORITY                       :{BLACK}فرماندار محلی: {LTBLUE}{STRING}
+STR_LAND_AREA_INFORMATION_LOCAL_AUTHORITY_NONE                  :هیچکدام
+STR_LAND_AREA_INFORMATION_LANDINFO_COORDS                       :{BLACK}مختصات: {LTBLUE}{NUM} x {NUM} x {NUM} ({STRING})
+STR_LAND_AREA_INFORMATION_BUILD_DATE                            :{BLACK}ساخته شده در: {LTBLUE}{DATE_LONG}
+STR_LAND_AREA_INFORMATION_STATION_CLASS                         :{BLACK}کلاس ایستگاه: {LTBLUE}{STRING}
+STR_LAND_AREA_INFORMATION_STATION_TYPE                          :{BLACK}نوع ایستگاه: {LTBLUE}{STRING}
+STR_LAND_AREA_INFORMATION_AIRPORT_CLASS                         :{BLACK}کلاس هواپیما: {LTBLUE}{STRING}
+STR_LAND_AREA_INFORMATION_AIRPORT_NAME                          :{BLACK}نام فرودگاه: {LTBLUE}{STRING}
+STR_LAND_AREA_INFORMATION_AIRPORTTILE_NAME                      :{BLACK}نام قطعه فرودگاه: {LTBLUE}{STRING}
+STR_LAND_AREA_INFORMATION_NEWGRF_NAME                           :{BLACK}NewGRF: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_CARGO_ACCEPTED                        :{BLACK}محموله های دریافتی : {LTBLUE}
 STR_LAND_AREA_INFORMATION_CARGO_EIGHTS                          :({COMMA}/8 {STRING})
+STR_LANG_AREA_INFORMATION_RAIL_SPEED_LIMIT                      :{BLACK}حد سرعت ریل: {LTBLUE}{VELOCITY}
 
 # Description of land area of different tiles
 STR_LAI_CLEAR_DESCRIPTION_ROCKS                                 :صخره
 STR_LAI_CLEAR_DESCRIPTION_ROUGH_LAND                            :سرزمین سنگلاخی
 STR_LAI_CLEAR_DESCRIPTION_BARE_LAND                             :سرزمین بایر
 STR_LAI_CLEAR_DESCRIPTION_GRASS                                 :چمن
+STR_LAI_CLEAR_DESCRIPTION_FIELDS                                :زمین ها
 STR_LAI_CLEAR_DESCRIPTION_SNOW_COVERED_LAND                     :زمین پوشیده از برف
 STR_LAI_CLEAR_DESCRIPTION_DESERT                                :صحرا
 
 STR_LAI_RAIL_DESCRIPTION_TRACK                                  :قطعه ریل راه آهن
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_SIGNALS              :ریل با نشانگرهای توقف
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRESIGNALS                  :ریل راه آهن با پیش نشانگرها
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXITSIGNALS                 :ریل راه آهن با نشانگرهای خروجی
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBOSIGNALS                :ریل راه آهن با نشانگرهای چندگانه
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PBSSIGNALS                  :ریل راه آهن با نشانگرهای مسیر
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NOENTRYSIGNALS              :ریل راه آهن با نشانگرهای راه یکطرفه
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_PRESIGNALS           :ریل راه آهن با نشانگرهای توقف و پیش نشانگرها
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_EXITSIGNALS          :ریل راه آهن با نشانگرهای توقف و نشانگر خروج
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_COMBOSIGNALS         :ریل راه آهن با نشانگرهای توقف و نشانگرهای چندگانه
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_PBSSIGNALS           :ریل راه آهن با نشانگرهای توقف و نشانگرهای مسیر
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_NOENTRYSIGNALS       :ریل راه آهن با نشانگرهای توقف و نشانگرهای راه یکطرفه
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_EXITSIGNALS             :ریل راه آهن با پیش نشانگر و نشانگرهای خروچی
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_COMBOSIGNALS            :ریل راه آهن با پیش نشانگرها و نشاگرهای چندگانه
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_PBSSIGNALS              :ریل راه آهن با پیش نشانگرها و نشانگرهای مسیر
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_NOENTRYSIGNALS          :ریل راه آهن با پیش نشانگرها و نشانگرهای مسیر یکطرفه
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_COMBOSIGNALS           :ریل راه آهن با نشانگرهای خروج و نشانگرهای چندگانه
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_PBSSIGNALS             :ریل راه آهن با نشانگرهای توقف و نشانگرهای مسیر
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_NOENTRYSIGNALS         :ریل راه آهن با نشانگرهای توقف و نشانگرهای مسیر یکطرفه
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBO_PBSSIGNALS            :ریل راه آهن با نشانگرهای چندگانه و نشانگرهای مسیر
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBO_NOENTRYSIGNALS        :ریل راه آهن با نشانگرهای چندگانه و نشانگرهای راه یکطرفه
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PBS_NOENTRYSIGNALS          :ریل راه آهن با نشانگرهای مسیر و نشانگرهای راه یکطرفه
+STR_LAI_RAIL_DESCRIPTION_TRAIN_DEPOT                            :گاراژ راه آهن
 
 STR_LAI_ROAD_DESCRIPTION_ROAD                                   :جاده
 STR_LAI_ROAD_DESCRIPTION_ROAD_WITH_STREETLIGHTS                 :جاده با چراغ راهنمایی رانندگی
 STR_LAI_ROAD_DESCRIPTION_TREE_LINED_ROAD                        :جاده 3 لاین
+STR_LAI_ROAD_DESCRIPTION_ROAD_VEHICLE_DEPOT                     :گاراژ خودروی جاده ای
+STR_LAI_ROAD_DESCRIPTION_ROAD_RAIL_LEVEL_CROSSING               :سطح عبور راه / راه آهن
+STR_LAI_ROAD_DESCRIPTION_TRAMWAY                                :راه تراموا
 
 # Houses come directly from their building names
 STR_LAI_TOWN_INDUSTRY_DESCRIPTION_UNDER_CONSTRUCTION            :{STRING} (در دست ساخت)
@@ -2185,23 +2238,40 @@ STR_LAI_STATION_DESCRIPTION_AIRPORT                             :فرودگاه
 STR_LAI_STATION_DESCRIPTION_TRUCK_LOADING_AREA                  :محوطه بارگیری کامیون
 STR_LAI_STATION_DESCRIPTION_BUS_STATION                         :ایستگاه اتوبوس
 STR_LAI_STATION_DESCRIPTION_SHIP_DOCK                           :اسکله
+STR_LAI_STATION_DESCRIPTION_BUOY                                :شناور
+STR_LAI_STATION_DESCRIPTION_WAYPOINT                            :نقطه مسیر
 
 STR_LAI_WATER_DESCRIPTION_WATER                                 :آب
+STR_LAI_WATER_DESCRIPTION_CANAL                                 :آبراه
+STR_LAI_WATER_DESCRIPTION_LOCK                                  :قفل
+STR_LAI_WATER_DESCRIPTION_RIVER                                 :رودخانه
 STR_LAI_WATER_DESCRIPTION_COAST_OR_RIVERBANK                    :خلیج یا ساحل رودخانه
+STR_LAI_WATER_DESCRIPTION_SHIP_DEPOT                            :گاراژ کشتی
 
 # Industries come directly from their industry names
 
 STR_LAI_TUNNEL_DESCRIPTION_RAILROAD                             :تونل راه آهن
 STR_LAI_TUNNEL_DESCRIPTION_ROAD                                 :تونل ماشین رو
 
+STR_LAI_BRIDGE_DESCRIPTION_RAIL_SUSPENSION_STEEL                :پل معلق راه آهن فولادی
 STR_LAI_BRIDGE_DESCRIPTION_RAIL_GIRDER_STEEL                    :پل راه آهن با شاه تیر فولادی
+STR_LAI_BRIDGE_DESCRIPTION_RAIL_CANTILEVER_STEEL                :پل راه آهن پایه فولادی
+STR_LAI_BRIDGE_DESCRIPTION_RAIL_SUSPENSION_CONCRETE             :پل معلق راه آهن با بتون مسلح
 STR_LAI_BRIDGE_DESCRIPTION_RAIL_WOODEN                          :پل راه آهن چوبی
+STR_LAI_BRIDGE_DESCRIPTION_RAIL_CONCRETE                        :پل راه آهن بتونی
 STR_LAI_BRIDGE_DESCRIPTION_RAIL_TUBULAR_STEEL                   :پل لوله ای راه آهن
 
+STR_LAI_BRIDGE_DESCRIPTION_ROAD_SUSPENSION_STEEL                :پل معلق فولادی
+STR_LAI_BRIDGE_DESCRIPTION_ROAD_GIRDER_STEEL                    :پل شاه تیر فولادی
+STR_LAI_BRIDGE_DESCRIPTION_ROAD_CANTILEVER_STEEL                :پل پایه فولادی
+STR_LAI_BRIDGE_DESCRIPTION_ROAD_SUSPENSION_CONCRETE             :پل معلق با بتون تقویت شده
 STR_LAI_BRIDGE_DESCRIPTION_ROAD_WOODEN                          :پل ماشین رو چوبی
+STR_LAI_BRIDGE_DESCRIPTION_ROAD_CONCRETE                        :پل بتونی
 STR_LAI_BRIDGE_DESCRIPTION_ROAD_TUBULAR_STEEL                   :پل جاده ای لوله ای
 
+STR_LAI_BRIDGE_DESCRIPTION_AQUEDUCT                             :مجرای آب
 
+STR_LAI_OBJECT_DESCRIPTION_TRANSMITTER                          :فرستنده
 STR_LAI_OBJECT_DESCRIPTION_LIGHTHOUSE                           :فانوس دریایی
 STR_LAI_OBJECT_DESCRIPTION_COMPANY_HEADQUARTERS                 :ساختمان اصلی شرکت
 STR_LAI_OBJECT_DESCRIPTION_COMPANY_OWNED_LAND                   :زمین خریداری شده
@@ -2215,53 +2285,213 @@ STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD 
 # Save/load game/scenario
 STR_SAVELOAD_SAVE_CAPTION                                       :{WHITE}ذخیره ی بازی
 STR_SAVELOAD_LOAD_CAPTION                                       :{WHITE}ادامه ی بازی
+STR_SAVELOAD_SAVE_SCENARIO                                      :{WHITE}ذخیره سناریو
+STR_SAVELOAD_LOAD_SCENARIO                                      :{WHITE}بارگذاری سناریو
+STR_SAVELOAD_LOAD_HEIGHTMAP                                     :{WHITE}بارگذاری نقشه پستی/بلندی
 STR_SAVELOAD_SAVE_HEIGHTMAP                                     :{WHITE}ذخیره Heightmap
+STR_SAVELOAD_HOME_BUTTON                                        :{BLACK}برای برگشت به پوشه پیش فرض ذخیره اینجا را کلیک کنید
+STR_SAVELOAD_BYTES_FREE                                         :{BLACK}{BYTES} فضای آزاد
 STR_SAVELOAD_LIST_TOOLTIP                                       :{BLACK}لیست درایو ها، پوشه ها و بازی های ذخیره شده
+STR_SAVELOAD_EDITBOX_TOOLTIP                                    :{BLACK}نام فعلی انتخاب شده برای ذخیره بازی
 STR_SAVELOAD_DELETE_BUTTON                                      :{BLACK}حذف
+STR_SAVELOAD_DELETE_TOOLTIP                                     :{BLACK}فایل ذخیره بازی انتخاب شده را پاک کن
 STR_SAVELOAD_SAVE_BUTTON                                        :{BLACK}ذخیره
+STR_SAVELOAD_SAVE_TOOLTIP                                       :{BLACK}ذخیره بازی با نام انتخاب شده
+STR_SAVELOAD_LOAD_BUTTON                                        :{BLACK}بارگذاری
+STR_SAVELOAD_LOAD_TOOLTIP                                       :{BLACK}بارگذاری بازی انتخاب شده
+STR_SAVELOAD_DETAIL_CAPTION                                     :{BLACK}جزییات بازی
+STR_SAVELOAD_DETAIL_NOT_AVAILABLE                               :{BLACK}هیچ اطلاعاتی در دسترس نیست
+STR_SAVELOAD_DETAIL_COMPANY_INDEX                               :{SILVER}{COMMA}: {WHITE}{STRING}
+STR_SAVELOAD_DETAIL_GRFSTATUS                                   :{SILVER}NewGRF: {WHITE}{STRING}
 
+STR_SAVELOAD_OSKTITLE                                           :{BLACK}نام فایل ذخیره بازی را وارد کنید
 
 # World generation
+STR_MAPGEN_WORLD_GENERATION_CAPTION                             :{WHITE}سازنده دنیا
 STR_MAPGEN_MAPSIZE                                              :{BLACK}اندازه نقشه:
 STR_MAPGEN_BY                                                   :{BLACK}*
+STR_MAPGEN_NUMBER_OF_TOWNS                                      :{BLACK}تعداد شهرها:
+STR_MAPGEN_DATE                                                 :{BLACK}تاریخ:
+STR_MAPGEN_NUMBER_OF_INDUSTRIES                                 :{BLACK}تعداد صنایع:
+STR_MAPGEN_SNOW_LINE_HEIGHT                                     :{BLACK}ارتفاع خط برف:
+STR_MAPGEN_SNOW_LINE_UP                                         :{BLACK}اضافه کردن یک واحد به ارتفاع خط برف
+STR_MAPGEN_SNOW_LINE_DOWN                                       :{BLACK}کم کردن یک واحد از ارتفاع خط برف
+STR_MAPGEN_RANDOM_SEED                                          :{BLACK}شماره ساخت تصادفی:
+STR_MAPGEN_RANDOM_SEED_HELP                                     :{BLACK}برای وارد کردن شماره تصادفی کلیک کنید
+STR_MAPGEN_RANDOM                                               :{BLACK}انتخاب تصادفی
+STR_MAPGEN_RANDOM_HELP                                          :{BLACK}شماره ساخت تصادفی برای ساخت زمین و پستی و بلندی ها به کار می رود
+STR_MAPGEN_LAND_GENERATOR                                       :{BLACK}سازنده زمین:
+STR_MAPGEN_TREE_PLACER                                          :{BLACK}الگوریتم درخت ها:
+STR_MAPGEN_TERRAIN_TYPE                                         :{BLACK}نوع پستی/بلندی:
+STR_MAPGEN_QUANTITY_OF_SEA_LAKES                                :{BLACK}سطح دریا:
 STR_MAPGEN_QUANTITY_OF_RIVERS                                   :{BLACK}رودخانه ها:
+STR_MAPGEN_SMOOTHNESS                                           :{BLACK}همواری:
+STR_MAPGEN_VARIETY                                              :{BLACK}توزیع انواع:
+STR_MAPGEN_GENERATE                                             :{WHITE}بساز
 
 # Strings for map borders at game generation
+STR_MAPGEN_BORDER_TYPE                                          :{BLACK}لبه های نقشه:
+STR_MAPGEN_NORTHWEST                                            :{BLACK}شمال غربی
+STR_MAPGEN_NORTHEAST                                            :{BLACK}شمال شرقی
+STR_MAPGEN_SOUTHEAST                                            :{BLACK}جنوب شرقی
+STR_MAPGEN_SOUTHWEST                                            :{BLACK}جنوب غربی
+STR_MAPGEN_BORDER_FREEFORM                                      :{BLACK}قالب آزاد
+STR_MAPGEN_BORDER_WATER                                         :{BLACK}دریا
+STR_MAPGEN_BORDER_RANDOM                                        :{BLACK}تصادفی
+STR_MAPGEN_BORDER_RANDOMIZE                                     :{BLACK}تصادفی
+STR_MAPGEN_BORDER_MANUAL                                        :{BLACK}دستی
 
+STR_MAPGEN_HEIGHTMAP_ROTATION                                   :{BLACK}جهت چرخش نقشه پستی/بلندی:
+STR_MAPGEN_HEIGHTMAP_NAME                                       :{BLACK}نام نقشه پستی/بلندی:
+STR_MAPGEN_HEIGHTMAP_SIZE_LABEL                                 :{BLACK}اندازه:
+STR_MAPGEN_HEIGHTMAP_SIZE                                       :{ORANGE}{NUM} x {NUM}
 
+STR_MAPGEN_RANDOM_SEED_OSKTITLE                                 :{BLACK}یک عدد تصادفی وارد کنید
+STR_MAPGEN_SNOW_LINE_QUERY_CAPT                                 :{WHITE}تغییر ارتفاع خط برف
+STR_MAPGEN_START_DATE_QUERY_CAPT                                :{WHITE}تغییر سال آغاز
 
 # SE Map generation
+STR_SE_MAPGEN_CAPTION                                           :{WHITE}نوع سناریو
+STR_SE_MAPGEN_FLAT_WORLD                                        :{WHITE}زمین تخت
+STR_SE_MAPGEN_FLAT_WORLD_TOOLTIP                                :{BLACK}یک زمین تخت بساز
+STR_SE_MAPGEN_RANDOM_LAND                                       :{WHITE}زمین تصادفی
+STR_SE_MAPGEN_FLAT_WORLD_HEIGHT                                 :{BLACK}ارتفاع زمین تخت:
+STR_SE_MAPGEN_FLAT_WORLD_HEIGHT_DOWN                            :{BLACK}کم کردن بک واحد از ارتفاع زمین تخت
+STR_SE_MAPGEN_FLAT_WORLD_HEIGHT_UP                              :{BLACK}اضافه کردن بک واحد به ارتفاع زمین تخت
 
+STR_SE_MAPGEN_FLAT_WORLD_HEIGHT_QUERY_CAPT                      :{WHITE}تغییر ارتفاع زمین تخت
 
 # Map generation progress
+STR_GENERATION_WORLD                                            :{WHITE}درحال ساخت دنیا...
+STR_GENERATION_ABORT                                            :{BLACK}لغو
+STR_GENERATION_ABORT_CAPTION                                    :{WHITE}لغو ساخت دنیا
+STR_GENERATION_ABORT_MESSAGE                                    :{YELLOW}آیا مطمئنید که می خواهید روند ساخت را متوقف کنید؟
+STR_GENERATION_PROGRESS                                         :{WHITE}{NUM}% کامل شده
+STR_GENERATION_PROGRESS_NUM                                     :{BLACK}{NUM} / {NUM}
+STR_GENERATION_WORLD_GENERATION                                 :{BLACK}ساختن دنیا
 STR_GENERATION_RIVER_GENERATION                                 :{BLACK}ساخت رودخانه
+STR_GENERATION_TREE_GENERATION                                  :{BLACK}ساختن درخت
+STR_GENERATION_OBJECT_GENERATION                                :{BLACK}ساختن اشیاء
+STR_GENERATION_CLEARING_TILES                                   :{BLACK}ساختن مناطق ناهموار و صخره ها
+STR_GENERATION_SETTINGUP_GAME                                   :{BLACK}راه اندازی بازی
+STR_GENERATION_PREPARING_TILELOOP                               :{BLACK}اجرای حلقه قطعه ها
+STR_GENERATION_PREPARING_GAME                                   :{BLACK}آماده سازی بازی
 
 # NewGRF settings
+STR_NEWGRF_SETTINGS_CAPTION                                     :{WHITE}تنظیمات NewGRF
+STR_NEWGRF_SETTINGS_INFO_TITLE                                  :{WHITE}اطلاعات مفصل NewGRF
+STR_NEWGRF_SETTINGS_ACTIVE_LIST                                 :{WHITE}فایل های NewGRF فعال
+STR_NEWGRF_SETTINGS_INACTIVE_LIST                               :{WHITE}فایل های NewGRF غیر فعال
+STR_NEWGRF_SETTINGS_SELECT_PRESET                               :{ORANGE}انتخاب موارد ثبت شده:
+STR_NEWGRF_FILTER_TITLE                                         :{ORANGE}جستجوی کلمه:
+STR_NEWGRF_SETTINGS_PRESET_LIST_TOOLTIP                         :{BLACK}مورد از پیش ثبت شده ای که انتخاب شده را بارگذاری می کند
+STR_NEWGRF_SETTINGS_PRESET_SAVE                                 :{BLACK}ذخیره به عنوان مورد از پیش ثبت شده
+STR_NEWGRF_SETTINGS_PRESET_SAVE_TOOLTIP                         :{BLACK}لیست فعلی را به عنوان موارد از پیش ثبت شده ذخیره کن
+STR_NEWGRF_SETTINGS_PRESET_SAVE_QUERY                           :{BLACK}نام برای موارد از پیش ثبت شده
+STR_NEWGRF_SETTINGS_PRESET_DELETE                               :{BLACK}پاک کردن مورد از پیش ثبت شده
+STR_NEWGRF_SETTINGS_PRESET_DELETE_TOOLTIP                       :{BLACK}مورد از پیش ثبت شده ای که انتخاب شده را پاک می کند
+STR_NEWGRF_SETTINGS_ADD                                         :{BLACK}اضافه
+STR_NEWGRF_SETTINGS_ADD_FILE_TOOLTIP                            :{BLACK}NewGRF انتخاب شده را به پیکربندی بازی اضافه می کند
+STR_NEWGRF_SETTINGS_RESCAN_FILES                                :{BLACK}بازبینی فایل ها
+STR_NEWGRF_SETTINGS_RESCAN_FILES_TOOLTIP                        :{BLACK}به روز رسانی لیست فایل های NewGRF در دسترس
+STR_NEWGRF_SETTINGS_REMOVE                                      :{BLACK}حذف
+STR_NEWGRF_SETTINGS_REMOVE_TOOLTIP                              :{BLACK}NewGRF انتخاب شده را از پیکربندی بازی حذف می کند
+STR_NEWGRF_SETTINGS_MOVEUP                                      :{BLACK}حرکت به بالا
+STR_NEWGRF_SETTINGS_MOVEUP_TOOLTIP                              :{BLACK}NewGRF انتخاب شده را به بالا می فرستد
+STR_NEWGRF_SETTINGS_MOVEDOWN                                    :{BLACK}حرکت به پایین
+STR_NEWGRF_SETTINGS_MOVEDOWN_TOOLTIP                            :{BLACK}NewGRF انتخاب شده را به پایین می فرستد
+STR_NEWGRF_SETTINGS_FILE_TOOLTIP                                :{BLACK}لیست فایل های NewGRF نصب شده. روی فایل کلیک کنید تا پارامترها را بتوانید تغییر بدهید
 
+STR_NEWGRF_SETTINGS_SET_PARAMETERS                              :{BLACK}ثبت پارامترها
+STR_NEWGRF_SETTINGS_TOGGLE_PALETTE                              :{BLACK}تغییر پالت
+STR_NEWGRF_SETTINGS_TOGGLE_PALETTE_TOOLTIP                      :{BLACK}تغییر نوع پالت برای NewGRF مورد نظر.{}اگر گرافیک صورتی رنگ به نظر آمد این پالت را تغییر دهید
+STR_NEWGRF_SETTINGS_APPLY_CHANGES                               :{BLACK}ثبت تغییرات
 
 STR_NEWGRF_SETTINGS_FIND_MISSING_CONTENT_BUTTON                 :{BLACK}یافتن مجموعه ای که کم است در اینترنت
 STR_NEWGRF_SETTINGS_FIND_MISSING_CONTENT_TOOLTIP                :{BLACK} بررسی اینکه آیا مجموعه ای که کم است در اینترنت یافت می شود یا نه
 
+STR_NEWGRF_SETTINGS_FILENAME                                    :{BLACK}نام فایل: {SILVER}{STRING}
+STR_NEWGRF_SETTINGS_GRF_ID                                      :{BLACK}GRF ID: {SILVER}{STRING}
+STR_NEWGRF_SETTINGS_VERSION                                     :{BLACK}ویرایش: {SILVER}{NUM}
+STR_NEWGRF_SETTINGS_MIN_VERSION                                 :{BLACK}کمترین ویرایش دارای سازگاری: {SILVER}{NUM}
+STR_NEWGRF_SETTINGS_MD5SUM                                      :{BLACK}MD5sum: {SILVER}{STRING}
+STR_NEWGRF_SETTINGS_PALETTE                                     :{BLACK}پالت: {SILVER}{STRING}
+STR_NEWGRF_SETTINGS_PARAMETER                                   :{BLACK}پارامترها: {SILVER}{STRING}
 
+STR_NEWGRF_SETTINGS_NO_INFO                                     :{BLACK}هیچ اطلاعاتی در دسترس نیست
+STR_NEWGRF_SETTINGS_NOT_FOUND                                   :{RED}فایل همسان پیدا نشد
+STR_NEWGRF_SETTINGS_DISABLED                                    :{RED}غیرفعال
 STR_NEWGRF_SETTINGS_INCOMPATIBLE                                :{RED}با این ورژن از OpenTTD همخوانی ندارد
 
+STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}پارامترهای NewGRF را وارد کنید
 
 # NewGRF parameters window
+STR_NEWGRF_PARAMETERS_CAPTION                                   :{WHITE}تغییر پارامترهای NewGRF
+STR_NEWGRF_PARAMETERS_CLOSE                                     :{BLACK}بسته
+STR_NEWGRF_PARAMETERS_RESET                                     :{BLACK}برگرداندن تغییرات
+STR_NEWGRF_PARAMETERS_RESET_TOOLTIP                             :{BLACK}ثبت مقدار پیش فرض برای همه پارامترها
+STR_NEWGRF_PARAMETERS_DEFAULT_NAME                              :پارامتر{NUM}
+STR_NEWGRF_PARAMETERS_SETTING                                   :{STRING}: {ORANGE}{STRING}
+STR_NEWGRF_PARAMETERS_NUM_PARAM                                 :{LTBLUE}تعداد پارامتر: {ORANGE}{NUM}
 
 # NewGRF inspect window
+STR_NEWGRF_INSPECT_CAPTION                                      :{WHITE}رسیدگی - {STRING}
+STR_NEWGRF_INSPECT_PARENT_BUTTON                                :{BLACK}والد
+STR_NEWGRF_INSPECT_PARENT_TOOLTIP                               :{BLACK}بازرسی شی ء مکان والد
 
+STR_NEWGRF_INSPECT_CAPTION_OBJECT_AT                            :{STRING} در {HEX}
+STR_NEWGRF_INSPECT_CAPTION_OBJECT_AT_OBJECT                     :شی‌ء
+STR_NEWGRF_INSPECT_CAPTION_OBJECT_AT_RAIL_TYPE                  :نوع ریل
 
+STR_NEWGRF_INSPECT_QUERY_CAPTION                                :{WHITE}متغیر NewGRF 60 + پارامتر (hexadecimal)
 
 # Sprite aligner window
+STR_SPRITE_ALIGNER_CAPTION                                      :{WHITE}جابجا کردن تصویر گرافیک {COMMA} ({STRING})
+STR_SPRITE_ALIGNER_NEXT_BUTTON                                  :{BLACK}تصویر بعدی
+STR_SPRITE_ALIGNER_NEXT_TOOLTIP                                 :{BLACK}نمایش تصویر بعدی، بدون انجام دادن هر گونه تغییرات در آخر
+STR_SPRITE_ALIGNER_GOTO_BUTTON                                  :{BLACK}رفتن به تصویر
+STR_SPRITE_ALIGNER_GOTO_TOOLTIP                                 :{BLACK}رفتن به تصویر بعد. اگر تصویر معمولی نیست به تصویر معمولی بعدی می رود
+STR_SPRITE_ALIGNER_PREVIOUS_BUTTON                              :{BLACK}تصویر قبلی
+STR_SPRITE_ALIGNER_PREVIOUS_TOOLTIP                             :{BLACK}نمایش تصویر عادی قبلی، بدون انجام دادن هر گونه تغییرات بر آخر
+STR_SPRITE_ALIGNER_SPRITE_TOOLTIP                               :{BLACK}نمایش تصویر انتخاب شده. تغییر مکان تصویر در زمان بارگزاری اعمال نمی شود
+STR_SPRITE_ALIGNER_MOVE_TOOLTIP                                 :{BLACK}تغییر مکان تصویر، تغییر مقدار اضافه شونده به X و Y
+STR_SPRITE_ALIGNER_OFFSETS                                      :{BLACK}مقدار اضافه شونده به X: {NUM}, مقدار اضافه شونده به Y: {NUM}
+STR_SPRITE_ALIGNER_PICKER_BUTTON                                :{BLACK}برداشتن تصویر
+STR_SPRITE_ALIGNER_PICKER_TOOLTIP                               :{BLACK}برداشتن یک تصویر از یک نقطه از صفحه نمایش
 
+STR_SPRITE_ALIGNER_GOTO_CAPTION                                 :{WHITE}برو به تصویر
 
 # NewGRF (self) generated warnings/errors
+STR_NEWGRF_ERROR_MSG_INFO                                       :{SILVER}{STRING}
+STR_NEWGRF_ERROR_MSG_WARNING                                    :{RED}هشدار: {SILVER}{STRING}
+STR_NEWGRF_ERROR_MSG_ERROR                                      :{RED}خطا: {SILVER}{STRING}
+STR_NEWGRF_ERROR_MSG_FATAL                                      :{RED}خطای وخیم: {SILVER}{STRING}
+STR_NEWGRF_ERROR_FATAL_POPUP                                    :{WHITE}یک خطای وخیم در NewGRF اتفاق افتاده: {}{STRING}
+STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{1:STRING} با TTDPatch که ویرایش آن توسط OpenTTD گزارش شده کار نمی کند
+STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{1:STRING} برای ویرایش {STRING}TTD می باشد
+STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{1:STRING} طراحی شده برای استفاده با {STRING}
+STR_NEWGRF_ERROR_INVALID_PARAMETER                              :پارامتر نا معتبر برای {1:STRING}: پارامتر {STRING} ({NUM})
+STR_NEWGRF_ERROR_LOAD_BEFORE                                    :{1:STRING} باید قبلا از {STRING} بار زده می شد.
+STR_NEWGRF_ERROR_LOAD_AFTER                                     :{1:STRING} باید بعد از {STRING} بار زده شود
+STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{1:STRING} نیاز به OpenTTD با ویرایش {STRING} یا بالاتر نیاز است
+STR_NEWGRF_ERROR_AFTER_TRANSLATED_FILE                          :فایل GRF برای ترجمه شدن طراحی شده
+STR_NEWGRF_ERROR_TOO_MANY_NEWGRFS_LOADED                        :تعداد NewGRF بیشتر از حد می باشد
+STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC                       :در حال بارگزاری {2:STRING} به عنوان NewGRF ایستا با {4:STRING} مشکل همخوانی دارد
+STR_NEWGRF_ERROR_UNEXPECTED_SPRITE                              :تصویر غیر منتظره
+STR_NEWGRF_ERROR_UNKNOWN_PROPERTY                               :ویژگی فعالیت 0 ناشناخته است
+STR_NEWGRF_ERROR_INVALID_ID                                     :تلاش برای استفاده از آی دی نا معتبر
+STR_NEWGRF_ERROR_CORRUPT_SPRITE                                 :{YELLOW}{STRING} دارای یک تصویر خراب می باشد. تصویرهای خراب با علامت سوال قرمز (؟) نشان داده شدند.
+STR_NEWGRF_ERROR_MULTIPLE_ACTION_8                              :دارای چندین ورودی فعالیت 8 می باشد
+STR_NEWGRF_ERROR_READ_BOUNDS                                    :خواندن تصویر از انتها گذشت
 STR_NEWGRF_ERROR_GRM_FAILED                                     :منبع GRF درخواست شده در دسترس نمی باشد.
+STR_NEWGRF_ERROR_FORCEFULLY_DISABLED                            :{2:STRING} غیر فعال گردیده توسط {4:STRING}
 STR_NEWGRF_ERROR_INVALID_SPRITE_LAYOUT                          :طرح با قالب ناشناخته/نامعتبر
 
 # NewGRF related 'general' warnings
 STR_NEWGRF_POPUP_CAUTION_CAPTION                                :{WHITE}اخطار!
+STR_NEWGRF_CONFIRMATION_TEXT                                    :{YELLOW}شما دارید در یک بازی درحال اجرا تغییر اعمال می کنید که ممکن است باعث برهم خوردن بازی شود.{}آیا مطمئنید؟
 
+STR_NEWGRF_DUPLICATE_GRFID                                      :{WHITE}نمی توان فایل را اضافه کرد: GRF ID تکراری
 
 
 # NewGRF status
@@ -2272,6 +2502,7 @@ STR_NEWGRF_POPUP_CAUTION_CAPTION                                :{WHITE}اخطا
 # 'User removed essential NewGRFs'-placeholders for stuff without specs
 
 # NewGRF scanning window
+STR_NEWGRF_SCAN_ARCHIVES                                        :جستجوی در بایگانی
 
 # Sign list window
 
@@ -2432,6 +2663,8 @@ STR_BUY_VEHICLE_TRAIN_ALL_CAPTION                               :وسایل ری
 STR_BUY_VEHICLE_ROAD_VEHICLE_CAPTION                            :ماشین های جدید
 STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :هواپیمای جدید
 
+STR_PURCHASE_INFO_SPEED_OCEAN                                   :{BLACK}سرعت در اقیانوس: {GOLD}{VELOCITY}
+STR_PURCHASE_INFO_SPEED_CANAL                                   :{BLACK}سرعت در کانال/رودخانه: {GOLD}{VELOCITY}
 STR_PURCHASE_INFO_REFITTABLE                                    :(قابل تعمیر)
 
 STR_BUY_VEHICLE_TRAIN_LIST_TOOLTIP                              :{BLACK}لیست انتخاب قطار - برای اطلاعات بیشتر روی وسیله کلیک کنید
@@ -2629,6 +2862,9 @@ STR_ORDERS_END_OF_ORDERS                                        :- - پایان 
 
 
 
+# Conditional order variables, must follow order of OrderConditionVariable enum
+STR_ORDER_CONDITIONAL_REMAINING_LIFETIME                        :عمر مفید باقی مانده (سال)
+
 
 
 STR_ORDERS_SKIP_BUTTON                                          :{BLACK}رها کردن
@@ -2729,6 +2965,8 @@ STR_ERROR_GAME_LOAD_FAILED                                      :{WHITE}بازی
 # Map generation messages
 
 
+
+STR_ERROR_HEIGHTMAP_TOO_LARGE                                   :{WHITE}تصویر بسیار بزرگ است...
 
 
 # Soundset messages

@@ -1236,7 +1236,7 @@ STR_CONFIG_SETTING_AUTORENEW_VEHICLE                            :{LTBLUE}Automat
 STR_CONFIG_SETTING_AUTORENEW_MONTHS                             :{LTBLUE}Automatikus járműfelújítás {ORANGE}{STRING}{LTBLUE} hónappal a max. életkora előtt/után
 STR_CONFIG_SETTING_AUTORENEW_MONEY                              :{LTBLUE}Automatikus járműfelújításhoz szükséges min. pénz: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ERRMSG_DURATION                              :{LTBLUE}Hibaüzenetek megjelenítési ideje: {ORANGE}{STRING} másodperc
-STR_CONFIG_SETTING_HOVER_DELAY                                  :{LTBLUE}Eszközinformációk megjelnítése: {ORANGE}Késleltetés {STRING} másodperccel
+STR_CONFIG_SETTING_HOVER_DELAY                                  :{LTBLUE}Eszközinformációk megjelenítése: {ORANGE}Késleltetés {STRING} másodperccel
 STR_CONFIG_SETTING_HOVER_DELAY_DISABLED                         :{LTBLUE}Eszközinformációk megjelenítése: {ORANGE}Jobb egérgombbal
 STR_CONFIG_SETTING_POPULATION_IN_LABEL                          :{LTBLUE}Mutassa a település lakosságát a feliratban: {ORANGE}{STRING}
 
@@ -1985,7 +1985,7 @@ STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_STATION                 :{BLACK}Vasútá
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_SIGNALS                 :{BLACK}Vasúti jelzők építése. Ctrl gombbal váltás az alak- és fényjelzők között{}Húzással a sínek mentén végig jelzők épülnek. Húzva Ctrl gombbal a következő pályakiágazásig épít jelzőket{}Ctrl+Kattintással válthatod a megnyitandó jelzőépítés-kezelő ablakot. Shift lenyomásával megmutatja a becsült költséget
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_BRIDGE                  :{BLACK}Vasúti híd építése. Shift lenyomásával megmutatja a becsült költséget
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TUNNEL                  :{BLACK}Vasúti alagút építése. Shift lenyomásával megmutatja a becsült költséget
-STR_RAIL_TOOLBAR_TOOLTIP_TOGGLE_BUILD_REMOVE_FOR                :{BLACK}Váltás fépítés/feleszedés között vasúti pályák, jelzők, ellenőrző pontok és vasútállomások esetében. Ctrl nyomvatartásával az ellenőrző pontokon és állomásokon a vasúti pályát is eltávolítja
+STR_RAIL_TOOLBAR_TOOLTIP_TOGGLE_BUILD_REMOVE_FOR                :{BLACK}Váltás építés/feleszedés között vasúti pályák, jelzők, ellenőrző pontok és vasútállomások esetében. Ctrl nyomvatartásával az ellenőrző pontokon és állomásokon a vasúti pályát is eltávolítja
 STR_RAIL_TOOLBAR_TOOLTIP_CONVERT_RAIL                           :{BLACK}Sínek átalakítása a kiválasztott típusra. Shift lenyomásával megmutatja a becsült költséget
 
 # Rail depot construction window
@@ -2591,6 +2591,7 @@ STR_NEWGRF_INVALID_INDUSTRYTYPE                                 :<érvénytelen 
 STR_NEWGRF_SCAN_CAPTION                                         :{WHITE}NewGRF-ek beolvasása
 STR_NEWGRF_SCAN_MESSAGE                                         :{BLACK}NewGRF-ek beolvasása. Mennyiségtől függően eltarthat egy ideig...
 STR_NEWGRF_SCAN_STATUS                                          :{BLACK}{NUM} NewGRF beolvasva kb. {NUM} NewGRF közül
+STR_NEWGRF_SCAN_ARCHIVES                                        :Archív fájlok keresése
 
 # Sign list window
 STR_SIGN_LIST_CAPTION                                           :{WHITE}Feliratok listája ({COMMA} db)
@@ -2899,6 +2900,8 @@ STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :Új repülőgé
 STR_PURCHASE_INFO_COST_WEIGHT                                   :{BLACK}Ár: {GOLD}{CURRENCY}{BLACK} Súly: {GOLD}{WEIGHT_S}
 STR_PURCHASE_INFO_SPEED_POWER                                   :{BLACK}Sebesség: {GOLD}{VELOCITY}{BLACK} Telj.: {GOLD}{POWER}
 STR_PURCHASE_INFO_SPEED                                         :{BLACK}Sebesség: {GOLD}{VELOCITY}
+STR_PURCHASE_INFO_SPEED_OCEAN                                   :{BLACK}Sebesség óceánon: {GOLD}{VELOCITY}
+STR_PURCHASE_INFO_SPEED_CANAL                                   :{BLACK}Sebesség folyón/csatornán: {GOLD}{VELOCITY}
 STR_PURCHASE_INFO_RUNNINGCOST                                   :{BLACK}Üzemeltetés: {GOLD}{CURRENCY}/év
 STR_PURCHASE_INFO_CAPACITY                                      :{BLACK}Kapacitás: {GOLD}{CARGO} {STRING}
 STR_PURCHASE_INFO_REFITTABLE                                    :(átalakítható)
@@ -3259,12 +3262,15 @@ STR_ORDER_DROP_HALT_DEPOT                                       :Maradj ott
 STR_ORDER_SERVICE_TOOLTIP                                       :{BLACK}Utasítás kihagyása, ha javítás szükséges
 
 STR_ORDER_CONDITIONAL_VARIABLE_TOOLTIP                          :{BLACK}A jármű adata ami alapján ugrani szeretnénk a parancssorban
+
+# Conditional order variables, must follow order of OrderConditionVariable enum
 STR_ORDER_CONDITIONAL_LOAD_PERCENTAGE                           :Rakomány százaléka
 STR_ORDER_CONDITIONAL_RELIABILITY                               :Megbízhatóság
 STR_ORDER_CONDITIONAL_MAX_SPEED                                 :Maximális sebesség
-STR_ORDER_CONDITIONAL_AGE                                       :Életkor (év)
+STR_ORDER_CONDITIONAL_AGE                                       :Kor (év)
 STR_ORDER_CONDITIONAL_REQUIRES_SERVICE                          :Javításra szorul
 STR_ORDER_CONDITIONAL_UNCONDITIONALLY                           :Mindig
+STR_ORDER_CONDITIONAL_REMAINING_LIFETIME                        :Hátralévő élettartam (év)
 
 STR_ORDER_CONDITIONAL_COMPARATOR_TOOLTIP                        :{BLACK}Hogyan viszonyul a jármű kiválasztott adata a megadott értékhez
 STR_ORDER_CONDITIONAL_COMPARATOR_EQUALS                         :egyenlő
@@ -3299,8 +3305,8 @@ STR_ORDERS_GO_TO_DROPDOWN_TOOLTIP                               :{BLACK}Fejlett 
 STR_ORDERS_VEH_WITH_SHARED_ORDERS_LIST_TOOLTIP                  :{BLACK}Megmutatja az összes járművet, amik megosztják ezt a menetrendet
 
 # String parts to build the order string
-STR_ORDER_GO_TO_WAYPOINT                                        :Menj át a(z) {WAYPOINT}on
-STR_ORDER_GO_NON_STOP_TO_WAYPOINT                               :Megállás nélkül menj a(z) {WAYPOINT}hoz
+STR_ORDER_GO_TO_WAYPOINT                                        :Menj át {WAYPOINT}
+STR_ORDER_GO_NON_STOP_TO_WAYPOINT                               :Megállás nélkül menj át {WAYPOINT}
 
 STR_ORDER_SERVICE_AT                                            :Javításra menj
 STR_ORDER_SERVICE_NON_STOP_AT                                   :Javításra megállás nélkül menj
@@ -3509,6 +3515,8 @@ STR_ERROR_PNGMAP_MISC                                           :{WHITE}... vala
 
 STR_ERROR_BMPMAP                                                :{WHITE}Nem sikerült a térkép betöltése a BMP-ből...
 STR_ERROR_BMPMAP_IMAGE_TYPE                                     :{WHITE}... nem sikerült a képtípust konvertálni
+
+STR_ERROR_HEIGHTMAP_TOO_LARGE                                   :{WHITE}... túl nagy a kép
 
 STR_WARNING_HEIGHTMAP_SCALE_CAPTION                             :{WHITE}Átméretezési figyelmeztetés
 STR_WARNING_HEIGHTMAP_SCALE_MESSAGE                             :{YELLOW}A forrás térkép túlságosan nagy mértékű átméretezése nem javasolt. Folytatod mégis?
@@ -4286,12 +4294,16 @@ STR_FORMAT_DATE_LONG                                            :{STRING} {STRIN
 STR_FORMAT_DATE_ISO                                             :{2:NUM}-{1:STRING}-{0:STRING}
 
 STR_FORMAT_BUOY_NAME                                            :{TOWN} Bója
+STR_FORMAT_BUOY_NAME.ba                                         :{TOWN} Bóján
 STR_FORMAT_BUOY_NAME_SERIAL                                     :{TOWN} {COMMA}. sz. Bója
+STR_FORMAT_BUOY_NAME_SERIAL.ba                                  :{TOWN} {COMMA}. sz. Bóján
 STR_FORMAT_COMPANY_NUM                                          :({COMMA}. vállalat)
 STR_FORMAT_GROUP_NAME                                           :{COMMA} csoport
 STR_FORMAT_INDUSTRY_NAME                                        :{TOWN}i {STRING}
 STR_FORMAT_WAYPOINT_NAME                                        :{TOWN} Ellenőrző pont
+STR_FORMAT_WAYPOINT_NAME.ba                                     :{TOWN} Ellenőrző ponton
 STR_FORMAT_WAYPOINT_NAME_SERIAL                                 :{TOWN} {COMMA}. sz. Ellenőrző pont
+STR_FORMAT_WAYPOINT_NAME_SERIAL.ba                              :{TOWN} {COMMA}. sz. Ellenőrző ponton
 
 STR_FORMAT_DEPOT_NAME_TRAIN                                     :{TOWN} Vasúti járműtelep
 STR_FORMAT_DEPOT_NAME_TRAIN_SERIAL                              :{TOWN} {COMMA}. sz. Vasúti Járműtelep
