@@ -70,6 +70,25 @@ enum TileLayoutFlags {
 DECLARE_ENUM_AS_BIT_SET(TileLayoutFlags)
 
 /**
+ * Determines which sprite to use from a spriteset for a specific construction stage.
+ * @param construction_stage Construction stage 0 - 3.
+ * @param num_sprites Number of available sprites to select stage from.
+ * @return Sprite to use
+ */
+static inline uint GetConstructionStageOffset(uint construction_stage, uint num_sprites)
+{
+	assert(num_sprites > 0);
+	if (num_sprites > 4) num_sprites = 4;
+	switch (construction_stage) {
+		case 0: return 0;
+		case 1: return num_sprites > 2 ? 1 : 0;
+		case 2: return num_sprites > 2 ? num_sprites - 2 : 0;
+		case 3: return num_sprites - 1;
+		default: NOT_REACHED();
+	}
+}
+
+/**
  * Additional modifiers for items in sprite layouts.
  */
 struct TileLayoutRegisters {
@@ -77,6 +96,8 @@ struct TileLayoutRegisters {
 	uint8 dodraw;          ///< Register deciding whether the sprite shall be drawn at all. Non-zero means drawing.
 	uint8 sprite;          ///< Register specifying a signed offset for the sprite.
 	uint8 palette;         ///< Register specifying a signed offset for the palette.
+	uint16 max_sprite_offset;  ///< Maximum offset to add to the sprite. (limited by size of the spriteset)
+	uint16 max_palette_offset; ///< Maximum offset to add to the palette. (limited by size of the spriteset)
 	union {
 		uint8 parent[3];   ///< Registers for signed offsets for the bounding box position of parent sprites.
 		uint8 child[2];    ///< Registers for signed offsets for the position of child sprites.
@@ -94,6 +115,12 @@ static const uint TLR_MAX_VAR10 = 7; ///< Maximum value for var 10.
  */
 struct NewGRFSpriteLayout : ZeroedMemoryAllocator, DrawTileSprites {
 	const TileLayoutRegisters *registers;
+
+	/**
+	 * Number of sprites in all referenced spritesets.
+	 * If these numbers are inconsistent, then this is 0 and the real values are in \c registers.
+	 */
+	uint consistent_max_offset;
 
 	void Allocate(uint num_sprites);
 	void AllocateRegisters();
@@ -128,7 +155,7 @@ struct NewGRFSpriteLayout : ZeroedMemoryAllocator, DrawTileSprites {
 		return this->registers != NULL;
 	}
 
-	uint32 PrepareLayout(uint32 orig_offset, uint32 newgrf_ground_offset, uint32 newgrf_offset, bool separate_ground) const;
+	uint32 PrepareLayout(uint32 orig_offset, uint32 newgrf_ground_offset, uint32 newgrf_offset, uint constr_stage, bool separate_ground) const;
 	void ProcessRegisters(uint8 resolved_var10, uint32 resolved_sprite, bool separate_ground) const;
 
 	/**

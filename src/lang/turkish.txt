@@ -874,7 +874,7 @@ STR_GAME_OPTIONS_CURRENCY_DEM                                   :Alman markı (D
 STR_GAME_OPTIONS_CURRENCY_DKK                                   :Danimarka Kronu (DKK)
 STR_GAME_OPTIONS_CURRENCY_ESP                                   :Peseta (ESP)
 STR_GAME_OPTIONS_CURRENCY_FIM                                   :Fin Markka (FIM)
-STR_GAME_OPTIONS_CURRENCY_FRF                                   :Frank (FRF)
+STR_GAME_OPTIONS_CURRENCY_FRF                                   :Fransız Frankı (FRF)
 STR_GAME_OPTIONS_CURRENCY_GRD                                   :Yunan Drachma (GRD)
 STR_GAME_OPTIONS_CURRENCY_HUF                                   :Macar Forinti (HUF)
 STR_GAME_OPTIONS_CURRENCY_ISK                                   :Iceland Kronasi (ISK)
@@ -1119,8 +1119,8 @@ STR_CONFIG_SETTING_TRAIN_LENGTH                                 :{LTBLUE}Trenler
 STR_CONFIG_SETTING_SMOKE_AMOUNT                                 :{LTBLUE}Araçlardan çıkan duman veya kıvılcım miktarı: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL                     :{LTBLUE}Tren ivme modeli: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL              :{LTBLUE}Kara taşıtı ivme modeli: {ORANGE}{STRING}
-STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Trenler için eğim dikliği {ORANGE}{STRING}%
-STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}Kara taşıtları için eğim dikliği %{ORANGE}{STRING}
+STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Trenler için eğim dikliği: {ORANGE}{STRING}%
+STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}Kara taşıtları için eğim dikliği: %{ORANGE}{STRING}
 STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Tren ve gemilerin 90 derece dönmesini yasakla: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Doğrudan bitişik olmayan istasyonları birleştirme izni: {ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Geliştirilmiş yükleme algoritması kullan: {ORANGE}{STRING}
@@ -3199,12 +3199,15 @@ STR_ORDER_DROP_HALT_DEPOT                                       :Dur
 STR_ORDER_SERVICE_TOOLTIP                                       :{BLACK}Bakım gerekmiyorsa bunu atla
 
 STR_ORDER_CONDITIONAL_VARIABLE_TOOLTIP                          :{BLACK}Dallanmanın temel alacağı araç verisi
+
+# Conditional order variables, must follow order of OrderConditionVariable enum
 STR_ORDER_CONDITIONAL_LOAD_PERCENTAGE                           :Yükleme yüzdesi
 STR_ORDER_CONDITIONAL_RELIABILITY                               :Güvenilirlik
 STR_ORDER_CONDITIONAL_MAX_SPEED                                 :Azami hız
 STR_ORDER_CONDITIONAL_AGE                                       :Araç yaşı (yıl)
 STR_ORDER_CONDITIONAL_REQUIRES_SERVICE                          :Bakım gerektirir
 STR_ORDER_CONDITIONAL_UNCONDITIONALLY                           :Her zaman
+STR_ORDER_CONDITIONAL_REMAINING_LIFETIME                        :Kalan ömrü (yıl)
 
 STR_ORDER_CONDITIONAL_COMPARATOR_TOOLTIP                        :{BLACK}Araç verisinin verilen değerle nasıl karşılaştırılacağı
 STR_ORDER_CONDITIONAL_COMPARATOR_EQUALS                         :eşittir
@@ -3449,6 +3452,8 @@ STR_ERROR_PNGMAP_MISC                                           :{WHITE}... yanl
 
 STR_ERROR_BMPMAP                                                :{WHITE}Arazi BMP'den yüklenemedi...
 STR_ERROR_BMPMAP_IMAGE_TYPE                                     :{WHITE}... resim türü çevrilemedi
+
+STR_ERROR_HEIGHTMAP_TOO_LARGE                                   :{WHITE}... resim çok büyük
 
 STR_WARNING_HEIGHTMAP_SCALE_CAPTION                             :{WHITE}Ölcek uyarısı
 STR_WARNING_HEIGHTMAP_SCALE_MESSAGE                             :{YELLOW}Kaynak haritanin boyutunu değiştirmek önerilmez. Harita oluşturmaya devam edilsin mi?
