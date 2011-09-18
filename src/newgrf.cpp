@@ -82,6 +82,17 @@ static const uint MAX_SPRITEGROUP = UINT8_MAX; ///< Maximum GRF-local ID for a s
 
 /** Temporary data during loading of GRFs */
 struct GrfProcessingState {
+private:
+	/** Definition of a single Action1 spriteset */
+	struct SpriteSet {
+		SpriteID sprite;  ///< SpriteID of the first sprite of the set.
+		uint num_sprites; ///< Number of sprites in the set.
+	};
+
+	/** Currently referenceable spritesets */
+	std::map<uint, SpriteSet> spritesets[GSF_END];
+
+public:
 	/* Global state */
 	GrfLoadingStage stage;    ///< Current loading stage
 	SpriteID spriteid;        ///< First available SpriteID for loading realsprites.
@@ -97,12 +108,6 @@ struct GrfProcessingState {
 	byte data_blocks;         ///< Number of binary include sprites to read before processing the next pseudo sprite.
 	GrfDataType data_type;    ///< Type of the binary include sprites to read.
 
-	/* Currently referenceable spritesets */
-	SpriteID spriteset_start; ///< SpriteID of the first sprite of the first set.
-	int spriteset_numsets;    ///< Number of spritesets.
-	int spriteset_numents;    ///< Number of sprites per set.
-	int spriteset_feature;    ///< GrfSpecFeature of the spriteset.
-
 	/* Currently referenceable spritegroups */
 	SpriteGroup *spritegroups[MAX_SPRITEGROUP + 1];
 
@@ -113,12 +118,78 @@ struct GrfProcessingState {
 		this->skip_sprites = 0;
 		this->data_blocks = 0;
 
-		this->spriteset_start = 0;
-		this->spriteset_numsets = 0;
-		this->spriteset_numents = 0;
-		this->spriteset_feature = GSF_INVALID;
+		for (uint i = 0; i < GSF_END; i++) {
+			this->spritesets[i].clear();
+		}
 
 		memset(this->spritegroups, 0, sizeof(this->spritegroups));
+	}
+
+	/**
+	 * Records new spritesets.
+	 * @param feature GrfSpecFeature the set is defined for.
+	 * @param first_sprite SpriteID of the first sprite in the set.
+	 * @param first_set First spriteset to define.
+	 * @param numsets Number of sets to define.
+	 * @param numents Number of sprites per set to define.
+	 */
+	void AddSpriteSets(byte feature, SpriteID first_sprite, uint first_set, uint numsets, uint numents)
+	{
+		assert(feature < GSF_END);
+		for (uint i = 0; i < numsets; i++) {
+			SpriteSet &set = this->spritesets[feature][first_set + i];
+			set.sprite = first_sprite + i * numents;
+			set.num_sprites = numents;
+		}
+	}
+
+	/**
+	 * Check whether there are any valid spritesets for a feature.
+	 * @param feature GrfSpecFeature to check.
+	 * @return true if there are any valid sets.
+	 * @note Spritesets with zero sprites are valid to allow callback-failures.
+	 */
+	bool HasValidSpriteSets(byte feature) const
+	{
+		assert(feature < GSF_END);
+		return !this->spritesets[feature].empty();
+	}
+
+	/**
+	 * Check whether a specific set is defined.
+	 * @param feature GrfSpecFeature to check.
+	 * @param set Set to check.
+	 * @return true if the set is valid.
+	 * @note Spritesets with zero sprites are valid to allow callback-failures.
+	 */
+	bool IsValidSpriteSet(byte feature, uint set) const
+	{
+		assert(feature < GSF_END);
+		return this->spritesets[feature].find(set) != this->spritesets[feature].end();
+	}
+
+	/**
+	 * Returns the first sprite of a spriteset.
+	 * @param feature GrfSpecFeature to query.
+	 * @param set Set to query.
+	 * @return First sprite of the set.
+	 */
+	SpriteID GetSprite(byte feature, uint set) const
+	{
+		assert(IsValidSpriteSet(feature, set));
+		return this->spritesets[feature].find(set)->second.sprite;
+	}
+
+	/**
+	 * Returns the number of sprites in a spriteset
+	 * @param feature GrfSpecFeature to query.
+	 * @param set Set to query.
+	 * @return Number of sprites in the set.
+	 */
+	uint GetNumEnts(byte feature, uint set) const
+	{
+		assert(IsValidSpriteSet(feature, set));
+		return this->spritesets[feature].find(set)->second.num_sprites;
 	}
 };
 
@@ -127,6 +198,7 @@ static GrfProcessingState _cur;
 
 class OTTDByteReaderSignal { };
 
+/** Class to read from a NewGRF file */
 class ByteReader {
 protected:
 	byte *data;
@@ -217,7 +289,7 @@ typedef void (*SpecialSpriteHandler)(ByteReader *buf);
 
 static const uint MAX_STATIONS = 256;
 
-/* Temporary data used when loading only */
+/** Temporary engine data used when loading only */
 struct GRFTempEngineData {
 	uint16 cargo_allowed;
 	uint16 cargo_disallowed;
@@ -228,14 +300,15 @@ struct GRFTempEngineData {
 	uint8 rv_max_speed;      ///< Temporary storage of RV prop 15, maximum speed in mph/0.8
 };
 
-static GRFTempEngineData *_gted;
+static GRFTempEngineData *_gted;  ///< Temporary engine data used during NewGRF loading
 
-/* Contains the GRF ID of the owner of a vehicle if it has been reserved.
+/**
+ * Contains the GRF ID of the owner of a vehicle if it has been reserved.
  * GRM for vehicles is only used if dynamic engine allocation is disabled,
  * so 256 is the number of original engines. */
 static uint32 _grm_engines[256];
 
-/* Contains the GRF ID of the owner of a cargo if it has been reserved */
+/** Contains the GRF ID of the owner of a cargo if it has been reserved */
 static uint32 _grm_cargos[NUM_CARGO * 2];
 
 struct GRFLocation {
@@ -281,6 +354,11 @@ void CDECL grfmsg(int severity, const char *str, ...)
 	DEBUG(grf, severity, "[%s:%d] %s", _cur.grfconfig->filename, _cur.nfo_line, buf);
 }
 
+/**
+ * Obtain a NewGRF file by its grfID
+ * @param grfid The grfID to obtain the file for
+ * @return The file.
+ */
 static GRFFile *GetFileByGRFID(uint32 grfid)
 {
 	const GRFFile * const *end = _grf_files.End();
@@ -290,6 +368,11 @@ static GRFFile *GetFileByGRFID(uint32 grfid)
 	return NULL;
 }
 
+/**
+ * Obtain a NewGRF file by its filename
+ * @param filename The filename to obtain the file for.
+ * @return The file.
+ */
 static GRFFile *GetFileByFilename(const char *filename)
 {
 	const GRFFile * const *end = _grf_files.End();
@@ -313,9 +396,9 @@ static void ClearTemporaryNewGRFData(GRFFile *gf)
 
 /**
  * Disable a GRF
- * @param message Error message or STR_NULL
- * @param config GRFConfig to disable, NULL for current
- * @return Error message of the GRF for further customisation
+ * @param message Error message or STR_NULL.
+ * @param config GRFConfig to disable, NULL for current.
+ * @return Error message of the GRF for further customisation.
  */
 static GRFError *DisableGrf(StringID message = STR_NULL, GRFConfig *config = NULL)
 {
@@ -346,9 +429,9 @@ static StringIDToGRFIDMapping _string_to_grf_mapping;
 /**
  * Used when setting an object's property to map to the GRF's strings
  * while taking in consideration the "drift" between TTDPatch string system and OpenTTD's one
- * @param grfid Id of the grf file
- * @param str StringID that we want to have the equivalent in OoenTTD
- * @return the properly adjusted StringID
+ * @param grfid Id of the grf file.
+ * @param str StringID that we want to have the equivalent in OoenTTD.
+ * @return The properly adjusted StringID.
  */
 StringID MapGRFStringID(uint32 grfid, StringID str)
 {
@@ -374,6 +457,11 @@ StringID MapGRFStringID(uint32 grfid, StringID str)
 
 static std::map<uint32, uint32> _grf_id_overrides;
 
+/**
+ * Set the override for a NewGRF
+ * @param source_grfid The grfID which wants to override another NewGRF.
+ * @param target_grfid The grfID which is being overridden.
+ */
 static void SetNewGRFOverride(uint32 source_grfid, uint32 target_grfid)
 {
 	_grf_id_overrides[source_grfid] = target_grfid;
@@ -382,11 +470,11 @@ static void SetNewGRFOverride(uint32 source_grfid, uint32 target_grfid)
 
 /**
  * Returns the engine associated to a certain internal_id, resp. allocates it.
- * @param file NewGRF that wants to change the engine
- * @param type Vehicle type
- * @param internal_id Engine ID inside the NewGRF
- * @param static_access If the engine is not present, return NULL instead of allocating a new engine. (Used for static Action 0x04)
- * @return The requested engine
+ * @param file NewGRF that wants to change the engine.
+ * @param type Vehicle type.
+ * @param internal_id Engine ID inside the NewGRF.
+ * @param static_access If the engine is not present, return NULL instead of allocating a new engine. (Used for static Action 0x04).
+ * @return The requested engine.
  */
 static Engine *GetNewEngine(const GRFFile *file, VehicleType type, uint16 internal_id, bool static_access = false)
 {
@@ -473,6 +561,16 @@ static Engine *GetNewEngine(const GRFFile *file, VehicleType type, uint16 intern
 	return e;
 }
 
+/**
+ * Return the ID of a new engine
+ * @param file The NewGRF file providing the engine.
+ * @param type The Vehicle type.
+ * @param internal_id NewGRF-internal ID of the engine.
+ * @return The new EngineID.
+ * @note depending on the dynamic_engine setting and a possible override
+ *       property the grfID may be unique or overwriting or partially re-defining
+ *       properties of an existing engine.
+ */
 EngineID GetNewEngineID(const GRFFile *file, VehicleType type, uint16 internal_id)
 {
 	uint32 scope_grfid = INVALID_GRFID; // If not using dynamic_engines, all newgrfs share their ID range
@@ -487,7 +585,7 @@ EngineID GetNewEngineID(const GRFFile *file, VehicleType type, uint16 internal_i
 
 /**
  * Map the colour modifiers of TTDPatch to those that Open is using.
- * @param grf_sprite pointer to the structure been modified
+ * @param grf_sprite Pointer to the structure been modified.
  */
 static void MapSpriteMappingRecolour(PalSpriteID *grf_sprite)
 {
@@ -513,13 +611,14 @@ static void MapSpriteMappingRecolour(PalSpriteID *grf_sprite)
  * @param buf                 Input stream.
  * @param read_flags          Whether to read TileLayoutFlags.
  * @param invert_action1_flag Set to true, if palette bit 15 means 'not from action 1'.
- * @param action1_offset      Offset to add to action 1 sprites.
- * @param action1_pitch       Factor to multiply action 1 sprite indices with.
- * @param action1_max         Maximal valid action 1 index.
+ * @param use_cur_spritesets  Whether to use currently referenceable action 1 sets.
+ * @param feature             GrfSpecFeature to use spritesets from.
  * @param [out] grf_sprite    Read sprite and palette.
- * @return read TileLayoutFlags.
+ * @param [out] max_sprite_offset  Optionally returns the number of sprites in the spriteset of the sprite. (0 if no spritset)
+ * @param [out] max_palette_offset Optionally returns the number of sprites in the spriteset of the palette. (0 if no spritset)
+ * @return Read TileLayoutFlags.
  */
-static TileLayoutFlags ReadSpriteLayoutSprite(ByteReader *buf, bool read_flags, bool invert_action1_flag, uint action1_offset, uint action1_pitch, uint action1_max, PalSpriteID *grf_sprite)
+static TileLayoutFlags ReadSpriteLayoutSprite(ByteReader *buf, bool read_flags, bool invert_action1_flag, bool use_cur_spritesets, int feature, PalSpriteID *grf_sprite, uint16 *max_sprite_offset = NULL, uint16 *max_palette_offset = NULL)
 {
 	grf_sprite->sprite = buf->ReadWord();
 	grf_sprite->pal = buf->ReadWord();
@@ -532,12 +631,13 @@ static TileLayoutFlags ReadSpriteLayoutSprite(ByteReader *buf, bool read_flags, 
 	if (custom_sprite) {
 		/* Use sprite from Action 1 */
 		uint index = GB(grf_sprite->sprite, 0, 14);
-		if (action1_pitch == 0 || index >= action1_max) {
+		if (use_cur_spritesets && (!_cur.IsValidSpriteSet(feature, index) || _cur.GetNumEnts(feature, index) == 0)) {
 			grfmsg(1, "ReadSpriteLayoutSprite: Spritelayout uses undefined custom spriteset %d", index);
 			grf_sprite->sprite = SPR_IMG_QUERY;
 			grf_sprite->pal = PAL_NONE;
 		} else {
-			SpriteID sprite = action1_offset + index * action1_pitch;
+			SpriteID sprite = use_cur_spritesets ? _cur.GetSprite(feature, index) : index;
+			if (max_sprite_offset != NULL) *max_sprite_offset = use_cur_spritesets ? _cur.GetNumEnts(feature, index) : UINT16_MAX;
 			SB(grf_sprite->sprite, 0, SPRITE_WIDTH, sprite);
 			SetBit(grf_sprite->sprite, SPRITE_MODIFIER_CUSTOM_SPRITE);
 		}
@@ -550,11 +650,12 @@ static TileLayoutFlags ReadSpriteLayoutSprite(ByteReader *buf, bool read_flags, 
 	if (flags & TLF_CUSTOM_PALETTE) {
 		/* Use palette from Action 1 */
 		uint index = GB(grf_sprite->pal, 0, 14);
-		if (action1_pitch == 0 || index >= action1_max) {
+		if (use_cur_spritesets && (!_cur.IsValidSpriteSet(feature, index) || _cur.GetNumEnts(feature, index) == 0)) {
 			grfmsg(1, "ReadSpriteLayoutSprite: Spritelayout uses undefined custom spriteset %d for 'palette'", index);
 			grf_sprite->pal = PAL_NONE;
 		} else {
-			SpriteID sprite = action1_offset + index * action1_pitch;
+			SpriteID sprite = use_cur_spritesets ? _cur.GetSprite(feature, index) : index;
+			if (max_palette_offset != NULL) *max_palette_offset = use_cur_spritesets ? _cur.GetNumEnts(feature, index) : UINT16_MAX;
 			SB(grf_sprite->pal, 0, SPRITE_WIDTH, sprite);
 			SetBit(grf_sprite->pal, SPRITE_MODIFIER_CUSTOM_SPRITE);
 		}
@@ -621,15 +722,14 @@ static void ReadSpriteLayoutRegisters(ByteReader *buf, TileLayoutFlags flags, bo
  * Read a spritelayout from the GRF.
  * @param buf                  Input
  * @param num_building_sprites Number of building sprites to read
- * @param action1_offset       Offset to add to action 1 sprites
- * @param action1_pitch        Factor to multiply action 1 sprite indices with
- * @param action1_max          Maximal valid action 1 index
+ * @param use_cur_spritesets   Whether to use currently referenceable action 1 sets.
+ * @param feature              GrfSpecFeature to use spritesets from.
  * @param allow_var10          Whether the spritelayout may specifiy var10 values for resolving multiple action-1-2-3 chains
  * @param no_z_position        Whether bounding boxes have no Z offset
  * @param dts                  Layout container to output into
- * @return true on error (GRF was disabled)
+ * @return True on error (GRF was disabled).
  */
-static bool ReadSpriteLayout(ByteReader *buf, uint num_building_sprites, uint action1_offset, uint action1_pitch, uint action1_max, bool allow_var10, bool no_z_position, NewGRFSpriteLayout *dts)
+static bool ReadSpriteLayout(ByteReader *buf, uint num_building_sprites, bool use_cur_spritesets, byte feature, bool allow_var10, bool no_z_position, NewGRFSpriteLayout *dts)
 {
 	bool has_flags = HasBit(num_building_sprites, 6);
 	ClrBit(num_building_sprites, 6);
@@ -637,8 +737,13 @@ static bool ReadSpriteLayout(ByteReader *buf, uint num_building_sprites, uint ac
 	if (!allow_var10) valid_flags &= ~TLF_VAR10_FLAGS;
 	dts->Allocate(num_building_sprites); // allocate before reading groundsprite flags
 
+	uint16 *max_sprite_offset = AllocaM(uint16, num_building_sprites + 1);
+	uint16 *max_palette_offset = AllocaM(uint16, num_building_sprites + 1);
+	MemSetT(max_sprite_offset, 0, num_building_sprites + 1);
+	MemSetT(max_palette_offset, 0, num_building_sprites + 1);
+
 	/* Groundsprite */
-	TileLayoutFlags flags = ReadSpriteLayoutSprite(buf, has_flags, false, action1_offset, action1_pitch, action1_max, &dts->ground);
+	TileLayoutFlags flags = ReadSpriteLayoutSprite(buf, has_flags, false, use_cur_spritesets, feature, &dts->ground, max_sprite_offset, max_palette_offset);
 	if (_cur.skip_sprites < 0) return true;
 
 	if (flags & ~(valid_flags & ~TLF_NON_GROUND_FLAGS)) {
@@ -653,7 +758,7 @@ static bool ReadSpriteLayout(ByteReader *buf, uint num_building_sprites, uint ac
 	for (uint i = 0; i < num_building_sprites; i++) {
 		DrawTileSeqStruct *seq = const_cast<DrawTileSeqStruct*>(&dts->seq[i]);
 
-		flags = ReadSpriteLayoutSprite(buf, has_flags, false, action1_offset, action1_pitch, action1_max, &seq->image);
+		flags = ReadSpriteLayoutSprite(buf, has_flags, false, use_cur_spritesets, feature, &seq->image, max_sprite_offset + i + 1, max_palette_offset + i + 1);
 		if (_cur.skip_sprites < 0) return true;
 
 		if (flags & ~valid_flags) {
@@ -675,6 +780,42 @@ static bool ReadSpriteLayout(ByteReader *buf, uint num_building_sprites, uint ac
 
 		ReadSpriteLayoutRegisters(buf, flags, seq->IsParentSprite(), dts, i + 1);
 		if (_cur.skip_sprites < 0) return true;
+	}
+
+	/* Check if the number of sprites per spriteset is consistent */
+	bool is_consistent = true;
+	dts->consistent_max_offset = 0;
+	for (uint i = 0; i < num_building_sprites + 1; i++) {
+		if (max_sprite_offset[i] > 0) {
+			if (dts->consistent_max_offset == 0) {
+				dts->consistent_max_offset = max_sprite_offset[i];
+			} else if (dts->consistent_max_offset != max_sprite_offset[i]) {
+				is_consistent = false;
+				break;
+			}
+		}
+		if (max_palette_offset[i] > 0) {
+			if (dts->consistent_max_offset == 0) {
+				dts->consistent_max_offset = max_palette_offset[i];
+			} else if (dts->consistent_max_offset != max_palette_offset[i]) {
+				is_consistent = false;
+				break;
+			}
+		}
+	}
+
+	/* When the Action1 sets are unknown, everything should be 0 (no spriteset usage) or UINT16_MAX (some spriteset usage) */
+	assert(use_cur_spritesets || (is_consistent && (dts->consistent_max_offset == 0 || dts->consistent_max_offset == UINT16_MAX)));
+
+	if (!is_consistent || dts->registers != NULL) {
+		dts->consistent_max_offset = 0;
+		if (dts->registers == NULL) dts->AllocateRegisters();
+
+		for (uint i = 0; i < num_building_sprites + 1; i++) {
+			TileLayoutRegisters &regs = const_cast<TileLayoutRegisters&>(dts->registers[i]);
+			regs.max_sprite_offset = max_sprite_offset[i];
+			regs.max_palette_offset = max_palette_offset[i];
+		}
 	}
 
 	return false;
@@ -706,6 +847,7 @@ static void ConvertTTDBasePrice(uint32 base_pointer, const char *error_location,
 	*index = (Price)((base_pointer - start) / size);
 }
 
+/** Possible return values for the FeatureChangeInfo functions */
 enum ChangeInfoResult {
 	CIR_SUCCESS,    ///< Variable was parsed and read
 	CIR_DISABLED,   ///< GRF was disabled due to error
@@ -716,6 +858,13 @@ enum ChangeInfoResult {
 
 typedef ChangeInfoResult (*VCI_Handler)(uint engine, int numinfo, int prop, ByteReader *buf);
 
+/**
+ * Define properties common to all vehicles
+ * @param ei Engine info.
+ * @param prop The property to change.
+ * @param buf The property value.
+ * @return ChangeInfoResult.
+ */
 static ChangeInfoResult CommonVehicleChangeInfo(EngineInfo *ei, int prop, ByteReader *buf)
 {
 	switch (prop) {
@@ -751,6 +900,14 @@ static ChangeInfoResult CommonVehicleChangeInfo(EngineInfo *ei, int prop, ByteRe
 	return CIR_SUCCESS;
 }
 
+/**
+ * Define properties for rail vehicles
+ * @param engine :ocal ID of the first vehicle.
+ * @param numinfo Number of subsequent IDs to change the property for.
+ * @param prop The property to change.
+ * @param buf The property value.
+ * @return ChangeInfoResult.
+ */
 static ChangeInfoResult RailVehicleChangeInfo(uint engine, int numinfo, int prop, ByteReader *buf)
 {
 	ChangeInfoResult ret = CIR_SUCCESS;
@@ -1008,6 +1165,14 @@ static ChangeInfoResult RailVehicleChangeInfo(uint engine, int numinfo, int prop
 	return ret;
 }
 
+/**
+ * Define properties for road vehicles
+ * @param engine Local ID of the first vehicle.
+ * @param numinfo Number of subsequent IDs to change the property for.
+ * @param prop The property to change.
+ * @param buf The property value.
+ * @return ChangeInfoResult.
+ */
 static ChangeInfoResult RoadVehicleChangeInfo(uint engine, int numinfo, int prop, ByteReader *buf)
 {
 	ChangeInfoResult ret = CIR_SUCCESS;
@@ -1154,6 +1319,14 @@ static ChangeInfoResult RoadVehicleChangeInfo(uint engine, int numinfo, int prop
 	return ret;
 }
 
+/**
+ * Define properties for ships
+ * @param engine Local ID of the first vehicle.
+ * @param numinfo Number of subsequent IDs to change the property for.
+ * @param prop The property to change.
+ * @param buf The property value.
+ * @return ChangeInfoResult.
+ */
 static ChangeInfoResult ShipVehicleChangeInfo(uint engine, int numinfo, int prop, ByteReader *buf)
 {
 	ChangeInfoResult ret = CIR_SUCCESS;
@@ -1288,6 +1461,14 @@ static ChangeInfoResult ShipVehicleChangeInfo(uint engine, int numinfo, int prop
 	return ret;
 }
 
+/**
+ * Define properties for aircraft
+ * @param engine Local ID of the aircraft.
+ * @param numinfo Number of subsequent IDs to change the property for.
+ * @param prop The property to change.
+ * @param buf The property value.
+ * @return ChangeInfoResult.
+ */
 static ChangeInfoResult AircraftVehicleChangeInfo(uint engine, int numinfo, int prop, ByteReader *buf)
 {
 	ChangeInfoResult ret = CIR_SUCCESS;
@@ -1406,6 +1587,14 @@ static ChangeInfoResult AircraftVehicleChangeInfo(uint engine, int numinfo, int 
 	return ret;
 }
 
+/**
+ * Define properties for stations
+ * @param stdid StationID of the first station tile.
+ * @param numinfo Number of subsequent station tiles to change the property for.
+ * @param prop The property to change.
+ * @param buf The property value.
+ * @return ChangeInfoResult.
+ */
 static ChangeInfoResult StationChangeInfo(uint stid, int numinfo, int prop, ByteReader *buf)
 {
 	ChangeInfoResult ret = CIR_SUCCESS;
@@ -1447,6 +1636,7 @@ static ChangeInfoResult StationChangeInfo(uint stid, int numinfo, int prop, Byte
 
 				for (uint t = 0; t < statspec->tiles; t++) {
 					NewGRFSpriteLayout *dts = &statspec->renderdata[t];
+					dts->consistent_max_offset = UINT16_MAX; // Spritesets are unknown, so no limit.
 
 					if (buf->HasData(4) && *(uint32*)buf->Data() == 0) {
 						buf->Skip(4);
@@ -1455,7 +1645,7 @@ static ChangeInfoResult StationChangeInfo(uint stid, int numinfo, int prop, Byte
 						continue;
 					}
 
-					ReadSpriteLayoutSprite(buf, false, false, 0, 1, UINT_MAX, &dts->ground);
+					ReadSpriteLayoutSprite(buf, false, false, false, GSF_STATIONS, &dts->ground);
 					/* On error, bail out immediately. Temporary GRF data was already freed */
 					if (_cur.skip_sprites < 0) return CIR_DISABLED;
 
@@ -1474,7 +1664,7 @@ static ChangeInfoResult StationChangeInfo(uint stid, int numinfo, int prop, Byte
 						dtss->size_y = buf->ReadByte();
 						dtss->size_z = buf->ReadByte();
 
-						ReadSpriteLayoutSprite(buf, false, true, 0, 1, UINT_MAX, &dtss->image);
+						ReadSpriteLayoutSprite(buf, false, true, false, GSF_STATIONS, &dtss->image);
 						/* On error, bail out immediately. Temporary GRF data was already freed */
 						if (_cur.skip_sprites < 0) return CIR_DISABLED;
 					}
@@ -1627,7 +1817,7 @@ static ChangeInfoResult StationChangeInfo(uint stid, int numinfo, int prop, Byte
 					NewGRFSpriteLayout *dts = &statspec->renderdata[t];
 					uint num_building_sprites = buf->ReadByte();
 					/* On error, bail out immediately. Temporary GRF data was already freed */
-					if (ReadSpriteLayout(buf, num_building_sprites, 0, 1, UINT_MAX, true, false, dts)) return CIR_DISABLED;
+					if (ReadSpriteLayout(buf, num_building_sprites, false, GSF_STATIONS, true, false, dts)) return CIR_DISABLED;
 				}
 				break;
 
@@ -1640,6 +1830,14 @@ static ChangeInfoResult StationChangeInfo(uint stid, int numinfo, int prop, Byte
 	return ret;
 }
 
+/**
+ * Define properties for water features
+ * @param id Type of the first water feature.
+ * @param numinfo Number of subsequent water feature ids to change the property for.
+ * @param prop The property to change.
+ * @param buf The property value.
+ * @return ChangeInfoResult.
+ */
 static ChangeInfoResult CanalChangeInfo(uint id, int numinfo, int prop, ByteReader *buf)
 {
 	ChangeInfoResult ret = CIR_SUCCESS;
@@ -1650,15 +1848,15 @@ static ChangeInfoResult CanalChangeInfo(uint id, int numinfo, int prop, ByteRead
 	}
 
 	for (int i = 0; i < numinfo; i++) {
-		WaterFeature *wf = &_water_feature[id + i];
+		CanalProperties *cp = &_cur.grffile->canal_local_properties[id + i];
 
 		switch (prop) {
 			case 0x08:
-				wf->callback_mask = buf->ReadByte();
+				cp->callback_mask = buf->ReadByte();
 				break;
 
 			case 0x09:
-				wf->flags = buf->ReadByte();
+				cp->flags = buf->ReadByte();
 				break;
 
 			default:
@@ -1670,6 +1868,14 @@ static ChangeInfoResult CanalChangeInfo(uint id, int numinfo, int prop, ByteRead
 	return ret;
 }
 
+/**
+ * Define properties for bridges
+ * @param brid BridgeID of the bridge.
+ * @param numinfo Number of subsequent bridgeIDs to change the property for.
+ * @param prop The property to change.
+ * @param buf The property value.
+ * @return ChangeInfoResult.
+ */
 static ChangeInfoResult BridgeChangeInfo(uint brid, int numinfo, int prop, ByteReader *buf)
 {
 	ChangeInfoResult ret = CIR_SUCCESS;
@@ -1774,6 +1980,12 @@ static ChangeInfoResult BridgeChangeInfo(uint brid, int numinfo, int prop, ByteR
 	return ret;
 }
 
+/**
+ * Ignore a house property
+ * @param prop Property to read.
+ * @param buf Property value.
+ * @return ChangeInfoResult.
+ */
 static ChangeInfoResult IgnoreTownHouseProperty(int prop, ByteReader *buf)
 {
 	ChangeInfoResult ret = CIR_SUCCESS;
@@ -1830,6 +2042,14 @@ static ChangeInfoResult IgnoreTownHouseProperty(int prop, ByteReader *buf)
 	return ret;
 }
 
+/**
+ * Define properties for houses
+ * @param hid HouseID of the house.
+ * @param numinfo Number of subsequent houseIDs to change the property for.
+ * @param prop The property to change.
+ * @param buf The property value.
+ * @return ChangeInfoResult.
+ */
 static ChangeInfoResult TownHouseChangeInfo(uint hid, int numinfo, int prop, ByteReader *buf)
 {
 	ChangeInfoResult ret = CIR_SUCCESS;
@@ -2066,7 +2286,7 @@ static ChangeInfoResult TownHouseChangeInfo(uint hid, int numinfo, int prop, Byt
  * Get the language map associated with a given NewGRF and language.
  * @param grfid       The NewGRF to get the map for.
  * @param language_id The (NewGRF) language ID to get the map for.
- * @return the LanguageMap, or NULL if it couldn't be found.
+ * @return The LanguageMap, or NULL if it couldn't be found.
  */
 /* static */ const LanguageMap *LanguageMap::GetLanguageMap(uint32 grfid, uint8 language_id)
 {
@@ -2075,6 +2295,14 @@ static ChangeInfoResult TownHouseChangeInfo(uint hid, int numinfo, int prop, Byt
 	return (grffile != NULL && grffile->language_map != NULL && language_id < MAX_LANG) ? &grffile->language_map[language_id] : NULL;
 }
 
+/**
+ * Define properties for global variables
+ * @param gvid ID of the global variable.
+ * @param numinfo Number of subsequent IDs to change the property for.
+ * @param prop The property to change.
+ * @param buf The property value.
+ * @return ChangeInfoResult.
+ */
 static ChangeInfoResult GlobalVarChangeInfo(uint gvid, int numinfo, int prop, ByteReader *buf)
 {
 	ChangeInfoResult ret = CIR_SUCCESS;
@@ -2361,6 +2589,14 @@ static ChangeInfoResult GlobalVarReserveInfo(uint gvid, int numinfo, int prop, B
 }
 
 
+/**
+ * Define properties for cargos
+ * @param cid Local ID of the cargo.
+ * @param numinfo Number of subsequent IDs to change the property for.
+ * @param prop The property to change.
+ * @param buf The property value.
+ * @return ChangeInfoResult.
+ */
 static ChangeInfoResult CargoChangeInfo(uint cid, int numinfo, int prop, ByteReader *buf)
 {
 	ChangeInfoResult ret = CIR_SUCCESS;
@@ -2492,6 +2728,14 @@ static ChangeInfoResult CargoChangeInfo(uint cid, int numinfo, int prop, ByteRea
 }
 
 
+/**
+ * Define properties for sound effects
+ * @param sid Local ID of the sound.
+ * @param numinfo Number of subsequent IDs to change the property for.
+ * @param prop The property to change.
+ * @param buf The property value.
+ * @return ChangeInfoResult.
+ */
 static ChangeInfoResult SoundEffectChangeInfo(uint sid, int numinfo, int prop, ByteReader *buf)
 {
 	ChangeInfoResult ret = CIR_SUCCESS;
@@ -2541,6 +2785,12 @@ static ChangeInfoResult SoundEffectChangeInfo(uint sid, int numinfo, int prop, B
 	return ret;
 }
 
+/**
+ * Ignore an industry tile property
+ * @param prop The property to ignore.
+ * @param buf The property value.
+ * @return ChangeInfoResult.
+ */
 static ChangeInfoResult IgnoreIndustryTileProperty(int prop, ByteReader *buf)
 {
 	ChangeInfoResult ret = CIR_SUCCESS;
@@ -2569,6 +2819,14 @@ static ChangeInfoResult IgnoreIndustryTileProperty(int prop, ByteReader *buf)
 	return ret;
 }
 
+/**
+ * Define properties for industry tiles
+ * @param indtid Local ID of the industry tile.
+ * @param numinfo Number of subsequent industry tile IDs to change the property for.
+ * @param prop The property to change.
+ * @param buf The property value.
+ * @return ChangeInfoResult.
+ */
 static ChangeInfoResult IndustrytilesChangeInfo(uint indtid, int numinfo, int prop, ByteReader *buf)
 {
 	ChangeInfoResult ret = CIR_SUCCESS;
@@ -2681,6 +2939,12 @@ static ChangeInfoResult IndustrytilesChangeInfo(uint indtid, int numinfo, int pr
 	return ret;
 }
 
+/**
+ * Ignore an industry property
+ * @param prop The property to ignore.
+ * @param buf The property value.
+ * @return ChangeInfoResult.
+ */
 static ChangeInfoResult IgnoreIndustryProperty(int prop, ByteReader *buf)
 {
 	ChangeInfoResult ret = CIR_SUCCESS;
@@ -2762,9 +3026,9 @@ static ChangeInfoResult IgnoreIndustryProperty(int prop, ByteReader *buf)
 
 /**
  * Validate the industry layout; e.g. to prevent duplicate tiles.
- * @param layout the layout to check
- * @param size the size of the layout
- * @return true if the layout is deemed valid
+ * @param layout The layout to check.
+ * @param size The size of the layout.
+ * @return True if the layout is deemed valid.
  */
 static bool ValidateIndustryLayout(const IndustryTileTable *layout, int size)
 {
@@ -2793,6 +3057,14 @@ static void CleanIndustryTileTable(IndustrySpec *ind)
 	}
 }
 
+/**
+ * Define properties for industries
+ * @param indid Local ID of the industry.
+ * @param numinfo Number of subsequent industry IDs to change the property for.
+ * @param prop The property to change.
+ * @param buf The property value.
+ * @return ChangeInfoResult.
+ */
 static ChangeInfoResult IndustriesChangeInfo(uint indid, int numinfo, int prop, ByteReader *buf)
 {
 	ChangeInfoResult ret = CIR_SUCCESS;
@@ -3126,6 +3398,14 @@ static void DuplicateTileTable(AirportSpec *as)
 	as->depot_table = depot_table;
 }
 
+/**
+ * Define properties for airports
+ * @param airport Local ID of the airport.
+ * @param numinfo Number of subsequent airport IDs to change the property for.
+ * @param prop The property to change.
+ * @param buf The property value.
+ * @return ChangeInfoResult.
+ */
 static ChangeInfoResult AirportChangeInfo(uint airport, int numinfo, int prop, ByteReader *buf)
 {
 	ChangeInfoResult ret = CIR_SUCCESS;
@@ -3292,6 +3572,12 @@ static ChangeInfoResult AirportChangeInfo(uint airport, int numinfo, int prop, B
 	return ret;
 }
 
+/**
+ * Ignore properties for objects
+ * @param prop The property to ignore.
+ * @param buf The property value.
+ * @return ChangeInfoResult.
+ */
 static ChangeInfoResult IgnoreObjectProperty(uint prop, ByteReader *buf)
 {
 	ChangeInfoResult ret = CIR_SUCCESS;
@@ -3329,6 +3615,14 @@ static ChangeInfoResult IgnoreObjectProperty(uint prop, ByteReader *buf)
 	return ret;
 }
 
+/**
+ * Define properties for objects
+ * @param id Local ID of the object.
+ * @param numinfo Number of subsequent objectIDs to change the property for.
+ * @param prop The property to change.
+ * @param buf The property value.
+ * @return ChangeInfoResult.
+ */
 static ChangeInfoResult ObjectChangeInfo(uint id, int numinfo, int prop, ByteReader *buf)
 {
 	ChangeInfoResult ret = CIR_SUCCESS;
@@ -3450,6 +3744,14 @@ static ChangeInfoResult ObjectChangeInfo(uint id, int numinfo, int prop, ByteRea
 	return ret;
 }
 
+/**
+ * Define properties for railtypes
+ * @param id ID of the railtype.
+ * @param numinfo Number of subsequent IDs to change the property for.
+ * @param prop The property to change.
+ * @param buf The property value.
+ * @return ChangeInfoResult.
+ */
 static ChangeInfoResult RailTypeChangeInfo(uint id, int numinfo, int prop, ByteReader *buf)
 {
 	ChangeInfoResult ret = CIR_SUCCESS;
@@ -3896,12 +4198,17 @@ static void NewSpriteSet(ByteReader *buf)
 
 	uint8 feature   = buf->ReadByte();
 	uint8 num_sets  = buf->ReadByte();
+	uint16 first_set = 0;
+
+	if (num_sets == 0 && buf->HasData(2)) {
+		/* Extended Action1 format.
+		 * Some GRFs define zero sets of zero sprites, though there is actually no use in that. Ignore them. */
+		first_set = buf->ReadExtendedByte();
+		num_sets = buf->ReadExtendedByte();
+	}
 	uint16 num_ents = buf->ReadExtendedByte();
 
-	_cur.spriteset_start = _cur.spriteid;
-	_cur.spriteset_feature = feature;
-	_cur.spriteset_numsets = num_sets;
-	_cur.spriteset_numents = num_ents;
+	_cur.AddSpriteSets(feature, _cur.spriteid, first_set, num_sets, num_ents);
 
 	grfmsg(7, "New sprite set at %d of type %d, consisting of %d sets with %d views each (total %d)",
 		_cur.spriteid, feature, num_sets, num_ents, num_sets * num_ents
@@ -3942,39 +4249,34 @@ static const SpriteGroup *GetGroupFromGroupID(byte setid, byte type, uint16 grou
 	return _cur.spritegroups[groupid];
 }
 
-/* Helper function to either create a callback or a result sprite group. */
-static const SpriteGroup *CreateGroupFromGroupID(byte feature, byte setid, byte type, uint16 spriteid, uint16 num_sprites)
+/**
+ * Helper function to either create a callback or a result sprite group.
+ * @param feature GrfSpecFeature to define spritegroup for.
+ * @param setid SetID of the currently being parsed Action2. (only for debug output)
+ * @param type Type of the currently being parsed Action2. (only for debug output)
+ * @param spriteid Raw value from the GRF for the new spritegroup; describes either the return value or the referenced spritegroup.
+ * @return Created spritegroup.
+ */
+static const SpriteGroup *CreateGroupFromGroupID(byte feature, byte setid, byte type, uint16 spriteid)
 {
 	if (HasBit(spriteid, 15)) {
 		assert(CallbackResultSpriteGroup::CanAllocateItem());
 		return new CallbackResultSpriteGroup(spriteid);
 	}
 
-	if (spriteid >= _cur.spriteset_numsets) {
-		grfmsg(1, "CreateGroupFromGroupID(0x%02X:0x%02X): Sprite set %u invalid, max %u", setid, type, spriteid, _cur.spriteset_numsets);
+	if (!_cur.IsValidSpriteSet(feature, spriteid)) {
+		grfmsg(1, "CreateGroupFromGroupID(0x%02X:0x%02X): Sprite set %u invalid", setid, type, spriteid);
 		return NULL;
 	}
 
-	/* Check if the sprite is within range. This can fail if the Action 0x01
-	 * is skipped, as TTDPatch mandates that Action 0x02s must be processed.
-	 * We don't have that rule, but must live by the Patch... */
-	if (_cur.spriteset_start + spriteid * num_sprites + num_sprites > _cur.spriteid) {
-		grfmsg(1, "CreateGroupFromGroupID(0x%02X:0x%02X): Real Sprite IDs 0x%04X - 0x%04X do not (all) exist (max 0x%04X), leaving empty",
-				setid, type,
-				_cur.spriteset_start + spriteid * num_sprites,
-				_cur.spriteset_start + spriteid * num_sprites + num_sprites - 1, _cur.spriteid - 1);
-		return NULL;
-	}
+	SpriteID spriteset_start = _cur.GetSprite(feature, spriteid);
+	uint num_sprites = _cur.GetNumEnts(feature, spriteid);
 
-	if (feature != _cur.spriteset_feature) {
-		grfmsg(1, "CreateGroupFromGroupID(0x%02X:0x%02X): Sprite set feature 0x%02X does not match action feature 0x%02X, skipping",
-				setid, type,
-				_cur.spriteset_feature, feature);
-		return NULL;
-	}
+	/* Ensure that the sprites are loeded */
+	assert(spriteset_start + num_sprites <= _cur.spriteid);
 
 	assert(ResultSpriteGroup::CanAllocateItem());
-	return new ResultSpriteGroup(_cur.spriteset_start + spriteid * num_sprites, num_sprites);
+	return new ResultSpriteGroup(spriteset_start, num_sprites);
 }
 
 /* Action 0x02 */
@@ -4118,11 +4420,10 @@ static void NewSpriteGroup(ByteReader *buf)
 				case GSF_AIRPORTS:
 				case GSF_RAILTYPES:
 				{
-					byte sprites     = _cur.spriteset_numents;
 					byte num_loaded  = type;
 					byte num_loading = buf->ReadByte();
 
-					if (_cur.spriteset_start == 0) {
+					if (!_cur.HasValidSpriteSets(feature)) {
 						grfmsg(0, "NewSpriteGroup: No sprite set to work on! Skipping");
 						return;
 					}
@@ -4136,18 +4437,18 @@ static void NewSpriteGroup(ByteReader *buf)
 					if (num_loaded  > 0) group->loaded = CallocT<const SpriteGroup*>(num_loaded);
 					if (num_loading > 0) group->loading = CallocT<const SpriteGroup*>(num_loading);
 
-					grfmsg(6, "NewSpriteGroup: New SpriteGroup 0x%02X, %u views, %u loaded, %u loading",
-							setid, sprites, num_loaded, num_loading);
+					grfmsg(6, "NewSpriteGroup: New SpriteGroup 0x%02X, %u loaded, %u loading",
+							setid, num_loaded, num_loading);
 
 					for (uint i = 0; i < num_loaded; i++) {
 						uint16 spriteid = buf->ReadWord();
-						group->loaded[i] = CreateGroupFromGroupID(feature, setid, type, spriteid, sprites);
+						group->loaded[i] = CreateGroupFromGroupID(feature, setid, type, spriteid);
 						grfmsg(8, "NewSpriteGroup: + rg->loaded[%i]  = subset %u", i, spriteid);
 					}
 
 					for (uint i = 0; i < num_loading; i++) {
 						uint16 spriteid = buf->ReadWord();
-						group->loading[i] = CreateGroupFromGroupID(feature, setid, type, spriteid, sprites);
+						group->loading[i] = CreateGroupFromGroupID(feature, setid, type, spriteid);
 						grfmsg(8, "NewSpriteGroup: + rg->loading[%i] = subset %u", i, spriteid);
 					}
 
@@ -4158,18 +4459,14 @@ static void NewSpriteGroup(ByteReader *buf)
 				case GSF_AIRPORTTILES:
 				case GSF_OBJECTS:
 				case GSF_INDUSTRYTILES: {
-					byte num_spriteset_ents   = _cur.spriteset_numents;
-					byte num_spritesets       = _cur.spriteset_numsets;
 					byte num_building_sprites = max((uint8)1, type);
 
 					assert(TileLayoutSpriteGroup::CanAllocateItem());
 					TileLayoutSpriteGroup *group = new TileLayoutSpriteGroup();
 					act_group = group;
-					/* num_building_stages should be 1, if we are only using non-custom sprites */
-					group->num_building_stages = max((uint8)1, num_spriteset_ents);
 
 					/* On error, bail out immediately. Temporary GRF data was already freed */
-					if (ReadSpriteLayout(buf, num_building_sprites, _cur.spriteset_start, num_spriteset_ents, num_spritesets, false, type == 0, &group->dts)) return;
+					if (ReadSpriteLayout(buf, num_building_sprites, true, feature, false, type == 0, &group->dts)) return;
 					break;
 				}
 
@@ -4273,7 +4570,7 @@ static CargoID TranslateCargo(uint8 feature, uint8 ctype)
 static bool IsValidGroupID(uint16 groupid, const char *function)
 {
 	if (groupid > MAX_SPRITEGROUP || _cur.spritegroups[groupid] == NULL) {
-		grfmsg(1, "%s: Spriteset 0x%04X out of range or empty, skipping.", function, groupid);
+		grfmsg(1, "%s: Spritegroup 0x%04X out of range or empty, skipping.", function, groupid);
 		return false;
 	}
 
@@ -4923,11 +5220,11 @@ static void FeatureNewName(ByteReader *buf)
 
 /**
  * Sanitize incoming sprite offsets for Action 5 graphics replacements.
- * @param num         the number of sprites to load.
- * @param offset      offset from the base.
- * @param max_sprites the maximum number of sprites that can be loaded in this action 5.
- * @param name        used for error warnings.
- * @return the number of sprites that is going to be skipped
+ * @param num         The number of sprites to load.
+ * @param offset      Offset from the base.
+ * @param max_sprites The maximum number of sprites that can be loaded in this action 5.
+ * @param name        Used for error warnings.
+ * @return The number of sprites that is going to be skipped.
  */
 static uint16 SanitizeSpriteOffset(uint16& num, uint16 offset, int max_sprites, const char *name)
 {
@@ -5388,7 +5685,7 @@ static void CfgApply(ByteReader *buf)
  * We could just tell the NewGRF querying that the file doesn't exist,
  * but that might give unwanted results. Disabling the NewGRF gives the
  * best result as no NewGRF author can complain about that.
- * @param c the NewGRF to disable.
+ * @param c The NewGRF to disable.
  */
 static void DisableStaticNewGRFInfluencingNonStaticNewGRFs(GRFConfig *c)
 {
@@ -5920,7 +6217,7 @@ static uint32 PerformGRM(uint32 *grm, uint16 num_ids, uint16 count, uint8 op, ui
 }
 
 
-/* Action 0x0D */
+/** Action 0x0D: Set parameter */
 static void ParamSet(ByteReader *buf)
 {
 	/* <0D> <target> <operation> <source1> <source2> [<data>]
@@ -6269,7 +6566,7 @@ static void GRFInhibit(ByteReader *buf)
 	}
 }
 
-/* Action 0x0F */
+/** Action 0x0F - Define Town names */
 static void FeatureTownName(ByteReader *buf)
 {
 	/* <0F> <id> <style-name> <num-parts> <parts>
@@ -6353,7 +6650,7 @@ static void FeatureTownName(ByteReader *buf)
 	}
 }
 
-/* Action 0x10 */
+/** Action 0x10 - Define goto label */
 static void DefineGotoLabel(ByteReader *buf)
 {
 	/* <10> <label> [<comment>]
@@ -6537,7 +6834,7 @@ static void LoadGRFSound(ByteReader *buf)
 	MemSetT(sound, 0);
 }
 
-/* Action 0x12 */
+/** Action 0x12 */
 static void LoadFontGlyph(ByteReader *buf)
 {
 	/* <12> <num_def> <font_size> <num_char> <base_char>
@@ -6564,7 +6861,7 @@ static void LoadFontGlyph(ByteReader *buf)
 	}
 }
 
-/* Action 0x12 (SKIP) */
+/** Action 0x12 (SKIP) */
 static void SkipAct12(ByteReader *buf)
 {
 	/* <12> <num_def> <font_size> <num_char> <base_char>
@@ -6590,7 +6887,7 @@ static void SkipAct12(ByteReader *buf)
 	grfmsg(3, "SkipAct12: Skipping %d sprites", _cur.skip_sprites);
 }
 
-/* Action 0x13 */
+/** Action 0x13 */
 static void TranslateGRFStrings(ByteReader *buf)
 {
 	/* <13> <grfid> <num-ent> <offset> <text...>
@@ -6933,6 +7230,7 @@ static bool ChangeGRFParamValueNames(ByteReader *buf)
 	return true;
 }
 
+/** Action14 parameter tags */
 AllowedSubtags _tags_parameters[] = {
 	AllowedSubtags('NAME', ChangeGRFParamName),
 	AllowedSubtags('DESC', ChangeGRFParamDescription),
@@ -6978,6 +7276,7 @@ static bool HandleParameterInfo(ByteReader *buf)
 	return true;
 }
 
+/** Action14 tags for the INFO node */
 AllowedSubtags _tags_info[] = {
 	AllowedSubtags('NAME', ChangeGRFName),
 	AllowedSubtags('DESC', ChangeGRFDescription),
@@ -6989,6 +7288,7 @@ AllowedSubtags _tags_info[] = {
 	AllowedSubtags()
 };
 
+/** Action14 root tags */
 AllowedSubtags _tags_root[] = {
 	AllowedSubtags('INFO', _tags_info),
 	AllowedSubtags()
@@ -6997,6 +7297,8 @@ AllowedSubtags _tags_root[] = {
 
 /**
  * Try to skip the current node and all subnodes (if it's a branch node).
+ * @param buf Buffer.
+ * @param type The node type to skip.
  * @return True if we could skip the node, false if an error occured.
  */
 static bool SkipUnknownInfo(ByteReader *buf, byte type)
@@ -7031,6 +7333,14 @@ static bool SkipUnknownInfo(ByteReader *buf, byte type)
 	return true;
 }
 
+/**
+ * Handle the nodes of an Action14
+ * @param type Type of node.
+ * @param id ID.
+ * @param buf Buffer.
+ * @param subtags Allowed subtags.
+ * @return Whether all tags could be handled.
+ */
 static bool HandleNode(byte type, uint32 id, ByteReader *buf, AllowedSubtags subtags[])
 {
 	uint i = 0;
@@ -7063,6 +7373,12 @@ static bool HandleNode(byte type, uint32 id, ByteReader *buf, AllowedSubtags sub
 	return SkipUnknownInfo(buf, type);
 }
 
+/**
+ * Handle the contents of a 'C' choice of an Action14
+ * @param buf Buffer.
+ * @param subtags List of subtags.
+ * @return Whether the nodes could all be handled.
+ */
 static bool HandleNodes(ByteReader *buf, AllowedSubtags subtags[])
 {
 	byte type = buf->ReadByte();
@@ -7074,14 +7390,17 @@ static bool HandleNodes(ByteReader *buf, AllowedSubtags subtags[])
 	return true;
 }
 
-/* Action 0x14 */
+/**
+ * Handle Action 0x14
+ * @param buf Buffer.
+ */
 static void StaticGRFInfo(ByteReader *buf)
 {
 	/* <14> <type> <id> <text/data...> */
 	HandleNodes(buf, _tags_root);
 }
 
-/* 'Action 0xFF' */
+/** 'Action 0xFF' */
 static void GRFDataBlock(ByteReader *buf)
 {
 	/* <FF> <name_len> <name> '\0' <data> */
@@ -7111,8 +7430,11 @@ static void GRFDataBlock(ByteReader *buf)
 	}
 }
 
-
-/* Used during safety scan on unsafe actions */
+/**
+ * Set the current NewGRF as unsafe for static use
+ * @param buf Unused.
+ * @note Used during safety scan on unsafe actions.
+ */
 static void GRFUnsafe(ByteReader *buf)
 {
 	SetBit(_cur.grfconfig->flags, GCF_UNSAFE);
@@ -7122,6 +7444,7 @@ static void GRFUnsafe(ByteReader *buf)
 }
 
 
+/** Initialize the TTDPatch flags */
 static void InitializeGRFSpecial()
 {
 	_ttdpatch_flags[0] = ((_settings_game.station.never_expire_airports ? 1 : 0) << 0x0C)  // keepsmallairport
@@ -7206,6 +7529,7 @@ static void InitializeGRFSpecial()
 	                   |                                                      (1 << 0x1F); // any switch is on
 }
 
+/** Reset and clear all NewGRF stations */
 static void ResetCustomStations()
 {
 	const GRFFile * const *end = _grf_files.End();
@@ -7240,6 +7564,7 @@ static void ResetCustomStations()
 	}
 }
 
+/** Reset and clear all NewGRF houses */
 static void ResetCustomHouses()
 {
 	const GRFFile * const *end = _grf_files.End();
@@ -7255,6 +7580,7 @@ static void ResetCustomHouses()
 	}
 }
 
+/** Reset and clear all NewGRF airports */
 static void ResetCustomAirports()
 {
 	const GRFFile * const *end = _grf_files.End();
@@ -7291,6 +7617,7 @@ static void ResetCustomAirports()
 	}
 }
 
+/** Reset and clear all NewGRF industries */
 static void ResetCustomIndustries()
 {
 	const GRFFile * const *end = _grf_files.End();
@@ -7330,6 +7657,7 @@ static void ResetCustomIndustries()
 	}
 }
 
+/** Reset and clear all NewObjects */
 static void ResetCustomObjects()
 {
 	const GRFFile * const *end = _grf_files.End();
@@ -7345,7 +7673,7 @@ static void ResetCustomObjects()
 	}
 }
 
-
+/** Reset and clear all NewGRFs */
 static void ResetNewGRF()
 {
 	const GRFFile * const *end = _grf_files.End();
@@ -7362,6 +7690,7 @@ static void ResetNewGRF()
 	_cur.grffile   = NULL;
 }
 
+/** Clear all NewGRF errors */
 static void ResetNewGRFErrors()
 {
 	for (GRFConfig *c = _grfconfig; c != NULL; c = c->next) {
@@ -7480,6 +7809,10 @@ void ResetPersistentNewGRFData()
 	_airporttile_mngr.ResetMapping();
 }
 
+/**
+ * Construct the Cargo Mapping
+ * @note This is the reverse of a cargo translation table
+ */
 static void BuildCargoTranslationMap()
 {
 	memset(_cur.grffile->cargo_map, 0xFF, sizeof(_cur.grffile->cargo_map));
@@ -7503,6 +7836,10 @@ static void BuildCargoTranslationMap()
 	}
 }
 
+/**
+ * Prepare loading a NewGRF file with its config
+ * @param config The NewGRF configuration struct with name, id, parameters and alike.
+ */
 static void InitNewGRFFile(const GRFConfig *config)
 {
 	GRFFile *newfile = GetFileByFilename(config->filename);
@@ -7653,6 +7990,17 @@ static void CalculateRefitMasks()
 
 		/* Clear refit_mask for not refittable ships */
 		if (e->type == VEH_SHIP && !e->u.ship.old_refittable) ei->refit_mask = 0;
+	}
+}
+
+/** Set to use the correct action0 properties for each canal feature */
+static void FinaliseCanals()
+{
+	for (uint i = 0; i < CF_END; i++) {
+		if (_water_feature[i].grffile != NULL) {
+			_water_feature[i].callback_mask = _water_feature[i].grffile->canal_local_properties[i].callback_mask;
+			_water_feature[i].flags = _water_feature[i].grffile->canal_local_properties[i].flags;
+		}
 	}
 }
 
@@ -8326,6 +8674,7 @@ void InitDepotWindowBlockSizes();
 
 extern void InitGRFTownGeneratorNames();
 
+/** Finish loading NewGRFs and execute needed post-processing */
 static void AfterLoadGRFs()
 {
 	for (StringIDToGRFIDMapping::iterator it = _string_to_grf_mapping.begin(); it != _string_to_grf_mapping.end(); it++) {
@@ -8347,6 +8696,9 @@ static void AfterLoadGRFs()
 
 	/* Polish engines */
 	FinaliseEngineArray();
+
+	/* Set the actually used Canal properties */
+	FinaliseCanals();
 
 	/* Set the block size in the depot windows based on vehicle sprite sizes */
 	InitDepotWindowBlockSizes();
@@ -8494,6 +8846,9 @@ void LoadNewGRF(uint load_index, uint file_index)
 		}
 	}
 
+	/* Pseudo sprite processing is finished; free temporary stuff */
+	_cur.ClearDataForNextFile();
+
 	/* Call any functions that should be run after GRFs have been loaded. */
 	AfterLoadGRFs();
 
@@ -8505,6 +8860,11 @@ void LoadNewGRF(uint load_index, uint file_index)
 	_display_opt  = display_opt;
 }
 
+/**
+ * Check for grf miscelaneous bits
+ * @param bit The bit to check.
+ * @return Whether the bit is set.
+ */
 bool HasGrfMiscBit(GrfMiscBit bit)
 {
 	return HasBit(_misc_grf_features, bit);
