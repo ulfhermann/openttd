@@ -344,7 +344,7 @@ STR_SORT_BY_MAX_SPEED                                           :max. rychlosti
 STR_SORT_BY_MODEL                                               :modelu
 STR_SORT_BY_VALUE                                               :hodnoty
 STR_SORT_BY_LENGTH                                              :délky
-STR_SORT_BY_LIFE_TIME                                           :zbývající životnosti
+STR_SORT_BY_LIFE_TIME                                           :Zbývající životnost
 STR_SORT_BY_TIMETABLE_DELAY                                     :zpoždění
 STR_SORT_BY_FACILITY                                            :druhu stanice
 STR_SORT_BY_WAITING                                             :množství čekajícího nákladu
@@ -426,6 +426,7 @@ STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :Zobrazení jmen
 STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :Zobrazení jmen stanic
 STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :Zobrazení jmen směrování
 STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :Zobrazení popisků
+STR_SETTINGS_MENU_SHOW_COMPETITOR_SIGNS                         :Zobrazovat popisky a jména protivníků
 STR_SETTINGS_MENU_FULL_ANIMATION                                :Plné animace
 STR_SETTINGS_MENU_FULL_DETAIL                                   :Plné detaily
 STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :Průhledné budovy
@@ -518,6 +519,7 @@ STR_ABOUT_MENU_ZOOMIN_SCREENSHOT                                :Přiblíženo n
 STR_ABOUT_MENU_GIANT_SCREENSHOT                                 :Screenshot celé mapy
 STR_ABOUT_MENU_ABOUT_OPENTTD                                    :O 'OpenTTD'
 STR_ABOUT_MENU_SPRITE_ALIGNER                                   :Zarovnávání spritů
+STR_ABOUT_MENU_TOGGLE_BOUNDING_BOXES                            :Přepnout ohraničení
 ############ range ends here
 
 ############ range for days starts (also used for the place in the highscore window)
@@ -1139,6 +1141,10 @@ STR_SEA_LEVEL_HIGH                                              :vysoká
 STR_SEA_LEVEL_CUSTOM                                            :Uživatelský
 STR_SEA_LEVEL_CUSTOM_PERCENTAGE                                 :Uživatelský ({NUM}%)
 
+STR_RIVERS_NONE                                                 :Žádné
+STR_RIVERS_FEW                                                  :Pár
+STR_RIVERS_MODERATE                                             :Více
+STR_RIVERS_LOT                                                  :Mnoho
 
 STR_DISASTER_NONE                                               :žádné
 STR_DISASTER_REDUCED                                            :snížené
@@ -1477,6 +1483,7 @@ STR_INTRO_TOOLTIP_ONLINE_CONTENT                                :{BLACK}Ukázat,
 STR_INTRO_TOOLTIP_AI_SETTINGS                                   :{BLACK}Ukázat nastavení AI
 STR_INTRO_TOOLTIP_QUIT                                          :{BLACK}Ukončit 'OpenTTD'
 
+STR_INTRO_TRANSLATION                                           :{BLACK}Tento překlad postrádá {NUM} řetěz{P ec ce ců}. Prosím pomozte OpenTTD udělat lepším a přihlaste se jako překladatel. Pro více informací, čtěte readme.txt.
 
 # Quit window
 STR_QUIT_CAPTION                                                :{WHITE}Konec
@@ -2405,6 +2412,7 @@ STR_MAPGEN_LAND_GENERATOR                                       :{BLACK}Generát
 STR_MAPGEN_TREE_PLACER                                          :{BLACK}Sázení stromů:
 STR_MAPGEN_TERRAIN_TYPE                                         :{BLACK}Typ krajiny:
 STR_MAPGEN_QUANTITY_OF_SEA_LAKES                                :{BLACK}Četnost jezer:
+STR_MAPGEN_QUANTITY_OF_RIVERS                                   :{BLACK}Řeky:
 STR_MAPGEN_SMOOTHNESS                                           :{BLACK}Členitost krajiny:
 STR_MAPGEN_VARIETY                                              :{BLACK}Rozmanitost terénu:
 STR_MAPGEN_GENERATE                                             :{WHITE}Vytvořit
@@ -2449,6 +2457,7 @@ STR_GENERATION_ABORT_MESSAGE                                    :{YELLOW}Opravdu
 STR_GENERATION_PROGRESS                                         :{WHITE}Z{NBSP}{NUM}{NBSP}% hotovo
 STR_GENERATION_PROGRESS_NUM                                     :{BLACK}{NUM} / {NUM}
 STR_GENERATION_WORLD_GENERATION                                 :{BLACK}Tvorba krajiny
+STR_GENERATION_RIVER_GENERATION                                 :{BLACK}Generování řek
 STR_GENERATION_TREE_GENERATION                                  :{BLACK}Výsadba stromů
 STR_GENERATION_OBJECT_GENERATION                                :{BLACK}Výstavba nepřesunutelných objektů
 STR_GENERATION_CLEARING_TILES                                   :{BLACK}Tvorba členitého a kamenitého území
@@ -2604,6 +2613,9 @@ STR_NEWGRF_INVALID_INDUSTRYTYPE                                 :<neplatný prů
 
 # NewGRF scanning window
 STR_NEWGRF_SCAN_CAPTION                                         :{WHITE}Prohledávání grafik
+STR_NEWGRF_SCAN_MESSAGE                                         :{BLACK}Prohledávám grafiky. Toto může chvíli trvat...
+STR_NEWGRF_SCAN_STATUS                                          :{BLACK}Prohledáno {NUM} grafik z {NUM}
+STR_NEWGRF_SCAN_ARCHIVES                                        :Hledám archivy
 
 # Sign list window
 STR_SIGN_LIST_CAPTION                                           :{WHITE}Seznam popisků - {COMMA} popis{P ek ky ků}
@@ -2912,6 +2924,8 @@ STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :Nové letadlo
 STR_PURCHASE_INFO_COST_WEIGHT                                   :{BLACK}Cena: {GOLD}{CURRENCY}{BLACK} Hmotnost: {GOLD}{WEIGHT_S}
 STR_PURCHASE_INFO_SPEED_POWER                                   :{BLACK}Rychlost: {GOLD}{VELOCITY}{BLACK} Výkon: {GOLD}{POWER}
 STR_PURCHASE_INFO_SPEED                                         :{BLACK}Rychlost: {GOLD}{VELOCITY}
+STR_PURCHASE_INFO_SPEED_OCEAN                                   :{BLACK}Rychlost na moři: {GOLD}{VELOCITY}
+STR_PURCHASE_INFO_SPEED_CANAL                                   :{BLACK}Rychlost v průplavech a řekách: {GOLD}{VELOCITY}
 STR_PURCHASE_INFO_RUNNINGCOST                                   :{BLACK}Provozní cena: {GOLD}{CURRENCY} ročně
 STR_PURCHASE_INFO_CAPACITY                                      :{BLACK}Kapacita: {GOLD}{CARGO} {STRING}
 STR_PURCHASE_INFO_REFITTABLE                                    :(lze přestavět)
@@ -3278,12 +3292,15 @@ STR_ORDER_DROP_HALT_DEPOT                                       :Zastavit
 STR_ORDER_SERVICE_TOOLTIP                                       :{BLACK}Přeskoč tento cíl, pokud není potřeba pravidelná údržba
 
 STR_ORDER_CONDITIONAL_VARIABLE_TOOLTIP                          :{BLACK}Vlastnost vozidla, podle které přeskakovat
+
+# Conditional order variables, must follow order of OrderConditionVariable enum
 STR_ORDER_CONDITIONAL_LOAD_PERCENTAGE                           :Procento naložení
 STR_ORDER_CONDITIONAL_RELIABILITY                               :Spolehlivost
 STR_ORDER_CONDITIONAL_MAX_SPEED                                 :Maximální rychlost
 STR_ORDER_CONDITIONAL_AGE                                       :Stáří vozidla (v letech)
 STR_ORDER_CONDITIONAL_REQUIRES_SERVICE                          :Vyžaduje údržbu
 STR_ORDER_CONDITIONAL_UNCONDITIONALLY                           :Vždy
+STR_ORDER_CONDITIONAL_REMAINING_LIFETIME                        :Zbývající životnost (v letech)
 
 STR_ORDER_CONDITIONAL_COMPARATOR_TOOLTIP                        :{BLACK}Jak porovnat vlastnost vozidla se zadanou hodnotou
 STR_ORDER_CONDITIONAL_COMPARATOR_EQUALS                         :se rovná
@@ -3528,6 +3545,8 @@ STR_ERROR_PNGMAP_MISC                                           :{WHITE}... něc
 
 STR_ERROR_BMPMAP                                                :{WHITE}Nebylo možné nahrát krajinu z BMP...
 STR_ERROR_BMPMAP_IMAGE_TYPE                                     :{WHITE}... nelze převést formát obrázku
+
+STR_ERROR_HEIGHTMAP_TOO_LARGE                                   :{WHITE}... obrázek je příliš velký
 
 STR_WARNING_HEIGHTMAP_SCALE_CAPTION                             :{WHITE}Varování kvůli velikosti
 STR_WARNING_HEIGHTMAP_SCALE_MESSAGE                             :{YELLOW}Tak velká zmena velikosti zdrojové mapy není doporučena. Pokračovat s generováním?
