@@ -6,7 +6,7 @@
 // OpenTTD is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 // See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with OpenTTD. If not, see <http://www.gnu.org/licenses/>.
 //
-   -1 * 0	 0C "Fixing (alignment) bugs in the orignal graphics. By Addi."
+   -1 * 0	 0C "Fixing (alignment) bugs in the original graphics. By Addi and PaulC."
    -1 * 6	 07 83 01 \7= 03 7D
 // Different graphics for same wood truck
    -1 * 14	 0A 04 01 87 0C 01 89 0C 01 07 0E 01 09 0E
@@ -327,3 +327,8 @@
    -1 sprites/fix_graphics.png 674 822 09 31 64 -31 0
    -1 sprites/fix_graphics.png 2 870 09 31 64 -31 0
    -1 sprites/fix_graphics.png 82 870 09 31 64 -31 0
+// Fix buoy in-game; don't show black outline
+   -1 * 4        01 05 01 \b1
+   -1 sprites/fix_graphics.png 575 490 09 11 7 7 4
+   -1 * 7        02 05 17 01 00 00 00
+   -1 * 7        03 05 01 08 00 17 00
