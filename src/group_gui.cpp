@@ -64,10 +64,10 @@ static const NWidgetPart _nested_group_widgets[] = {
 		/* left part */
 		NWidget(NWID_VERTICAL),
 			NWidget(WWT_PANEL, COLOUR_GREY), SetMinimalTextLines(1, WD_DROPDOWNTEXT_TOP + WD_DROPDOWNTEXT_BOTTOM), SetFill(1, 0), EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_GREY, GRP_WIDGET_ALL_VEHICLES), SetMinimalSize(200, 13), SetFill(1, 0), EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_GREY, GRP_WIDGET_DEFAULT_VEHICLES), SetMinimalSize(200, 13), SetFill(1, 0), EndContainer(),
+			NWidget(WWT_PANEL, COLOUR_GREY, GRP_WIDGET_ALL_VEHICLES), SetFill(1, 0), EndContainer(),
+			NWidget(WWT_PANEL, COLOUR_GREY, GRP_WIDGET_DEFAULT_VEHICLES), SetFill(1, 0), EndContainer(),
 			NWidget(NWID_HORIZONTAL),
-				NWidget(WWT_MATRIX, COLOUR_GREY, GRP_WIDGET_LIST_GROUP), SetMinimalSize(188, 0), SetDataTip(0x701, STR_GROUPS_CLICK_ON_GROUP_FOR_TOOLTIP),
+				NWidget(WWT_MATRIX, COLOUR_GREY, GRP_WIDGET_LIST_GROUP), SetDataTip(0x701, STR_GROUPS_CLICK_ON_GROUP_FOR_TOOLTIP),
 						SetFill(1, 0), SetResize(0, 1), SetScrollbar(GRP_WIDGET_LIST_GROUP_SCROLLBAR),
 				NWidget(NWID_VSCROLLBAR, COLOUR_GREY, GRP_WIDGET_LIST_GROUP_SCROLLBAR),
 			EndContainer(),
@@ -78,10 +78,10 @@ static const NWidgetPart _nested_group_widgets[] = {
 						SetDataTip(SPR_GROUP_DELETE_TRAIN, STR_GROUP_DELETE_TOOLTIP),
 				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, GRP_WIDGET_RENAME_GROUP), SetMinimalSize(24, 25), SetFill(0, 1),
 						SetDataTip(SPR_GROUP_RENAME_TRAIN, STR_GROUP_RENAME_TOOLTIP),
-				NWidget(WWT_PANEL, COLOUR_GREY), SetMinimalSize(92, 25), SetFill(1, 1), EndContainer(),
+				NWidget(WWT_PANEL, COLOUR_GREY), SetFill(1, 1), EndContainer(),
 				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, GRP_WIDGET_REPLACE_PROTECTION), SetMinimalSize(24, 25), SetFill(0, 1),
 						SetDataTip(SPR_GROUP_REPLACE_OFF_TRAIN, STR_GROUP_REPLACE_PROTECTION_TOOLTIP),
-				NWidget(WWT_PANEL, COLOUR_GREY), SetMinimalSize(12, 25), SetFill(0, 1), EndContainer(),
+				NWidget(WWT_PANEL, COLOUR_GREY), SetMinimalSize(WD_VSCROLLBAR_WIDTH, 25), SetFill(0, 1), EndContainer(),
 			EndContainer(),
 		EndContainer(),
 		/* right part */
@@ -114,11 +114,24 @@ static const NWidgetPart _nested_group_widgets[] = {
 
 class VehicleGroupWindow : public BaseVehicleListWindow {
 private:
+	/* Columns in the group list */
+	enum ListColumns {
+		VGC_NAME,          ///< Group name.
+		VGC_PROTECT,       ///< Autoreplace protect icon.
+		VGC_AUTOREPLACE,   ///< Autoreplace active icon.
+		VGC_PROFIT,        ///< Profit icon.
+		VGC_NUMBER,        ///< Number of vehicles in the group.
+
+		VGC_END
+	};
+
 	VehicleID vehicle_sel; ///< Selected vehicle
 	GroupID group_rename;  ///< Group being renamed, INVALID_GROUP if none
 	GUIGroupList groups;   ///< List of groups
 	uint tiny_step_height; ///< Step height for the group list
 	Scrollbar *group_sb;
+
+	Dimension column_size[VGC_END]; ///< Size of the columns in the group list.
 
 	/**
 	 * (Re)Build the group list.
@@ -163,6 +176,102 @@ private:
 		int r = strnatcmp(last_name[0], last_name[1]); // Sort by name (natural sorting).
 		if (r == 0) return (*a)->index - (*b)->index;
 		return r;
+	}
+
+	/**
+	 * Compute tiny_step_height and column_size
+	 * @return Total width required for the group list.
+	 */
+	uint ComputeGroupInfoSize()
+	{
+		this->column_size[VGC_NAME] = maxdim(GetStringBoundingBox(STR_GROUP_DEFAULT_TRAINS + this->vli.vtype), GetStringBoundingBox(STR_GROUP_ALL_TRAINS + this->vli.vtype));
+		this->column_size[VGC_NAME].width = max(170u, this->column_size[VGC_NAME].width);
+		this->tiny_step_height = this->column_size[VGC_NAME].height;
+
+		this->column_size[VGC_PROTECT] = GetSpriteSize(SPR_GROUP_REPLACE_PROTECT);
+		this->tiny_step_height = max(this->tiny_step_height, this->column_size[VGC_PROTECT].height);
+
+		this->column_size[VGC_AUTOREPLACE] = GetSpriteSize(SPR_GROUP_REPLACE_ACTIVE);
+		this->tiny_step_height = max(this->tiny_step_height, this->column_size[VGC_AUTOREPLACE].height);
+
+		this->column_size[VGC_PROFIT].width = 0;
+		this->column_size[VGC_PROFIT].height = 0;
+		static const SpriteID profit_sprites[] = {SPR_PROFIT_NA, SPR_PROFIT_NEGATIVE, SPR_PROFIT_SOME, SPR_PROFIT_LOT};
+		for (uint i = 0; i < lengthof(profit_sprites); i++) {
+			Dimension d = GetSpriteSize(profit_sprites[i]);
+			this->column_size[VGC_PROFIT] = maxdim(this->column_size[VGC_PROFIT], d);
+		}
+		this->tiny_step_height = max(this->tiny_step_height, this->column_size[VGC_PROFIT].height);
+
+		SetDParam(0, GroupStatistics::Get(this->vli.company, ALL_GROUP, this->vli.vtype).num_vehicle > 900 ? 9999 : 999);
+		this->column_size[VGC_NUMBER] = GetStringBoundingBox(STR_TINY_COMMA);
+		this->tiny_step_height = max(this->tiny_step_height, this->column_size[VGC_NUMBER].height);
+
+		this->tiny_step_height += WD_MATRIX_TOP;
+
+		return WD_FRAMERECT_LEFT + 8 +
+			this->column_size[VGC_NAME].width + 8 +
+			this->column_size[VGC_PROTECT].width + 2 +
+			this->column_size[VGC_AUTOREPLACE].width + 2 +
+			this->column_size[VGC_PROFIT].width + 2 +
+			this->column_size[VGC_NUMBER].width + 2 +
+			WD_FRAMERECT_RIGHT;
+	}
+
+	/**
+	 * Draw a row in the group list.
+	 * @param y Top of the row.
+	 * @param left Left of the row.
+	 * @param right Right of the row.
+	 * @param g_id Group to list.
+	 * @param protection Whether autoreplace protection is set.
+	 */
+	void DrawGroupInfo(int y, int left, int right, GroupID g_id, bool protection = false) const
+	{
+		/* draw the selected group in white, else we draw it in black */
+		TextColour colour = g_id == this->vli.index ? TC_WHITE : TC_BLACK;
+		const GroupStatistics &stats = GroupStatistics::Get(this->vli.company, g_id, this->vli.vtype);
+		bool rtl = _current_text_dir == TD_RTL;
+
+		/* draw group name */
+		StringID str;
+		if (IsAllGroupID(g_id)) {
+			str = STR_GROUP_ALL_TRAINS + this->vli.vtype;
+		} else if (IsDefaultGroupID(g_id)) {
+			str = STR_GROUP_DEFAULT_TRAINS + this->vli.vtype;
+		} else {
+			SetDParam(0, g_id);
+			str = STR_GROUP_NAME;
+		}
+		int x = rtl ? right - WD_FRAMERECT_RIGHT - 8 - this->column_size[VGC_NAME].width + 1 : left + WD_FRAMERECT_LEFT + 8;
+		DrawString(x, x + this->column_size[VGC_NAME].width - 1, y + (this->tiny_step_height - this->column_size[VGC_NAME].height) / 2, str, colour);
+
+		/* draw autoreplace protection */
+		x = rtl ? x - 8 - this->column_size[VGC_PROTECT].width : x + 8 + this->column_size[VGC_NAME].width;
+		if (protection) DrawSprite(SPR_GROUP_REPLACE_PROTECT, PAL_NONE, x, y + (this->tiny_step_height - this->column_size[VGC_PROTECT].height) / 2);
+
+		/* draw autoreplace status */
+		x = rtl ? x - 2 - this->column_size[VGC_AUTOREPLACE].width : x + 2 + this->column_size[VGC_PROTECT].width;
+		if (stats.autoreplace_defined) DrawSprite(SPR_GROUP_REPLACE_ACTIVE, stats.autoreplace_finished ? PALETTE_CRASH : PAL_NONE, x, y + (this->tiny_step_height - this->column_size[VGC_AUTOREPLACE].height) / 2);
+
+		/* draw the profit icon */
+		x = rtl ? x - 2 - this->column_size[VGC_PROFIT].width : x + 2 + this->column_size[VGC_AUTOREPLACE].width;
+		SpriteID spr;
+		if (stats.num_profit_vehicle == 0) {
+			spr = SPR_PROFIT_NA;
+		} else if (stats.profit_last_year < 0) {
+			spr = SPR_PROFIT_NEGATIVE;
+		} else if (stats.profit_last_year < 10000 * stats.num_profit_vehicle) { // TODO magic number
+			spr = SPR_PROFIT_SOME;
+		} else {
+			spr = SPR_PROFIT_LOT;
+		}
+		DrawSprite(spr, PAL_NONE, x, y + (this->tiny_step_height - this->column_size[VGC_PROFIT].height) / 2);
+
+		/* draw the number of vehicles of the group */
+		x = rtl ? x - 2 - this->column_size[VGC_NUMBER].width : x + 2 + this->column_size[VGC_PROFIT].width;
+		SetDParam(0, stats.num_vehicle);
+		DrawString(x, x + this->column_size[VGC_NUMBER].width - 1, y + (this->tiny_step_height - this->column_size[VGC_NUMBER].height) / 2, STR_TINY_COMMA, colour, SA_RIGHT | SA_FORCE);
 	}
 
 public:
@@ -217,18 +326,32 @@ public:
 	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		switch (widget) {
-			case GRP_WIDGET_LIST_GROUP:
-				this->tiny_step_height = FONT_HEIGHT_NORMAL + WD_MATRIX_TOP;
+			case GRP_WIDGET_LIST_GROUP: {
+				size->width = this->ComputeGroupInfoSize();
 				resize->height = this->tiny_step_height;
-				/* Minimum height is the height of the list widget minus all and default vehicles and a bit for the bottom bar */
-				size->height =  4 * GetVehicleListHeight(this->vli.vtype, this->tiny_step_height) - (this->tiny_step_height > 25 ? 2 : 3) * this->tiny_step_height;
+
+				/* Minimum height is the height of the list widget minus all and default vehicles... */
+				size->height =  4 * GetVehicleListHeight(this->vli.vtype, this->tiny_step_height) - 2 * this->tiny_step_height;
+
+				/* ... minus the buttons at the bottom ... */
+				uint max_icon_height = 25;
+				max_icon_height = max(max_icon_height, GetSpriteSize(this->GetWidget<NWidgetCore>(GRP_WIDGET_CREATE_GROUP)->widget_data).height);
+				max_icon_height = max(max_icon_height, GetSpriteSize(this->GetWidget<NWidgetCore>(GRP_WIDGET_RENAME_GROUP)->widget_data).height);
+				max_icon_height = max(max_icon_height, GetSpriteSize(this->GetWidget<NWidgetCore>(GRP_WIDGET_DELETE_GROUP)->widget_data).height);
+				max_icon_height = max(max_icon_height, GetSpriteSize(this->GetWidget<NWidgetCore>(GRP_WIDGET_REPLACE_PROTECTION)->widget_data).height);
+
+				/* ... plus the statusbar below the vehicle list */
+				if (max_icon_height > FONT_HEIGHT_NORMAL) max_icon_height -= FONT_HEIGHT_NORMAL;
+
+				/* The size must be a multiple of tiny_step_height for the resizing to work */
+				size->height -= this->tiny_step_height * CeilDiv(max_icon_height, this->tiny_step_height);
 				break;
+			}
 
 			case GRP_WIDGET_ALL_VEHICLES:
 			case GRP_WIDGET_DEFAULT_VEHICLES:
-				size->height = FONT_HEIGHT_NORMAL + WD_MATRIX_TOP;
-				size->width = max(GetStringBoundingBox(STR_GROUP_DEFAULT_TRAINS + this->vli.vtype).width, GetStringBoundingBox(STR_GROUP_ALL_TRAINS + this->vli.vtype).width);
-				size->width += WD_FRAMERECT_LEFT + WD_FRAMERECT_RIGHT + 8 + 8;
+				size->width = this->ComputeGroupInfoSize();
+				size->height = this->tiny_step_height;
 				break;
 
 			case GRP_WIDGET_SORT_BY_ORDER: {
@@ -240,7 +363,8 @@ public:
 			}
 
 			case GRP_WIDGET_LIST_VEHICLE:
-				resize->height = GetVehicleListHeight(this->vli.vtype, FONT_HEIGHT_NORMAL + WD_MATRIX_TOP);
+				this->ComputeGroupInfoSize();
+				resize->height = GetVehicleListHeight(this->vli.vtype, this->tiny_step_height);
 				size->height = 4 * resize->height;
 				break;
 
@@ -303,8 +427,8 @@ public:
 
 					SetDParam(0, STR_GROUP_NAME);
 					SetDParam(1, g->index);
-					SetDParam(2, g->num_vehicle);
-					SetDParam(3, g->num_vehicle);
+					SetDParam(2, g->statistics.num_vehicle);
+					SetDParam(3, g->statistics.num_vehicle);
 				}
 				break;
 		}
@@ -369,30 +493,22 @@ public:
 	{
 		switch (widget) {
 			case GRP_WIDGET_ALL_VEHICLES:
-				DrawString(r.left + WD_FRAMERECT_LEFT + 8, r.right - WD_FRAMERECT_RIGHT - 8, r.top + WD_FRAMERECT_TOP + 1,
-						STR_GROUP_ALL_TRAINS + this->vli.vtype, IsAllGroupID(this->vli.index) ? TC_WHITE : TC_BLACK);
+				DrawGroupInfo(r.top + WD_FRAMERECT_TOP, r.left, r.right, ALL_GROUP);
 				break;
 
 			case GRP_WIDGET_DEFAULT_VEHICLES:
-				DrawString(r.left + WD_FRAMERECT_LEFT + 8, r.right - WD_FRAMERECT_RIGHT - 8, r.top + WD_FRAMERECT_TOP + 1,
-						STR_GROUP_DEFAULT_TRAINS + this->vli.vtype, IsDefaultGroupID(this->vli.index) ? TC_WHITE : TC_BLACK);
+				DrawGroupInfo(r.top + WD_FRAMERECT_TOP, r.left, r.right, DEFAULT_GROUP);
 				break;
 
 			case GRP_WIDGET_LIST_GROUP: {
-				int y1 = r.top + WD_FRAMERECT_TOP + 1;
+				int y1 = r.top + WD_FRAMERECT_TOP;
 				int max = min(this->group_sb->GetPosition() + this->group_sb->GetCapacity(), this->groups.Length());
 				for (int i = this->group_sb->GetPosition(); i < max; ++i) {
 					const Group *g = this->groups[i];
 
 					assert(g->owner == this->owner);
 
-					/* draw the selected group in white, else we draw it in black */
-					SetDParam(0, g->index);
-					DrawString(r.left + WD_FRAMERECT_LEFT + 8, r.right - WD_FRAMERECT_RIGHT - 8, y1, STR_GROUP_NAME, (this->vli.index == g->index) ? TC_WHITE : TC_BLACK);
-
-					/* draw the number of vehicles of the group */
-					SetDParam(0, g->num_vehicle);
-					DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y1 + 1, STR_TINY_COMMA, (this->vli.index == g->index) ? TC_WHITE : TC_BLACK, SA_RIGHT);
+					DrawGroupInfo(y1, r.left, r.right, g->index, g->replace_protection);
 
 					y1 += this->tiny_step_height;
 				}
