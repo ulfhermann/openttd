@@ -21,16 +21,55 @@
 typedef Pool<Group, GroupID, 16, 64000> GroupPool;
 extern GroupPool _group_pool; ///< Pool of groups.
 
+/** Statistics and caches on the vehicles in a group. */
+struct GroupStatistics {
+	uint16 num_vehicle;                     ///< Number of vehicles.
+	uint16 *num_engines;                    ///< Caches the number of engines of each type the company owns.
+
+	bool autoreplace_defined;               ///< Are any autoreplace rules set?
+	bool autoreplace_finished;              ///< Have all autoreplacement finished?
+
+	uint16 num_profit_vehicle;              ///< Number of vehicles considered for profit statistics;
+	Money profit_last_year;                 ///< Sum of profits for all vehicles.
+
+	GroupStatistics();
+	~GroupStatistics();
+
+	void Clear();
+
+	void ClearProfits()
+	{
+		this->num_profit_vehicle = 0;
+		this->profit_last_year = 0;
+	}
+
+	void ClearAutoreplace()
+	{
+		this->autoreplace_defined = false;
+		this->autoreplace_finished = false;
+	}
+
+	static GroupStatistics &Get(CompanyID company, GroupID id_g, VehicleType type);
+	static GroupStatistics &Get(const Vehicle *v);
+	static GroupStatistics &GetAllGroup(const Vehicle *v);
+
+	static void CountVehicle(const Vehicle *v, int delta);
+	static void CountEngine(const Vehicle *v, int delta);
+	static void VehicleReachedProfitAge(const Vehicle *v);
+
+	static void UpdateProfits();
+	static void UpdateAfterLoad();
+	static void UpdateAutoreplace(CompanyID company);
+};
+
 /** Group data. */
 struct Group : GroupPool::PoolItem<&_group_pool> {
 	char *name;                             ///< Group Name
-
-	uint16 num_vehicle;                     ///< Number of vehicles in the group
 	OwnerByte owner;                        ///< Group Owner
 	VehicleTypeByte vehicle_type;           ///< Vehicle type of the group
 
 	bool replace_protection;                ///< If set to true, the global autoreplace have no effect on the group
-	uint16 *num_engines;                    ///< Caches the number of engines of each type the company owns (no need to save this)
+	GroupStatistics statistics;             ///< NOSAVE: Statistics and caches on the vehicles in the group.
 
 	Group(CompanyID owner = INVALID_COMPANY);
 	~Group();
@@ -69,27 +108,6 @@ static inline uint GetGroupArraySize()
 }
 
 uint GetGroupNumEngines(CompanyID company, GroupID id_g, EngineID id_e);
-
-/**
- * Increase the number of vehicles by one in a group.
- * @param id_g Group id.
- */
-static inline void IncreaseGroupNumVehicle(GroupID id_g)
-{
-	Group *g = Group::GetIfValid(id_g);
-	if (g != NULL) g->num_vehicle++;
-}
-
-/**
- * Decrease the number of vehicles by one in a group.
- * @param id_g Group id.
- */
-static inline void DecreaseGroupNumVehicle(GroupID id_g)
-{
-	Group *g = Group::GetIfValid(id_g);
-	if (g != NULL) g->num_vehicle--;
-}
-
 
 void SetTrainGroupID(Train *v, GroupID grp);
 void UpdateTrainGroupID(Train *v);
