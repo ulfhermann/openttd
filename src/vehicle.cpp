@@ -600,21 +600,6 @@ uint CountVehiclesInChain(const Vehicle *v)
 }
 
 /**
- * Count the number of vehicles of a company.
- * @param c Company owning the vehicles.
- * @param [out] counts Array of counts. Contains the vehicle count ordered by type afterwards.
- */
-void CountCompanyVehicles(CompanyID cid, uint counts[4])
-{
-	for (uint i = 0; i < 4; i++) counts[i] = 0;
-
-	const Vehicle *v;
-	FOR_ALL_VEHICLES(v) {
-		if (v->owner == cid && v->IsPrimaryVehicle()) counts[v->type]++;
-	}
-}
-
-/**
  * Check if a vehicle is counted in num_engines in each company struct
  * @return true if the vehicle is counted in num_engines
  */
@@ -694,12 +679,12 @@ void Vehicle::PreDestructor()
 	}
 
 	if (this->IsEngineCountable()) {
-		Company::Get(this->owner)->num_engines[this->engine_type]--;
-		if (this->owner == _local_company) InvalidateAutoreplaceWindow(this->engine_type, this->group_id);
+		GroupStatistics::CountEngine(this, -1);
+		if (this->IsPrimaryVehicle()) GroupStatistics::CountVehicle(this, -1);
+		GroupStatistics::UpdateAutoreplace(this->owner);
 
+		if (this->owner == _local_company) InvalidateAutoreplaceWindow(this->engine_type, this->group_id);
 		DeleteGroupHighlightOfVehicle(this);
-		if (Group::IsValidID(this->group_id)) Group::Get(this->group_id)->num_engines[this->engine_type]--;
-		if (this->IsPrimaryVehicle()) DecreaseGroupNumVehicle(this->group_id);
 	}
 
 	if (this->type == VEH_AIRCRAFT && this->IsPrimaryVehicle()) {
@@ -1154,7 +1139,10 @@ bool Vehicle::HandleBreakdown()
  */
 void AgeVehicle(Vehicle *v)
 {
-	if (v->age < MAX_DAY) v->age++;
+	if (v->age < MAX_DAY) {
+		v->age++;
+		if (v->IsPrimaryVehicle() && v->age == VEHICLE_PROFIT_MIN_AGE + 1) GroupStatistics::VehicleReachedProfitAge(v);
+	}
 
 	if (!v->IsPrimaryVehicle() && (v->type != VEH_TRAIN || !Train::From(v)->IsEngine())) return;
 
@@ -1520,10 +1508,8 @@ UnitID GetFreeUnitNumber(VehicleType type)
 		default: NOT_REACHED();
 	}
 
-	uint amounts[4];
-	CountCompanyVehicles(_current_company, amounts);
-	assert((uint)type < lengthof(amounts));
-	if (amounts[type] >= max_veh) return UINT16_MAX; // Currently already at the limit, no room to make a new one.
+	const Company *c = Company::Get(_current_company);
+	if (c->group_all[type].num_vehicle >= max_veh) return UINT16_MAX; // Currently already at the limit, no room to make a new one.
 
 	FreeUnitIDGenerator gen(type, _current_company);
 
@@ -2582,6 +2568,11 @@ void VehiclesYearlyLoop()
 			SetWindowDirty(WC_VEHICLE_DETAILS, v->index);
 		}
 	}
+	GroupStatistics::UpdateProfits();
+	SetWindowClassesDirty(WC_TRAINS_LIST);
+	SetWindowClassesDirty(WC_SHIPS_LIST);
+	SetWindowClassesDirty(WC_ROADVEH_LIST);
+	SetWindowClassesDirty(WC_AIRCRAFT_LIST);
 }
 
 
