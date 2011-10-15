@@ -125,7 +125,13 @@ void LinkGraph::CreateComponent(Station *first)
 void LinkGraph::NextComponent()
 {
 	if (this->GetSize() > 0) return; // don't mess with running jobs (might happen when changing interval)
-	StationID last_station_id = this->current_station_id;
+
+	/* The station pool may shrink when saving and subsequently loading a game as
+	 * NULL entries at the end are cut off then. If the current station id points
+	 * to one of those NULL entries we have to clamp it here to avoid an infinite
+	 * loop later.
+	 */
+	StationID last_station_id = min(this->current_station_id, Station::GetPoolSize() - 1);
 	LinkGraphComponentID current_component_id = this->LinkGraphComponent::index;
 
 	do {
