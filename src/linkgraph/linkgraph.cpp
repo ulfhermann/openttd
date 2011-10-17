@@ -122,7 +122,13 @@ void LinkGraph::CreateComponent(Station *first)
  */
 void LinkGraph::NextComponent()
 {
-	if (this->GetSize() > 0) return; // don't mess with running jobs (might happen when changing interval)
+	/* Check for no stations to avoid problems with Station::GetPoolSize()
+	 * being 0 later and to avoid searching an empty pool.
+	 */
+	if (Station::GetNumItems() == 0) return;
+
+	/* Don't mess with running jobs (might happen when changing interval).*/
+	if (this->GetSize() > 0) return;
 
 	/* The station pool may shrink when saving and subsequently loading a game as
 	 * NULL entries at the end are cut off then. If the current station id points
