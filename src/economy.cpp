@@ -390,11 +390,6 @@ void ChangeOwnershipOfCompanyItems(Owner old_owner, Owner new_owner)
 	}
 
 	{
-		FreeUnitIDGenerator unitidgen[] = {
-			FreeUnitIDGenerator(VEH_TRAIN, new_owner), FreeUnitIDGenerator(VEH_ROAD,     new_owner),
-			FreeUnitIDGenerator(VEH_SHIP,  new_owner), FreeUnitIDGenerator(VEH_AIRCRAFT, new_owner)
-		};
-
 		Vehicle *v;
 		FOR_ALL_VEHICLES(v) {
 			if (v->owner == old_owner && IsCompanyBuildableVehicleType(v->type)) {
@@ -403,21 +398,48 @@ void ChangeOwnershipOfCompanyItems(Owner old_owner, Owner new_owner)
 				} else {
 					if (v->IsEngineCountable()) GroupStatistics::CountEngine(v, -1);
 					if (v->IsPrimaryVehicle()) GroupStatistics::CountVehicle(v, -1);
-
-					v->owner = new_owner;
-					v->colourmap = PAL_NONE;
-
-					if (v->IsEngineCountable()) {
-						GroupStatistics::CountEngine(v, 1);
-					}
-					if (v->IsPrimaryVehicle()) {
-						GroupStatistics::CountVehicle(v, 1);
-						v->unitnumber = unitidgen[v->type].NextID();
-					}
-
-					/* Invalidate the vehicle's cargo payment "owner cache". */
-					if (v->cargo_payment != NULL) v->cargo_payment->owner = NULL;
 				}
+			}
+		}
+	}
+
+	/* In all cases clear replace engine rules.
+	 * Even if it was copied, it could interfere with new owner's rules */
+	RemoveAllEngineReplacementForCompany(Company::Get(old_owner));
+
+	if (new_owner == INVALID_OWNER) {
+		RemoveAllGroupsForCompany(old_owner);
+	} else {
+		Group *g;
+		FOR_ALL_GROUPS(g) {
+			if (g->owner == old_owner) g->owner = new_owner;
+		}
+	}
+
+	{
+		FreeUnitIDGenerator unitidgen[] = {
+			FreeUnitIDGenerator(VEH_TRAIN, new_owner), FreeUnitIDGenerator(VEH_ROAD,     new_owner),
+			FreeUnitIDGenerator(VEH_SHIP,  new_owner), FreeUnitIDGenerator(VEH_AIRCRAFT, new_owner)
+		};
+
+		Vehicle *v;
+		FOR_ALL_VEHICLES(v) {
+			if (v->owner == old_owner && IsCompanyBuildableVehicleType(v->type)) {
+				assert(new_owner != INVALID_OWNER);
+
+				v->owner = new_owner;
+				v->colourmap = PAL_NONE;
+
+				if (v->IsEngineCountable()) {
+					GroupStatistics::CountEngine(v, 1);
+				}
+				if (v->IsPrimaryVehicle()) {
+					GroupStatistics::CountVehicle(v, 1);
+					v->unitnumber = unitidgen[v->type].NextID();
+				}
+
+				/* Invalidate the vehicle's cargo payment "owner cache". */
+				if (v->cargo_payment != NULL) v->cargo_payment->owner = NULL;
 			}
 		}
 
@@ -470,19 +492,6 @@ void ChangeOwnershipOfCompanyItems(Owner old_owner, Owner new_owner)
 	FOR_ALL_WAYPOINTS(wp) {
 		if (wp->owner == old_owner) {
 			wp->owner = new_owner == INVALID_OWNER ? OWNER_NONE : new_owner;
-		}
-	}
-
-	/* In all cases clear replace engine rules.
-	 * Even if it was copied, it could interfere with new owner's rules */
-	RemoveAllEngineReplacementForCompany(Company::Get(old_owner));
-
-	if (new_owner == INVALID_OWNER) {
-		RemoveAllGroupsForCompany(old_owner);
-	} else {
-		Group *g;
-		FOR_ALL_GROUPS(g) {
-			if (g->owner == old_owner) g->owner = new_owner;
 		}
 	}
 
@@ -1257,7 +1266,7 @@ static uint32 LoadUnloadVehicle(Vehicle *front, uint32 cargos_reserved)
 	for (Vehicle *v = front; v != NULL; v = v->Next()) {
 		if (v->cargo_cap == 0) continue;
 
-		const Engine *e = Engine::Get(v->engine_type);
+		const Engine *e = v->GetEngine();
 		byte load_amount = e->info.load_amount;
 
 		/* The default loadamount for mail is 1/4 of the load amount for passengers */

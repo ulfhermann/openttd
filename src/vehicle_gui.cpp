@@ -217,8 +217,8 @@ static const uint MAX_REFIT_CYCLE = 256;
  */
 byte GetBestFittingSubType(Vehicle *v_from, Vehicle *v_for)
 {
-	const Engine *e_from = Engine::Get(v_from->engine_type);
-	const Engine *e_for  = Engine::Get(v_for->engine_type);
+	const Engine *e_from = v_from->GetEngine();
+	const Engine *e_for  = v_for->GetEngine();
 
 	/* If one them doesn't carry cargo, there's no need to find a sub type */
 	if (!e_from->CanCarryCargo() || !e_for->CanCarryCargo()) return 0;
@@ -276,7 +276,7 @@ struct RefitOption {
 	CargoID cargo;    ///< Cargo to refit to
 	byte subtype;     ///< Subcargo to use
 	uint16 value;     ///< GRF-local String to display for the cargo
-	EngineID engine;  ///< Engine for which to resolve #value
+	const Engine *engine;  ///< Engine for which to resolve #value
 
 	/**
 	 * Inequality operator for #RefitOption.
@@ -330,7 +330,7 @@ static void DrawVehicleRefitWindow(const SubtypeList list[NUM_CARGO], int sel, u
 			SetDParam(0, CargoSpec::Get(refit.cargo)->name);
 			/* If the callback succeeded, draw the cargo suffix. */
 			if (refit.value != CALLBACK_FAILED) {
-				SetDParam(1, GetGRFStringID(GetEngineGRFID(refit.engine), 0xD000 + refit.value));
+				SetDParam(1, GetGRFStringID(refit.engine->GetGRFID(), 0xD000 + refit.value));
 				DrawString(r.left + WD_MATRIX_LEFT, r.right - WD_MATRIX_RIGHT, y, STR_JUST_STRING_SPACE_STRING, colour);
 			} else {
 				DrawString(r.left + WD_MATRIX_LEFT, r.right - WD_MATRIX_RIGHT, y, STR_JUST_STRING, colour);
@@ -386,7 +386,7 @@ struct RefitWindow : public Window {
 
 		do {
 			if (v->type == VEH_TRAIN && !vehicles_to_refit.Contains(v->index)) continue;
-			const Engine *e = Engine::Get(v->engine_type);
+			const Engine *e = v->GetEngine();
 			uint32 cmask = e->info.refit_mask;
 			byte callback_mask = e->info.callback_mask;
 
@@ -428,7 +428,7 @@ struct RefitWindow : public Window {
 						option.cargo   = cid;
 						option.subtype = refit_cyc;
 						option.value   = callback;
-						option.engine  = v->engine_type;
+						option.engine  = v->GetEngine();
 						this->list[current_index].Include(option);
 					}
 
@@ -445,7 +445,7 @@ struct RefitWindow : public Window {
 					option.cargo   = cid;
 					option.subtype = 0;
 					option.value   = CALLBACK_FAILED;
-					option.engine  = INVALID_ENGINE;
+					option.engine  = NULL;
 					this->list[current_index].Include(option);
 				}
 				current_index++;
@@ -612,7 +612,7 @@ struct RefitWindow : public Window {
 			case VRW_VEHICLE_PANEL_DISPLAY: {
 				Vehicle *v = Vehicle::Get(this->window_number);
 				DrawVehicleImage(v, this->sprite_left + WD_FRAMERECT_LEFT, this->sprite_right - WD_FRAMERECT_RIGHT,
-					r.top + WD_FRAMERECT_TOP, INVALID_VEHICLE, this->hscroll != NULL ? this->hscroll->GetPosition() : 0);
+					r.top + WD_FRAMERECT_TOP, INVALID_VEHICLE, EIT_IN_DETAILS, this->hscroll != NULL ? this->hscroll->GetPosition() : 0);
 
 				/* Highlight selected vehicles. */
 				if (this->order != INVALID_VEH_ORDER_ID) break;
@@ -705,7 +705,7 @@ struct RefitWindow : public Window {
 				this->BuildRefitList();
 
 				/* The vehicle width has changed too. */
-				this->vehicle_width = GetVehicleWidth(Vehicle::Get(this->window_number));
+				this->vehicle_width = GetVehicleWidth(Vehicle::Get(this->window_number), EIT_IN_DETAILS);
 				uint max_width = 0;
 
 				/* Check the width of all cargo information strings. */
@@ -866,7 +866,7 @@ struct RefitWindow : public Window {
 
 	virtual void OnResize()
 	{
-		this->vehicle_width = GetVehicleWidth(Vehicle::Get(this->window_number));
+		this->vehicle_width = GetVehicleWidth(Vehicle::Get(this->window_number), EIT_IN_DETAILS);
 		this->vscroll->SetCapacityFromWidget(this, VRW_MATRIX);
 		if (this->hscroll != NULL) this->hscroll->SetCapacityFromWidget(this, VRW_VEHICLE_PANEL_DISPLAY);
 		this->GetWidget<NWidgetCore>(VRW_MATRIX)->widget_data = (this->vscroll->GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
@@ -976,7 +976,7 @@ StringID GetCargoSubtypeText(const Vehicle *v)
 	if (HasBit(EngInfo(v->engine_type)->callback_mask, CBM_VEHICLE_CARGO_SUFFIX)) {
 		uint16 cb = GetVehicleCallback(CBID_VEHICLE_CARGO_SUFFIX, 0, 0, v->engine_type, v);
 		if (cb != CALLBACK_FAILED) {
-			return GetGRFStringID(GetEngineGRFID(v->engine_type), 0xD000 + cb);
+			return GetGRFStringID(v->GetGRFID(), 0xD000 + cb);
 		}
 	}
 	return STR_EMPTY;
@@ -1237,13 +1237,13 @@ static void DrawSmallOrderList(const Vehicle *v, int left, int right, int y, Veh
  * @param selection Selected vehicle to draw a frame around
  * @param skip      Number of pixels to skip at the front (for scrolling)
  */
-void DrawVehicleImage(const Vehicle *v, int left, int right, int y, VehicleID selection, int skip)
+void DrawVehicleImage(const Vehicle *v, int left, int right, int y, VehicleID selection, EngineImageType image_type, int skip)
 {
 	switch (v->type) {
-		case VEH_TRAIN:    DrawTrainImage(Train::From(v), left, right, y, selection, skip); break;
-		case VEH_ROAD:     DrawRoadVehImage(v, left, right, y, selection, skip);  break;
-		case VEH_SHIP:     DrawShipImage(v, left, right, y, selection);     break;
-		case VEH_AIRCRAFT: DrawAircraftImage(v, left, right, y, selection); break;
+		case VEH_TRAIN:    DrawTrainImage(Train::From(v), left, right, y, selection, image_type, skip); break;
+		case VEH_ROAD:     DrawRoadVehImage(v, left, right, y, selection, image_type, skip);  break;
+		case VEH_SHIP:     DrawShipImage(v, left, right, y, selection, image_type);     break;
+		case VEH_AIRCRAFT: DrawAircraftImage(v, left, right, y, selection, image_type); break;
 		default: NOT_REACHED();
 	}
 }
@@ -1303,7 +1303,7 @@ void BaseVehicleListWindow::DrawVehicleListItems(VehicleID selected_vehicle, int
 		SetDParam(0, v->GetDisplayProfitThisYear());
 		SetDParam(1, v->GetDisplayProfitLastYear());
 
-		DrawVehicleImage(v, image_left, image_right, y + FONT_HEIGHT_SMALL - 1, selected_vehicle, 0);
+		DrawVehicleImage(v, image_left, image_right, y + FONT_HEIGHT_SMALL - 1, selected_vehicle, EIT_IN_LIST, 0);
 		DrawString(text_left, text_right, y + line_height - FONT_HEIGHT_SMALL - WD_FRAMERECT_BOTTOM - 1, STR_VEHICLE_LIST_PROFIT_THIS_YEAR_LAST_YEAR);
 
 		if (v->name != NULL) {
@@ -1996,19 +1996,19 @@ struct VehicleDetailsWindow : Window {
 			case VLD_WIDGET_MIDDLE_DETAILS: {
 				/* For other vehicles, at the place of the matrix. */
 				bool rtl = _current_text_dir == TD_RTL;
-				uint sprite_width = max<uint>(GetSprite(v->GetImage(rtl ? DIR_E : DIR_W), ST_NORMAL)->width, 70U) + WD_FRAMERECT_LEFT + WD_FRAMERECT_RIGHT;
+				uint sprite_width = max<uint>(GetSprite(v->GetImage(rtl ? DIR_E : DIR_W, EIT_IN_DETAILS), ST_NORMAL)->width, 70U) + WD_FRAMERECT_LEFT + WD_FRAMERECT_RIGHT;
 
 				uint text_left  = r.left  + (rtl ? 0 : sprite_width);
 				uint text_right = r.right - (rtl ? sprite_width : 0);
 
 				/* Articulated road vehicles use a complete line. */
 				if (v->type == VEH_ROAD && v->HasArticulatedPart()) {
-					DrawVehicleImage(v, r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP, INVALID_VEHICLE, 0);
+					DrawVehicleImage(v, r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP, INVALID_VEHICLE, EIT_IN_DETAILS, 0);
 				} else {
 					uint sprite_left  = rtl ? text_right : r.left;
 					uint sprite_right = rtl ? r.right : text_left;
 
-					DrawVehicleImage(v, sprite_left + WD_FRAMERECT_LEFT, sprite_right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP, INVALID_VEHICLE, 0);
+					DrawVehicleImage(v, sprite_left + WD_FRAMERECT_LEFT, sprite_right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP, INVALID_VEHICLE, EIT_IN_DETAILS, 0);
 				}
 				DrawVehicleDetails(v, text_left + WD_FRAMERECT_LEFT, text_right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP, 0, 0, this->tab);
 				break;
@@ -2686,7 +2686,7 @@ void CcBuildPrimaryVehicle(const CommandCost &result, TileIndex tile, uint32 p1,
  * @param v Vehicle to get the width for.
  * @return Width of the vehicle.
  */
-int GetVehicleWidth(Vehicle *v)
+int GetVehicleWidth(Vehicle *v, EngineImageType image_type)
 {
 	int vehicle_width = 0;
 
@@ -2705,7 +2705,7 @@ int GetVehicleWidth(Vehicle *v)
 
 		default:
 			bool rtl = _current_text_dir == TD_RTL;
-			SpriteID sprite = v->GetImage(rtl ? DIR_E : DIR_W);
+			SpriteID sprite = v->GetImage(rtl ? DIR_E : DIR_W, image_type);
 			const Sprite *real_sprite = GetSprite(sprite, ST_NORMAL);
 			vehicle_width = real_sprite->width;
 
