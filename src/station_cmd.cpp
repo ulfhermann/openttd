@@ -50,6 +50,7 @@
 #include "table/airporttile_ids.h"
 #include "newgrf_airporttiles.h"
 #include "order_backup.h"
+#include "newgrf_house.h"
 
 #include "table/strings.h"
 
@@ -181,29 +182,6 @@ static bool CMSATree(TileIndex tile)
 	return IsTileType(tile, MP_TREES);
 }
 
-/**
- * Check whether the tile is a forest.
- * @param tile the tile to investigate.
- * @return true if and only if the tile is a forest
- */
-static bool CMSAForest(TileIndex tile)
-{
-	/* No industry */
-	if (!IsTileType(tile, MP_INDUSTRY)) return false;
-
-	const Industry *ind = Industry::GetByTile(tile);
-
-	/* No extractive industry */
-	if ((GetIndustrySpec(ind->type)->life_type & INDUSTRYLIFE_ORGANIC) == 0) return false;
-
-	for (uint i = 0; i < lengthof(ind->produced_cargo); i++) {
-		/* The industry produces wood. */
-		if (ind->produced_cargo[i] != CT_INVALID && CargoSpec::Get(ind->produced_cargo[i])->label == 'WOOD') return true;
-	}
-
-	return false;
-}
-
 #define M(x) ((x) - STR_SV_STNAME)
 
 enum StationNaming {
@@ -323,7 +301,7 @@ static StringID GenerateStationName(Station *st, TileIndex tile, StationNaming n
 	/* Check woods */
 	if (HasBit(free_names, M(STR_SV_STNAME_WOODS)) && (
 				CountMapSquareAround(tile, CMSATree) >= 8 ||
-				CountMapSquareAround(tile, CMSAForest) >= 2)
+				CountMapSquareAround(tile, IsTileForestIndustry) >= 2)
 			) {
 		return _settings_game.game_creation.landscape == LT_TROPIC ? STR_SV_STNAME_FOREST : STR_SV_STNAME_WOODS;
 	}
@@ -3011,6 +2989,31 @@ static VehicleEnterTileStatus VehicleEnter_Station(Vehicle *v, TileIndex tile, i
 }
 
 /**
+ * Run the watched cargo callback for all houses in the catchment area.
+ * @param st Station.
+ */
+void TriggerWatchedCargoCallbacks(Station *st)
+{
+	/* Collect cargoes accepted since the last big tick. */
+	uint cargoes = 0;
+	for (CargoID cid = 0; cid < NUM_CARGO; cid++) {
+		if (HasBit(st->goods[cid].acceptance_pickup, GoodsEntry::GES_ACCEPTED_BIGTICK)) SetBit(cargoes, cid);
+	}
+
+	/* Anything to do? */
+	if (cargoes == 0) return;
+
+	/* Loop over all houses in the catchment. */
+	Rect r = st->GetCatchmentRect();
+	TileArea ta(TileXY(r.left, r.top), TileXY(r.right, r.bottom));
+	TILE_AREA_LOOP(tile, ta) {
+		if (IsTileType(tile, MP_HOUSE)) {
+			WatchedCargoCallback(tile, cargoes);
+		}
+	}
+}
+
+/**
  * This function is called for each station once every 250 ticks.
  * Not all stations will get the tick at the same time.
  * @param st the station receiving the tick.
@@ -3024,6 +3027,8 @@ static bool StationHandleBigTick(BaseStation *st)
 	}
 
 	if (Station::IsExpected(st)) {
+		TriggerWatchedCargoCallbacks(Station::From(st));
+
 		for (CargoID i = 0; i < NUM_CARGO; i++) {
 			ClrBit(Station::From(st)->goods[i].acceptance_pickup, GoodsEntry::GES_ACCEPTED_BIGTICK);
 		}
