@@ -755,10 +755,8 @@ static uint ShowAdditionalText(int left, int right, int y, EngineID engine)
 	uint16 callback = GetVehicleCallback(CBID_VEHICLE_ADDITIONAL_TEXT, 0, 0, engine, NULL);
 	if (callback == CALLBACK_FAILED) return y;
 
-	/* STR_BLACK_STRING is used to start the string with {BLACK} */
-	SetDParam(0, GetGRFStringID(GetEngineGRFID(engine), 0xD000 + callback));
-	StartTextRefStackUsage(0);
-	uint result = DrawStringMultiLine(left, right, y, INT32_MAX, STR_BLACK_STRING);
+	StartTextRefStackUsage(6);
+	uint result = DrawStringMultiLine(left, right, y, INT32_MAX, GetGRFStringID(Engine::Get(engine)->GetGRFID(), 0xD000 + callback), TC_BLACK);
 	StopTextRefStackUsage();
 	return result;
 }
@@ -880,7 +878,7 @@ void DrawEngineList(VehicleType type, int l, int r, int y, const GUIEngineList *
 
 		SetDParam(0, engine);
 		DrawString(text_left, text_right, y + normal_text_y_offset, STR_ENGINE_NAME, engine == selected_id ? TC_WHITE : TC_BLACK);
-		DrawVehicleEngine(l, r, sprite_x, y + sprite_y_offset, engine, (show_count && num_engines == 0) ? PALETTE_CRASH : GetEnginePalette(engine, _local_company));
+		DrawVehicleEngine(l, r, sprite_x, y + sprite_y_offset, engine, (show_count && num_engines == 0) ? PALETTE_CRASH : GetEnginePalette(engine, _local_company), EIT_PURCHASE);
 		if (show_count) {
 			SetDParam(0, num_engines);
 			DrawString(text_left, text_right, y + small_text_y_offset, STR_TINY_BLACK_COMA, TC_FROMSTRING, SA_RIGHT);
