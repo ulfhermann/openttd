@@ -24,6 +24,8 @@
 #include "sprite.h"
 #include "genworld.h"
 #include "newgrf_animation_base.h"
+#include "newgrf_cargo.h"
+#include "station_base.h"
 
 static BuildingCounts<uint32> _building_counts;
 static HouseClassMapping _class_mapping[HOUSE_CLASS_MAX];
@@ -309,7 +311,32 @@ static uint32 HouseGetVariable(const ResolverObject *object, byte variable, byte
 		}
 
 		/* Cargo acceptance history of nearby stations */
-		/*case 0x64: not implemented yet */
+		case 0x64: {
+			CargoID cid = GetCargoTranslation(parameter, object->grffile);
+			if (cid == CT_INVALID) return 0;
+
+			/* Extract tile offset. */
+			int8 x_offs = GB(GetRegister(0x100), 0, 8);
+			int8 y_offs = GB(GetRegister(0x100), 8, 8);
+			TileIndex testtile = TILE_MASK(tile + TileDiffXY(x_offs, y_offs));
+
+			const StationList *sl = StationFinder(TileArea(testtile, 1, 1)).GetStations();
+
+			/* Collect acceptance stats. */
+			uint32 res = 0;
+			for (Station * const * st_iter = sl->Begin(); st_iter != sl->End(); st_iter++) {
+				const Station *st = *st_iter;
+				if (HasBit(st->goods[cid].acceptance_pickup, GoodsEntry::GES_EVER_ACCEPTED))    SetBit(res, 0);
+				if (HasBit(st->goods[cid].acceptance_pickup, GoodsEntry::GES_LAST_MONTH))       SetBit(res, 1);
+				if (HasBit(st->goods[cid].acceptance_pickup, GoodsEntry::GES_CURRENT_MONTH))    SetBit(res, 2);
+				if (HasBit(st->goods[cid].acceptance_pickup, GoodsEntry::GES_ACCEPTED_BIGTICK)) SetBit(res, 3);
+			}
+
+			/* Cargo triggered CB 148? */
+			if (HasBit(object->u.house.watched_cargo_triggers, cid)) SetBit(res, 4);
+
+			return res;
+		}
 
 		/* Distance test for some house types */
 		case 0x65: return GetDistanceFromNearbyHouse(parameter, tile, object->u.house.house_id);
@@ -403,7 +430,7 @@ static void NewHouseResolver(ResolverObject *res, HouseID house_id, TileIndex ti
 	res->grffile         = (hs != NULL ? hs->grf_prop.grffile : NULL);
 }
 
-uint16 GetHouseCallback(CallbackID callback, uint32 param1, uint32 param2, HouseID house_id, Town *town, TileIndex tile, bool not_yet_constructed, uint8 initial_random_bits)
+uint16 GetHouseCallback(CallbackID callback, uint32 param1, uint32 param2, HouseID house_id, Town *town, TileIndex tile, bool not_yet_constructed, uint8 initial_random_bits, uint32 watched_cargo_triggers)
 {
 	ResolverObject object;
 	const SpriteGroup *group;
@@ -416,6 +443,7 @@ uint16 GetHouseCallback(CallbackID callback, uint32 param1, uint32 param2, House
 	object.callback_param2 = param2;
 	object.u.house.not_yet_constructed = not_yet_constructed;
 	object.u.house.initial_random_bits = initial_random_bits;
+	object.u.house.watched_cargo_triggers = watched_cargo_triggers;
 
 	group = SpriteGroup::Resolve(HouseSpec::Get(house_id)->grf_prop.spritegroup[0], &object);
 	if (group == NULL) return CALLBACK_FAILED;
@@ -481,13 +509,13 @@ void DrawNewHouseTile(TileInfo *ti, HouseID house_id)
 }
 
 /* Simple wrapper for GetHouseCallback to keep the animation unified. */
-uint16 GetSimpleHouseCallback(CallbackID callback, uint32 param1, uint32 param2, const HouseSpec *spec, Town *town, TileIndex tile)
+uint16 GetSimpleHouseCallback(CallbackID callback, uint32 param1, uint32 param2, const HouseSpec *spec, Town *town, TileIndex tile, uint32 extra_data)
 {
-	return GetHouseCallback(callback, param1, param2, spec - HouseSpec::Get(0), town, tile);
+	return GetHouseCallback(callback, param1, param2, spec - HouseSpec::Get(0), town, tile, false, 0, extra_data);
 }
 
 /** Helper class for animation control. */
-struct HouseAnimationBase : public AnimationBase<HouseAnimationBase, HouseSpec, Town, GetSimpleHouseCallback> {
+struct HouseAnimationBase : public AnimationBase<HouseAnimationBase, HouseSpec, Town, uint32, GetSimpleHouseCallback> {
 	static const CallbackID cb_animation_speed      = CBID_HOUSE_ANIMATION_SPEED;
 	static const CallbackID cb_animation_next_frame = CBID_HOUSE_ANIMATION_NEXT_FRAME;
 
@@ -632,6 +660,49 @@ static void DoTriggerHouse(TileIndex tile, HouseTrigger trigger, byte base_rando
 void TriggerHouse(TileIndex t, HouseTrigger trigger)
 {
 	DoTriggerHouse(t, trigger, 0, true);
+}
+
+/**
+ * Run the watched cargo accepted callback for a single house tile.
+ * @param tile The house tile.
+ * @param origin The triggering tile.
+ * @param trigger_cargoes Cargo types that triggered the callback.
+ * @param random Random bits.
+ */
+void DoWatchedCargoCallback(TileIndex tile, TileIndex origin, uint32 trigger_cargoes, uint16 random)
+{
+	TileIndexDiffC diff = TileIndexToTileIndexDiffC(origin, tile);
+	uint32 cb_info = random << 16 | (uint8)diff.y << 8 | (uint8)diff.x;
+	HouseAnimationBase::ChangeAnimationFrame(CBID_HOUSE_WATCHED_CARGO_ACCEPTED, HouseSpec::Get(GetHouseType(tile)), Town::GetByTile(tile), tile, 0, cb_info, trigger_cargoes);
+}
+
+/**
+ * Run watched cargo accepted callback for a house.
+ * @param tile House tile.
+ * @param trigger_cargoes Triggering cargo types.
+ * @pre IsTileType(t, MP_HOUSE)
+ */
+void WatchedCargoCallback(TileIndex tile, uint32 trigger_cargoes)
+{
+	assert(IsTileType(tile, MP_HOUSE));
+	HouseID id = GetHouseType(tile);
+	const HouseSpec *hs = HouseSpec::Get(id);
+
+	trigger_cargoes &= hs->watched_cargoes;
+	/* None of the trigger cargoes is watched? */
+	if (trigger_cargoes == 0) return;
+
+	/* Same random value for all tiles of a multi-tile house. */
+	uint16 r = Random();
+
+	/* Do the callback, start at northern tile. */
+	TileIndex north = tile + GetHouseNorthPart(id);
+	hs = HouseSpec::Get(id);
+
+	DoWatchedCargoCallback(north, tile, trigger_cargoes, r);
+	if (hs->building_flags & BUILDING_2_TILES_Y)   DoWatchedCargoCallback(TILE_ADDXY(north, 0, 1), tile, trigger_cargoes, r);
+	if (hs->building_flags & BUILDING_2_TILES_X)   DoWatchedCargoCallback(TILE_ADDXY(north, 1, 0), tile, trigger_cargoes, r);
+	if (hs->building_flags & BUILDING_HAS_4_TILES) DoWatchedCargoCallback(TILE_ADDXY(north, 1, 1), tile, trigger_cargoes, r);
 }
 
 /**

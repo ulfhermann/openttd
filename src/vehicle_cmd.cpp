@@ -241,7 +241,7 @@ static CommandCost GetRefitCost(EngineID engine_type)
 
 		default: NOT_REACHED();
 	}
-	return CommandCost(expense_type, GetPrice(base_price, cost_factor, e->grf_prop.grffile, -10));
+	return CommandCost(expense_type, GetPrice(base_price, cost_factor, e->GetGRF(), -10));
 }
 
 /**
@@ -273,7 +273,7 @@ static CommandCost RefitVehicle(Vehicle *v, bool only_this, uint8 num_vehicles, 
 	for (; v != NULL; v = (only_this ? NULL : v->Next())) {
 		if (v->type == VEH_TRAIN && !vehicles_to_refit.Contains(v->index) && !only_this) continue;
 
-		const Engine *e = Engine::Get(v->engine_type);
+		const Engine *e = v->GetEngine();
 		if (!e->CanCarryCargo()) continue;
 
 		/* If the vehicle is not refittable, count its capacity nevertheless if the cargo matches */
@@ -450,7 +450,7 @@ CommandCost CmdStartStopVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, 
 	 * return 0xFF if it can. */
 	uint16 callback = GetVehicleCallback(CBID_VEHICLE_START_STOP_CHECK, 0, 0, v->engine_type, v);
 	if (callback != CALLBACK_FAILED && GB(callback, 0, 8) != 0xFF && HasBit(p2, 0)) {
-		StringID error = GetGRFStringID(GetEngineGRFID(v->engine_type), 0xD000 + callback);
+		StringID error = GetGRFStringID(v->GetGRFID(), 0xD000 + callback);
 		return_cmd_error(error);
 	}
 
@@ -791,7 +791,7 @@ CommandCost CmdCloneVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 					break;
 				}
 			} else {
-				const Engine *e = Engine::Get(v->engine_type);
+				const Engine *e = v->GetEngine();
 				CargoID initial_cargo = (e->CanCarryCargo() ? e->GetDefaultCargoType() : (CargoID)CT_INVALID);
 
 				if (v->cargo_type != initial_cargo && initial_cargo != CT_INVALID) {
