@@ -92,7 +92,7 @@ void VehicleServiceInDepot(Vehicle *v)
 {
 	v->date_of_last_service = _date;
 	v->breakdowns_since_last_service = 0;
-	v->reliability = Engine::Get(v->engine_type)->reliability;
+	v->reliability = v->GetEngine()->reliability;
 	SetWindowDirty(WC_VEHICLE_DETAILS, v->index); // ensure that last service date and reliability are updated
 }
 
@@ -111,7 +111,7 @@ bool Vehicle::NeedsServicing() const
 	/* Are we ready for the next service cycle? */
 	const Company *c = Company::Get(this->owner);
 	if (c->settings.vehicle.servint_ispercent ?
-			(this->reliability >= Engine::Get(this->engine_type)->reliability * (100 - this->service_interval) / 100) :
+			(this->reliability >= this->GetEngine()->reliability * (100 - this->service_interval) / 100) :
 			(this->date_of_last_service + this->service_interval >= _date)) {
 		return false;
 	}
@@ -211,8 +211,7 @@ uint Vehicle::Crash(bool flooded)
 void ShowNewGrfVehicleError(EngineID engine, StringID part1, StringID part2, GRFBugs bug_type, bool critical)
 {
 	const Engine *e = Engine::Get(engine);
-	uint32 grfid = e->grf_prop.grffile->grfid;
-	GRFConfig *grfconfig = GetGRFConfig(grfid);
+	GRFConfig *grfconfig = GetGRFConfig(e->GetGRFID());
 
 	if (!HasBit(grfconfig->grf_bugs, bug_type)) {
 		SetBit(grfconfig->grf_bugs, bug_type);
@@ -629,6 +628,36 @@ bool Vehicle::HasEngineType() const
 		case VEH_SHIP: return true;
 		default: return false;
 	}
+}
+
+/**
+ * Retrieves the engine of the vehicle.
+ * @return Engine of the vehicle.
+ * @pre HasEngineType() == true
+ */
+const Engine *Vehicle::GetEngine() const
+{
+	return Engine::Get(this->engine_type);
+}
+
+/**
+ * Retrieve the NewGRF the vehicle is tied to.
+ * This is the GRF providing the Action 3 for the engine type.
+ * @return NewGRF associated to the vehicle.
+ */
+const GRFFile *Vehicle::GetGRF() const
+{
+	return this->GetEngine()->GetGRF();
+}
+
+/**
+ * Retrieve the GRF ID of the NewGRF the vehicle is tied to.
+ * This is the GRF providing the Action 3 for the engine type.
+ * @return GRF ID of the associated NewGRF.
+ */
+uint32 Vehicle::GetGRFID() const
+{
+	return this->GetEngine()->GetGRFID();
 }
 
 /**
@@ -1091,10 +1120,6 @@ bool Vehicle::HandleBreakdown()
 				this->breakdowns_since_last_service++;
 			}
 
-			this->MarkDirty();
-			SetWindowDirty(WC_VEHICLE_VIEW, this->index);
-			SetWindowDirty(WC_VEHICLE_DETAILS, this->index);
-
 			if (this->type == VEH_AIRCRAFT) {
 				/* Aircraft just need this flag, the rest is handled elsewhere */
 				this->vehstatus |= VS_AIRCRAFT_BROKEN;
@@ -1112,6 +1137,11 @@ bool Vehicle::HandleBreakdown()
 					if (u != NULL) u->animation_state = this->breakdown_delay * 2;
 				}
 			}
+
+			this->MarkDirty(); // Update graphics after speed is zeroed
+			SetWindowDirty(WC_VEHICLE_VIEW, this->index);
+			SetWindowDirty(WC_VEHICLE_DETAILS, this->index);
+
 			/* FALL THROUGH */
 		case 1:
 			/* Aircraft breakdowns end only when arriving at the airport */
@@ -1158,7 +1188,7 @@ void AgeVehicle(Vehicle *v)
 	if (v->Previous() != NULL || v->owner != _local_company || (v->vehstatus & VS_CRASHED) != 0) return;
 
 	/* Don't warn if a renew is active */
-	if (Company::Get(v->owner)->settings.engine_renew && Engine::Get(v->engine_type)->company_avail != 0) return;
+	if (Company::Get(v->owner)->settings.engine_renew && v->GetEngine()->company_avail != 0) return;
 
 	StringID str;
 	if (age == -DAYS_IN_LEAP_YEAR) {
@@ -1756,7 +1786,7 @@ PaletteID GetVehiclePalette(const Vehicle *v)
 uint GetVehicleCapacity(const Vehicle *v, uint16 *mail_capacity)
 {
 	if (mail_capacity != NULL) *mail_capacity = 0;
-	const Engine *e = Engine::Get(v->engine_type);
+	const Engine *e = v->GetEngine();
 
 	if (!e->CanCarryCargo()) return 0;
 
@@ -2274,7 +2304,7 @@ CommandCost Vehicle::SendToDepot(DoCommandFlag flags, DepotCommand command)
 void Vehicle::UpdateVisualEffect(bool allow_power_change)
 {
 	bool powered_before = HasBit(this->vcache.cached_vis_effect, VE_DISABLE_WAGON_POWER);
-	const Engine *e = Engine::Get(this->engine_type);
+	const Engine *e = this->GetEngine();
 
 	/* Evaluate properties */
 	byte visual_effect;

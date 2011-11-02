@@ -92,7 +92,7 @@ byte FreightWagonMult(CargoID cargo)
 static void RailVehicleLengthChanged(const Train *u)
 {
 	/* show a warning once for each engine in whole game and once for each GRF after each game load */
-	const Engine *engine = Engine::Get(u->engine_type);
+	const Engine *engine = u->GetEngine();
 	uint32 grfid = engine->grf_prop.grffile->grfid;
 	GRFConfig *grfconfig = GetGRFConfig(grfid);
 	if (GamelogGRFBugReverse(grfid, engine->grf_prop.local_id) || !HasBit(grfconfig->grf_bugs, GBUG_VEH_LENGTH)) {
@@ -189,7 +189,7 @@ void Train::ConsistChanged(bool same_length)
 	}
 
 	for (Train *u = this; u != NULL; u = u->Next()) {
-		const Engine *e_u = Engine::Get(u->engine_type);
+		const Engine *e_u = u->GetEngine();
 		const RailVehicleInfo *rvi_u = &e_u->u.rail;
 
 		if (!HasBit(e_u->info.misc_flags, EF_RAIL_TILTS)) train_can_tilt = false;
@@ -455,10 +455,10 @@ int Train::GetDisplayImageWidth(Point *offset) const
 	int reference_width = TRAININFO_DEFAULT_VEHICLE_WIDTH;
 	int vehicle_pitch = 0;
 
-	const Engine *e = Engine::Get(this->engine_type);
-	if (e->grf_prop.grffile != NULL && is_custom_sprite(e->u.rail.image_index)) {
-		reference_width = e->grf_prop.grffile->traininfo_vehicle_width;
-		vehicle_pitch = e->grf_prop.grffile->traininfo_vehicle_pitch;
+	const Engine *e = this->GetEngine();
+	if (e->GetGRF() != NULL && is_custom_sprite(e->u.rail.image_index)) {
+		reference_width = e->GetGRF()->traininfo_vehicle_width;
+		vehicle_pitch = e->GetGRF()->traininfo_vehicle_pitch;
 	}
 
 	if (offset != NULL) {
@@ -473,7 +473,7 @@ static SpriteID GetDefaultTrainSprite(uint8 spritenum, Direction direction)
 	return ((direction + _engine_sprite_add[spritenum]) & _engine_sprite_and[spritenum]) + _engine_sprite_base[spritenum];
 }
 
-SpriteID Train::GetImage(Direction direction) const
+SpriteID Train::GetImage(Direction direction, EngineImageType image_type) const
 {
 	uint8 spritenum = this->spritenum;
 	SpriteID sprite;
@@ -481,10 +481,10 @@ SpriteID Train::GetImage(Direction direction) const
 	if (HasBit(this->flags, VRF_REVERSE_DIRECTION)) direction = ReverseDir(direction);
 
 	if (is_custom_sprite(spritenum)) {
-		sprite = GetCustomVehicleSprite(this, (Direction)(direction + 4 * IS_CUSTOM_SECONDHEAD_SPRITE(spritenum)));
+		sprite = GetCustomVehicleSprite(this, (Direction)(direction + 4 * IS_CUSTOM_SECONDHEAD_SPRITE(spritenum)), image_type);
 		if (sprite != 0) return sprite;
 
-		spritenum = Engine::Get(this->engine_type)->original_image_index;
+		spritenum = this->GetEngine()->original_image_index;
 	}
 
 	sprite = GetDefaultTrainSprite(spritenum, direction);
@@ -494,17 +494,17 @@ SpriteID Train::GetImage(Direction direction) const
 	return sprite;
 }
 
-static SpriteID GetRailIcon(EngineID engine, bool rear_head, int &y)
+static SpriteID GetRailIcon(EngineID engine, bool rear_head, int &y, EngineImageType image_type)
 {
 	const Engine *e = Engine::Get(engine);
 	Direction dir = rear_head ? DIR_E : DIR_W;
 	uint8 spritenum = e->u.rail.image_index;
 
 	if (is_custom_sprite(spritenum)) {
-		SpriteID sprite = GetCustomVehicleIcon(engine, dir);
+		SpriteID sprite = GetCustomVehicleIcon(engine, dir, image_type);
 		if (sprite != 0) {
-			if (e->grf_prop.grffile != NULL) {
-				y += e->grf_prop.grffile->traininfo_vehicle_pitch;
+			if (e->GetGRF() != NULL) {
+				y += e->GetGRF()->traininfo_vehicle_pitch;
 			}
 			return sprite;
 		}
@@ -517,14 +517,14 @@ static SpriteID GetRailIcon(EngineID engine, bool rear_head, int &y)
 	return GetDefaultTrainSprite(spritenum, DIR_W);
 }
 
-void DrawTrainEngine(int left, int right, int preferred_x, int y, EngineID engine, PaletteID pal)
+void DrawTrainEngine(int left, int right, int preferred_x, int y, EngineID engine, PaletteID pal, EngineImageType image_type)
 {
 	if (RailVehInfo(engine)->railveh_type == RAILVEH_MULTIHEAD) {
 		int yf = y;
 		int yr = y;
 
-		SpriteID spritef = GetRailIcon(engine, false, yf);
-		SpriteID spriter = GetRailIcon(engine, true, yr);
+		SpriteID spritef = GetRailIcon(engine, false, yf, image_type);
+		SpriteID spriter = GetRailIcon(engine, true, yr, image_type);
 		const Sprite *real_spritef = GetSprite(spritef, ST_NORMAL);
 		const Sprite *real_spriter = GetSprite(spriter, ST_NORMAL);
 
@@ -533,7 +533,7 @@ void DrawTrainEngine(int left, int right, int preferred_x, int y, EngineID engin
 		DrawSprite(spritef, pal, preferred_x - 14, yf);
 		DrawSprite(spriter, pal, preferred_x + 15, yr);
 	} else {
-		SpriteID sprite = GetRailIcon(engine, false, y);
+		SpriteID sprite = GetRailIcon(engine, false, y, image_type);
 		const Sprite *real_sprite = GetSprite(sprite, ST_NORMAL);
 		preferred_x = Clamp(preferred_x, left - real_sprite->x_offs, right - real_sprite->width - real_sprite->x_offs);
 		DrawSprite(sprite, pal, preferred_x, y);
@@ -994,7 +994,7 @@ static CommandCost CheckTrainAttachment(Train *t)
 				StringID error = STR_NULL;
 
 				if (callback == 0xFD) error = STR_ERROR_INCOMPATIBLE_RAIL_TYPES;
-				if (callback  < 0xFD) error = GetGRFStringID(GetEngineGRFID(head->engine_type), 0xD000 + callback);
+				if (callback  < 0xFD) error = GetGRFStringID(head->GetGRFID(), 0xD000 + callback);
 
 				if (error != STR_NULL) return_cmd_error(error);
 			}
@@ -2047,7 +2047,7 @@ static bool CheckTrainStayInDepot(Train *v)
 	v->cur_speed = 0;
 
 	v->UpdateDeltaXY(v->direction);
-	v->cur_image = v->GetImage(v->direction);
+	v->cur_image = v->GetImage(v->direction, EIT_ON_MAP);
 	VehicleMove(v, false);
 	UpdateSignalsOnSegment(v->tile, INVALID_DIAGDIR, v->owner);
 	v->UpdateAcceleration();
@@ -3318,7 +3318,7 @@ static void ChangeTrainDirRandomly(Train *v)
 		if (!(v->vehstatus & VS_HIDDEN)) {
 			v->direction = ChangeDir(v->direction, delta[GB(Random(), 0, 2)]);
 			v->UpdateDeltaXY(v->direction);
-			v->cur_image = v->GetImage(v->direction);
+			v->cur_image = v->GetImage(v->direction, EIT_ON_MAP);
 			/* Refrain from updating the z position of the vehicle when on
 			 * a bridge, because UpdateInclination() will put the vehicle under
 			 * the bridge in that case */
@@ -3688,7 +3688,7 @@ Money Train::GetRunningCost() const
 	const Train *v = this;
 
 	do {
-		const Engine *e = Engine::Get(v->engine_type);
+		const Engine *e = v->GetEngine();
 		if (e->u.rail.running_cost_class == INVALID_PRICE) continue;
 
 		uint cost_factor = GetVehicleProperty(v, PROP_TRAIN_RUNNING_COST_FACTOR, e->u.rail.running_cost);
@@ -3697,7 +3697,7 @@ Money Train::GetRunningCost() const
 		/* Halve running cost for multiheaded parts */
 		if (v->IsMultiheaded()) cost_factor /= 2;
 
-		cost += GetPrice(e->u.rail.running_cost_class, cost_factor, e->grf_prop.grffile);
+		cost += GetPrice(e->u.rail.running_cost_class, cost_factor, e->GetGRF());
 	} while ((v = v->GetNextVehicle()) != NULL);
 
 	return cost;
