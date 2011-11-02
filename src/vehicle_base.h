@@ -119,6 +119,8 @@ struct LoadgameState;
 extern bool LoadOldVehicle(LoadgameState *ls, int num);
 extern void FixOldVehicles();
 
+struct GRFFile;
+
 /** %Vehicle data structure. */
 struct Vehicle : VehiclePool::PoolItem<&_vehicle_pool>, BaseVehicle {
 private:
@@ -347,12 +349,17 @@ public:
 	 */
 	virtual bool IsPrimaryVehicle() const { return false; }
 
+	const Engine *GetEngine() const;
+
 	/**
 	 * Gets the sprite to show for the given direction
 	 * @param direction the direction the vehicle is facing
 	 * @return the sprite for the given vehicle in the given direction
 	 */
-	virtual SpriteID GetImage(Direction direction) const { return 0; }
+	virtual SpriteID GetImage(Direction direction, EngineImageType image_type) const { return 0; }
+
+	const GRFFile *GetGRF() const;
+	uint32 GetGRFID() const;
 
 	/**
 	 * Invalidates cached NewGRF variables
@@ -1005,7 +1012,7 @@ struct SpecializedVehicle : public Vehicle {
 		 * it gives ~3% runtime improvements in games with many vehicles */
 		if (turned) ((T *)this)->T::UpdateDeltaXY(this->direction);
 		SpriteID old_image = this->cur_image;
-		this->cur_image = ((T *)this)->T::GetImage(this->direction);
+		this->cur_image = ((T *)this)->T::GetImage(this->direction, EIT_ON_MAP);
 		if (moved || this->cur_image != old_image) VehicleMove(this, true);
 	}
 };
