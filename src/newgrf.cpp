@@ -2031,7 +2031,6 @@ static ChangeInfoResult IgnoreTownHouseProperty(int prop, ByteReader *buf)
 		case 0x20: {
 			byte count = buf->ReadByte();
 			for (byte j = 0; j < count; j++) buf->ReadByte();
-			ret = CIR_UNHANDLED;
 			break;
 		}
 
@@ -2113,13 +2112,6 @@ static ChangeInfoResult TownHouseChangeInfo(uint hid, int numinfo, int prop, Byt
 				if (!CargoSpec::Get(housespec->accepts_cargo[2])->IsValid()) {
 					housespec->cargo_acceptance[2] = 0;
 				}
-
-				/**
-				 * New houses do not (currently) expect to have a default start
-				 * date before 1930, as this breaks the build date stuff.
-				 * @see FinaliseHouseArray() for more details.
-				 */
-				if (housespec->min_year < 1930) housespec->min_year = 1930;
 
 				_loaded_newgrf_features.has_newhouses = true;
 				break;
@@ -2258,10 +2250,12 @@ static ChangeInfoResult TownHouseChangeInfo(uint hid, int numinfo, int prop, Byt
 				housespec->minimum_life = buf->ReadByte();
 				break;
 
-			case 0x20: { // @todo Cargo acceptance watch list
+			case 0x20: { // Cargo acceptance watch list
 				byte count = buf->ReadByte();
-				for (byte j = 0; j < count; j++) buf->ReadByte();
-				ret = CIR_UNHANDLED;
+				for (byte j = 0; j < count; j++) {
+					CargoID cargo = GetCargoTranslation(buf->ReadByte(), _cur.grffile);
+					if (cargo != CT_INVALID) SetBit(housespec->watched_cargoes, cargo);
+				}
 				break;
 			}
 
@@ -5153,7 +5147,7 @@ static void FeatureNewName(ByteReader *buf)
 				if (!generic) {
 					Engine *e = GetNewEngine(_cur.grffile, (VehicleType)feature, id, HasBit(_cur.grfconfig->flags, GCF_STATIC));
 					if (e == NULL) break;
-					StringID string = AddGRFString(_cur.grffile->grfid, e->index, lang, false, new_scheme, name, e->info.string_id);
+					StringID string = AddGRFString(_cur.grffile->grfid, e->index, lang, new_scheme, false, name, e->info.string_id);
 					e->info.string_id = string;
 				} else {
 					AddGRFString(_cur.grffile->grfid, id, lang, new_scheme, true, name, STR_UNDEFINED);
@@ -7954,15 +7948,21 @@ static void CalculateRefitMasks()
 	FOR_ALL_ENGINES(e) {
 		EngineID engine = e->index;
 		EngineInfo *ei = &e->info;
-		uint32 mask = 0;
-		uint32 not_mask = 0;
-		uint32 xor_mask = 0;
+		bool only_defaultcargo; ///< Set if the vehicle shall carry only the default cargo
 
 		/* Did the newgrf specify any refitting? If not, use defaults. */
 		if (_gted[engine].refitmask_valid) {
+			uint32 mask = 0;
+			uint32 not_mask = 0;
+			uint32 xor_mask = 0;
+
+			/* If the original masks set by the grf are zero, the vehicle shall only carry the default cargo.
+			 * Note: After applying the translations, the vehicle may end up carrying no defined cargo. It becomes unavailable in that case. */
+			only_defaultcargo = (ei->refit_mask == 0 && _gted[engine].cargo_allowed == 0);
+
 			if (ei->refit_mask != 0) {
 				const GRFFile *file = _gted[engine].refitmask_grf;
-				if (file == NULL) file = e->grf_prop.grffile;
+				if (file == NULL) file = e->GetGRF();
 				if (file != NULL && file->cargo_max != 0) {
 					/* Apply cargo translation table to the refit mask */
 					uint num_cargo = min(32, file->cargo_max);
@@ -7991,7 +7991,11 @@ static void CalculateRefitMasks()
 					if (_gted[engine].cargo_disallowed & cs->classes) SetBit(not_mask, cs->Index());
 				}
 			}
+
+			ei->refit_mask = ((mask & ~not_mask) ^ xor_mask) & _cargo_mask;
 		} else {
+			uint32 xor_mask = 0;
+
 			/* Don't apply default refit mask to wagons nor engines with no capacity */
 			if (e->type != VEH_TRAIN || (e->u.rail.capacity != 0 && e->u.rail.railveh_type != RAILVEH_WAGON)) {
 				const CargoLabel *cl = _default_refitmasks[e->type];
@@ -8004,9 +8008,18 @@ static void CalculateRefitMasks()
 					SetBit(xor_mask, cargo);
 				}
 			}
+
+			ei->refit_mask = xor_mask & _cargo_mask;
+
+			/* If the mask is zero, the vehicle shall only carry the default cargo */
+			only_defaultcargo = (ei->refit_mask == 0);
 		}
 
-		ei->refit_mask = ((mask & ~not_mask) ^ xor_mask) & _cargo_mask;
+		/* Ensure that the vehicle is either not refittable, or that the default cargo is one of the refittable cargos.
+		 * Note: Vehicles refittable to no cargo are handle differently to vehicle refittable to a single cargo. The latter might have subtypes. */
+		if (!only_defaultcargo && (e->type != VEH_SHIP || e->u.ship.old_refittable) && ei->cargo_type != CT_INVALID && !HasBit(ei->refit_mask, ei->cargo_type)) {
+			ei->cargo_type = CT_INVALID;
+		}
 
 		/* Check if this engine's cargo type is valid. If not, set to the first refittable
 		 * cargo type. Finally disable the vehicle, if there is still no cargo. */
@@ -8014,7 +8027,9 @@ static void CalculateRefitMasks()
 		if (ei->cargo_type == CT_INVALID) ei->climates = 0;
 
 		/* Clear refit_mask for not refittable ships */
-		if (e->type == VEH_SHIP && !e->u.ship.old_refittable) ei->refit_mask = 0;
+		if (e->type == VEH_SHIP && !e->u.ship.old_refittable) {
+			ei->refit_mask = 0;
+		}
 	}
 }
 
@@ -8035,7 +8050,7 @@ static void FinaliseEngineArray()
 	Engine *e;
 
 	FOR_ALL_ENGINES(e) {
-		if (e->grf_prop.grffile == NULL) {
+		if (e->GetGRF() == NULL) {
 			const EngineIDMapping &eid = _engine_mngr[e->index];
 			if (eid.grfid != INVALID_GRFID || eid.internal_id != eid.substitute_id) {
 				e->info.string_id = STR_NEWGRF_INVALID_ENGINE;
@@ -8045,7 +8060,7 @@ static void FinaliseEngineArray()
 		/* When the train does not set property 27 (misc flags), but it
 		 * is overridden by a NewGRF graphically we want to disable the
 		 * flipping possibility. */
-		if (e->type == VEH_TRAIN && !_gted[e->index].prop27_set && e->grf_prop.grffile != NULL && is_custom_sprite(e->u.rail.image_index)) {
+		if (e->type == VEH_TRAIN && !_gted[e->index].prop27_set && e->GetGRF() != NULL && is_custom_sprite(e->u.rail.image_index)) {
 			ClrBit(e->info.misc_flags, EF_RAIL_FLIPS);
 		}
 
