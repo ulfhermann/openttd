@@ -37,7 +37,8 @@ static EngineID GetNextArticulatedPart(uint index, EngineID front_type, Vehicle 
 	if (callback == CALLBACK_FAILED || GB(callback, 0, 8) == 0xFF) return INVALID_ENGINE;
 
 	if (mirrored != NULL) *mirrored = HasBit(callback, 7);
-	return GetNewEngineID(GetEngineGRF(front_type), Engine::Get(front_type)->type, GB(callback, 0, 7));
+	const Engine *front_engine = Engine::Get(front_type);
+	return GetNewEngineID(front_engine->GetGRF(), front_engine->type, GB(callback, 0, 7));
 }
 
 /**
@@ -251,7 +252,7 @@ bool IsArticulatedVehicleCarryingDifferentCargos(const Vehicle *v, CargoID *carg
  */
 void CheckConsistencyOfArticulatedVehicle(const Vehicle *v)
 {
-	const Engine *engine = Engine::Get(v->engine_type);
+	const Engine *engine = v->GetEngine();
 
 	uint32 purchase_refit_union, purchase_refit_intersection;
 	GetArticulatedRefitMasks(v->engine_type, true, &purchase_refit_union, &purchase_refit_intersection);
