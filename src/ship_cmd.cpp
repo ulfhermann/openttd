@@ -62,13 +62,13 @@ static inline TrackBits GetTileShipTrackStatus(TileIndex tile)
 	return TrackStatusToTrackBits(GetTileTrackStatus(tile, TRANSPORT_WATER, 0));
 }
 
-static SpriteID GetShipIcon(EngineID engine)
+static SpriteID GetShipIcon(EngineID engine, EngineImageType image_type)
 {
 	const Engine *e = Engine::Get(engine);
 	uint8 spritenum = e->u.ship.image_index;
 
 	if (is_custom_sprite(spritenum)) {
-		SpriteID sprite = GetCustomVehicleIcon(engine, DIR_W);
+		SpriteID sprite = GetCustomVehicleIcon(engine, DIR_W, image_type);
 		if (sprite != 0) return sprite;
 
 		spritenum = e->original_image_index;
@@ -77,9 +77,9 @@ static SpriteID GetShipIcon(EngineID engine)
 	return DIR_W + _ship_sprites[spritenum];
 }
 
-void DrawShipEngine(int left, int right, int preferred_x, int y, EngineID engine, PaletteID pal)
+void DrawShipEngine(int left, int right, int preferred_x, int y, EngineID engine, PaletteID pal, EngineImageType image_type)
 {
-	SpriteID sprite = GetShipIcon(engine);
+	SpriteID sprite = GetShipIcon(engine, image_type);
 	const Sprite *real_sprite = GetSprite(sprite, ST_NORMAL);
 	preferred_x = Clamp(preferred_x, left - real_sprite->x_offs, right - real_sprite->width - real_sprite->x_offs);
 	DrawSprite(sprite, pal, preferred_x, y);
@@ -91,23 +91,23 @@ void DrawShipEngine(int left, int right, int preferred_x, int y, EngineID engine
  * @param width The width of the sprite
  * @param height The height of the sprite
  */
-void GetShipSpriteSize(EngineID engine, uint &width, uint &height)
+void GetShipSpriteSize(EngineID engine, uint &width, uint &height, EngineImageType image_type)
 {
-	const Sprite *spr = GetSprite(GetShipIcon(engine), ST_NORMAL);
+	const Sprite *spr = GetSprite(GetShipIcon(engine, image_type), ST_NORMAL);
 
 	width  = spr->width;
 	height = spr->height;
 }
 
-SpriteID Ship::GetImage(Direction direction) const
+SpriteID Ship::GetImage(Direction direction, EngineImageType image_type) const
 {
 	uint8 spritenum = this->spritenum;
 
 	if (is_custom_sprite(spritenum)) {
-		SpriteID sprite = GetCustomVehicleSprite(this, direction);
+		SpriteID sprite = GetCustomVehicleSprite(this, direction, image_type);
 		if (sprite != 0) return sprite;
 
-		spritenum = Engine::Get(this->engine_type)->original_image_index;
+		spritenum = this->GetEngine()->original_image_index;
 	}
 
 	return _ship_sprites[spritenum] + direction;
@@ -190,9 +190,9 @@ void Ship::UpdateCache()
 
 Money Ship::GetRunningCost() const
 {
-	const Engine *e = Engine::Get(this->engine_type);
+	const Engine *e = this->GetEngine();
 	uint cost_factor = GetVehicleProperty(this, PROP_SHIP_RUNNING_COST_FACTOR, e->u.ship.running_cost);
-	return GetPrice(PR_RUNNING_SHIP, cost_factor, e->grf_prop.grffile);
+	return GetPrice(PR_RUNNING_SHIP, cost_factor, e->GetGRF());
 }
 
 void Ship::OnNewDay()
