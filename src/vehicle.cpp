@@ -2063,7 +2063,7 @@ void Vehicle::RefreshNextHopsStats()
 				v->cargo_subtype = new_subtype;
 
 				uint16 mail_capacity = 0;
-				uint amount = GetVehicleCapacity(v, &mail_capacity);
+				uint amount = e->DetermineCapacity(v, &mail_capacity);
 
 				/* Restore the original cargo type */
 				v->cargo_type = temp_cid;
