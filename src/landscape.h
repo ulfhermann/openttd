@@ -35,11 +35,42 @@ byte HighestSnowLine();
 byte LowestSnowLine();
 void ClearSnowLine();
 
-uint GetPartialZ(int x, int y, Slope corners);
-uint GetSlopeZ(int x, int y);
-void GetSlopeZOnEdge(Slope tileh, DiagDirection edge, int *z1, int *z2);
 int GetSlopeZInCorner(Slope tileh, Corner corner);
-Slope GetFoundationSlope(TileIndex tile, uint *z);
+Slope GetFoundationSlope(TileIndex tile, int *z = NULL);
+
+uint GetPartialPixelZ(int x, int y, Slope corners);
+int GetSlopePixelZ(int x, int y);
+void GetSlopePixelZOnEdge(Slope tileh, DiagDirection edge, int *z1, int *z2);
+
+/**
+ * Determine the Z height of a corner relative to TileZ.
+ *
+ * @pre The slope must not be a halftile slope.
+ *
+ * @param tileh The slope.
+ * @param corner The corner.
+ * @return Z position of corner relative to TileZ.
+ */
+static inline int GetSlopePixelZInCorner(Slope tileh, Corner corner)
+{
+	return GetSlopeZInCorner(tileh, corner) * TILE_HEIGHT;
+}
+
+/**
+ * Get slope of a tile on top of a (possible) foundation
+ * If a tile does not have a foundation, the function returns the same as GetTilePixelSlope.
+ *
+ * @param tile The tile of interest.
+ * @param z returns the z of the foundation slope. (Can be NULL, if not needed)
+ * @return The slope on top of the foundation.
+ */
+static inline Slope GetFoundationPixelSlope(TileIndex tile, int *z)
+{
+	assert(z != NULL);
+	Slope s = GetFoundationSlope(tile, z);
+	*z *= TILE_HEIGHT;
+	return s;
+}
 
 /**
  * Map 3D world or tile coordinate to equivalent 2D coordinate as used in the viewports and smallmap.
@@ -67,7 +98,7 @@ static inline Point RemapCoords(int x, int y, int z)
  */
 static inline Point RemapCoords2(int x, int y)
 {
-	return RemapCoords(x, y, GetSlopeZ(x, y));
+	return RemapCoords(x, y, GetSlopePixelZ(x, y));
 }
 
 /**
@@ -85,6 +116,19 @@ static inline Point InverseRemapCoords(int x, int y)
 }
 
 uint ApplyFoundationToSlope(Foundation f, Slope *s);
+/**
+ * Applies a foundation to a slope.
+ *
+ * @pre      Foundation and slope must be valid combined.
+ * @param f  The #Foundation.
+ * @param s  The #Slope to modify.
+ * @return   Increment to the tile Z coordinate.
+ */
+static inline uint ApplyPixelFoundationToSlope(Foundation f, Slope *s)
+{
+	return ApplyFoundationToSlope(f, s) * TILE_HEIGHT;
+}
+
 void DrawFoundation(TileInfo *ti, Foundation f);
 bool HasFoundationNW(TileIndex tile, Slope slope_here, uint z_here);
 bool HasFoundationNE(TileIndex tile, Slope slope_here, uint z_here);
