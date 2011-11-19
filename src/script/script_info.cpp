@@ -18,18 +18,18 @@
 
 /** Number of operations to get the author and similar information. */
 static const int MAX_GET_OPS            =   1000;
-/** Number of operations to create an instance of an AI. */
+/** Number of operations to create an instance of a script. */
 static const int MAX_CREATEINSTANCE_OPS = 100000;
 
 ScriptFileInfo::~ScriptFileInfo()
 {
-	free((void *)this->author);
-	free((void *)this->name);
-	free((void *)this->short_name);
-	free((void *)this->description);
-	free((void *)this->date);
-	free((void *)this->instance_name);
-	free((void *)this->url);
+	free(this->author);
+	free(this->name);
+	free(this->short_name);
+	free(this->description);
+	free(this->date);
+	free(this->instance_name);
+	free(this->url);
 	free(this->main_script);
 	free(this->tar_file);
 	free(this->SQ_instance);

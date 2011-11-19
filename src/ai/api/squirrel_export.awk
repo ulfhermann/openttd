@@ -26,14 +26,14 @@ function array_sort(ARRAY, ELEMENTS, temp, i, j)
 
 function dump_class_templates(name)
 {
-	print "	template <> "       name " *GetParam(ForceType<"       name " *>, HSQUIRRELVM vm, int index, SQAutoFreePointers *ptr) { SQUserPointer instance; sq_getinstanceup(vm, index, &instance, 0); return  (" name " *)instance; }"
-	print "	template <> "       name " &GetParam(ForceType<"       name " &>, HSQUIRRELVM vm, int index, SQAutoFreePointers *ptr) { SQUserPointer instance; sq_getinstanceup(vm, index, &instance, 0); return *(" name " *)instance; }"
-	print "	template <> const " name " *GetParam(ForceType<const " name " *>, HSQUIRRELVM vm, int index, SQAutoFreePointers *ptr) { SQUserPointer instance; sq_getinstanceup(vm, index, &instance, 0); return  (" name " *)instance; }"
-	print "	template <> const " name " &GetParam(ForceType<const " name " &>, HSQUIRRELVM vm, int index, SQAutoFreePointers *ptr) { SQUserPointer instance; sq_getinstanceup(vm, index, &instance, 0); return *(" name " *)instance; }"
+	print "	template <> inline "       name " *GetParam(ForceType<"       name " *>, HSQUIRRELVM vm, int index, SQAutoFreePointers *ptr) { SQUserPointer instance; sq_getinstanceup(vm, index, &instance, 0); return  (" name " *)instance; }"
+	print "	template <> inline "       name " &GetParam(ForceType<"       name " &>, HSQUIRRELVM vm, int index, SQAutoFreePointers *ptr) { SQUserPointer instance; sq_getinstanceup(vm, index, &instance, 0); return *(" name " *)instance; }"
+	print "	template <> inline const " name " *GetParam(ForceType<const " name " *>, HSQUIRRELVM vm, int index, SQAutoFreePointers *ptr) { SQUserPointer instance; sq_getinstanceup(vm, index, &instance, 0); return  (" name " *)instance; }"
+	print "	template <> inline const " name " &GetParam(ForceType<const " name " &>, HSQUIRRELVM vm, int index, SQAutoFreePointers *ptr) { SQUserPointer instance; sq_getinstanceup(vm, index, &instance, 0); return *(" name " *)instance; }"
 	if (name == "AIEvent") {
-		print "	template <> int Return<" name " *>(HSQUIRRELVM vm, " name " *res) { if (res == NULL) { sq_pushnull(vm); return 1; } Squirrel::CreateClassInstanceVM(vm, \"" name "\", res, NULL, DefSQDestructorCallback<" name ">); return 1; }"
+		print "	template <> inline int Return<" name " *>(HSQUIRRELVM vm, " name " *res) { if (res == NULL) { sq_pushnull(vm); return 1; } Squirrel::CreateClassInstanceVM(vm, \"" name "\", res, NULL, DefSQDestructorCallback<" name ">); return 1; }"
 	} else {
-		print "	template <> int Return<" name " *>(HSQUIRRELVM vm, " name " *res) { if (res == NULL) { sq_pushnull(vm); return 1; } res->AddRef(); Squirrel::CreateClassInstanceVM(vm, \"" name "\", res, NULL, DefSQDestructorCallback<" name ">); return 1; }"
+		print "	template <> inline int Return<" name " *>(HSQUIRRELVM vm, " name " *res) { if (res == NULL) { sq_pushnull(vm); return 1; } res->AddRef(); Squirrel::CreateClassInstanceVM(vm, \"" name "\", res, NULL, DefSQDestructorCallback<" name ">); return 1; }"
 	}
 }
 
@@ -102,9 +102,9 @@ BEGIN {
 /^(	*)private/   { if (cls_level == 1) public = "false"; next; }
 
 # Ignore special doxygen blocks
-/^#ifndef DOXYGEN_SKIP/          { doxygen_skip = "next"; next; }
-/^#ifdef DOXYGEN_SKIP/           { doxygen_skip = "true"; next; }
-/^#endif \/\* DOXYGEN_SKIP \*\// { doxygen_skip = "false"; next; }
+/^#ifndef DOXYGEN_AI_DOCS/          { doxygen_skip = "next"; next; }
+/^#ifdef DOXYGEN_AI_DOCS/           { doxygen_skip = "true"; next; }
+/^#endif \/\* DOXYGEN_AI_DOCS \*\// { doxygen_skip = "false"; next; }
 /^#else/                         {
 	if (doxygen_skip == "next") {
 		doxygen_skip = "true";
@@ -178,8 +178,8 @@ BEGIN {
 		}
 		print "	/* Allow enums to be used as Squirrel parameters */"
 		for (i = 1; i <= enum_size; i++) {
-			print "	template <> " enums[i] " GetParam(ForceType<" enums[i] ">, HSQUIRRELVM vm, int index, SQAutoFreePointers *ptr) { SQInteger tmp; sq_getinteger(vm, index, &tmp); return (" enums[i] ")tmp; }"
-			print "	template <> int Return<" enums[i] ">(HSQUIRRELVM vm, " enums[i] " res) { sq_pushinteger(vm, (int32)res); return 1; }"
+			print "	template <> inline " enums[i] " GetParam(ForceType<" enums[i] ">, HSQUIRRELVM vm, int index, SQAutoFreePointers *ptr) { SQInteger tmp; sq_getinteger(vm, index, &tmp); return (" enums[i] ")tmp; }"
+			print "	template <> inline int Return<" enums[i] ">(HSQUIRRELVM vm, " enums[i] " res) { sq_pushinteger(vm, (int32)res); return 1; }"
 			delete enums[i]
 		}
 	}
@@ -209,6 +209,9 @@ BEGIN {
 	print "} // namespace SQConvert"
 
 	print "";
+	print "template <> const char *GetClassName<" cls ">() { return \"" cls "\"; }"
+	print "";
+
 	# Then do the registration functions of the class. */
 	print "void SQ" cls "_Register(Squirrel *engine)"
 	print "{"
@@ -414,7 +417,6 @@ BEGIN {
 		cls_param[1] = len;
 		cls_param[2] = types;
 	} else if (substr(funcname, 0, 1) == "_" && types != "v") {
-	} else if (funcname == "GetClassName" && types == ".") {
 	} else if (is_static) {
 		static_method_size++
 		static_methods[static_method_size, 0] = funcname

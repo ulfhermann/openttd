@@ -23,7 +23,7 @@ static void DrawTile_Void(TileInfo *ti)
 }
 
 
-static uint GetSlopeZ_Void(TileIndex tile, uint x, uint y)
+static int GetSlopePixelZ_Void(TileIndex tile, uint x, uint y)
 {
 	return TilePixelHeight(tile);
 }
@@ -60,22 +60,22 @@ static TrackStatus GetTileTrackStatus_Void(TileIndex tile, TransportType mode, u
 	return 0;
 }
 
-static CommandCost TerraformTile_Void(TileIndex tile, DoCommandFlag flags, uint z_new, Slope tileh_new)
+static CommandCost TerraformTile_Void(TileIndex tile, DoCommandFlag flags, int z_new, Slope tileh_new)
 {
 	return_cmd_error(STR_ERROR_OFF_EDGE_OF_MAP);
 }
 
 extern const TileTypeProcs _tile_type_void_procs = {
 	DrawTile_Void,            // draw_tile_proc
-	GetSlopeZ_Void,           // get_slope_z_proc
+	GetSlopePixelZ_Void,      // get_slope_z_proc
 	ClearTile_Void,           // clear_tile_proc
 	NULL,                     // add_accepted_cargo_proc
 	GetTileDesc_Void,         // get_tile_desc_proc
 	GetTileTrackStatus_Void,  // get_tile_track_status_proc
 	NULL,                     // click_tile_proc
 	NULL,                     // animate_tile_proc
-	TileLoop_Void,            // tile_loop_clear
-	ChangeTileOwner_Void,     // change_tile_owner_clear
+	TileLoop_Void,            // tile_loop_proc
+	ChangeTileOwner_Void,     // change_tile_owner_proc
 	NULL,                     // add_produced_cargo_proc
 	NULL,                     // vehicle_enter_tile_proc
 	GetFoundation_Void,       // get_foundation_proc

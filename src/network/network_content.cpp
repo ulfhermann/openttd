@@ -376,7 +376,7 @@ static char *GetFullFilename(const ContentInfo *ci, bool compressed)
 	switch (ci->type) {
 		default: return NULL;
 		case CONTENT_TYPE_BASE_GRAPHICS: dir = BASESET_DIR;    break;
-		case CONTENT_TYPE_BASE_MUSIC:    dir = GM_DIR;         break;
+		case CONTENT_TYPE_BASE_MUSIC:    dir = BASESET_DIR;    break;
 		case CONTENT_TYPE_BASE_SOUNDS:   dir = BASESET_DIR;    break;
 		case CONTENT_TYPE_NEWGRF:        dir = NEWGRF_DIR;     break;
 		case CONTENT_TYPE_AI:            dir = AI_DIR;         break;
@@ -530,13 +530,41 @@ void ClientNetworkContentSocketHandler::AfterDownload()
 	if (GunzipFile(this->curInfo)) {
 		unlink(GetFullFilename(this->curInfo, true));
 
-		TarScanner ts;
-		ts.AddFile(GetFullFilename(this->curInfo, false), 0);
-
 		if (this->curInfo->type == CONTENT_TYPE_BASE_MUSIC) {
 			/* Music can't be in a tar. So extract the tar! */
-			ExtractTar(GetFullFilename(this->curInfo, false));
+			ExtractTar(GetFullFilename(this->curInfo, false), BASESET_DIR);
 			unlink(GetFullFilename(this->curInfo, false));
+		} else {
+			Subdirectory sd = NO_DIRECTORY;
+			switch (this->curInfo->type) {
+				case CONTENT_TYPE_AI:
+					sd = AI_DIR;
+					break;
+
+				case CONTENT_TYPE_AI_LIBRARY:
+					sd = AI_LIBRARY_DIR;
+					break;
+
+				case CONTENT_TYPE_BASE_GRAPHICS:
+				case CONTENT_TYPE_BASE_SOUNDS:
+				case CONTENT_TYPE_BASE_MUSIC:
+					sd = BASESET_DIR;
+					break;
+
+				case CONTENT_TYPE_NEWGRF:
+					sd = NEWGRF_DIR;
+					break;
+
+				case CONTENT_TYPE_SCENARIO:
+				case CONTENT_TYPE_HEIGHTMAP:
+					sd = SCENARIO_DIR;
+					break;
+
+				default: NOT_REACHED();
+			}
+
+			TarScanner ts;
+			ts.AddFile(sd, GetFullFilename(this->curInfo, false));
 		}
 
 		this->OnDownloadComplete(this->curInfo->id);
