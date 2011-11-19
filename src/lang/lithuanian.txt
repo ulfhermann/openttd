@@ -334,7 +334,6 @@ STR_SORT_BY_CAPTION_POPULATION                                  :{BLACK}Populiac
 STR_SORT_BY_CAPTION_NAME                                        :{BLACK}Vardą
 STR_SORT_BY_CAPTION_DATE                                        :{BLACK}Datą
 # These are used in dropdowns
-STR_SORT_BY_POPULATION                                          :Populiacija
 STR_SORT_BY_NAME                                                :Pavadinimą
 STR_SORT_BY_PRODUCTION                                          :Produkciją
 STR_SORT_BY_TYPE                                                :Tipą
@@ -705,9 +704,7 @@ STR_PLAYLIST_TRACK_NAME                                         :{TINYFONT}{LTBL
 STR_PLAYLIST_TRACK_INDEX                                        :{TINYFONT}{BLACK}Takelio numeris
 STR_PLAYLIST_PROGRAM                                            :{TINYFONT}{BLACK}Programa - „{STRING}“
 STR_PLAYLIST_CLEAR                                              :{TINYFONT}{BLACK}Išvalyti
-STR_PLAYLIST_SAVE                                               :{TINYFONT}{BLACK}Išsaugoti
 STR_PLAYLIST_TOOLTIP_CLEAR_CURRENT_PROGRAM_CUSTOM1              :{BLACK}Panaikinti esamą programą (tik „Speciali 1“ arba „Speciali 2“)
-STR_PLAYLIST_TOOLTIP_SAVE_MUSIC_SETTINGS                        :{BLACK}Išsaugoti muzikos nustatymus
 STR_PLAYLIST_TOOLTIP_CLICK_TO_ADD_TRACK                         :{BLACK}Paspauskite ant garso takelio, norėdami įtraukti į sąrašą (tik „Speciali 1“ arba „Speciali 2“)
 STR_PLAYLIST_TOOLTIP_CLICK_TO_REMOVE_TRACK                      :{BLACK}Spragtelėjus takelį, jis pašalinamas iš dabartinės programos (tik „Speciali 1“ ir „Speciali 2“)
 
@@ -2099,7 +2096,7 @@ STR_STATION_BUILD_CARGO_TRAM_ORIENTATION_TOOLTIP                :{BLACK}Pasirink
 # Waterways toolbar (last two for SE only)
 STR_WATERWAYS_TOOLBAR_CAPTION                                   :{WHITE}Kanalų kasimas
 STR_WATERWAYS_TOOLBAR_CAPTION_SE                                :{WHITE}Kanalai
-STR_WATERWAYS_TOOLBAR_BUILD_CANALS_TOOLTIP                      :{BLACK}Statyk kanalus.
+STR_WATERWAYS_TOOLBAR_BUILD_CANALS_TOOLTIP                      :{BLACK}Statyti kanalus. Nuspaudus klavišą 'Shift' bus rodoma statybų kaina
 STR_WATERWAYS_TOOLBAR_BUILD_LOCKS_TOOLTIP                       :{BLACK}Įrengti šliuzus. Shift perjungia tarp statymo/kainos parodymo
 STR_WATERWAYS_TOOLBAR_BUILD_DEPOT_TOOLTIP                       :{BLACK}Statyti laivų depą (naujų laivų įsigijimui ir remontui). Shift perjungia tarp statymo/kainos parodymo
 STR_WATERWAYS_TOOLBAR_BUILD_DOCK_TOOLTIP                        :{BLACK}Statyti laivų doką. Ctrl leidžia prijungti stoteles. Shift perjungia tarp statymo/kainos parodymo
@@ -2144,7 +2141,7 @@ STR_STATION_BUILD_NOISE                                         :{BLACK}Sukeltas
 
 # Landscaping toolbar
 STR_LANDSCAPING_TOOLBAR                                         :{WHITE}Žemės tvarkymas
-STR_LANDSCAPING_TOOLTIP_LOWER_A_CORNER_OF_LAND                  :{BLACK}Pažeminti žemės lygį
+STR_LANDSCAPING_TOOLTIP_LOWER_A_CORNER_OF_LAND                  :{BLACK}Pažeminti žemės lygį. Tempiant pirmas segmentas bus pažemintas, kiti pažymėti segmentai išlyginti pagal pirmąjį. Nuspaudus 'Ctrl', plotas bus žymimas įstrižai. 'Shift' parodys statybos kainą
 STR_LANDSCAPING_TOOLTIP_RAISE_A_CORNER_OF_LAND                  :{BLACK}Paaukštinti žemės lygį
 STR_LANDSCAPING_LEVEL_LAND_TOOLTIP                              :{BLACK}Žemės lygis
 STR_LANDSCAPING_TOOLTIP_PURCHASE_LAND                           :{BLACK}Nusipirkti žemę vėlesniam naudojimui. Shift perjungia tarp statymo/kainos parodymo
@@ -2268,30 +2265,6 @@ STR_LAI_CLEAR_DESCRIPTION_GRASS                                 :Žolė
 STR_LAI_CLEAR_DESCRIPTION_FIELDS                                :Laukai
 STR_LAI_CLEAR_DESCRIPTION_SNOW_COVERED_LAND                     :Užpustyta žemė
 STR_LAI_CLEAR_DESCRIPTION_DESERT                                :Dykuma
-
-STR_LAI_RAIL_DESCRIPTION_TRACK                                  :Geležinkelio bėgiai
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_SIGNALS              :Gelezinkelio bėgiai su paprastais šviesoforais
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRESIGNALS                  :Geležinkelio bėgiai su pre-šviesoforais
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXITSIGNALS                 :Gelezinkelio bėgiai su exit-šviesoforais
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBOSIGNALS                :geležinkelio bėgiai su kombo signalais
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PBSSIGNALS                  :Geležinkelis su krypties šviesoforais
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NOENTRYSIGNALS              :Geležinkelis su vienpusiais krypties signalais
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_PRESIGNALS           :Geležinkelis su paprastais ir pre-signalais
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_EXITSIGNALS          :Geležinkelis su paprastais ir išėjimo signalais
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_COMBOSIGNALS         :Geležinkelis su paprastais ir kombo-signalais
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_PBSSIGNALS           :Geležinkelis su paprastais ir krypties signalais
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_NOENTRYSIGNALS       :Geležinkelis su paprastais ir vienpusiais kelio signalais
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_EXITSIGNALS             :Geležinkelis su pre- ir išėjimo signalais
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_COMBOSIGNALS            :Geležinkelis su pre- ir kombo- signalais
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_PBSSIGNALS              :Geležinkelis su pre- ir krypties signalais
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_NOENTRYSIGNALS          :Geležinkelio bėgiai su pre- ir vienpusias trajektorijos signalais
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_COMBOSIGNALS           :Geležinkelis su išėjimo ir kombo- šviesoforais
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_PBSSIGNALS             :Geležinkelis su išėjimo ir krypties šviesoforais
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_NOENTRYSIGNALS         :Geležinkelis su išėjimo ir vienpusiais krypties šviesoforais
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBO_PBSSIGNALS            :Bėgiai su kombo ir krypties signalais
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBO_NOENTRYSIGNALS        :Bėgiai su combo- ir vienpusiais krypties signalais
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PBS_NOENTRYSIGNALS          :Bėgiai su krypties ir vienpusiais krypties šviesoforais
-STR_LAI_RAIL_DESCRIPTION_TRAIN_DEPOT                            :Traukinių depas
 
 STR_LAI_ROAD_DESCRIPTION_ROAD                                   :Kelias
 STR_LAI_ROAD_DESCRIPTION_ROAD_WITH_STREETLIGHTS                 :Kelias su žibintais
@@ -2498,7 +2471,6 @@ STR_NEWGRF_SETTINGS_NOT_FOUND                                   :{RED}Atitinkama
 STR_NEWGRF_SETTINGS_DISABLED                                    :{RED}Išjungta
 STR_NEWGRF_SETTINGS_INCOMPATIBLE                                :{RED}Nesuderinamas su šia OpenTTD versija
 
-STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}Įveskite Papild. grafikos parametrus
 
 # NewGRF parameters window
 STR_NEWGRF_PARAMETERS_CAPTION                                   :{WHITE}Pakeisti NewGRF parametrus
@@ -3315,7 +3287,6 @@ STR_ORDER_GO_TO_NEAREST_HANGAR                                  :Skristi į arti
 STR_ORDER_CONDITIONAL                                           :Sąlyginis užsakymo šuolis
 STR_ORDER_SHARE                                                 :Dalintis užduotimis
 STR_ORDERS_GO_TO_TOOLTIP                                        :{BLACK}Iterpti nauja uzduoti pries pazymeta, arba iterpti saraso pabaigoje. Ctrl+Paspaudimas verčia stotelių nurodymus į 'pilnai pasikrauti bet kokio krovinio', kontrolės punktų į 'praleisti' ir garažų - 'aptarnauti'
-STR_ORDERS_GO_TO_DROPDOWN_TOOLTIP                               :{BLACK}Įterpti užsakymą
 
 STR_ORDERS_VEH_WITH_SHARED_ORDERS_LIST_TOOLTIP                  :{BLACK}Parodyti visas tr. priemones, kurios dalijasi šiais nurodymais
 
@@ -3357,6 +3328,8 @@ STR_ORDER_NO_UNLOAD                                             :(Neiškrauti ir
 STR_ORDER_NO_UNLOAD_FULL_LOAD                                   :(Neiškrauti ir laukti pilno pakrovimo)
 STR_ORDER_NO_UNLOAD_FULL_LOAD_ANY                               :(Neiškrauti ir laukti bet kokio pilno pakrovimo)
 STR_ORDER_NO_UNLOAD_NO_LOAD                                     :(Jokio iškrovimo ar pakrovimo)
+
+
 
 STR_ORDER_STOP_LOCATION_NEAR_END                                :[netoli pabaigos]
 STR_ORDER_STOP_LOCATION_MIDDLE                                  :[viduryje]
@@ -3446,7 +3419,7 @@ STR_AI_DEBUG_SELECT_AI_TOOLTIP                                  :{BLACK}Rodyti D
 STR_ERROR_NO_AI                                                 :{WHITE}OpenTTD yra paruoštas be DI palaikymo...
 STR_ERROR_NO_AI_SUB                                             :{WHITE}... nerasta jokių prieinamų DI!
 
-STR_ERROR_AI_NO_AI_FOUND                                        :Nerasta jokio tinkamo DI..{}Šis DI yra netikras ir nieko nedarys.{}Gali parsisiųsti keletą DI naudojant 'Turinio internete' sistemą.
+STR_ERROR_AI_NO_AI_FOUND                                        :Nerasta jokio tinkamo DI.{}Šis DI yra netikras ir nieko nedarys.{}Galite parsisiųsti keletą DI per 'Turinio internete' sistemą.
 STR_ERROR_AI_PLEASE_REPORT_CRASH                                :{WHITE}Vienas iš paleistų DI išsijungė. Praneškite apie tai šio DI autoriui su DI Debug lango vaizdu.
 STR_ERROR_AI_DEBUG_SERVER_ONLY                                  :{YELLOW}DI derinimo langas yra pasiekiamas tik iš serverio
 
@@ -3525,8 +3498,8 @@ STR_ERROR_NO_TOWN_IN_SCENARIO                                   :{WHITE}... šia
 
 STR_ERROR_PNGMAP                                                :{WHITE}Negalima užkrauti žemėlapio iš PNG...
 STR_ERROR_PNGMAP_FILE_NOT_FOUND                                 :{WHITE}... failas nerastas.
-STR_ERROR_PNGMAP_IMAGE_TYPE                                     :{WHITE}... Negali perversti paveiklsėlio. 8 arba 24-bit PNG paveikslėlis reikalingas.
-STR_ERROR_PNGMAP_MISC                                           :{WHITE}... kažkas buvo ne taip. Atsiprašome. (greičiausiai pažeistas failas)
+STR_ERROR_PNGMAP_IMAGE_TYPE                                     :{WHITE}... kovertuoti paveikslėlio nepavyko. Reikalingas 8-ių arba 24-ių bitų PNG paveikslėlis.
+STR_ERROR_PNGMAP_MISC                                           :{WHITE}... nutiko kažkas netikėto (greičiausiai pažeistas failas). Atsiprašome.
 
 STR_ERROR_BMPMAP                                                :{WHITE}Negalima nuskaityti kraštovaizdžio iš BMP...
 STR_ERROR_BMPMAP_IMAGE_TYPE                                     :{WHITE}... nepavyko pakeisti vaizdo failo formato.
@@ -3537,7 +3510,7 @@ STR_WARNING_HEIGHTMAP_SCALE_CAPTION                             :{WHITE}Skales i
 STR_WARNING_HEIGHTMAP_SCALE_MESSAGE                             :{YELLOW}Perdaryti pagrindini zemelapi per daug nerekomenduojama. Testi generavima?
 
 # Soundset messages
-STR_WARNING_FALLBACK_SOUNDSET                                   :{WHITE}Rasta tik fiktyvi garsų biblioteka. Jeigu nori garsų žaidime, gauk garsų rinkinį naudojant parsisiuntimų sistemą.
+STR_WARNING_FALLBACK_SOUNDSET                                   :{WHITE}Rasta tik fiktyvi garsų biblioteka. Jeigu norite garsų žaidime, įdiekite garsų rinkinį naudojant parsisiuntimų sistemą.
 
 # Screenshot related messages
 STR_MESSAGE_SCREENSHOT_SUCCESSFULLY                             :{WHITE}Ekrano vaizdas išsaugotas kaip „{STRING}“
@@ -3570,8 +3543,6 @@ STR_ERROR_NOT_ALLOWED_WHILE_PAUSED                              :{WHITE}Negalima
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS                 :{WHITE}{TOWN} vietos valdžia neleidžia
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_AIRPORT                       :{WHITE}{TOWN} vietinė valdžia neleidžia statyti kito oro uosto šiame mieste
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_NOISE                         :{WHITE}{TOWN} vietos valdžia atsisako suteikti leidimą statyti oro uosta dėl triukšmo problemų
-STR_ERROR_BRIBE_FAILED                                          :{WHITE}Tavo meginimas papirkti buvo
-STR_ERROR_BRIBE_FAILED_2                                        :{WHITE}issaiskinta vietiniu pareigunu
 
 # Levelling errors
 STR_ERROR_CAN_T_RAISE_LAND_HERE                                 :{WHITE}Žemės lygio čia paaukštinti negalima...
@@ -3607,7 +3578,7 @@ STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP_SUB                          :{WHITE}... per 
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_TOWN                             :{WHITE}... per arti kito miesto
 STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}... per daug miestų
 STR_ERROR_NO_SPACE_FOR_TOWN                                     :{WHITE}... daugiau nera vietos zemelapyje
-STR_ERROR_TOWN_EXPAND_WARN_NO_ROADS                             :{WHITE}Miestas nestatys kelių. Jūs galite įjungti kelių statyba per Sudėtingesni nustatymai>Ekonomika>Miestai.
+STR_ERROR_TOWN_EXPAND_WARN_NO_ROADS                             :{WHITE}Miestas nestatys kelių. Jūs galite įjungti kelių statybą per Sudėtingesni nustatymai>Ekonomika>Miestai.
 STR_ERROR_ROAD_WORKS_IN_PROGRESS                                :{WHITE}Vyksta kelio darbai
 STR_ERROR_TOWN_CAN_T_DELETE                                     :{WHITE}Negalima panaikinti šio miesto...{}Mieste yra stotis arba depas, arba miestui priklausantis vienas iš laukelių negali būti ištrintas.
 STR_ERROR_STATUE_NO_SUITABLE_PLACE                              :{WHITE}... nėra tinkamos vietos statulai šio miesto centre
@@ -3645,7 +3616,6 @@ STR_ERROR_TOO_MANY_STATIONS_LOADING                             :{WHITE}Per daug
 STR_ERROR_TOO_MANY_STATION_SPECS                                :{WHITE}Perdaug traukinių stoties dalių
 STR_ERROR_TOO_MANY_BUS_STOPS                                    :{WHITE}Per daug autobusų stotelių
 STR_ERROR_TOO_MANY_TRUCK_STOPS                                  :{WHITE}Per daug sunkvežimių pakrovimo aikstelių
-STR_ERROR_TOO_CLOSE_TO_ANOTHER_RAILROAD                         :{WHITE}Per arti kitos geležinkelio stoties
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_STATION                          :{WHITE}Per arti kitos stotelės
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_DOCK                             :{WHITE}Per arti kitos prieplaukos
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_AIRPORT                          :{WHITE}Per arti kito oro uosto

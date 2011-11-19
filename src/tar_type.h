@@ -24,7 +24,7 @@ struct TarListEntry {
 	 * to free filename, which isn't set at that moment... but because it
 	 * initializes the variable with garbage, it's going to segfault. */
 	TarListEntry() : filename(NULL), dirname(NULL) {}
-	~TarListEntry() { free((void*)this->filename); free((void*)this->dirname); }
+	~TarListEntry() { free(this->filename); free(this->dirname); }
 };
 
 struct TarFileListEntry {
@@ -35,9 +35,9 @@ struct TarFileListEntry {
 
 typedef std::map<std::string, TarListEntry> TarList;
 typedef std::map<std::string, TarFileListEntry> TarFileList;
-extern TarList _tar_list;
-extern TarFileList _tar_filelist;
+extern TarList _tar_list[NUM_SUBDIRS];
+extern TarFileList _tar_filelist[NUM_SUBDIRS];
 
-#define FOR_ALL_TARS(tar) for (tar = _tar_filelist.begin(); tar != _tar_filelist.end(); tar++)
+#define FOR_ALL_TARS(tar, sd) for (tar = _tar_filelist[sd].begin(); tar != _tar_filelist[sd].end(); tar++)
 
 #endif /* TAR_TYPE_H */

@@ -38,10 +38,10 @@
 
 #include "table/strings.h"
 
-static const uint ROTOR_Z_OFFSET         = 5;    ///< Z Offset between helicopter- and rotorsprite.
+static const int ROTOR_Z_OFFSET         = 5;    ///< Z Offset between helicopter- and rotorsprite.
 
-static const uint PLANE_HOLDING_ALTITUDE = 150;  ///< Altitude of planes in holding pattern (= lowest flight altitude).
-static const uint HELI_FLIGHT_ALTITUDE   = 184;  ///< Normal flight altitude of helicopters.
+static const int PLANE_HOLDING_ALTITUDE = 150;  ///< Altitude of planes in holding pattern (= lowest flight altitude).
+static const int HELI_FLIGHT_ALTITUDE   = 184;  ///< Normal flight altitude of helicopters.
 
 
 void Aircraft::UpdateDeltaXY(Direction direction)
@@ -251,7 +251,7 @@ CommandCost CmdBuildAircraft(TileIndex tile, DoCommandFlag flags, const Engine *
 		v->x_pos = u->x_pos = x;
 		v->y_pos = u->y_pos = y;
 
-		u->z_pos = GetSlopeZ(x, y);
+		u->z_pos = GetSlopePixelZ(x, y);
 		v->z_pos = u->z_pos + 1;
 
 		v->vehstatus = VS_HIDDEN | VS_STOPPED | VS_DEFPAL;
@@ -307,7 +307,7 @@ CommandCost CmdBuildAircraft(TileIndex tile, DoCommandFlag flags, const Engine *
 
 		v->InvalidateNewGRFCacheOfChain();
 
-		v->cargo_cap = GetVehicleCapacity(v, &u->cargo_cap);
+		v->cargo_cap = e->DetermineCapacity(v, &u->cargo_cap);
 
 		v->InvalidateNewGRFCacheOfChain();
 
@@ -487,10 +487,10 @@ void SetAircraftPosition(Aircraft *v, int x, int y, int z)
 	int safe_x = Clamp(x, 0, MapMaxX() * TILE_SIZE);
 	int safe_y = Clamp(y - 1, 0, MapMaxY() * TILE_SIZE);
 	u->x_pos = x;
-	u->y_pos = y - ((v->z_pos - GetSlopeZ(safe_x, safe_y)) >> 3);
+	u->y_pos = y - ((v->z_pos - GetSlopePixelZ(safe_x, safe_y)) >> 3);
 
 	safe_y = Clamp(u->y_pos, 0, MapMaxY() * TILE_SIZE);
-	u->z_pos = GetSlopeZ(safe_x, safe_y);
+	u->z_pos = GetSlopePixelZ(safe_x, safe_y);
 	u->cur_image = v->cur_image;
 
 	VehicleMove(u, true);
@@ -631,14 +631,14 @@ static int UpdateAircraftSpeed(Aircraft *v, uint speed_limit = SPEED_LIMIT_NONE,
  * @param v The vehicle. Should be an aircraft
  * @returns Altitude in pixel units
  */
-byte GetAircraftFlyingAltitude(const Aircraft *v)
+int GetAircraftFlyingAltitude(const Aircraft *v)
 {
 	if (v->subtype == AIR_HELICOPTER) return HELI_FLIGHT_ALTITUDE;
 
 	/* Make sure Aircraft fly no lower so that they don't conduct
 	 * CFITs (controlled flight into terrain)
 	 */
-	byte base_altitude = PLANE_HOLDING_ALTITUDE;
+	int base_altitude = PLANE_HOLDING_ALTITUDE;
 
 	/* Make sure eastbound and westbound planes do not "crash" into each
 	 * other by providing them with vertical seperation
@@ -777,7 +777,7 @@ static bool AircraftController(Aircraft *v)
 			count = UpdateAircraftSpeed(v);
 			if (count > 0) {
 				v->tile = 0;
-				byte z_dest = GetAircraftFlyingAltitude(v);
+				int z_dest = GetAircraftFlyingAltitude(v);
 
 				/* Reached altitude? */
 				if (v->z_pos >= z_dest) {
@@ -806,7 +806,7 @@ static bool AircraftController(Aircraft *v)
 		v->tile = tile;
 
 		/* Find altitude of landing position. */
-		int z = GetSlopeZ(x, y) + 1 + afc->delta_z;
+		int z = GetSlopePixelZ(x, y) + 1 + afc->delta_z;
 
 		if (z == v->z_pos) {
 			Vehicle *u = v->Next()->Next();
@@ -931,7 +931,7 @@ static bool AircraftController(Aircraft *v)
 		if (amd.flag & (AMED_TAKEOFF | AMED_SLOWTURN | AMED_LAND)) v->tile = 0;
 
 		/* Adjust Z for land or takeoff? */
-		uint z = v->z_pos;
+		int z = v->z_pos;
 
 		if (amd.flag & AMED_TAKEOFF) {
 			z = min(z + 2, GetAircraftFlyingAltitude(v));
@@ -951,7 +951,7 @@ static bool AircraftController(Aircraft *v)
 				continue;
 			}
 
-			uint curz = GetSlopeZ(x + amd.x, y + amd.y) + 1;
+			int curz = GetSlopePixelZ(x + amd.x, y + amd.y) + 1;
 
 			/* We're not flying below our destination, right? */
 			assert(curz <= z);
@@ -967,7 +967,7 @@ static bool AircraftController(Aircraft *v)
 
 		/* We've landed. Decrease speed when we're reaching end of runway. */
 		if (amd.flag & AMED_BRAKE) {
-			uint curz = GetSlopeZ(x, y) + 1;
+			int curz = GetSlopePixelZ(x, y) + 1;
 
 			if (z > curz) {
 				z--;
@@ -994,7 +994,7 @@ static bool HandleCrashedAircraft(Aircraft *v)
 
 	/* make aircraft crash down to the ground */
 	if (v->crashed_counter < 500 && st == NULL && ((v->crashed_counter % 3) == 0) ) {
-		uint z = GetSlopeZ(v->x_pos, v->y_pos);
+		int z = GetSlopePixelZ(v->x_pos, v->y_pos);
 		v->z_pos -= 1;
 		if (v->z_pos == z) {
 			v->crashed_counter = 500;

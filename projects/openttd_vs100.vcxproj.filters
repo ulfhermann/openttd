@@ -648,6 +648,9 @@
     <ClInclude Include="..\src\network\network_content.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\network\network_content_gui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="..\src\network\network_func.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1156,6 +1159,9 @@
       <Filter>GUI Source Code</Filter>
     </ClCompile>
     <ClCompile Include="..\src\autoreplace_gui.cpp">
+      <Filter>GUI Source Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\bootstrap_gui.cpp">
       <Filter>GUI Source Code</Filter>
     </ClCompile>
     <ClCompile Include="..\src\bridge_gui.cpp">

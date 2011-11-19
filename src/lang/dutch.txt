@@ -259,7 +259,6 @@ STR_SORT_BY_CAPTION_POPULATION                                  :{BLACK}Inwoners
 STR_SORT_BY_CAPTION_NAME                                        :{BLACK}Naam
 STR_SORT_BY_CAPTION_DATE                                        :{BLACK}Datum
 # These are used in dropdowns
-STR_SORT_BY_POPULATION                                          :Inwoners
 STR_SORT_BY_NAME                                                :Naam
 STR_SORT_BY_PRODUCTION                                          :Productie
 STR_SORT_BY_TYPE                                                :Soort
@@ -630,9 +629,7 @@ STR_PLAYLIST_TRACK_NAME                                         :{TINYFONT}{LTBL
 STR_PLAYLIST_TRACK_INDEX                                        :{TINYFONT}{BLACK}Nummerindex
 STR_PLAYLIST_PROGRAM                                            :{TINYFONT}{BLACK}Programma - '{STRING}'
 STR_PLAYLIST_CLEAR                                              :{TINYFONT}{BLACK}Maak leeg
-STR_PLAYLIST_SAVE                                               :{TINYFONT}{BLACK}Opslaan
 STR_PLAYLIST_TOOLTIP_CLEAR_CURRENT_PROGRAM_CUSTOM1              :{BLACK}Maak huidig programma leeg (alleen Aangepast1 en Aangepast2)
-STR_PLAYLIST_TOOLTIP_SAVE_MUSIC_SETTINGS                        :{BLACK}Sla muziekinstellingen op
 STR_PLAYLIST_TOOLTIP_CLICK_TO_ADD_TRACK                         :{BLACK}Klik op het nummer om deze aan het programma toe te voegen (alleen Aangepast1 en Aangepast2)
 STR_PLAYLIST_TOOLTIP_CLICK_TO_REMOVE_TRACK                      :{BLACK}Klik op het nummer om deze uit het programma te verwijderen (alleen Aangepast1 en Aangepast2)
 
@@ -1924,6 +1921,11 @@ STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TUNNEL                  :{BLACK}Graaf sp
 STR_RAIL_TOOLBAR_TOOLTIP_TOGGLE_BUILD_REMOVE_FOR                :{BLACK}Kies tussen bouwen en verwijderen van sporen, seinen, controleposten en stations. Houd Ctrl ingedrukt om ook het spoor van controleposten en stations te verwijderen
 STR_RAIL_TOOLBAR_TOOLTIP_CONVERT_RAIL                           :{BLACK}Verander spoortype. Shift schakelt tussen bouwen/inschatting van de kosten
 
+STR_RAIL_NAME_RAILROAD                                          :Spoorweg
+STR_RAIL_NAME_ELRAIL                                            :Spoorweg met bovenleiding
+STR_RAIL_NAME_MONORAIL                                          :Monorail
+STR_RAIL_NAME_MAGLEV                                            :Zweeftrein
+
 # Rail depot construction window
 STR_BUILD_DEPOT_TRAIN_ORIENTATION_CAPTION                       :{WHITE}Richting van treindepot
 STR_BUILD_DEPOT_TRAIN_ORIENTATION_TOOLTIP                       :{BLACK}Selecteer richting van treindepot
@@ -2194,29 +2196,29 @@ STR_LAI_CLEAR_DESCRIPTION_FIELDS                                :Akkers
 STR_LAI_CLEAR_DESCRIPTION_SNOW_COVERED_LAND                     :Sneeuw
 STR_LAI_CLEAR_DESCRIPTION_DESERT                                :Woestijn
 
-STR_LAI_RAIL_DESCRIPTION_TRACK                                  :Spoor
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_SIGNALS              :Spoor met blokseinen
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRESIGNALS                  :Spoor met beginseinen
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXITSIGNALS                 :Spoor met uitgangsseinen
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBOSIGNALS                :Spoor met combinatieseinen
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PBSSIGNALS                  :Spoor met routeseinen
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NOENTRYSIGNALS              :Spoor met eenrichtingsrouteseinen
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_PRESIGNALS           :Spoor met blok- en beginseinen
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_EXITSIGNALS          :Spoor met blok- en uitgangsseinen
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_COMBOSIGNALS         :Spoor met blok- en combinatieseinen
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_PBSSIGNALS           :Spoor met blok- en routeseinen
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_NOENTRYSIGNALS       :Spoor met blok- en eenrichtingsrouteseinen
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_EXITSIGNALS             :Spoor met begin- en uitgangsseinen
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_COMBOSIGNALS            :Spoor met begin- en combinatieseinen
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_PBSSIGNALS              :Spoor met begin- en routeseinen
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_NOENTRYSIGNALS          :Spoor met begin- en eenrichtingsrouteseinen
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_COMBOSIGNALS           :Spoor met uitgangs- en combinatieseinen
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_PBSSIGNALS             :Spoor met uitgangs- en routeseinen
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_NOENTRYSIGNALS         :Spoor met uitgangs- en eenrichtingsrouteseinen
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBO_PBSSIGNALS            :Spoor met combinatie- en routeseinen
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBO_NOENTRYSIGNALS        :Spoor met combinatie- en eenrichtingsrouteseinen
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PBS_NOENTRYSIGNALS          :Spoor met route- en eenrichtingsrouteseinen
-STR_LAI_RAIL_DESCRIPTION_TRAIN_DEPOT                            :Treindepot
+STR_LAI_RAIL_DESCRIPTION_TRACK                                  :{STRING} spoor
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_SIGNALS              :{STRING} spoor met blokseinen
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRESIGNALS                  :{STRING} spoor met voorseinen
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXITSIGNALS                 :{STRING} spoor met exitseinen
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBOSIGNALS                :{STRING} spoor met combo-seinen
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PBSSIGNALS                  :{STRING} spoor met routeseinen
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NOENTRYSIGNALS              :{STRING} spoor met eenrichtingsseinen
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_PRESIGNALS           :{STRING} spoor met blok en voorseinen
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_EXITSIGNALS          :{STRING} spoor met blok en exitseinen
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_COMBOSIGNALS         :{STRING} spoor met blok en combo-seinen
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_PBSSIGNALS           :{STRING} spoor met blok en routeseinen
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_NOENTRYSIGNALS       :{STRING} spoor met blok en eenrichtingsseinen
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_EXITSIGNALS             :{STRING} spoor met voor- en exitseinen
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_COMBOSIGNALS            :{STRING} spoor met voor- en combo-seinen
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_PBSSIGNALS              :{STRING} spoor met voor- en routeseinen
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_NOENTRYSIGNALS          :{STRING} spoor met voor- en eenrichtingsseinen
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_COMBOSIGNALS           :{STRING} spoor met exit- en combo-seinen
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_PBSSIGNALS             :{STRING} spoor em exit- en routeseinen
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_NOENTRYSIGNALS         :{STRING} spoor met exit- en eenrichtingsseinen
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBO_PBSSIGNALS            :{STRING} spoor met combo- en routeseinen
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBO_NOENTRYSIGNALS        :{STRING} Spoor met combo- en eenrichtingssein
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PBS_NOENTRYSIGNALS          :{STRING} spoor met route en eenrichtingssein
+STR_LAI_RAIL_DESCRIPTION_TRAIN_DEPOT                            :{STRING} trein depot
 
 STR_LAI_ROAD_DESCRIPTION_ROAD                                   :Weg
 STR_LAI_ROAD_DESCRIPTION_ROAD_WITH_STREETLIGHTS                 :Weg met straatlantaarns
@@ -2400,7 +2402,8 @@ STR_NEWGRF_SETTINGS_MOVEUP                                      :{BLACK}Naar bov
 STR_NEWGRF_SETTINGS_MOVEUP_TOOLTIP                              :{BLACK}Verplaats het geselecteerde NewGRF-bestand naar boven in de lijst
 STR_NEWGRF_SETTINGS_MOVEDOWN                                    :{BLACK}Naar beneden
 STR_NEWGRF_SETTINGS_MOVEDOWN_TOOLTIP                            :{BLACK}Verplaats het geselecteerde NewGRF-bestand naar beneden in de lijst
-STR_NEWGRF_SETTINGS_FILE_TOOLTIP                                :{BLACK}Een lijst van de NewGRF-bestanden die zijn geïnstalleerd. Klik op een bestand om de parameters te wijzigen
+STR_NEWGRF_SETTINGS_FILE_TOOLTIP                                :{BLACK}Een lijst van de NewGRF-bestanden die zijn geïnstalleerd.
+STR_NEWGRF_SETTINGS_VIEW_README                                 :{BLACK}Bekijk leesme
 
 STR_NEWGRF_SETTINGS_SET_PARAMETERS                              :{BLACK}Stel parameters in
 STR_NEWGRF_SETTINGS_TOGGLE_PALETTE                              :{BLACK}Palet omzetten
@@ -2423,8 +2426,6 @@ STR_NEWGRF_SETTINGS_NOT_FOUND                                   :{RED}Bestand ni
 STR_NEWGRF_SETTINGS_DISABLED                                    :{RED}Uitgeschakeld
 STR_NEWGRF_SETTINGS_INCOMPATIBLE                                :{RED}Niet compatibel met deze versie van OpenTTD
 
-STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}NewGRF-parameters ingeven
-
 # NewGRF parameters window
 STR_NEWGRF_PARAMETERS_CAPTION                                   :{WHITE}NewGRF parameters wijzigen
 STR_NEWGRF_PARAMETERS_CLOSE                                     :{BLACK}Sluiten
@@ -2433,6 +2434,9 @@ STR_NEWGRF_PARAMETERS_RESET_TOOLTIP                             :{BLACK}Zet alle
 STR_NEWGRF_PARAMETERS_DEFAULT_NAME                              :Parameter {NUM}
 STR_NEWGRF_PARAMETERS_SETTING                                   :{STRING}: {ORANGE}{STRING}
 STR_NEWGRF_PARAMETERS_NUM_PARAM                                 :{LTBLUE}Aantal parameters: {ORANGE}{NUM}
+
+# NewGRF readme window
+STR_NEWGRF_README_CAPTION                                       :{WHITE}NewGRF leesme van {STRING}
 
 # NewGRF inspect window
 STR_NEWGRF_INSPECT_CAPTION                                      :{WHITE}Inspecteer - {STRING}
@@ -2515,6 +2519,7 @@ STR_BROKEN_VEHICLE_LENGTH                                       :{WHITE}Trein '{
 STR_NEWGRF_BUGGY                                                :{WHITE}NewGRF '{0:STRING}' geeft onjuiste informatie
 STR_NEWGRF_BUGGY_ARTICULATED_CARGO                              :{WHITE}Vracht-/ombouwinformatie voor '{1:ENGINE}' wijkt af van aanschaflijst na het bouwen. Dit kan resulteren in problemen bij ombouwen door automatisch vernieuwen/vervangen
 STR_NEWGRF_BUGGY_ENDLESS_PRODUCTION_CALLBACK                    :{WHITE}'{1:STRING}' heeft een eindeloze loop veroorzaakt in de productie-callback
+STR_NEWGRF_BUGGY_UNKNOWN_CALLBACK_RESULT                        :{WHITE}Callback 0x{HEX} gaf inbekend/ongeldig resultaat 0x{HEX}
 
 # 'User removed essential NewGRFs'-placeholders for stuff without specs
 STR_NEWGRF_INVALID_CARGO                                        :<ongeldige vracht>
@@ -3190,6 +3195,10 @@ STR_ORDER_TOOLTIP_UNLOAD                                        :{BLACK}Verander
 
 STR_ORDER_REFIT                                                 :{BLACK}Ombouwen
 STR_ORDER_REFIT_TOOLTIP                                         :{BLACK}Kies naar welk type vracht ombouwen in deze order. Ctrl+klik om ombouw instructie te verwijderen
+STR_ORDER_REFIT_AUTO                                            :{BLACK}Auto-ombouwen
+STR_ORDER_REFIT_AUTO_TOOLTIP                                    :{BLACK}Kies vrachttype voor auto-ombouwen naar in deze order. Ctrl+Klik om ombouw opdracht te verwijderen. Auto-ombouwen wordt alleen uitgevoerd als het voertuig dit toelaat
+STR_ORDER_DROP_REFIT_AUTO                                       :Voorgedefinieerde vracht
+STR_ORDER_DROP_REFIT_AUTO_ANY                                   :Beschikbare vracht
 
 STR_ORDER_SERVICE                                               :{BLACK}Onderhoud
 STR_ORDER_DROP_GO_ALWAYS_DEPOT                                  :Ga altijd
@@ -3236,7 +3245,6 @@ STR_ORDER_GO_TO_NEAREST_HANGAR                                  :Ga naar dichtst
 STR_ORDER_CONDITIONAL                                           :Conditionele order sprong
 STR_ORDER_SHARE                                                 :Orders delen
 STR_ORDERS_GO_TO_TOOLTIP                                        :{BLACK}Voeg een nieuwe order in voor de geselecteerde order, of voeg het toe aan het eind van de lijst. Ctrl+klik maakt stationsorders "Eén soort vracht volledig laden", controlepost-orders "Ga non-stop via" en depot-orders "Onderhoud bij". "Orders delen" of Ctrl laat dit voertuig de orders delen met het geselecteerde voertuig. Klikken op een voertuig kopieert de orders van dat voertuig
-STR_ORDERS_GO_TO_DROPDOWN_TOOLTIP                               :{BLACK}Voeg een geavanceerde order toe
 
 STR_ORDERS_VEH_WITH_SHARED_ORDERS_LIST_TOOLTIP                  :{BLACK}Toon alle voertuigen met dezelfde gedeelde orders
 
@@ -3278,6 +3286,21 @@ STR_ORDER_NO_UNLOAD                                             :(Niet lossen en
 STR_ORDER_NO_UNLOAD_FULL_LOAD                                   :(Niet lossen en volledig laden)
 STR_ORDER_NO_UNLOAD_FULL_LOAD_ANY                               :(Niet lossen en één soort vracht volledig laden)
 STR_ORDER_NO_UNLOAD_NO_LOAD                                     :(Niet lossen en niet laden)
+
+STR_ORDER_AUTO_REFIT                                            :(Auto-ombouw naar {STRING})
+STR_ORDER_FULL_LOAD_REFIT                                       :(Volledig laden met auto-ombouw naar {STRING})
+STR_ORDER_FULL_LOAD_ANY_REFIT                                   :(Volledig willekeurige vracht laden met auto-ombouw naar {STRING})
+STR_ORDER_UNLOAD_REFIT                                          :(Lossen en neem vracht met auto-ombouw naar {STRING})
+STR_ORDER_UNLOAD_FULL_LOAD_REFIT                                :(Lossen en wacht op volledig geladen vracht met auto-ombouw naar {STRING})
+STR_ORDER_UNLOAD_FULL_LOAD_ANY_REFIT                            :(Lossen en wacht op willekeurig volledig geladen vracht met auto-ombouw naar {STRING})
+STR_ORDER_TRANSFER_REFIT                                        :(Overdragen en neem vracht met auto-ombouw naar {STRING})
+STR_ORDER_TRANSFER_FULL_LOAD_REFIT                              :(Overdragen en wacht op volledig geladen vracht met auto-ombouw naar {STRING})
+STR_ORDER_TRANSFER_FULL_LOAD_ANY_REFIT                          :(Overdragen en wacht op willekeurige vollediggeladen vracht met auto-ombouw naar {STRING})
+STR_ORDER_NO_UNLOAD_REFIT                                       :(Niet lossen en neem vracht met auto-ombouw naar {STRING})
+STR_ORDER_NO_UNLOAD_FULL_LOAD_REFIT                             :(Niet lossen en wacht op volledig geladen vracht met auto-ombouw naar {STRING})
+STR_ORDER_NO_UNLOAD_FULL_LOAD_ANY_REFIT                         :(Niet lossen en wacht voor willekeurige volledigladen vracht met auto-ombouw naar {STRING})
+
+STR_ORDER_AUTO_REFIT_ANY                                        :beschikbare vracht
 
 STR_ORDER_STOP_LOCATION_NEAR_END                                :[begin]
 STR_ORDER_STOP_LOCATION_MIDDLE                                  :[midden]
@@ -3491,8 +3514,7 @@ STR_ERROR_NOT_ALLOWED_WHILE_PAUSED                              :{WHITE}Niet toe
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS                 :{WHITE}De gemeenteraad van {TOWN} staat dit niet toe
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_AIRPORT                       :{WHITE}De gemeenteraad van {TOWN} staat bouwen van nog een vliegveld niet toe
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_NOISE                         :{WHITE}{TOWN} lokale autoriteiten weigeren toestemming te geven voor vliegveld wegens zorgen om geluidsoverlast
-STR_ERROR_BRIBE_FAILED                                          :{WHITE}Je poging tot omkopen is
-STR_ERROR_BRIBE_FAILED_2                                        :{WHITE}ontdekt door een regionale onderzoeker
+STR_ERROR_BRIBE_FAILED                                          :{WHITE}Je omkopingspoging is ontdekt door een regionale controleur
 
 # Levelling errors
 STR_ERROR_CAN_T_RAISE_LAND_HERE                                 :{WHITE}Kan land hier niet ophogen...
@@ -3566,7 +3588,6 @@ STR_ERROR_TOO_MANY_STATIONS_LOADING                             :{WHITE}Te veel 
 STR_ERROR_TOO_MANY_STATION_SPECS                                :{WHITE}Te veel treinstationsdelen
 STR_ERROR_TOO_MANY_BUS_STOPS                                    :{WHITE}Te veel bushaltes
 STR_ERROR_TOO_MANY_TRUCK_STOPS                                  :{WHITE}Te veel vrachtwagenlaadstations
-STR_ERROR_TOO_CLOSE_TO_ANOTHER_RAILROAD                         :{WHITE}Te dicht bij een ander station
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_STATION                          :{WHITE}Te dicht bij een ander (laad)station
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_DOCK                             :{WHITE}Te dicht bij een andere haven
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_AIRPORT                          :{WHITE}Te dicht bij een ander vliegveld

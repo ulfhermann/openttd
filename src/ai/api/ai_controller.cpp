@@ -54,8 +54,8 @@ AIController::AIController() :
 AIController::~AIController()
 {
 	for (LoadedLibraryList::iterator iter = this->loaded_library.begin(); iter != this->loaded_library.end(); iter++) {
-		free((void *)(*iter).second);
-		free((void *)(*iter).first);
+		free((*iter).second);
+		free((*iter).first);
 	}
 
 	this->loaded_library.clear();
@@ -63,7 +63,12 @@ AIController::~AIController()
 
 /* static */ uint AIController::GetTick()
 {
-	return ::Company::Get(_current_company)->ai_instance->GetController()->ticks;
+	return AIObject::GetActiveInstance()->GetController()->ticks;
+}
+
+/* static */ int AIController::GetOpsTillSuspend()
+{
+	return AIObject::GetActiveInstance()->GetOpsTillSuspend();
 }
 
 /* static */ int AIController::GetSetting(const char *name)
