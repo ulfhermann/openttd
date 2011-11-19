@@ -40,7 +40,7 @@ inline void Blitter_32bppOptimized::Draw(const Blitter::BlitterParams *bp, ZoomL
 	/* skip upper lines in src_px and src_n */
 	for (uint i = bp->skip_top; i != 0; i--) {
 		src_px = (const Colour *)((const byte *)src_px + *(const uint32 *)src_px);
-		src_n += *(uint32 *)src_n;
+		src_n += *(const uint32 *)src_n;
 	}
 
 	/* skip lines in dst */
@@ -58,7 +58,7 @@ inline void Blitter_32bppOptimized::Draw(const Blitter::BlitterParams *bp, ZoomL
 		src_px++;
 
 		/* next src_n line begins here */
-		const uint8 *src_n_ln = src_n + *(uint32 *)src_n;
+		const uint8 *src_n_ln = src_n + *(const uint32 *)src_n;
 		src_n += 4;
 
 		/* we will end this line when we reach this point */
@@ -354,7 +354,7 @@ Sprite *Blitter_32bppOptimized::Encode(SpriteLoader::Sprite *sprite, AllocatorPr
 		lengths[z][1] = (byte *)dst_n_ln  - (byte *)dst_n_orig[z];
 
 		free(src_orig->data);
-		free((void *)src_orig);
+		free(src_orig);
 	}
 
 	uint len = 0; // total length of data

@@ -260,7 +260,6 @@ STR_SORT_BY_CAPTION_POPULATION                                  :{BLACK}Populaç
 STR_SORT_BY_CAPTION_NAME                                        :{BLACK}Nome
 STR_SORT_BY_CAPTION_DATE                                        :{BLACK}Data
 # These are used in dropdowns
-STR_SORT_BY_POPULATION                                          :População
 STR_SORT_BY_NAME                                                :Nome
 STR_SORT_BY_PRODUCTION                                          :Produção
 STR_SORT_BY_TYPE                                                :Tipo
@@ -631,9 +630,7 @@ STR_PLAYLIST_TRACK_NAME                                         :{TINYFONT}{LTBL
 STR_PLAYLIST_TRACK_INDEX                                        :{TINYFONT}{BLACK}Índice de faixas
 STR_PLAYLIST_PROGRAM                                            :{TINYFONT}{BLACK}Programa - '{STRING}'
 STR_PLAYLIST_CLEAR                                              :{TINYFONT}{BLACK}Limpar
-STR_PLAYLIST_SAVE                                               :{TINYFONT}{BLACK}Guardar
 STR_PLAYLIST_TOOLTIP_CLEAR_CURRENT_PROGRAM_CUSTOM1              :{BLACK}Limpar programa actual (somente Personaliz. 1 ou Personaliz. 2)
-STR_PLAYLIST_TOOLTIP_SAVE_MUSIC_SETTINGS                        :{BLACK}Gravar configuração de música
 STR_PLAYLIST_TOOLTIP_CLICK_TO_ADD_TRACK                         :{BLACK}Clique na faixa de música para a adicionar ao programa actual (somente Personaliz. 1 ou Personaliz. 2)
 STR_PLAYLIST_TOOLTIP_CLICK_TO_REMOVE_TRACK                      :{BLACK}Faça clique numa faixa para a remover da lista (Personaliz. 1 ou Personaliz. 2 apenas)
 
@@ -1925,6 +1922,11 @@ STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TUNNEL                  :{BLACK}Construi
 STR_RAIL_TOOLBAR_TOOLTIP_TOGGLE_BUILD_REMOVE_FOR                :{BLACK}Alternar entre construir/remover linha férrea, sinais, pontos de passagem e estações. Fixar o Ctrl também remove a linha férrea de pontos de passagem e estações
 STR_RAIL_TOOLBAR_TOOLTIP_CONVERT_RAIL                           :{BLACK}Converter/Actualizar tipo de linha. Shift alterna contruir/mostrar custo estimado
 
+STR_RAIL_NAME_RAILROAD                                          :Caminhos-de-ferro
+STR_RAIL_NAME_ELRAIL                                            :Caminhos-de-ferro elétricos
+STR_RAIL_NAME_MONORAIL                                          :Monocarril
+STR_RAIL_NAME_MAGLEV                                            :Maglev
+
 # Rail depot construction window
 STR_BUILD_DEPOT_TRAIN_ORIENTATION_CAPTION                       :{WHITE}Orientação do Depósito
 STR_BUILD_DEPOT_TRAIN_ORIENTATION_TOOLTIP                       :{BLACK}Seleccionar a orientação do depósito
@@ -2195,29 +2197,6 @@ STR_LAI_CLEAR_DESCRIPTION_FIELDS                                :Campos
 STR_LAI_CLEAR_DESCRIPTION_SNOW_COVERED_LAND                     :Neve
 STR_LAI_CLEAR_DESCRIPTION_DESERT                                :Deserto
 
-STR_LAI_RAIL_DESCRIPTION_TRACK                                  :Caminhos-de-ferro
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_SIGNALS              :Caminhos-de-ferro com sinais normais
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRESIGNALS                  :Caminhos-de-ferro com pré-sinais
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXITSIGNALS                 :Caminhos-de-ferro com sinais de saída
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBOSIGNALS                :Caminhos-de-ferro com sinais combinados
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PBSSIGNALS                  :Caminho de ferro com faróis de rota
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NOENTRYSIGNALS              :Caminho de ferro com faróis de mão única
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_PRESIGNALS           :Carris com sinais normais e pré-sinais
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_EXITSIGNALS          :Carris com sinais normais e de saída
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_COMBOSIGNALS         :Carris com sinais normais e combinados
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_PBSSIGNALS           :Caminho de ferro com obstrução e faróis de rota
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_NOENTRYSIGNALS       :Caminho de ferro com obstrução e faróis de mão única
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_EXITSIGNALS             :Carris com pré-sinais e sinais de saída
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_COMBOSIGNALS            :Carris com pré-sinais e sinais combinados
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_PBSSIGNALS              :Linha férrea com pré-sinais e sinais de trajecto
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_NOENTRYSIGNALS          :Linha férrea com pré-sinais e sinais de sentido único
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_COMBOSIGNALS           :Carris com sinais de saída e combinados
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_PBSSIGNALS             :Linha férrea com sinais de saída e de trajecto
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_NOENTRYSIGNALS         :Linha férrea com sinais de saída e de sentido único
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBO_PBSSIGNALS            :Linha férrea com conjunto de sinais e sinais de trajecto
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBO_NOENTRYSIGNALS        :Linha férrea com sinais multi- e de sentido único
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PBS_NOENTRYSIGNALS          :Linha férrea com sinais de trajecto e de sentido único
-STR_LAI_RAIL_DESCRIPTION_TRAIN_DEPOT                            :Depósito ferroviário
 
 STR_LAI_ROAD_DESCRIPTION_ROAD                                   :Estrada
 STR_LAI_ROAD_DESCRIPTION_ROAD_WITH_STREETLIGHTS                 :Estrada com iluminação
@@ -2402,6 +2381,7 @@ STR_NEWGRF_SETTINGS_MOVEUP_TOOLTIP                              :{BLACK}Move o f
 STR_NEWGRF_SETTINGS_MOVEDOWN                                    :{BLACK}Para Baixo
 STR_NEWGRF_SETTINGS_MOVEDOWN_TOOLTIP                            :{BLACK}Move o ficheiro NewGRF seleccionado para baixo na lista
 STR_NEWGRF_SETTINGS_FILE_TOOLTIP                                :{BLACK}Lista dos ficheiros NewGRF instalados. Clique num ficheiro para alterar os seus parâmetros
+STR_NEWGRF_SETTINGS_VIEW_README                                 :{BLACK}Ver leia-me
 
 STR_NEWGRF_SETTINGS_SET_PARAMETERS                              :{BLACK}Definir parâmetros
 STR_NEWGRF_SETTINGS_TOGGLE_PALETTE                              :{BLACK}Alternar palete
@@ -2424,8 +2404,6 @@ STR_NEWGRF_SETTINGS_NOT_FOUND                                   :{RED}Ficheiro c
 STR_NEWGRF_SETTINGS_DISABLED                                    :{RED}Desactivado
 STR_NEWGRF_SETTINGS_INCOMPATIBLE                                :{RED}Incompatível com esta versão do OpenTTD
 
-STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}Insira parâmetros do NewGRF
-
 # NewGRF parameters window
 STR_NEWGRF_PARAMETERS_CAPTION                                   :{WHITE}Alterar parâmetros NewGRF
 STR_NEWGRF_PARAMETERS_CLOSE                                     :{BLACK}Fechar
@@ -2434,6 +2412,8 @@ STR_NEWGRF_PARAMETERS_RESET_TOOLTIP                             :{BLACK}Retorna 
 STR_NEWGRF_PARAMETERS_DEFAULT_NAME                              :Parâmetro {NUM}
 STR_NEWGRF_PARAMETERS_SETTING                                   :{STRING}: {ORANGE}{STRING}
 STR_NEWGRF_PARAMETERS_NUM_PARAM                                 :{LTBLUE}Número de parâmetros: {ORANGE}{NUM}
+
+# NewGRF readme window
 
 # NewGRF inspect window
 STR_NEWGRF_INSPECT_CAPTION                                      :{WHITE}Inspeccionar - {STRING}
@@ -2516,6 +2496,7 @@ STR_BROKEN_VEHICLE_LENGTH                                       :{WHITE}O Comboi
 STR_NEWGRF_BUGGY                                                :{WHITE}NewGRF '{0:STRING}' fornece informação incorrecta
 STR_NEWGRF_BUGGY_ARTICULATED_CARGO                              :{WHITE}A informação de carga/adaptação do modelo de veículo '{1:ENGINE}' difere da que consta na lista de veículos depois de adquirido. Isto poderá causar problemas ao adaptar quando automaticamente renovado/substituído.
 STR_NEWGRF_BUGGY_ENDLESS_PRODUCTION_CALLBACK                    :{WHITE}'{1:STRING}' causou um loop infinito no callback de produção.
+STR_NEWGRF_BUGGY_UNKNOWN_CALLBACK_RESULT                        :{WHITE}Callback 0x{HEX} devolveu resultado desconhecido/inválido 0x{HEX}
 
 # 'User removed essential NewGRFs'-placeholders for stuff without specs
 STR_NEWGRF_INVALID_CARGO                                        :<mercadoria inválida>
@@ -3191,6 +3172,10 @@ STR_ORDER_TOOLTIP_UNLOAD                                        :{BLACK}Mudar o 
 
 STR_ORDER_REFIT                                                 :{BLACK}Adaptar
 STR_ORDER_REFIT_TOOLTIP                                         :{BLACK}Seleccionar o tipo de carga a adaptar nesta ordem. Pressionar Ctrl e botão-esquerdo do rato para remover a instrução de adaptação
+STR_ORDER_REFIT_AUTO                                            :{BLACK}Auto-adaptar
+STR_ORDER_REFIT_AUTO_TOOLTIP                                    :{BLACK}Selecione qual o tipo de mercadoria para o qual auto-adaptar nesta ordem. Ctrl+Clique para remover ordem de adaptação. Auto-adaptação só será realizada se o veículo a aceitar
+STR_ORDER_DROP_REFIT_AUTO                                       :Mercadoria fixa
+STR_ORDER_DROP_REFIT_AUTO_ANY                                   :Mercadoria disponível
 
 STR_ORDER_SERVICE                                               :{BLACK}Manutenção
 STR_ORDER_DROP_GO_ALWAYS_DEPOT                                  :Vai sempre
@@ -3237,7 +3222,6 @@ STR_ORDER_GO_TO_NEAREST_HANGAR                                  :Ir para o hanga
 STR_ORDER_CONDITIONAL                                           :Saltar ordem condicional
 STR_ORDER_SHARE                                                 :Partilhar ordens
 STR_ORDERS_GO_TO_TOOLTIP                                        :{BLACK}Inserir nova ordem antes da ordem seleccionada, ou adicionar ao fim da lista. Ctrl torna em 'encher' as ordens em estações, em 'sem parar' as ordens de pontos de passagem e em 'serviço' as ordens em depósitos. 'Ordens Partilhadas' ou Ctrl permite que este veículos partilhe ordens com o veículo escolhido. Clicando em um veículo de copia as ordens desse veículo
-STR_ORDERS_GO_TO_DROPDOWN_TOOLTIP                               :{BLACK}Inserir uma ordem avançada
 
 STR_ORDERS_VEH_WITH_SHARED_ORDERS_LIST_TOOLTIP                  :{BLACK}Mostra todos os veículos que seguem este mesmo trajecto
 
@@ -3279,6 +3263,21 @@ STR_ORDER_NO_UNLOAD                                             :(Não descarreg
 STR_ORDER_NO_UNLOAD_FULL_LOAD                                   :(Não descarregar e aguardar até encher)
 STR_ORDER_NO_UNLOAD_FULL_LOAD_ANY                               :(Não descarregar e aguardar até encher de qq. carga)
 STR_ORDER_NO_UNLOAD_NO_LOAD                                     :(Não descarregar e não carregar)
+
+STR_ORDER_AUTO_REFIT                                            :(Auto-adaptar para {STRING})
+STR_ORDER_FULL_LOAD_REFIT                                       :(Carga cheia com auto-adaptação para {STRING})
+STR_ORDER_FULL_LOAD_ANY_REFIT                                   :(Carga cheia de qualquer mercadoria com auto-adaptação para {STRING})
+STR_ORDER_UNLOAD_REFIT                                          :(Descarregar e levar carga com auto-adaptação para {STRING})
+STR_ORDER_UNLOAD_FULL_LOAD_REFIT                                :(Descarregar e esperar por carga cheia com auto-adaptação para {STRING})
+STR_ORDER_UNLOAD_FULL_LOAD_ANY_REFIT                            :(Descarregar e esperar por qualquer carga cheia com auto-adaptação para {STRING})
+STR_ORDER_TRANSFER_REFIT                                        :(Tranferir e levar carga com auto-adaptação para {STRING})
+STR_ORDER_TRANSFER_FULL_LOAD_REFIT                              :(Transferir e esperar por carga cheia com auto-adaptação para {STRING})
+STR_ORDER_TRANSFER_FULL_LOAD_ANY_REFIT                          :(Transferir e esperar por qualquer carga cheia com auto-adaptação para {STRING})
+STR_ORDER_NO_UNLOAD_REFIT                                       :(Não descarregar e levar carga com auto-adaptação para {STRING})
+STR_ORDER_NO_UNLOAD_FULL_LOAD_REFIT                             :(Não descarregar e esperar por carga cheia com auto-adaptação para {STRING})
+STR_ORDER_NO_UNLOAD_FULL_LOAD_ANY_REFIT                         :(Não descarregar e esperar por qualquer carga cheia com auto-adaptação para {STRING})
+
+STR_ORDER_AUTO_REFIT_ANY                                        :mercadoria disponível
 
 STR_ORDER_STOP_LOCATION_NEAR_END                                :[extremo perto]
 STR_ORDER_STOP_LOCATION_MIDDLE                                  :[no meio]
@@ -3492,8 +3491,7 @@ STR_ERROR_NOT_ALLOWED_WHILE_PAUSED                              :{WHITE}Não per
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS                 :{WHITE}A autoridade local de {TOWN} não autoriza
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_AIRPORT                       :{WHITE}{TOWN} a autoridade local recusa permitir que outro aeroporto seja construído nesta cidade
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_NOISE                         :{WHITE}{TOWN} a autoridade local não permite a construção do aeroporto devido à poluição sonora
-STR_ERROR_BRIBE_FAILED                                          :{WHITE}A sua tentativa de suborno foi
-STR_ERROR_BRIBE_FAILED_2                                        :{WHITE}descoberta por um investigador regional
+STR_ERROR_BRIBE_FAILED                                          :{WHITE}A sua tentativa de suborno foi descoberta por um investigador regional
 
 # Levelling errors
 STR_ERROR_CAN_T_RAISE_LAND_HERE                                 :{WHITE}Não é possível levantar terreno aqui...
@@ -3567,7 +3565,6 @@ STR_ERROR_TOO_MANY_STATIONS_LOADING                             :{WHITE}Demasiad
 STR_ERROR_TOO_MANY_STATION_SPECS                                :{WHITE}Demasiadas partes na estação ferroviária
 STR_ERROR_TOO_MANY_BUS_STOPS                                    :{WHITE}Demasiadas paragens de autocarro
 STR_ERROR_TOO_MANY_TRUCK_STOPS                                  :{WHITE}Demasiadas estações de carga
-STR_ERROR_TOO_CLOSE_TO_ANOTHER_RAILROAD                         :{WHITE}Demasiado perto de outra estação ferroviária
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_STATION                          :{WHITE}Muito junto de uma estação/local de carga
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_DOCK                             :{WHITE}Muito perto de outra doca
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_AIRPORT                          :{WHITE}Demasiado perto de outro aeroporto
