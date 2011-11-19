@@ -620,7 +620,7 @@ DEF_CONSOLE_CMD(ConPauseGame)
 	return true;
 }
 
-DEF_CONSOLE_CMD(ConUnPauseGame)
+DEF_CONSOLE_CMD(ConUnpauseGame)
 {
 	if (argc == 0) {
 		IConsoleHelp("Unpause a network game. Usage: 'unpause'");
@@ -1251,7 +1251,6 @@ DEF_CONSOLE_CMD(ConRescanAI)
 		return true;
 	}
 
-	TarScanner::DoScan();
 	AI::Rescan();
 
 	return true;
@@ -1265,7 +1264,6 @@ DEF_CONSOLE_CMD(ConRescanNewGRF)
 		return true;
 	}
 
-	TarScanner::DoScan();
 	ScanNewGRFFiles(NULL);
 
 	return true;
@@ -1938,7 +1936,7 @@ void IConsoleStdLibRegister()
 	IConsoleCmdRegister("banlist",         ConBanList, ConHookServerOnly);
 
 	IConsoleCmdRegister("pause",           ConPauseGame, ConHookServerOnly);
-	IConsoleCmdRegister("unpause",         ConUnPauseGame, ConHookServerOnly);
+	IConsoleCmdRegister("unpause",         ConUnpauseGame, ConHookServerOnly);
 
 	IConsoleCmdRegister("company_pw",      ConCompanyPassword, ConHookNeedNetwork);
 	IConsoleAliasRegister("company_password",      "company_pw %+");

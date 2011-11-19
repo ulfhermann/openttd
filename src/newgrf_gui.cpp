@@ -450,7 +450,7 @@ static const NWidgetPart _nested_newgrf_parameter_widgets[] = {
 	EndContainer(),
 };
 
-/* Window definition for the change grf parameters window */
+/** Window definition for the change grf parameters window */
 static const WindowDesc _newgrf_parameters_desc(
 	WDP_CENTER, 500, 208,
 	WC_GRF_PARAMETERS, WC_NONE,
@@ -462,6 +462,186 @@ void OpenGRFParameterWindow(GRFConfig *c)
 {
 	DeleteWindowByClass(WC_GRF_PARAMETERS);
 	new NewGRFParametersWindow(&_newgrf_parameters_desc, c);
+}
+
+/** Widgets of the #NewGRFTextfileWindow. */
+enum ShowNewGRFTextfileWidgets {
+	GTW_WIDGET_CAPTION,    ///< The caption of the window.
+	GTW_WIDGET_BACKGROUND, ///< Panel to draw the textfile on.
+	GTW_WIDGET_VSCROLLBAR, ///< Vertical scrollbar to scroll through the textfile up-and-down.
+	GTW_WIDGET_HSCROLLBAR, ///< Horizontal scrollbar to scroll through the textfile left-to-right.
+};
+
+/** Window for displaying the textfile of a NewGRF. */
+struct NewGRFTextfileWindow : public Window {
+	const GRFConfig *grf_config;         ///< View the textfile of this GRFConfig.
+	TextfileType file_type;              ///< Type of textfile to view.
+	int line_height;                     ///< Height of a line in the display widget.
+	Scrollbar *vscroll;                  ///< Vertical scrollbar.
+	Scrollbar *hscroll;                  ///< Horizontal scrollbar.
+	char *text;                          ///< Lines of text from the NewGRF's textfile.
+	SmallVector<const char *, 64> lines; ///< #text, split into lines in a table with lines.
+	uint max_length;                     ///< The longest line in the textfile (in pixels).
+
+	static const int TOP_SPACING    = WD_FRAMETEXT_TOP;    ///< Additional spacing at the top of the #GTW_WIDGET_BACKGROUND widget.
+	static const int BOTTOM_SPACING = WD_FRAMETEXT_BOTTOM; ///< Additional spacing at the bottom of the #GTW_WIDGET_BACKGROUND widget.
+
+	NewGRFTextfileWindow(const WindowDesc *desc, const GRFConfig *c, TextfileType file_type) : Window(), grf_config(c), file_type(file_type)
+	{
+		this->CreateNestedTree(desc);
+		this->GetWidget<NWidgetCore>(GTW_WIDGET_CAPTION)->SetDataTip(STR_NEWGRF_README_CAPTION + file_type, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS);
+		this->vscroll = this->GetScrollbar(GTW_WIDGET_VSCROLLBAR);
+		this->hscroll = this->GetScrollbar(GTW_WIDGET_HSCROLLBAR);
+		this->FinishInitNested(desc);
+
+		this->LoadTextfile();
+	}
+
+	~NewGRFTextfileWindow()
+	{
+		free(this->text);
+	}
+
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
+	{
+		switch (widget) {
+			case GTW_WIDGET_BACKGROUND:
+				this->line_height = FONT_HEIGHT_NORMAL + 2;
+				resize->height = this->line_height;
+
+				size->height = 4 * resize->height + TOP_SPACING + BOTTOM_SPACING; // At least 4 lines are visible.
+				size->width = max(200u, size->width); // At least 200 pixels wide.
+				break;
+		}
+	}
+
+	virtual void SetStringParameters(int widget) const
+	{
+		if (widget == GTW_WIDGET_CAPTION) SetDParamStr(0, this->grf_config->GetName());
+	}
+
+	virtual void DrawWidget(const Rect &r, int widget) const
+	{
+		if (widget != GTW_WIDGET_BACKGROUND) return;
+
+		int width = r.right - r.left + 1 - WD_BEVEL_LEFT - WD_BEVEL_RIGHT;
+		int height = r.bottom - r.top + 1 - WD_BEVEL_LEFT - WD_BEVEL_RIGHT;
+
+		DrawPixelInfo new_dpi;
+		if (!FillDrawPixelInfo(&new_dpi, r.left + WD_BEVEL_LEFT, r.top, width, height)) return;
+		DrawPixelInfo *old_dpi = _cur_dpi;
+		_cur_dpi = &new_dpi;
+
+		int left, right;
+		if (_current_text_dir == TD_RTL) {
+			left = width + WD_BEVEL_RIGHT - WD_FRAMETEXT_RIGHT - this->hscroll->GetCount();
+			right = width + WD_BEVEL_RIGHT - WD_FRAMETEXT_RIGHT - 1 + this->hscroll->GetPosition();
+		} else {
+			left = WD_FRAMETEXT_LEFT - WD_BEVEL_LEFT - this->hscroll->GetPosition();
+			right = WD_FRAMETEXT_LEFT - WD_BEVEL_LEFT + this->hscroll->GetCount() - 1;
+		}
+		int top = TOP_SPACING;
+		for (uint i = 0; i < this->vscroll->GetCapacity() && i + this->vscroll->GetPosition() < this->lines.Length(); i++) {
+			DrawString(left, right, top + i * this->line_height, this->lines[i + this->vscroll->GetPosition()], TC_WHITE);
+		}
+
+		_cur_dpi = old_dpi;
+	}
+
+	virtual void OnResize()
+	{
+		this->vscroll->SetCapacityFromWidget(this, GTW_WIDGET_BACKGROUND, TOP_SPACING + BOTTOM_SPACING);
+		this->hscroll->SetCapacityFromWidget(this, GTW_WIDGET_BACKGROUND);
+	}
+
+private:
+
+	/**
+	 * Load the NewGRF's textfile text from file, and setup #lines, #max_length, and both scrollbars.
+	 */
+	void LoadTextfile()
+	{
+		this->lines.Clear();
+
+		/* Does GRF have a file of the demanded type? */
+		const char *textfile = this->grf_config->GetTextfile(file_type);
+		if (textfile == NULL) return;
+
+		/* Get text from file */
+		size_t filesize;
+		FILE *handle = FioFOpenFile(textfile, "rb", NEWGRF_DIR, &filesize);
+		if (handle == NULL) return;
+
+		this->text = ReallocT(this->text, filesize + 1);
+		size_t read = fread(this->text, 1, filesize, handle);
+		fclose(handle);
+
+		if (read != filesize) return;
+
+		this->text[filesize] = '\0';
+
+		/* Replace tabs and line feeds with a space since str_validate removes those. */
+		for (char *p = this->text; *p != '\0'; p++) {
+			if (*p == '\t' || *p == '\r') *p = ' ';
+		}
+
+		/* Check for the byte-order-mark, and skip it if needed. */
+		char *p = this->text + (strncmp("\xEF\xBB\xBF", this->text, 3) == 0 ? 3 : 0);
+
+		/* Make sure the string is a valid UTF-8 sequence. */
+		str_validate(p, this->text + filesize, true);
+
+		/* Split the string on newlines. */
+		*this->lines.Append() = p;
+		for (; *p != '\0'; p++) {
+			if (*p == '\n') {
+				*p = '\0';
+				*this->lines.Append() = p + 1;
+			}
+		}
+
+		/* Initialize scrollbars */
+		this->vscroll->SetCount(this->lines.Length());
+
+		this->max_length = 0;
+		for (uint i = 0; i < this->lines.Length(); i++) {
+			this->max_length = max(this->max_length, GetStringBoundingBox(this->lines[i]).width);
+		}
+		this->hscroll->SetCount(this->max_length + WD_FRAMETEXT_LEFT + WD_FRAMETEXT_RIGHT);
+		this->hscroll->SetStepSize(10); // Speed up horizontal scrollbar
+	}
+};
+
+static const NWidgetPart _nested_newgrf_textfile_widgets[] = {
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_CLOSEBOX, COLOUR_MAUVE),
+		NWidget(WWT_CAPTION, COLOUR_MAUVE, GTW_WIDGET_CAPTION), SetDataTip(STR_NULL, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+	EndContainer(),
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_PANEL, COLOUR_MAUVE, GTW_WIDGET_BACKGROUND), SetMinimalSize(200, 125), SetResize(1, 12), SetScrollbar(GTW_WIDGET_VSCROLLBAR),
+		EndContainer(),
+		NWidget(NWID_VERTICAL),
+			NWidget(NWID_VSCROLLBAR, COLOUR_MAUVE, GTW_WIDGET_VSCROLLBAR),
+		EndContainer(),
+	EndContainer(),
+	NWidget(NWID_HORIZONTAL),
+		NWidget(NWID_HSCROLLBAR, COLOUR_MAUVE, GTW_WIDGET_HSCROLLBAR),
+		NWidget(WWT_RESIZEBOX, COLOUR_MAUVE),
+	EndContainer(),
+};
+
+/** Window definition for the grf textfile window */
+static const WindowDesc _newgrf_textfile_desc(
+	WDP_CENTER, 630, 460,
+	WC_NEWGRF_TEXTFILE, WC_NONE,
+	WDF_UNCLICK_BUTTONS,
+	_nested_newgrf_textfile_widgets, lengthof(_nested_newgrf_textfile_widgets)
+);
+
+void ShowNewGRFTextfileWindow(const GRFConfig *c, TextfileType file_type)
+{
+	DeleteWindowByClass(WC_NEWGRF_TEXTFILE);
+	new NewGRFTextfileWindow(&_newgrf_textfile_desc, c, file_type);
 }
 
 static GRFPresetList _grf_preset_list;
@@ -501,7 +681,8 @@ enum ShowNewGRFStateWidgets {
 	SNGRFS_SCROLL2BAR,
 	SNGRFS_NEWGRF_INFO_TITLE,
 	SNGRFS_NEWGRF_INFO,
-	SNGRFS_SET_PARAMETERS,
+	SNGRFS_NEWGRF_TEXTFILE,
+	SNGRFS_SET_PARAMETERS = SNGRFS_NEWGRF_TEXTFILE + TFT_END,
 	SNGRFS_TOGGLE_PALETTE,
 	SNGRFS_APPLY_CHANGES,
 	SNGRFS_RESCAN_FILES,
@@ -579,6 +760,7 @@ struct NewGRFWindow : public QueryStringBaseWindow, NewGRFScanCallback {
 	~NewGRFWindow()
 	{
 		DeleteWindowByClass(WC_GRF_PARAMETERS);
+		DeleteWindowByClass(WC_NEWGRF_TEXTFILE);
 
 		if (this->editable && !this->execute) {
 			CopyGRFConfigList(this->orig_list, this->actives, true);
@@ -781,6 +963,13 @@ struct NewGRFWindow : public QueryStringBaseWindow, NewGRFScanCallback {
 
 	virtual void OnClick(Point pt, int widget, int click_count)
 	{
+		if (widget >= SNGRFS_NEWGRF_TEXTFILE && widget < SNGRFS_NEWGRF_TEXTFILE + TFT_END) {
+			if (this->active_sel == NULL && this->avail_sel == NULL) return;
+
+			ShowNewGRFTextfileWindow(this->active_sel != NULL ? this->active_sel : this->avail_sel, (TextfileType)(widget - SNGRFS_NEWGRF_TEXTFILE));
+			return;
+		}
+
 		switch (widget) {
 			case SNGRFS_PRESET_LIST: {
 				DropDownList *list = new DropDownList();
@@ -994,7 +1183,6 @@ struct NewGRFWindow : public QueryStringBaseWindow, NewGRFScanCallback {
 
 			case SNGRFS_RESCAN_FILES:
 			case SNGRFS_RESCAN_FILES2:
-				TarScanner::DoScan();
 				ScanNewGRFFiles(this);
 				break;
 		}
@@ -1005,7 +1193,8 @@ struct NewGRFWindow : public QueryStringBaseWindow, NewGRFScanCallback {
 		this->avail_sel = NULL;
 		this->avail_pos = -1;
 		this->avails.ForceRebuild();
-		this->DeleteChildWindows(WC_QUERY_STRING); // Remove the parameter query window
+		this->DeleteChildWindows(WC_QUERY_STRING);  // Remove the parameter query window
+		this->DeleteChildWindows(WC_NEWGRF_TEXTFILE); // Remove the view textfile window
 	}
 
 	virtual void OnDropdownSelect(int widget, int index)
@@ -1110,6 +1299,12 @@ struct NewGRFWindow : public QueryStringBaseWindow, NewGRFScanCallback {
 			SNGRFS_MOVE_DOWN,
 			WIDGET_LIST_END
 		);
+
+		const GRFConfig *c = (this->avail_sel == NULL) ? this->active_sel : this->avail_sel;
+		for (TextfileType tft = TFT_BEGIN; tft < TFT_END; tft++) {
+			this->SetWidgetDisabledState(SNGRFS_NEWGRF_TEXTFILE + tft, c == NULL || c->GetTextfile(tft) == NULL);
+		}
+
 		this->SetWidgetDisabledState(SNGRFS_SET_PARAMETERS, !this->show_params || disable_all || this->active_sel->num_valid_params == 0);
 		this->SetWidgetDisabledState(SNGRFS_TOGGLE_PALETTE, disable_all);
 
@@ -1358,6 +1553,9 @@ public:
 		this->resize_y = this->avs->resize_y;
 		if (this->acs->resize_y > 0 && (this->resize_y == 0 || this->resize_y > this->acs->resize_y)) this->resize_y = this->acs->resize_y;
 		this->resize_y = LeastCommonMultiple(this->resize_y, this->inf->resize_y);
+
+		/* Make sure the height suits the 3 column (resp. not-editable) format; the 2 column format can easily fill space between the lists */
+		this->smallest_y = ComputeMaxSize(min_acs_height, this->smallest_y + this->resize_y - 1, this->resize_y);
 	}
 
 	virtual void AssignSizePosition(SizingType sizing, uint x, uint y, uint given_width, uint given_height, bool rtl)
@@ -1407,8 +1605,9 @@ public:
 			acs_width = ComputeMaxSize(min_acs_width, acs_width, this->acs->GetHorizontalStepSize(sizing)) -
 					this->acs->padding_left - this->acs->padding_right;
 
-			uint avs_height = ComputeMaxSize(this->avs->smallest_y, given_height, this->avs->GetVerticalStepSize(sizing));
-			uint acs_height = ComputeMaxSize(this->acs->smallest_y, given_height, this->acs->GetVerticalStepSize(sizing));
+			/* Never use fill_y on these; the minimal size is choosen, so that the 3 column view looks nice */
+			uint avs_height = ComputeMaxSize(this->avs->smallest_y, given_height, this->avs->resize_y);
+			uint acs_height = ComputeMaxSize(this->acs->smallest_y, given_height, this->acs->resize_y);
 
 			/* Assign size and position to the childs. */
 			if (rtl) {
@@ -1444,9 +1643,10 @@ public:
 			uint min_acs_height = this->acs->smallest_y + this->acs->padding_top + this->acs->padding_bottom;
 			uint extra_height = given_height - min_acs_height - min_avs_height;
 
-			uint avs_height = ComputeMaxSize(this->avs->smallest_y, this->avs->smallest_y + extra_height / 2, this->avs->GetVerticalStepSize(sizing));
+			/* Never use fill_y on these; instead use the INTER_LIST_SPACING as filler */
+			uint avs_height = ComputeMaxSize(this->avs->smallest_y, this->avs->smallest_y + extra_height / 2, this->avs->resize_y);
 			if (this->editable) extra_height -= avs_height - this->avs->smallest_y;
-			uint acs_height = ComputeMaxSize(this->acs->smallest_y, this->acs->smallest_y + extra_height, this->acs->GetVerticalStepSize(sizing));
+			uint acs_height = ComputeMaxSize(this->acs->smallest_y, this->acs->smallest_y + extra_height, this->acs->resize_y);
 
 			/* Assign size and position to the childs. */
 			if (rtl) {
@@ -1454,20 +1654,16 @@ public:
 				this->inf->AssignSizePosition(sizing, x, y + this->inf->padding_top, inf_width, inf_height, rtl);
 				x += inf_width + this->inf->padding_right + INTER_COLUMN_SPACING;
 
-				uint ypos = y + this->acs->padding_top;
-				this->acs->AssignSizePosition(sizing, x + this->acs->padding_left, ypos, acs_width, acs_height, rtl);
+				this->acs->AssignSizePosition(sizing, x + this->acs->padding_left, y + this->acs->padding_top, acs_width, acs_height, rtl);
 				if (this->editable) {
-					ypos += acs_height + this->acs->padding_bottom + INTER_LIST_SPACING + this->avs->padding_top;
-					this->avs->AssignSizePosition(sizing, x + this->avs->padding_left, ypos, avs_width, avs_height, rtl);
+					this->avs->AssignSizePosition(sizing, x + this->avs->padding_left, y + given_height - avs_height - this->avs->padding_bottom, avs_width, avs_height, rtl);
 				} else {
 					this->avs->AssignSizePosition(sizing, 0, 0, this->avs->smallest_x, this->avs->smallest_y, rtl);
 				}
 			} else {
-				uint ypos = y + this->acs->padding_top;
-				this->acs->AssignSizePosition(sizing, x + this->acs->padding_left, ypos, acs_width, acs_height, rtl);
+				this->acs->AssignSizePosition(sizing, x + this->acs->padding_left, y + this->acs->padding_top, acs_width, acs_height, rtl);
 				if (this->editable) {
-					ypos += acs_height + this->acs->padding_bottom + INTER_LIST_SPACING + this->avs->padding_top;
-					this->avs->AssignSizePosition(sizing, x + this->avs->padding_left, ypos, avs_width, avs_height, rtl);
+					this->avs->AssignSizePosition(sizing, x + this->avs->padding_left, y + given_height - avs_height - this->avs->padding_bottom, avs_width, avs_height, rtl);
 				} else {
 					this->avs->AssignSizePosition(sizing, 0, 0, this->avs->smallest_x, this->avs->smallest_y, rtl);
 				}
@@ -1527,7 +1723,7 @@ static const NWidgetPart _nested_newgrf_actives_widgets[] = {
 		NWidget(NWID_HORIZONTAL), SetPadding(0, 2, 0, 2),
 			NWidget(WWT_PANEL, COLOUR_MAUVE),
 				NWidget(WWT_INSET, COLOUR_MAUVE, SNGRFS_FILE_LIST), SetMinimalSize(100, 1), SetPadding(2, 2, 2, 2),
-						SetFill(1, 1), SetResize(1, 1), SetScrollbar(SNGRFS_SCROLLBAR),
+						SetFill(1, 1), SetResize(1, 1), SetScrollbar(SNGRFS_SCROLLBAR), SetDataTip(STR_NULL, STR_NEWGRF_SETTINGS_FILE_TOOLTIP),
 				EndContainer(),
 			EndContainer(),
 			NWidget(NWID_VSCROLLBAR, COLOUR_MAUVE, SNGRFS_SCROLLBAR),
@@ -1591,9 +1787,19 @@ static const NWidgetPart _nested_newgrf_availables_widgets[] = {
 
 static const NWidgetPart _nested_newgrf_infopanel_widgets[] = {
 	/* Right side, info panel. */
-	NWidget(WWT_PANEL, COLOUR_MAUVE), SetPadding(0, 0, 2, 0),
-		NWidget(WWT_EMPTY, COLOUR_MAUVE, SNGRFS_NEWGRF_INFO_TITLE), SetFill(1, 0), SetResize(1, 0),
-		NWidget(WWT_EMPTY, COLOUR_MAUVE, SNGRFS_NEWGRF_INFO), SetFill(1, 1), SetResize(1, 1), SetMinimalSize(150, 100),
+	NWidget(NWID_VERTICAL), SetPadding(0, 0, 2, 0),
+		NWidget(WWT_PANEL, COLOUR_MAUVE), SetPadding(0, 0, 2, 0),
+			NWidget(WWT_EMPTY, COLOUR_MAUVE, SNGRFS_NEWGRF_INFO_TITLE), SetFill(1, 0), SetResize(1, 0),
+			NWidget(WWT_EMPTY, COLOUR_MAUVE, SNGRFS_NEWGRF_INFO), SetFill(1, 1), SetResize(1, 1), SetMinimalSize(150, 100),
+		EndContainer(),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, SNGRFS_NEWGRF_TEXTFILE + TFT_README), SetFill(1, 0), SetResize(1, 0),
+				SetDataTip(STR_NEWGRF_SETTINGS_VIEW_README, STR_NULL),
+		NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, SNGRFS_NEWGRF_TEXTFILE + TFT_CHANGELOG), SetFill(1, 0), SetResize(1, 0),
+					SetDataTip(STR_NEWGRF_SETTINGS_VIEW_CHANGELOG, STR_NULL),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, SNGRFS_NEWGRF_TEXTFILE + TFT_LICENSE), SetFill(1, 0), SetResize(1, 0),
+					SetDataTip(STR_NEWGRF_SETTINGS_VIEW_LICENSE, STR_NULL),
+		EndContainer(),
 	EndContainer(),
 	NWidget(NWID_SELECTION, INVALID_COLOUR, SNGRFS_SHOW_APPLY),
 		/* Right side, buttons. */
