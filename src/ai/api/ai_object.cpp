@@ -12,8 +12,6 @@
 #include "../../stdafx.h"
 #include "../../script/squirrel.hpp"
 #include "../../command_func.h"
-#include "../../company_base.h"
-#include "../../company_func.h"
 #include "../../network/network.h"
 #include "../../tunnelbridge.h"
 
@@ -27,92 +25,113 @@
  */
 static AIStorage *GetStorage()
 {
-	return AIInstance::GetStorage();
+	return AIObject::GetActiveInstance()->GetStorage();
 }
 
-void AIObject::SetDoCommandDelay(uint ticks)
+
+/* static */ AIInstance *AIObject::ActiveInstance::active = NULL;
+
+AIObject::ActiveInstance::ActiveInstance(AIInstance *instance)
+{
+	this->last_active = AIObject::ActiveInstance::active;
+	AIObject::ActiveInstance::active = instance;
+}
+
+AIObject::ActiveInstance::~ActiveInstance()
+{
+	AIObject::ActiveInstance::active = this->last_active;
+}
+
+/* static */ AIInstance *AIObject::GetActiveInstance()
+{
+	assert(AIObject::ActiveInstance::active != NULL);
+	return AIObject::ActiveInstance::active;
+}
+
+
+/* static */ void AIObject::SetDoCommandDelay(uint ticks)
 {
 	assert(ticks > 0);
 	GetStorage()->delay = ticks;
 }
 
-uint AIObject::GetDoCommandDelay()
+/* static */ uint AIObject::GetDoCommandDelay()
 {
 	return GetStorage()->delay;
 }
 
-void AIObject::SetDoCommandMode(AIModeProc *proc, AIObject *instance)
+/* static */ void AIObject::SetDoCommandMode(AIModeProc *proc, AIObject *instance)
 {
 	GetStorage()->mode = proc;
 	GetStorage()->mode_instance = instance;
 }
 
-AIModeProc *AIObject::GetDoCommandMode()
+/* static */ AIModeProc *AIObject::GetDoCommandMode()
 {
 	return GetStorage()->mode;
 }
 
-AIObject *AIObject::GetDoCommandModeInstance()
+/* static */ AIObject *AIObject::GetDoCommandModeInstance()
 {
 	return GetStorage()->mode_instance;
 }
 
-void AIObject::SetDoCommandCosts(Money value)
+/* static */ void AIObject::SetDoCommandCosts(Money value)
 {
 	GetStorage()->costs = CommandCost(value);
 }
 
-void AIObject::IncreaseDoCommandCosts(Money value)
+/* static */ void AIObject::IncreaseDoCommandCosts(Money value)
 {
 	GetStorage()->costs.AddCost(value);
 }
 
-Money AIObject::GetDoCommandCosts()
+/* static */ Money AIObject::GetDoCommandCosts()
 {
 	return GetStorage()->costs.GetCost();
 }
 
-void AIObject::SetLastError(AIErrorType last_error)
+/* static */ void AIObject::SetLastError(AIErrorType last_error)
 {
 	GetStorage()->last_error = last_error;
 }
 
-AIErrorType AIObject::GetLastError()
+/* static */ AIErrorType AIObject::GetLastError()
 {
 	return GetStorage()->last_error;
 }
 
-void AIObject::SetLastCost(Money last_cost)
+/* static */ void AIObject::SetLastCost(Money last_cost)
 {
 	GetStorage()->last_cost = last_cost;
 }
 
-Money AIObject::GetLastCost()
+/* static */ Money AIObject::GetLastCost()
 {
 	return GetStorage()->last_cost;
 }
 
-void AIObject::SetRoadType(RoadType road_type)
+/* static */ void AIObject::SetRoadType(RoadType road_type)
 {
 	GetStorage()->road_type = road_type;
 }
 
-RoadType AIObject::GetRoadType()
+/* static */ RoadType AIObject::GetRoadType()
 {
 	return GetStorage()->road_type;
 }
 
-void AIObject::SetRailType(RailType rail_type)
+/* static */ void AIObject::SetRailType(RailType rail_type)
 {
 	GetStorage()->rail_type = rail_type;
 }
 
-RailType AIObject::GetRailType()
+/* static */ RailType AIObject::GetRailType()
 {
 	return GetStorage()->rail_type;
 }
 
-void AIObject::SetLastCommandRes(bool res)
+/* static */ void AIObject::SetLastCommandRes(bool res)
 {
 	GetStorage()->last_command_res = res;
 	/* Also store the results of various global variables */
@@ -122,89 +141,89 @@ void AIObject::SetLastCommandRes(bool res)
 	SetNewGroupID(_new_group_id);
 }
 
-bool AIObject::GetLastCommandRes()
+/* static */ bool AIObject::GetLastCommandRes()
 {
 	return GetStorage()->last_command_res;
 }
 
-void AIObject::SetNewVehicleID(VehicleID vehicle_id)
+/* static */ void AIObject::SetNewVehicleID(VehicleID vehicle_id)
 {
 	GetStorage()->new_vehicle_id = vehicle_id;
 }
 
-VehicleID AIObject::GetNewVehicleID()
+/* static */ VehicleID AIObject::GetNewVehicleID()
 {
 	return GetStorage()->new_vehicle_id;
 }
 
-void AIObject::SetNewSignID(SignID sign_id)
+/* static */ void AIObject::SetNewSignID(SignID sign_id)
 {
 	GetStorage()->new_sign_id = sign_id;
 }
 
-SignID AIObject::GetNewSignID()
+/* static */ SignID AIObject::GetNewSignID()
 {
 	return GetStorage()->new_sign_id;
 }
 
-void AIObject::SetNewTunnelEndtile(TileIndex tile)
+/* static */ void AIObject::SetNewTunnelEndtile(TileIndex tile)
 {
 	GetStorage()->new_tunnel_endtile = tile;
 }
 
-TileIndex AIObject::GetNewTunnelEndtile()
+/* static */ TileIndex AIObject::GetNewTunnelEndtile()
 {
 	return GetStorage()->new_tunnel_endtile;
 }
 
-void AIObject::SetNewGroupID(GroupID group_id)
+/* static */ void AIObject::SetNewGroupID(GroupID group_id)
 {
 	GetStorage()->new_group_id = group_id;
 }
 
-GroupID AIObject::GetNewGroupID()
+/* static */ GroupID AIObject::GetNewGroupID()
 {
 	return GetStorage()->new_group_id;
 }
 
-void AIObject::SetAllowDoCommand(bool allow)
+/* static */ void AIObject::SetAllowDoCommand(bool allow)
 {
 	GetStorage()->allow_do_command = allow;
 }
 
-bool AIObject::GetAllowDoCommand()
+/* static */ bool AIObject::GetAllowDoCommand()
 {
 	return GetStorage()->allow_do_command;
 }
 
-bool AIObject::CanSuspend()
+/* static */ bool AIObject::CanSuspend()
 {
-	Squirrel *squirrel = Company::Get(_current_company)->ai_instance->engine;
+	Squirrel *squirrel = AIObject::GetActiveInstance()->engine;
 	return GetStorage()->allow_do_command && squirrel->CanSuspend();
 }
 
-void *&AIObject::GetEventPointer()
+/* static */ void *&AIObject::GetEventPointer()
 {
 	return GetStorage()->event_data;
 }
 
-void *&AIObject::GetLogPointer()
+/* static */ void *&AIObject::GetLogPointer()
 {
 	return GetStorage()->log_data;
 }
 
-void AIObject::SetCallbackVariable(int index, int value)
+/* static */ void AIObject::SetCallbackVariable(int index, int value)
 {
 	if ((size_t)index >= GetStorage()->callback_value.size()) GetStorage()->callback_value.resize(index + 1);
 	GetStorage()->callback_value[index] = value;
 }
 
-int AIObject::GetCallbackVariable(int index)
+/* static */ int AIObject::GetCallbackVariable(int index)
 {
 	return GetStorage()->callback_value[index];
 }
 
-bool AIObject::DoCommand(TileIndex tile, uint32 p1, uint32 p2, uint cmd, const char *text, AISuspendCallbackProc *callback)
+/* static */ bool AIObject::DoCommand(TileIndex tile, uint32 p1, uint32 p2, uint cmd, const char *text, AISuspendCallbackProc *callback)
 {
 	if (!AIObject::CanSuspend()) {
 		throw AI_FatalError("You are not allowed to execute any DoCommand (even indirect) in your constructor, Save(), Load(), and any valuator.");

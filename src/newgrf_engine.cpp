@@ -460,7 +460,7 @@ static uint32 PositionHelper(const Vehicle *v, bool consecutive)
 	return chain_before | chain_after << 8 | (chain_before + chain_after + consecutive) << 16;
 }
 
-static uint32 VehicleGetVariable(Vehicle *v, const ResolverObject *object, byte variable, byte parameter, bool *available)
+static uint32 VehicleGetVariable(Vehicle *v, const ResolverObject *object, byte variable, uint32 parameter, bool *available)
 {
 	/* Calculated vehicle parameters */
 	switch (variable) {
@@ -531,7 +531,10 @@ static uint32 VehicleGetVariable(Vehicle *v, const ResolverObject *object, byte 
 					}
 				}
 
-				uint8 common_bitnum = (common_cargo_type == CT_INVALID ? 0xFF : CargoSpec::Get(common_cargo_type)->bitnum);
+				/* Unlike everywhere else the cargo translation table is only used since grf version 8, not 7. */
+				const GRFFile *grffile = v->GetGRF();
+				uint8 common_bitnum = (common_cargo_type == CT_INVALID) ? 0xFF :
+					(grffile->grf_version < 8) ? CargoSpec::Get(common_cargo_type)->bitnum : grffile->cargo_map[common_cargo_type];
 				v->grf_cache.consist_cargo_information = cargo_classes | (common_bitnum << 8) | (common_subtype << 16) | (user_def_data << 24);
 				SetBit(v->grf_cache.cache_valid, NCVV_CONSIST_CARGO_INFORMATION);
 			}
@@ -558,7 +561,7 @@ static uint32 VehicleGetVariable(Vehicle *v, const ResolverObject *object, byte 
 					airporttype = st->airport.GetSpec()->ttd_airport_type;
 				}
 
-				return (altitude << 8) | airporttype;
+				return (Clamp(altitude, 0, 0xFF) << 8) | airporttype;
 			}
 
 		case 0x45: { // Curvature info
@@ -792,7 +795,7 @@ static uint32 VehicleGetVariable(Vehicle *v, const ResolverObject *object, byte 
 			switch (variable - 0x80) {
 				case 0x62: return t->track;
 				case 0x66: return t->railtype;
-				case 0x73: return t->gcache.cached_veh_length;
+				case 0x73: return 0x80 + VEHICLE_LENGTH - t->gcache.cached_veh_length;
 				case 0x74: return t->gcache.cached_power;
 				case 0x75: return GB(t->gcache.cached_power,  8, 24);
 				case 0x76: return GB(t->gcache.cached_power, 16, 16);
@@ -837,7 +840,7 @@ static uint32 VehicleGetVariable(Vehicle *v, const ResolverObject *object, byte 
 	return UINT_MAX;
 }
 
-static uint32 VehicleGetVariable(const ResolverObject *object, byte variable, byte parameter, bool *available)
+static uint32 VehicleGetVariable(const ResolverObject *object, byte variable, uint32 parameter, bool *available)
 {
 	Vehicle *v = const_cast<Vehicle*>(GRV(object));
 
@@ -1076,16 +1079,13 @@ uint16 GetVehicleCallbackParent(CallbackID callback, uint32 param1, uint32 param
 /* Callback 36 handlers */
 uint GetVehicleProperty(const Vehicle *v, PropertyID property, uint orig_value)
 {
-	uint16 callback = GetVehicleCallback(CBID_VEHICLE_MODIFY_PROPERTY, property, 0, v->engine_type, v);
-	if (callback != CALLBACK_FAILED) return callback;
-
-	return orig_value;
+	return GetEngineProperty(v->engine_type, property, orig_value, v);
 }
 
 
-uint GetEngineProperty(EngineID engine, PropertyID property, uint orig_value)
+uint GetEngineProperty(EngineID engine, PropertyID property, uint orig_value, const Vehicle *v)
 {
-	uint16 callback = GetVehicleCallback(CBID_VEHICLE_MODIFY_PROPERTY, property, 0, engine, NULL);
+	uint16 callback = GetVehicleCallback(CBID_VEHICLE_MODIFY_PROPERTY, property, 0, engine, v);
 	if (callback != CALLBACK_FAILED) return callback;
 
 	return orig_value;

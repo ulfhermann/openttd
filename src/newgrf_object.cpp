@@ -157,14 +157,15 @@ static uint32 GetObjectIDAtOffset(TileIndex tile, uint32 cur_grfid)
  * @param parameter from callback.  It's in fact a pair of coordinates
  * @param tile TileIndex from which the callback was initiated
  * @param index of the object been queried for
+ * @param grf_version8 True, if we are dealing with a new NewGRF which uses GRF version >= 8.
  * @return a construction of bits obeying the newgrf format
  */
-static uint32 GetNearbyObjectTileInformation(byte parameter, TileIndex tile, ObjectID index)
+static uint32 GetNearbyObjectTileInformation(byte parameter, TileIndex tile, ObjectID index, bool grf_version8)
 {
 	if (parameter != 0) tile = GetNearbyTile(parameter, tile); // only perform if it is required
 	bool is_same_object = (IsTileType(tile, MP_OBJECT) && GetObjectIndex(tile) == index);
 
-	return GetNearbyTileInformation(tile) | (is_same_object ? 1 : 0) << 8;
+	return GetNearbyTileInformation(tile, grf_version8) | (is_same_object ? 1 : 0) << 8;
 }
 
 /**
@@ -222,7 +223,7 @@ static uint32 GetCountAndDistanceOfClosestInstance(byte local_id, uint32 grfid, 
 }
 
 /** Used by the resolver to get values for feature 0F deterministic spritegroups. */
-static uint32 ObjectGetVariable(const ResolverObject *object, byte variable, byte parameter, bool *available)
+static uint32 ObjectGetVariable(const ResolverObject *object, byte variable, uint32 parameter, bool *available)
 {
 	const Object *o = object->u.object.o;
 	TileIndex tile = object->u.object.tile;
@@ -289,7 +290,7 @@ static uint32 ObjectGetVariable(const ResolverObject *object, byte variable, byt
 		}
 
 		/* Tile information. */
-		case 0x41: return GetTileSlope(tile, NULL) << 8 | GetTerrainType(tile);
+		case 0x41: return GetTileSlope(tile) << 8 | GetTerrainType(tile);
 
 		/* Construction date */
 		case 0x42: return o->build_date;
@@ -321,7 +322,7 @@ static uint32 ObjectGetVariable(const ResolverObject *object, byte variable, byt
 			return (IsTileType(tile, MP_OBJECT) && Object::GetByTile(tile) == o) ? GetObjectRandomBits(tile) : 0;
 
 		/* Land info of nearby tiles */
-		case 0x62: return GetNearbyObjectTileInformation(parameter, tile, o == NULL ? INVALID_OBJECT : o->index);
+		case 0x62: return GetNearbyObjectTileInformation(parameter, tile, o == NULL ? INVALID_OBJECT : o->index, object->grffile->grf_version >= 8);
 
 		/* Animation counter of nearby tile */
 		case 0x63:
