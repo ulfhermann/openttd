@@ -255,9 +255,9 @@ static void DrawTile_Town(TileInfo *ti)
 	}
 }
 
-static uint GetSlopeZ_Town(TileIndex tile, uint x, uint y)
+static int GetSlopePixelZ_Town(TileIndex tile, uint x, uint y)
 {
-	return GetTileMaxZ(tile);
+	return GetTileMaxPixelZ(tile);
 }
 
 /** Tile callback routine */
@@ -273,7 +273,7 @@ static Foundation GetFoundation_Town(TileIndex tile, Slope tileh)
 		const HouseSpec *hs = HouseSpec::Get(hid);
 		if (hs->grf_prop.spritegroup[0] != NULL && HasBit(hs->callback_mask, CBM_HOUSE_DRAW_FOUNDATIONS)) {
 			uint32 callback_res = GetHouseCallback(CBID_HOUSE_DRAW_FOUNDATIONS, 0, 0, hid, Town::GetByTile(tile), tile);
-			if (callback_res == 0) return FOUNDATION_NONE;
+			if (callback_res != CALLBACK_FAILED && !ConvertBooleanCallback(hs->grf_prop.grffile, CBID_HOUSE_DRAW_FOUNDATIONS, callback_res)) return FOUNDATION_NONE;
 		}
 	}
 	return FlatteningFoundation(tileh);
@@ -487,13 +487,13 @@ static void TileLoop_Town(TileIndex tile)
 			const CargoSpec *cs = CargoSpec::Get(cargo);
 			switch (cs->town_effect) {
 				case TE_PASSENGERS:
-					t->new_max_pass += amt;
-					t->new_act_pass += moved;
+					t->pass.new_max += amt;
+					t->pass.new_act += moved;
 					break;
 
 				case TE_MAIL:
-					t->new_max_mail += amt;
-					t->new_act_mail += moved;
+					t->mail.new_max += amt;
+					t->mail.new_act += moved;
 					break;
 
 				default:
@@ -505,16 +505,16 @@ static void TileLoop_Town(TileIndex tile)
 			uint amt = GB(r, 0, 8) / 8 + 1;
 
 			if (EconomyIsInRecession()) amt = (amt + 1) >> 1;
-			t->new_max_pass += amt;
-			t->new_act_pass += MoveGoodsToStation(CT_PASSENGERS, amt, ST_TOWN, t->index, stations.GetStations());
+			t->pass.new_max += amt;
+			t->pass.new_act += MoveGoodsToStation(CT_PASSENGERS, amt, ST_TOWN, t->index, stations.GetStations());
 		}
 
 		if (GB(r, 8, 8) < hs->mail_generation) {
 			uint amt = GB(r, 8, 8) / 8 + 1;
 
 			if (EconomyIsInRecession()) amt = (amt + 1) >> 1;
-			t->new_max_mail += amt;
-			t->new_act_mail += MoveGoodsToStation(CT_MAIL, amt, ST_TOWN, t->index, stations.GetStations());
+			t->mail.new_max += amt;
+			t->mail.new_act += MoveGoodsToStation(CT_MAIL, amt, ST_TOWN, t->index, stations.GetStations());
 		}
 	}
 
@@ -650,10 +650,14 @@ static void GetTileDesc_Town(TileIndex tile, TileDesc *td)
 	td->str = hs->building_name;
 
 	uint16 callback_res = GetHouseCallback(CBID_HOUSE_CUSTOM_NAME, house_completed ? 1 : 0, 0, house, Town::GetByTile(tile), tile);
-	if (callback_res != CALLBACK_FAILED) {
-		StringID new_name = GetGRFStringID(hs->grf_prop.grffile->grfid, 0xD000 + callback_res);
-		if (new_name != STR_NULL && new_name != STR_UNDEFINED) {
-			td->str = new_name;
+	if (callback_res != CALLBACK_FAILED && callback_res != 0x400) {
+		if (callback_res > 0x400) {
+			ErrorUnknownCallbackResult(hs->grf_prop.grffile->grfid, CBID_HOUSE_CUSTOM_NAME, callback_res);
+		} else {
+			StringID new_name = GetGRFStringID(hs->grf_prop.grffile->grfid, 0xD000 + callback_res);
+			if (new_name != STR_NULL && new_name != STR_UNDEFINED) {
+				td->str = new_name;
+			}
 		}
 	}
 
@@ -787,7 +791,7 @@ static bool IsRoadAllowedHere(Town *t, TileIndex tile, DiagDirection dir)
 		}
 	}
 
-	Slope cur_slope = _settings_game.construction.build_on_slopes ? GetFoundationSlope(tile, NULL) : GetTileSlope(tile, NULL);
+	Slope cur_slope = _settings_game.construction.build_on_slopes ? GetFoundationSlope(tile) : GetTileSlope(tile);
 	bool ret = !IsNeighborRoadTile(tile, dir, t->layout == TL_ORIGINAL ? 1 : 2);
 	if (cur_slope == SLOPE_FLAT) return ret;
 
@@ -828,7 +832,7 @@ static void LevelTownLand(TileIndex tile)
 
 	/* Don't terraform if land is plain or if there's a house there. */
 	if (IsTileType(tile, MP_HOUSE)) return;
-	Slope tileh = GetTileSlope(tile, NULL);
+	Slope tileh = GetTileSlope(tile);
 	if (tileh == SLOPE_FLAT) return;
 
 	/* First try up, then down */
@@ -871,7 +875,7 @@ static RoadBits GetTownRoadGridElement(Town *t, TileIndex tile, DiagDirection di
 
 	RoadBits rb_template;
 
-	switch (GetTileSlope(tile, NULL)) {
+	switch (GetTileSlope(tile)) {
 		default:       rb_template = ROAD_ALL; break;
 		case SLOPE_W:  rb_template = ROAD_NW | ROAD_SW; break;
 		case SLOPE_SW: rb_template = ROAD_Y  | ROAD_SW; break;
@@ -970,7 +974,7 @@ static bool GrowTownWithBridge(const Town *t, const TileIndex tile, const DiagDi
 {
 	assert(bridge_dir < DIAGDIR_END);
 
-	const Slope slope = GetTileSlope(tile, NULL);
+	const Slope slope = GetTileSlope(tile);
 
 	/* Make sure the direction is compatible with the slope.
 	 * Well we check if the slope has an up bit set in the
@@ -1337,7 +1341,7 @@ static bool GrowTown(Town *t)
 		tile = t->xy;
 		for (ptr = _town_coord_mod; ptr != endof(_town_coord_mod); ++ptr) {
 			/* Only work with plain land that not already has a house */
-			if (!IsTileType(tile, MP_HOUSE) && GetTileSlope(tile, NULL) == SLOPE_FLAT) {
+			if (!IsTileType(tile, MP_HOUSE) && GetTileSlope(tile) == SLOPE_FLAT) {
 				if (DoCommand(tile, 0, 0, DC_AUTO | DC_NO_WATER, CMD_LANDSCAPE_CLEAR).Succeeded()) {
 					DoCommand(tile, GenRandomRoadBits(), t->index, DC_EXEC | DC_AUTO, CMD_BUILD_ROAD);
 					cur_company.Restore();
@@ -1397,8 +1401,8 @@ void UpdateTownRadius(Town *t)
 
 void UpdateTownMaxPass(Town *t)
 {
-	t->max_pass = t->population >> 3;
-	t->max_mail = t->population >> 4;
+	t->pass.old_max = t->population >> 3;
+	t->mail.old_max = t->population >> 4;
 }
 
 /**
@@ -1422,20 +1426,8 @@ static void DoCreateTown(Town *t, TileIndex tile, uint32 townnameparts, TownSize
 	t->population = 0;
 	t->grow_counter = 0;
 	t->growth_rate = 250;
-	t->new_max_pass = 0;
-	t->new_max_mail = 0;
-	t->new_act_pass = 0;
-	t->new_act_mail = 0;
-	t->max_pass = 0;
-	t->max_mail = 0;
-	t->act_pass = 0;
-	t->act_mail = 0;
 
 	t->fund_buildings_months = 0;
-	t->new_act_food = 0;
-	t->new_act_water = 0;
-	t->act_food = 0;
-	t->act_water = 0;
 
 	for (uint i = 0; i != MAX_COMPANIES; i++) t->ratings[i] = RATING_INITIAL;
 
@@ -1500,7 +1492,7 @@ static CommandCost TownCanBePlacedHere(TileIndex tile)
 	}
 
 	/* Can only build on clear flat areas, possibly with trees. */
-	if ((!IsTileType(tile, MP_CLEAR) && !IsTileType(tile, MP_TREES)) || GetTileSlope(tile, NULL) != SLOPE_FLAT) {
+	if ((!IsTileType(tile, MP_CLEAR) && !IsTileType(tile, MP_TREES)) || GetTileSlope(tile) != SLOPE_FLAT) {
 		return_cmd_error(STR_ERROR_SITE_UNSUITABLE);
 	}
 
@@ -1697,7 +1689,7 @@ static bool FindFurthestFromWater(TileIndex tile, void *user_data)
 	uint dist = GetClosestWaterDistance(tile, true);
 
 	if (IsTileType(tile, MP_CLEAR) &&
-			GetTileSlope(tile, NULL) == SLOPE_FLAT &&
+			GetTileSlope(tile) == SLOPE_FLAT &&
 			IsTileAlignedToGrid(tile, sp->layout) &&
 			dist > sp->max_dist) {
 		sp->tile = tile;
@@ -1907,7 +1899,7 @@ static void MakeTownHouse(TileIndex t, Town *town, byte counter, byte stage, Hou
 static inline bool CanBuildHouseHere(TileIndex tile, TownID town, bool noslope)
 {
 	/* cannot build on these slopes... */
-	Slope slope = GetTileSlope(tile, NULL);
+	Slope slope = GetTileSlope(tile);
 	if ((noslope && slope != SLOPE_FLAT) || IsSteepSlope(slope)) return false;
 
 	/* building under a bridge? */
@@ -1930,7 +1922,7 @@ static inline bool CanBuildHouseHere(TileIndex tile, TownID town, bool noslope)
  * @return true iff house can be built here
  * @see CanBuildHouseHere()
  */
-static inline bool CheckBuildHouseSameZ(TileIndex tile, TownID town, uint z, bool noslope)
+static inline bool CheckBuildHouseSameZ(TileIndex tile, TownID town, int z, bool noslope)
 {
 	if (!CanBuildHouseHere(tile, town, noslope)) return false;
 
@@ -1950,7 +1942,7 @@ static inline bool CheckBuildHouseSameZ(TileIndex tile, TownID town, uint z, boo
  * @return true iff house can be built
  * @see CheckBuildHouseSameZ()
  */
-static bool CheckFree2x2Area(TileIndex tile, TownID town, uint z, bool noslope)
+static bool CheckFree2x2Area(TileIndex tile, TownID town, int z, bool noslope)
 {
 	/* we need to check this tile too because we can be at different tile now */
 	if (!CheckBuildHouseSameZ(tile, town, z, noslope)) return false;
@@ -2039,7 +2031,7 @@ static inline bool TownLayoutAllows2x2HouseHere(Town *t, TileIndex tile)
  * @param noslope are slopes forbidden?
  * @param second diagdir from first tile to second tile
  */
-static bool CheckTownBuild2House(TileIndex *tile, Town *t, uint maxz, bool noslope, DiagDirection second)
+static bool CheckTownBuild2House(TileIndex *tile, Town *t, int maxz, bool noslope, DiagDirection second)
 {
 	/* 'tile' is already checked in BuildTownHouse() - CanBuildHouseHere() and slope test */
 
@@ -2064,7 +2056,7 @@ static bool CheckTownBuild2House(TileIndex *tile, Town *t, uint maxz, bool noslo
  * @param maxz all tiles should have the same height
  * @param noslope are slopes forbidden?
  */
-static bool CheckTownBuild2x2House(TileIndex *tile, Town *t, uint maxz, bool noslope)
+static bool CheckTownBuild2x2House(TileIndex *tile, Town *t, int maxz, bool noslope)
 {
 	TileIndex tile2 = *tile;
 
@@ -2095,7 +2087,7 @@ static bool BuildTownHouse(Town *t, TileIndex tile)
 	/* no house allowed at all, bail out */
 	if (!CanBuildHouseHere(tile, t->index, false)) return false;
 
-	uint z;
+	int z;
 	Slope slope = GetTileSlope(tile, &z);
 
 	/* Get the town zone type of the current tile, as well as the climate.
@@ -2104,7 +2096,7 @@ static bool BuildTownHouse(Town *t, TileIndex tile)
 
 	/* Above snow? */
 	int land = _settings_game.game_creation.landscape;
-	if (land == LT_ARCTIC && z >= _settings_game.game_creation.snow_line) land = -1;
+	if (land == LT_ARCTIC && z >= HighestSnowLine()) land = -1;
 
 	uint bitmask = (1 << rad) + (1 << (land + 12));
 
@@ -2139,7 +2131,7 @@ static bool BuildTownHouse(Town *t, TileIndex tile)
 		houses[num++] = (HouseID)i;
 	}
 
-	uint maxz = GetTileMaxZ(tile);
+	int maxz = GetTileMaxZ(tile);
 	TileIndex baseTile = tile;
 
 	while (probability_max > 0) {
@@ -2203,7 +2195,7 @@ static bool BuildTownHouse(Town *t, TileIndex tile)
 
 		if (HasBit(hs->callback_mask, CBM_HOUSE_ALLOW_CONSTRUCTION)) {
 			uint16 callback_res = GetHouseCallback(CBID_HOUSE_ALLOW_CONSTRUCTION, 0, 0, house, t, tile, true, random_bits);
-			if (callback_res != CALLBACK_FAILED && GB(callback_res, 0, 8) == 0) continue;
+			if (callback_res != CALLBACK_FAILED && !Convert8bitBooleanCallback(hs->grf_prop.grffile, CBID_HOUSE_ALLOW_CONSTRUCTION, callback_res)) continue;
 		}
 
 		/* build the house */
@@ -2525,7 +2517,7 @@ static CommandCost TownActionRoadRebuild(Town *t, DoCommandFlag flags)
 static bool SearchTileForStatue(TileIndex tile, void *user_data)
 {
 	/* Statues can be build on slopes, just like houses. Only the steep slopes is a no go. */
-	if (IsSteepSlope(GetTileSlope(tile, NULL))) return false;
+	if (IsSteepSlope(GetTileSlope(tile))) return false;
 	/* Don't build statues under bridges. */
 	if (MayHaveBridgeAbove(tile) && IsBridgeAbove(tile)) return false;
 
@@ -2614,7 +2606,7 @@ static CommandCost TownActionBribe(Town *t, DoCommandFlag flags)
 
 			/* only show errormessage to the executing player. All errors are handled command.c
 			 * but this is special, because it can only 'fail' on a DC_EXEC */
-			if (IsLocalCompany()) ShowErrorMessage(STR_ERROR_BRIBE_FAILED, STR_ERROR_BRIBE_FAILED_2, WL_INFO);
+			if (IsLocalCompany()) ShowErrorMessage(STR_ERROR_BRIBE_FAILED, INVALID_STRING_ID, WL_INFO);
 
 			/* decrease by a lot!
 			 * ChangeTownRating is only for stuff in demolishing. Bribe failure should
@@ -2779,10 +2771,10 @@ static void UpdateTownGrowRate(Town *t)
 	}
 
 	if (_settings_game.game_creation.landscape == LT_ARCTIC) {
-		if (TilePixelHeight(t->xy) >= GetSnowLine() && t->act_food == 0 && t->population > 90) return;
+		if (TileHeight(t->xy) >= GetSnowLine() && t->food.old_act == 0 && t->population > 90) return;
 
 	} else if (_settings_game.game_creation.landscape == LT_TROPIC) {
-		if (GetTropicZone(t->xy) == TROPICZONE_DESERT && (t->act_food == 0 || t->act_water == 0) && t->population > 60) return;
+		if (GetTropicZone(t->xy) == TROPICZONE_DESERT && (t->food.old_act == 0 || t->water.old_act == 0) && t->population > 60) return;
 	}
 
 	/* Use the normal growth rate values if new buildings have been funded in
@@ -2802,13 +2794,10 @@ static void UpdateTownGrowRate(Town *t)
 
 static void UpdateTownAmounts(Town *t)
 {
-	t->max_pass = t->new_max_pass; t->new_max_pass = 0;
-	t->act_pass = t->new_act_pass; t->new_act_pass = 0;
-	t->act_food = t->new_act_food; t->new_act_food = 0;
-	t->act_water = t->new_act_water; t->new_act_water = 0;
-
-	t->max_mail = t->new_max_mail; t->new_max_mail = 0;
-	t->act_mail = t->new_act_mail; t->new_act_mail = 0;
+	t->pass.NewMonth();
+	t->mail.NewMonth();
+	t->food.NewMonth();
+	t->water.NewMonth();
 
 	SetWindowDirty(WC_TOWN_VIEW, t->index);
 }
@@ -3046,7 +3035,7 @@ void TownsYearlyLoop()
 	}
 }
 
-static CommandCost TerraformTile_Town(TileIndex tile, DoCommandFlag flags, uint z_new, Slope tileh_new)
+static CommandCost TerraformTile_Town(TileIndex tile, DoCommandFlag flags, int z_new, Slope tileh_new)
 {
 	if (AutoslopeEnabled()) {
 		HouseID house = GetHouseType(tile);
@@ -3064,7 +3053,7 @@ static CommandCost TerraformTile_Town(TileIndex tile, DoCommandFlag flags, uint 
 			if (HasBit(hs->callback_mask, CBM_HOUSE_AUTOSLOPE)) {
 				/* If the callback fails, allow autoslope. */
 				uint16 res = GetHouseCallback(CBID_HOUSE_AUTOSLOPE, 0, 0, house, Town::GetByTile(tile), tile);
-				if ((res != 0) && (res != CALLBACK_FAILED)) allow_terraform = false;
+				if (res != CALLBACK_FAILED && ConvertBooleanCallback(hs->grf_prop.grffile, CBID_HOUSE_AUTOSLOPE, res)) allow_terraform = false;
 			}
 
 			if (allow_terraform) return CommandCost(EXPENSES_CONSTRUCTION, _price[PR_BUILD_FOUNDATION]);
@@ -3077,15 +3066,15 @@ static CommandCost TerraformTile_Town(TileIndex tile, DoCommandFlag flags, uint 
 /** Tile callback functions for a town */
 extern const TileTypeProcs _tile_type_town_procs = {
 	DrawTile_Town,           // draw_tile_proc
-	GetSlopeZ_Town,          // get_slope_z_proc
+	GetSlopePixelZ_Town,     // get_slope_z_proc
 	ClearTile_Town,          // clear_tile_proc
 	AddAcceptedCargo_Town,   // add_accepted_cargo_proc
 	GetTileDesc_Town,        // get_tile_desc_proc
 	GetTileTrackStatus_Town, // get_tile_track_status_proc
 	NULL,                    // click_tile_proc
 	AnimateTile_Town,        // animate_tile_proc
-	TileLoop_Town,           // tile_loop_clear
-	ChangeTileOwner_Town,    // change_tile_owner_clear
+	TileLoop_Town,           // tile_loop_proc
+	ChangeTileOwner_Town,    // change_tile_owner_proc
 	AddProducedCargo_Town,   // add_produced_cargo_proc
 	NULL,                    // vehicle_enter_tile_proc
 	GetFoundation_Town,      // get_foundation_proc

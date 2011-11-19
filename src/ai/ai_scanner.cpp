@@ -28,6 +28,8 @@ void AIScanner::RescanAIDir()
 	this->Scan(PATHSEP "library.nut", AI_LIBRARY_DIR);
 }
 
+template <> const char *GetClassName<AIInfo>() { return "AIInfo"; }
+
 AIScanner::AIScanner() :
 	ScriptScanner(),
 	info_dummy(NULL)
@@ -42,6 +44,7 @@ AIScanner::AIScanner() :
 	SQAIInfo.DefSQConst(engine, AICONFIG_RANDOM, "AICONFIG_RANDOM");
 	SQAIInfo.DefSQConst(engine, AICONFIG_BOOLEAN, "AICONFIG_BOOLEAN");
 	SQAIInfo.DefSQConst(engine, AICONFIG_INGAME, "AICONFIG_INGAME");
+	SQAIInfo.DefSQConst(engine, AICONFIG_AI_DEVELOPER, "AICONFIG_AI_DEVELOPER");
 	SQAIInfo.PostRegister(engine);
 	this->engine->AddMethod("RegisterAI", &AIInfo::Constructor, 2, "tx");
 	this->engine->AddMethod("RegisterDummyAI", &AIInfo::DummyConstructor, 2, "tx");
@@ -67,16 +70,16 @@ void AIScanner::Reset()
 {
 	AIInfoList::iterator it = this->info_list.begin();
 	for (; it != this->info_list.end(); it++) {
-		free((void *)(*it).first);
+		free((*it).first);
 		delete (*it).second;
 	}
 	it = this->info_single_list.begin();
 	for (; it != this->info_single_list.end(); it++) {
-		free((void *)(*it).first);
+		free((*it).first);
 	}
 	AILibraryList::iterator lit = this->library_list.begin();
 	for (; lit != this->library_list.end(); lit++) {
-		free((void *)(*lit).first);
+		free((*lit).first);
 		delete (*lit).second;
 	}
 
@@ -425,11 +428,11 @@ static bool IsSameAI(const ContentInfo *ci, bool md5sum, AIFileInfo *info)
 	AIFileChecksumCreator checksum;
 	const char *tar_filename = info->GetTarFile();
 	TarList::iterator iter;
-	if (tar_filename != NULL && (iter = _tar_list.find(tar_filename)) != _tar_list.end()) {
+	if (tar_filename != NULL && (iter = _tar_list[AI_DIR].find(tar_filename)) != _tar_list[AI_DIR].end()) {
 		/* The main script is in a tar file, so find all files that
 		 * are in the same tar and add them to the MD5 checksumming. */
 		TarFileList::iterator tar;
-		FOR_ALL_TARS(tar) {
+		FOR_ALL_TARS(tar, AI_DIR) {
 			/* Not in the same tar. */
 			if (tar->second.tar_filename != iter->first) continue;
 
