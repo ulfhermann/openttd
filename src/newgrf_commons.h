@@ -140,8 +140,8 @@ struct NewGRFSpriteLayout : ZeroedMemoryAllocator, DrawTileSprites {
 
 	virtual ~NewGRFSpriteLayout()
 	{
-		free(const_cast<DrawTileSeqStruct*>(this->seq));
-		free(const_cast<TileLayoutRegisters*>(this->registers));
+		free(this->seq);
+		free(this->registers);
 	}
 
 	/**
@@ -296,9 +296,13 @@ extern ObjectOverrideManager _object_mngr;
 
 uint32 GetTerrainType(TileIndex tile, TileContext context = TCX_NORMAL);
 TileIndex GetNearbyTile(byte parameter, TileIndex tile, bool signed_offsets = true, Axis axis = INVALID_AXIS);
-uint32 GetNearbyTileInformation(TileIndex tile);
+uint32 GetNearbyTileInformation(TileIndex tile, bool grf_version8);
 uint32 GetCompanyInfo(CompanyID owner, const struct Livery *l = NULL);
 CommandCost GetErrorMessageFromLocationCallbackResult(uint16 cb_res, uint32 grfid, StringID default_error);
+
+void ErrorUnknownCallbackResult(uint32 grfid, uint16 cbid, uint16 cb_res);
+bool ConvertBooleanCallback(const struct GRFFile *grffile, uint16 cbid, uint16 cb_res);
+bool Convert8bitBooleanCallback(const struct GRFFile *grffile, uint16 cbid, uint16 cb_res);
 
 /**
  * Data related to the handling of grf files.

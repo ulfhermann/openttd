@@ -89,7 +89,16 @@ TileIndex GetNorthernBridgeEnd(TileIndex t);
 TileIndex GetSouthernBridgeEnd(TileIndex t);
 TileIndex GetOtherBridgeEnd(TileIndex t);
 
-uint GetBridgeHeight(TileIndex tile);
+int GetBridgeHeight(TileIndex tile);
+/**
+ * Get the height ('z') of a bridge in pixels.
+ * @param tile the bridge ramp tile to get the bridge height from
+ * @return the height of the bridge in pixels
+ */
+static inline int GetBridgePixelHeight(TileIndex tile)
+{
+	return GetBridgeHeight(tile) * TILE_HEIGHT;
+}
 
 /**
  * Remove the bridge over the given axis.
