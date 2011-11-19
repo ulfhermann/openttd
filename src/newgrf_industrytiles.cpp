@@ -32,14 +32,15 @@
  * @param tile TileIndex from which the callback was initiated
  * @param index of the industry been queried for
  * @param signed_offsets Are the x and y offset encoded in parameter signed?
+ * @param grf_version8 True, if we are dealing with a new NewGRF which uses GRF version >= 8.
  * @return a construction of bits obeying the newgrf format
  */
-uint32 GetNearbyIndustryTileInformation(byte parameter, TileIndex tile, IndustryID index, bool signed_offsets)
+uint32 GetNearbyIndustryTileInformation(byte parameter, TileIndex tile, IndustryID index, bool signed_offsets, bool grf_version8)
 {
 	if (parameter != 0) tile = GetNearbyTile(parameter, tile, signed_offsets); // only perform if it is required
 	bool is_same_industry = (IsTileType(tile, MP_INDUSTRY) && GetIndustryIndex(tile) == index);
 
-	return GetNearbyTileInformation(tile) | (is_same_industry ? 1 : 0) << 8;
+	return GetNearbyTileInformation(tile, grf_version8) | (is_same_industry ? 1 : 0) << 8;
 }
 
 /**
@@ -61,7 +62,7 @@ uint32 GetRelativePosition(TileIndex tile, TileIndex ind_tile)
 	return ((y & 0xF) << 20) | ((x & 0xF) << 16) | (y << 8) | x;
 }
 
-static uint32 IndustryTileGetVariable(const ResolverObject *object, byte variable, byte parameter, bool *available)
+static uint32 IndustryTileGetVariable(const ResolverObject *object, byte variable, uint32 parameter, bool *available)
 {
 	const Industry *inds = object->u.industry.ind;
 	TileIndex tile       = object->u.industry.tile;
@@ -87,7 +88,7 @@ static uint32 IndustryTileGetVariable(const ResolverObject *object, byte variabl
 		case 0x44: return (IsTileType(tile, MP_INDUSTRY)) ? GetAnimationFrame(tile) : 0;
 
 		/* Land info of nearby tiles */
-		case 0x60: return GetNearbyIndustryTileInformation(parameter, tile, inds == NULL ? (IndustryID)INVALID_INDUSTRY : inds->index);
+		case 0x60: return GetNearbyIndustryTileInformation(parameter, tile, inds == NULL ? (IndustryID)INVALID_INDUSTRY : inds->index, true, object->grffile->grf_version >= 8);
 
 		/* Animation stage of nearby tiles */
 		case 0x61:
@@ -248,7 +249,7 @@ bool DrawNewIndustryTile(TileInfo *ti, Industry *i, IndustryGfx gfx, const Indus
 		if (HasBit(inds->callback_mask, CBM_INDT_DRAW_FOUNDATIONS)) {
 			/* Called to determine the type (if any) of foundation to draw for industry tile */
 			uint32 callback_res = GetIndustryTileCallback(CBID_INDTILE_DRAW_FOUNDATIONS, 0, 0, gfx, i, ti->tile);
-			draw_old_one = (callback_res != 0);
+			if (callback_res != CALLBACK_FAILED) draw_old_one = ConvertBooleanCallback(inds->grf_prop.grffile, CBID_INDTILE_DRAW_FOUNDATIONS, callback_res);
 		}
 
 		if (draw_old_one) DrawFoundation(ti, FOUNDATION_LEVELED);
@@ -295,7 +296,7 @@ CommandCost PerformIndustryTileSlopeCheck(TileIndex ind_base_tile, TileIndex ind
 
 	uint16 callback_res = GetIndustryTileCallback(CBID_INDTILE_SHAPE_CHECK, 0, creation_type << 8 | itspec_index, gfx, &ind, ind_tile);
 	if (callback_res == CALLBACK_FAILED) {
-		if (!IsSlopeRefused(GetTileSlope(ind_tile, NULL), its->slopes_refused)) return CommandCost();
+		if (!IsSlopeRefused(GetTileSlope(ind_tile), its->slopes_refused)) return CommandCost();
 		return_cmd_error(STR_ERROR_SITE_UNSUITABLE);
 	}
 	if (its->grf_prop.grffile->grf_version < 7) {

@@ -226,9 +226,42 @@ static inline void SetAnimationFrame(TileIndex t, byte frame)
 	_me[t].m7 = frame;
 }
 
-Slope GetTileSlope(TileIndex tile, uint *h);
-uint GetTileZ(TileIndex tile);
-uint GetTileMaxZ(TileIndex tile);
+Slope GetTileSlope(TileIndex tile, int *h = NULL);
+int GetTileZ(TileIndex tile);
+int GetTileMaxZ(TileIndex tile);
+
+/**
+ * Return the slope of a given tile
+ * @param tile Tile to compute slope of
+ * @param h    If not \c NULL, pointer to storage of z height
+ * @return Slope of the tile, except for the HALFTILE part
+ */
+static inline Slope GetTilePixelSlope(TileIndex tile, int *h)
+{
+	Slope s = GetTileSlope(tile, h);
+	if (h != NULL) *h *= TILE_HEIGHT;
+	return s;
+}
+
+/**
+ * Get bottom height of the tile
+ * @param tile Tile to compute height of
+ * @return Minimum height of the tile
+ */
+static inline int GetTilePixelZ(TileIndex tile)
+{
+	return GetTileZ(tile) * TILE_HEIGHT;
+}
+
+/**
+ * Get top height of the tile
+ * @param t Tile to compute height of
+ * @return Maximum height of the tile
+ */
+static inline int GetTileMaxPixelZ(TileIndex tile)
+{
+	return GetTileMaxZ(tile) * TILE_HEIGHT;
+}
 
 
 /**

@@ -19,6 +19,7 @@
 #include "window_func.h"
 #include "progress.h"
 #include "video/video_driver.hpp"
+#include "strings_func.h"
 
 #include "fileio_func.h"
 #include "fios.h"
@@ -634,8 +635,7 @@ void DoScanNewGRFFiles(void *callback)
 	_modal_progress_work_mutex->BeginCritical();
 
 	ClearGRFConfigList(&_all_grfs);
-
-	TarScanner::DoScan();
+	TarScanner::DoScan(TarScanner::NEWGRF);
 
 	DEBUG(grf, 1, "Scanning for NewGRFs");
 	uint num = GRFFileScanner::DoScan();
@@ -830,4 +830,38 @@ static const uint32 OPENTTD_GRAPHICS_BASE_GRF_ID = BSWAP32(0xFF4F5400);
 bool GRFConfig::IsOpenTTDBaseGRF() const
 {
 	return (this->ident.grfid & 0x00FFFFFF) == OPENTTD_GRAPHICS_BASE_GRF_ID;
+}
+
+/**
+ * Search a textfile file next to this NewGRF.
+ * @param type The type of the textfile to search for.
+ * @return The filename for the textfile, \c NULL otherwise.
+ */
+const char *GRFConfig::GetTextfile(TextfileType type) const
+{
+	static const char * const prefixes[] = {
+		"readme",
+		"changelog",
+		"license",
+	};
+	assert_compile(lengthof(prefixes) == TFT_END);
+
+	const char *prefix = prefixes[type];
+
+	if (this->filename == NULL) return NULL;
+
+	static char file_path[MAX_PATH];
+	strecpy(file_path, this->filename, lastof(file_path));
+
+	char *slash = strrchr(file_path, PATHSEPCHAR);
+	if (slash == NULL) return NULL;
+
+	seprintf(slash + 1, lastof(file_path), "%s_%s.txt", prefix, GetCurrentLanguageIsoCode());
+	if (FioCheckFileExists(file_path, NEWGRF_DIR)) return file_path;
+
+	seprintf(slash + 1, lastof(file_path), "%s_%.2s.txt", prefix, GetCurrentLanguageIsoCode());
+	if (FioCheckFileExists(file_path, NEWGRF_DIR)) return file_path;
+
+	seprintf(slash + 1, lastof(file_path), "%s.txt", prefix);
+	return FioCheckFileExists(file_path, NEWGRF_DIR) ? file_path : NULL;
 }
