@@ -24,9 +24,6 @@ class AIListSorter;
  */
 class AIList : public AIObject {
 public:
-	/** Get the name of this class to identify it towards squirrel. */
-	static const char *GetClassName() { return "AIList"; }
-
 	/** Type of sorter */
 	enum SorterType {
 		SORT_BY_VALUE, ///< Sort the list based on the value of the item.
@@ -239,7 +236,7 @@ public:
 	 */
 	void KeepList(AIList *list);
 
-#ifndef DOXYGEN_SKIP
+#ifndef DOXYGEN_AI_DOCS
 	/**
 	 * Used for 'foreach()' and [] get from Squirrel.
 	 */
@@ -280,7 +277,7 @@ public:
 	 *  list.Valuate(MyVal, 12);
 	 */
 	void Valuate(void *valuator_function, int params, ...);
-#endif /* DOXYGEN_SKIP */
+#endif /* DOXYGEN_AI_DOCS */
 };
 
 #endif /* AI_LIST_HPP */

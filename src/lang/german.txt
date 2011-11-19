@@ -260,7 +260,6 @@ STR_SORT_BY_CAPTION_POPULATION                                  :{BLACK}Bevölke
 STR_SORT_BY_CAPTION_NAME                                        :{BLACK}Name
 STR_SORT_BY_CAPTION_DATE                                        :{BLACK}Datum
 # These are used in dropdowns
-STR_SORT_BY_POPULATION                                          :Bevölkerung
 STR_SORT_BY_NAME                                                :Name
 STR_SORT_BY_PRODUCTION                                          :Produktion
 STR_SORT_BY_TYPE                                                :Typ
@@ -631,9 +630,7 @@ STR_PLAYLIST_TRACK_NAME                                         :{TINYFONT}{LTBL
 STR_PLAYLIST_TRACK_INDEX                                        :{TINYFONT}{BLACK}Track Inhalt
 STR_PLAYLIST_PROGRAM                                            :{TINYFONT}{BLACK}Programm - '{STRING}'
 STR_PLAYLIST_CLEAR                                              :{TINYFONT}{BLACK}Bereinigen
-STR_PLAYLIST_SAVE                                               :{TINYFONT}{BLACK}Speichern
 STR_PLAYLIST_TOOLTIP_CLEAR_CURRENT_PROGRAM_CUSTOM1              :{BLACK}Lösche laufendes Programm (nur für Benutzerdefiniert 1 und 2)
-STR_PLAYLIST_TOOLTIP_SAVE_MUSIC_SETTINGS                        :{BLACK}Musikeinstellungen speichern
 STR_PLAYLIST_TOOLTIP_CLICK_TO_ADD_TRACK                         :{BLACK}Klicke auf den Musiktitel, um ihn in das laufende Programm zu übernehmen (nur für Benutzerdefiniert 1 und 2)
 STR_PLAYLIST_TOOLTIP_CLICK_TO_REMOVE_TRACK                      :{BLACK}Klicke auf einen Musiktitel, um ihn aus der aktuellen Liste zu entfernen (nur für Benutzerdefiniert 1 und 2)
 
@@ -1879,6 +1876,11 @@ STR_CONTENT_ERROR_COULD_NOT_DOWNLOAD_CONNECTION_LOST            :{WHITE}... Verb
 STR_CONTENT_ERROR_COULD_NOT_DOWNLOAD_FILE_NOT_WRITABLE          :{WHITE}... kann Datei nicht schreiben
 STR_CONTENT_ERROR_COULD_NOT_EXTRACT                             :{WHITE}Kann heruntergeladene Datei nicht entpacken
 
+STR_MISSING_GRAPHICS_SET_CAPTION                                :{WHITE}Fehlende Grafiken
+STR_MISSING_GRAPHICS_SET_MESSAGE                                :{BLACK}OpenTTD benötigt Basisgrafiken, um zu funktionieren, es konnten aber keine gefunden werden. Darf OpenTTD diese herunterladen und installieren?
+STR_MISSING_GRAPHICS_YES_DOWNLOAD                               :{BLACK}Ja, download die Grafiken
+STR_MISSING_GRAPHICS_NO_QUIT                                    :{BLACK}Nein, OpenTTD beenden
+
 # Transparency settings window
 STR_TRANSPARENCY_CAPTION                                        :{WHITE}Transparenzeinstellungen
 STR_TRANSPARENT_SIGNS_TOOLTIP                                   :{BLACK}Transparenz für Stationsschilder einstellen. Strg+Klick, um Umschalten zu verhindern
@@ -1924,6 +1926,11 @@ STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_BRIDGE                  :{BLACK}Eisenbah
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TUNNEL                  :{BLACK}Eisenbahntunnel bauen. Shift schaltet zwischen Bauen und Kostenvoranschlag um
 STR_RAIL_TOOLBAR_TOOLTIP_TOGGLE_BUILD_REMOVE_FOR                :{BLACK}Umschalter für Bau/Abriss mit aktuellem Bauwerkzeug. Strg+Klick um die Gleise von Wegpunkten und Bahnhöfen ebenfalls zu entfernen
 STR_RAIL_TOOLBAR_TOOLTIP_CONVERT_RAIL                           :{BLACK}Gleistyp in den ausgewählten umwandeln. Shift schaltet zwischen Bauen und Kostenvoranschlag um
+
+STR_RAIL_NAME_RAILROAD                                          :Schienen
+STR_RAIL_NAME_ELRAIL                                            :Elektrifizierte Schienen
+STR_RAIL_NAME_MONORAIL                                          :Einschienenbahn
+STR_RAIL_NAME_MAGLEV                                            :Magnetschwebebahn
 
 # Rail depot construction window
 STR_BUILD_DEPOT_TRAIN_ORIENTATION_CAPTION                       :{WHITE}Ausrichtung Zugdepot
@@ -2195,29 +2202,29 @@ STR_LAI_CLEAR_DESCRIPTION_FIELDS                                :Ackerland
 STR_LAI_CLEAR_DESCRIPTION_SNOW_COVERED_LAND                     :Schneebedecktes Land
 STR_LAI_CLEAR_DESCRIPTION_DESERT                                :Wüste
 
-STR_LAI_RAIL_DESCRIPTION_TRACK                                  :Gleis
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_SIGNALS              :Gleis mit Blocksignalen
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRESIGNALS                  :Gleis mit Einfahrsignalen
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXITSIGNALS                 :Gleis mit Ausfahrsignalen
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBOSIGNALS                :Gleis mit Kombinationssignalen
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PBSSIGNALS                  :Gleis mit Pfadsignal
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NOENTRYSIGNALS              :Gleis mit einseitigem Pfadsignal
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_PRESIGNALS           :Gleis mit Block- und Einfahrsignalen
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_EXITSIGNALS          :Gleis mit Block- und Ausfahrsignalen
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_COMBOSIGNALS         :Gleis mit Block- und Kombinationssignalen
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_PBSSIGNALS           :Gleis mit Blocksignal und Pfadsignal
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_NOENTRYSIGNALS       :Gleis mit Blocksignal und einseitigem Pfadsignal
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_EXITSIGNALS             :Gleis mit Ein- und Ausfahrsignalen
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_COMBOSIGNALS            :Gleis mit Einfahr- und Kombinationssignalen
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_PBSSIGNALS              :Gleis mit Einfahr- und Pfadsignal
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_NOENTRYSIGNALS          :Gleis mit Einfahr- und einseitigem Pfadsignal
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_COMBOSIGNALS           :Gleis mit Ausfahr- und Kombinationssignalen
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_PBSSIGNALS             :Gleis mit Ausfahr- und Pfadsignal
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_NOENTRYSIGNALS         :Gleis mit Ausfahr- und einseitigem Pfadsignal
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBO_PBSSIGNALS            :Gleis mit Kombinations- und Pfadsignal
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBO_NOENTRYSIGNALS        :Gleis mit Kombinations- und einseitigem Pfadsignal
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PBS_NOENTRYSIGNALS          :Gleis mit Pfadsignal und einseitigem Pfadsignal
-STR_LAI_RAIL_DESCRIPTION_TRAIN_DEPOT                            :Zugdepot
+STR_LAI_RAIL_DESCRIPTION_TRACK                                  :{STRING}: Schienen
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_SIGNALS              :{STRING}: Schienen mit Blocksignal
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRESIGNALS                  :{STRING}: Schienen mit Vorsignal
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXITSIGNALS                 :{STRING}: Schienen mit Ausfahrtsignal
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBOSIGNALS                :{STRING}: Schienen mit Kombinationssignal
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PBSSIGNALS                  :{STRING}: Schienen mit Pfadsignal
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NOENTRYSIGNALS              :{STRING}: Schienen mit einseitigem Pfadsignal
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_PRESIGNALS           :{STRING}: Schienen mit Block- und Vorsignal
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_EXITSIGNALS          :{STRING}: Schienen mit Block- und Ausfahrtsignal
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_COMBOSIGNALS         :{STRING}: Schienen mit Block- und Kombinationssignal
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_PBSSIGNALS           :{STRING}: Schienen mit Block- und Pfadsignal
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_NOENTRYSIGNALS       :{STRING}: Schienen mit Block- und einseitigem Pfadsignal
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_EXITSIGNALS             :{STRING}: Schienen mit Vor- und Ausfahrtsignal
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_COMBOSIGNALS            :{STRING}: Schienen mit Vor- und Kombinationssignal
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_PBSSIGNALS              :{STRING}: Schienen mit Vor- und Pfadsignal
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_NOENTRYSIGNALS          :{STRING}: Schienen mit Vor- und einseitigem Pfadsignal
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_COMBOSIGNALS           :{STRING}: Schienen mit Ausfahrt- und Kombinationssignal
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_PBSSIGNALS             :{STRING}: Schienen mit Ausfahrt- und Pfadsignal
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_NOENTRYSIGNALS         :{STRING}: Schienen mit Ausfahrt- und einseitigem Pfadsignal
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBO_PBSSIGNALS            :{STRING}: Schienen mit Kombinations- und Pfadsignal
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBO_NOENTRYSIGNALS        :{STRING}: Schienen mit Kombinations- und einseitigem Pfadsignal
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PBS_NOENTRYSIGNALS          :{STRING}: Schienen mit Pfad- und einseitigem Pfadsignal
+STR_LAI_RAIL_DESCRIPTION_TRAIN_DEPOT                            :{STRING}: Zugdepot
 
 STR_LAI_ROAD_DESCRIPTION_ROAD                                   :Straße
 STR_LAI_ROAD_DESCRIPTION_ROAD_WITH_STREETLIGHTS                 :Straße mit Laternen
@@ -2403,6 +2410,9 @@ STR_NEWGRF_SETTINGS_MOVEDOWN                                    :{BLACK}Nach unt
 STR_NEWGRF_SETTINGS_MOVEDOWN_TOOLTIP                            :{BLACK}Die ausgewählte NewGRF-Datei in der Liste nach unten verschieben
 STR_NEWGRF_SETTINGS_FILE_TOOLTIP                                :{BLACK}Eine Liste der installierten NewGRF-Dateien. Zum Ändern der Parameter Datei auswählen
 
+# Additional textfiles accompanying NewGRFs
+STR_NEWGRF_SETTINGS_VIEW_README                                 :{BLACK}Readme anzeigen
+
 STR_NEWGRF_SETTINGS_SET_PARAMETERS                              :{BLACK}Parameter setzen
 STR_NEWGRF_SETTINGS_TOGGLE_PALETTE                              :{BLACK}Farbpalette ändern
 STR_NEWGRF_SETTINGS_TOGGLE_PALETTE_TOOLTIP                      :{BLACK}Farbpalette des ausgewählten NewGRF ändern.{}Nutze dieses, wenn die Grafiken des NewGRF im Spiel pink dargestellt werden
@@ -2424,8 +2434,6 @@ STR_NEWGRF_SETTINGS_NOT_FOUND                                   :{RED}Zugehörig
 STR_NEWGRF_SETTINGS_DISABLED                                    :{RED}Deaktiviert
 STR_NEWGRF_SETTINGS_INCOMPATIBLE                                :{RED}Nicht mit dieser Version von OpenTTD kompatibel
 
-STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}NewGRF-Parameter eingeben
-
 # NewGRF parameters window
 STR_NEWGRF_PARAMETERS_CAPTION                                   :{WHITE}NewGRF Parameter ändern
 STR_NEWGRF_PARAMETERS_CLOSE                                     :{BLACK}Schließen
@@ -2434,6 +2442,9 @@ STR_NEWGRF_PARAMETERS_RESET_TOOLTIP                             :{BLACK}Alle Par
 STR_NEWGRF_PARAMETERS_DEFAULT_NAME                              :Parameter {NUM}
 STR_NEWGRF_PARAMETERS_SETTING                                   :{STRING}: {ORANGE}{STRING}
 STR_NEWGRF_PARAMETERS_NUM_PARAM                                 :{LTBLUE}Anzahl Parameter: {ORANGE}{NUM}
+
+# NewGRF textfile window
+STR_NEWGRF_README_CAPTION                                       :{WHITE}NewGRF - Readme von {STRING}
 
 # NewGRF inspect window
 STR_NEWGRF_INSPECT_CAPTION                                      :{WHITE}Inspiziere - {STRING}
@@ -2516,6 +2527,7 @@ STR_BROKEN_VEHICLE_LENGTH                                       :{WHITE}Zug '{VE
 STR_NEWGRF_BUGGY                                                :{WHITE}NewGRF '{0:STRING}' liefert falsche Informationen
 STR_NEWGRF_BUGGY_ARTICULATED_CARGO                              :{WHITE}Fracht / Ersetzungs - Informationen für '{1:ENGINE}' weichen von der Einkaufsliste nach dem Kauf ab. Das kann dazu führen, dass das Umrüsten beim autmatisches Ersetzen oder Erneuern nicht korrekt funktioniert
 STR_NEWGRF_BUGGY_ENDLESS_PRODUCTION_CALLBACK                    :{WHITE}'{1:STRING}' verursachte eine Endlosschleife im 'Production callback'
+STR_NEWGRF_BUGGY_UNKNOWN_CALLBACK_RESULT                        :{WHITE}Callback 0x{HEX} lieferte des unbekannte und ungülte Resultat 0x{HEX}
 
 # 'User removed essential NewGRFs'-placeholders for stuff without specs
 STR_NEWGRF_INVALID_CARGO                                        :<ungültige Frachtart>
@@ -3191,6 +3203,10 @@ STR_ORDER_TOOLTIP_UNLOAD                                        :{BLACK}Ändert 
 
 STR_ORDER_REFIT                                                 :{BLACK}Umrüsten
 STR_ORDER_REFIT_TOOLTIP                                         :{BLACK}Frachtart auswählen, auf die umgerüstet werden soll. Strg+Klick, um einen Umrüstungsauftrag wieder zu entfernen
+STR_ORDER_REFIT_AUTO                                            :{BLACK}Automatisches Umrüsten
+STR_ORDER_REFIT_AUTO_TOOLTIP                                    :{BLACK}Auswählen, auf welche Frachtart automatisch umgerüstet wird. Strg+Klick um Auftrag zum Umrüsten zu entfernen. Automatisches Umrüsten wird vorgenommen, wenn das Fahrzeug es zuläßt.
+STR_ORDER_DROP_REFIT_AUTO                                       :Vorgegebene Fracht
+STR_ORDER_DROP_REFIT_AUTO_ANY                                   :Verfügbare Fracht
 
 STR_ORDER_SERVICE                                               :{BLACK}Wartung
 STR_ORDER_DROP_GO_ALWAYS_DEPOT                                  :Gehe immer
@@ -3237,7 +3253,6 @@ STR_ORDER_GO_TO_NEAREST_HANGAR                                  :Nächster Hanga
 STR_ORDER_CONDITIONAL                                           :Bedingter Sprung zu Auftrag
 STR_ORDER_SHARE                                                 :Gemeinsame Aufträge
 STR_ORDERS_GO_TO_TOOLTIP                                        :{BLACK}Einen neuen Auftrag vor dem markierten Auftrag oder am Ende der Liste einfügen. Strg halten, um für Stationen 'Vollladen einer Fracht', für Wegpunkte 'ohne Halt' und für Depots 'Wartung' auszuwählen. 'Gemeinsame Aufträge' erlauben ein Fahrzeug auszuwählen mit dem dieses die Aufträge teilt. Klicken auf ein Fahrzeug kopiert die Aufträge von diesem
-STR_ORDERS_GO_TO_DROPDOWN_TOOLTIP                               :{BLACK}Erweiterten Auftrag einfügen
 
 STR_ORDERS_VEH_WITH_SHARED_ORDERS_LIST_TOOLTIP                  :{BLACK}Alle Fahrzeuge mit demselben Fahrplan anzeigen
 
@@ -3279,6 +3294,21 @@ STR_ORDER_NO_UNLOAD                                             :(Nicht entladen
 STR_ORDER_NO_UNLOAD_FULL_LOAD                                   :(Nicht entladen, aber auf volle Ladung warten)
 STR_ORDER_NO_UNLOAD_FULL_LOAD_ANY                               :(Nicht entladen, aber voll beladen mit beliebiger Fracht)
 STR_ORDER_NO_UNLOAD_NO_LOAD                                     :(Kein Entladen und kein Laden)
+
+STR_ORDER_AUTO_REFIT                                            :(Automatische Umrüstung auf {STRING})
+STR_ORDER_FULL_LOAD_REFIT                                       :(Volladen mit automatischer Umrüstung auf {STRING})
+STR_ORDER_FULL_LOAD_ANY_REFIT                                   :(Volladen einer Frachtart und automatischer Umrüstung auf {STRING})
+STR_ORDER_UNLOAD_REFIT                                          :(Entladen und laden mit automatischer Umrüstung auf {STRING})
+STR_ORDER_UNLOAD_FULL_LOAD_REFIT                                :(Umladen und warten auf volle Zuladung mit automatischer Umrüstung auf {STRING})
+STR_ORDER_UNLOAD_FULL_LOAD_ANY_REFIT                            :(Entladen und warten auf volle Zuladung einer Frachtart mit automatischer Umrüstung auf {STRING})
+STR_ORDER_TRANSFER_REFIT                                        :(Umladen und laden mit automatischer Umrüstung auf {STRING})
+STR_ORDER_TRANSFER_FULL_LOAD_REFIT                              :(Umladen und warten auf volle Zuladung mit automatischer Umrüstung auf {STRING})
+STR_ORDER_TRANSFER_FULL_LOAD_ANY_REFIT                          :(Umladen und warten auf volle Zuladung einer Frachtart mit automatischer Umrüstung auf {STRING})
+STR_ORDER_NO_UNLOAD_REFIT                                       :(Nicht entladen und laden mit automatischer Umrüstung auf {STRING})
+STR_ORDER_NO_UNLOAD_FULL_LOAD_REFIT                             :(Nicht entladen und warten auf volle Zuladung mit automatischer Umrüstung auf {STRING})
+STR_ORDER_NO_UNLOAD_FULL_LOAD_ANY_REFIT                         :(Nicht entladen und warten auf volle Zuladung einer Fracht mit automatischer Umrüstung auf {STRING})
+
+STR_ORDER_AUTO_REFIT_ANY                                        :verfügbare Fracht
 
 STR_ORDER_STOP_LOCATION_NEAR_END                                :[am Anfang]
 STR_ORDER_STOP_LOCATION_MIDDLE                                  :[in der Mitte]
@@ -3492,8 +3522,7 @@ STR_ERROR_NOT_ALLOWED_WHILE_PAUSED                              :{WHITE}Nicht er
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS                 :{WHITE}Die Stadtverwaltung von {TOWN} erteilt keine Genehmigung
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_AIRPORT                       :{WHITE}Die Stadtverwaltung von {TOWN} verweigert die Genehmigung für den Bau eines weiteren Flughafens in der Stadt
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_NOISE                         :{WHITE}Die Stadtverwaltung von {TOWN} verweigert aus Lärmschutzgründen den Bau des Flughafens
-STR_ERROR_BRIBE_FAILED                                          :{WHITE}Der Bestechungsversuch wurde
-STR_ERROR_BRIBE_FAILED_2                                        :{WHITE}von einem regionalen Untersuchungsbeamten aufgedeckt
+STR_ERROR_BRIBE_FAILED                                          :{WHITE}Die versuchte Bestechung wurde von einem Ermittler entdeckt.
 
 # Levelling errors
 STR_ERROR_CAN_T_RAISE_LAND_HERE                                 :{WHITE}Land kann nicht angehoben werden...
@@ -3567,7 +3596,6 @@ STR_ERROR_TOO_MANY_STATIONS_LOADING                             :{WHITE}Zu viele
 STR_ERROR_TOO_MANY_STATION_SPECS                                :{WHITE}Zu viele Bahnsteigteile
 STR_ERROR_TOO_MANY_BUS_STOPS                                    :{WHITE}Zu viele Busbahnhöfe
 STR_ERROR_TOO_MANY_TRUCK_STOPS                                  :{WHITE}Zu viele Lkw-Ladeplätze
-STR_ERROR_TOO_CLOSE_TO_ANOTHER_RAILROAD                         :{WHITE}Zu nah an einem anderen Bahnhof
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_STATION                          :{WHITE}Stationen/Ladeplätze liegen zu dicht beisammen
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_DOCK                             :{WHITE}Zu dicht an einem anderen Hafen
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_AIRPORT                          :{WHITE}Zu dicht an einem anderen Flughafen

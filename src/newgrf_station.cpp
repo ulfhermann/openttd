@@ -257,7 +257,7 @@ static struct {
 	uint8 valid; ///< Bits indicating what variable is valid (for each bit, \c 0 is invalid, \c 1 is valid).
 } _svc;
 
-static uint32 StationGetVariable(const ResolverObject *object, byte variable, byte parameter, bool *available)
+static uint32 StationGetVariable(const ResolverObject *object, byte variable, uint32 parameter, bool *available)
 {
 	const BaseStation *st = object->u.station.st;
 	TileIndex tile = object->u.station.tile;
@@ -293,10 +293,10 @@ static uint32 StationGetVariable(const ResolverObject *object, byte variable, by
 				if (object->u.station.axis != INVALID_AXIS && tile != INVALID_TILE) {
 					if (parameter != 0) tile = GetNearbyTile(parameter, tile, true, object->u.station.axis); // only perform if it is required
 
-					Slope tileh = GetTileSlope(tile, NULL);
+					Slope tileh = GetTileSlope(tile);
 					bool swap = (object->u.station.axis == AXIS_Y && HasBit(tileh, CORNER_W) != HasBit(tileh, CORNER_E));
 
-					return GetNearbyTileInformation(tile) ^ (swap ? SLOPE_EW : 0);
+					return GetNearbyTileInformation(tile, object->grffile->grf_version >= 8) ^ (swap ? SLOPE_EW : 0);
 				}
 				break;
 
@@ -350,10 +350,10 @@ static uint32 StationGetVariable(const ResolverObject *object, byte variable, by
 
 			if (parameter != 0) tile = GetNearbyTile(parameter, tile); // only perform if it is required
 
-			Slope tileh = GetTileSlope(tile, NULL);
+			Slope tileh = GetTileSlope(tile);
 			bool swap = (axis == AXIS_Y && HasBit(tileh, CORNER_W) != HasBit(tileh, CORNER_E));
 
-			return GetNearbyTileInformation(tile) ^ (swap ? SLOPE_EW : 0);
+			return GetNearbyTileInformation(tile, object->grffile->grf_version >= 8) ^ (swap ? SLOPE_EW : 0);
 		}
 
 		case 0x68: { // Station info of nearby tiles
@@ -678,7 +678,7 @@ uint16 GetStationCallback(CallbackID callback, uint32 param1, uint32 param2, con
 CommandCost PerformStationTileSlopeCheck(TileIndex north_tile, TileIndex cur_tile, const StationSpec *statspec, Axis axis, byte plat_len, byte numtracks)
 {
 	TileIndexDiff diff = cur_tile - north_tile;
-	Slope slope = GetTileSlope(cur_tile, NULL);
+	Slope slope = GetTileSlope(cur_tile);
 
 	ResolverObject object;
 	NewStationResolver(&object, statspec, NULL, cur_tile);
@@ -694,8 +694,9 @@ CommandCost PerformStationTileSlopeCheck(TileIndex north_tile, TileIndex cur_til
 	/* Failed callback means success. */
 	if (cb_res == CALLBACK_FAILED) return CommandCost();
 
-	/* The meaning of bit 10 is inverted in the result of this callback. */
-	return GetErrorMessageFromLocationCallbackResult(ToggleBit(cb_res, 10), statspec->grf_prop.grffile->grfid, STR_ERROR_LAND_SLOPED_IN_WRONG_DIRECTION);
+	/* The meaning of bit 10 is inverted for a grf version < 8. */
+	if (statspec->grf_prop.grffile->grf_version < 8) ToggleBit(cb_res, 10);
+	return GetErrorMessageFromLocationCallbackResult(cb_res, statspec->grf_prop.grffile->grfid, STR_ERROR_LAND_SLOPED_IN_WRONG_DIRECTION);
 }
 
 

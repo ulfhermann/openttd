@@ -31,6 +31,7 @@
 #include "company_base.h"
 #include "core/backup_type.hpp"
 #include "date_func.h"
+#include "strings_func.h"
 
 #include "table/strings.h"
 #include "table/railtypes.h"
@@ -381,7 +382,7 @@ CommandCost CmdBuildSingleRail(TileIndex tile, DoCommandFlag flags, uint32 p1, u
 
 	if (!ValParamRailtype(railtype) || !ValParamTrackOrientation(track)) return CMD_ERROR;
 
-	Slope tileh = GetTileSlope(tile, NULL);
+	Slope tileh = GetTileSlope(tile);
 	TrackBits trackbit = TrackToTrackBits(track);
 
 	switch (GetTileType(tile)) {
@@ -590,7 +591,7 @@ CommandCost CmdRemoveSingleRail(TileIndex tile, DoCommandFlag flags, uint32 p1, 
 				owner = GetTileOwner(tile);
 				present ^= trackbit;
 				if (present == 0) {
-					Slope tileh = GetTileSlope(tile, NULL);
+					Slope tileh = GetTileSlope(tile);
 					/* If there is flat water on the lower halftile, convert the tile to shore so the water remains */
 					if (GetRailGroundType(tile) == RAIL_GROUND_WATER && IsSlopeWithOneCornerRaised(tileh)) {
 						MakeShore(tile);
@@ -649,7 +650,7 @@ bool FloodHalftile(TileIndex t)
 	bool flooded = false;
 	if (GetRailGroundType(t) == RAIL_GROUND_WATER) return flooded;
 
-	Slope tileh = GetTileSlope(t, NULL);
+	Slope tileh = GetTileSlope(t);
 	TrackBits rail_bits = GetTrackBits(t);
 
 	if (IsSlopeWithOneCornerRaised(tileh)) {
@@ -861,7 +862,7 @@ CommandCost CmdBuildTrainDepot(TileIndex tile, DoCommandFlag flags, uint32 p1, u
 	RailType railtype = Extract<RailType, 0, 4>(p1);
 	if (!ValParamRailtype(railtype)) return CMD_ERROR;
 
-	Slope tileh = GetTileSlope(tile, NULL);
+	Slope tileh = GetTileSlope(tile);
 
 	DiagDirection dir = Extract<DiagDirection, 0, 2>(p2);
 
@@ -1637,7 +1638,7 @@ static CommandCost ClearTile_Track(TileIndex tile, DoCommandFlag flags)
 	switch (GetRailTileType(tile)) {
 		case RAIL_TILE_SIGNALS:
 		case RAIL_TILE_NORMAL: {
-			Slope tileh = GetTileSlope(tile, NULL);
+			Slope tileh = GetTileSlope(tile);
 			/* Is there flat water on the lower halftile that gets cleared expensively? */
 			bool water_ground = (GetRailGroundType(tile) == RAIL_GROUND_WATER && IsSlopeWithOneCornerRaised(tileh));
 
@@ -1683,7 +1684,7 @@ static uint GetSaveSlopeZ(uint x, uint y, Track track)
 		case TRACK_RIGHT: x &= ~0xF; y |=  0xF; break;
 		default: break;
 	}
-	return GetSlopeZ(x, y);
+	return GetSlopePixelZ(x, y);
 }
 
 static void DrawSingleSignal(TileIndex tile, Track track, byte condition, uint image, uint pos)
@@ -1774,7 +1775,7 @@ static void DrawTrackFence_NE_SW(const TileInfo *ti, SpriteID base_image)
  */
 static void DrawTrackFence_NS_1(const TileInfo *ti, SpriteID base_image)
 {
-	uint z = ti->z + GetSlopeZInCorner(RemoveHalftileSlope(ti->tileh), CORNER_W);
+	int z = ti->z + GetSlopePixelZInCorner(RemoveHalftileSlope(ti->tileh), CORNER_W);
 	AddSortableSpriteToDraw(base_image + RFO_FLAT_VERT, _drawtile_track_palette,
 		ti->x + TILE_SIZE / 2, ti->y + TILE_SIZE / 2, 1, 1, 4, z);
 }
@@ -1784,7 +1785,7 @@ static void DrawTrackFence_NS_1(const TileInfo *ti, SpriteID base_image)
  */
 static void DrawTrackFence_NS_2(const TileInfo *ti, SpriteID base_image)
 {
-	uint z = ti->z + GetSlopeZInCorner(RemoveHalftileSlope(ti->tileh), CORNER_E);
+	int z = ti->z + GetSlopePixelZInCorner(RemoveHalftileSlope(ti->tileh), CORNER_E);
 	AddSortableSpriteToDraw(base_image + RFO_FLAT_VERT, _drawtile_track_palette,
 		ti->x + TILE_SIZE / 2, ti->y + TILE_SIZE / 2, 1, 1, 4, z);
 }
@@ -1794,7 +1795,7 @@ static void DrawTrackFence_NS_2(const TileInfo *ti, SpriteID base_image)
  */
 static void DrawTrackFence_WE_1(const TileInfo *ti, SpriteID base_image)
 {
-	uint z = ti->z + GetSlopeZInCorner(RemoveHalftileSlope(ti->tileh), CORNER_N);
+	int z = ti->z + GetSlopePixelZInCorner(RemoveHalftileSlope(ti->tileh), CORNER_N);
 	AddSortableSpriteToDraw(base_image + RFO_FLAT_HORZ, _drawtile_track_palette,
 		ti->x + TILE_SIZE / 2, ti->y + TILE_SIZE / 2, 1, 1, 4, z);
 }
@@ -1804,7 +1805,7 @@ static void DrawTrackFence_WE_1(const TileInfo *ti, SpriteID base_image)
  */
 static void DrawTrackFence_WE_2(const TileInfo *ti, SpriteID base_image)
 {
-	uint z = ti->z + GetSlopeZInCorner(RemoveHalftileSlope(ti->tileh), CORNER_S);
+	int z = ti->z + GetSlopePixelZInCorner(RemoveHalftileSlope(ti->tileh), CORNER_S);
 	AddSortableSpriteToDraw(base_image + RFO_FLAT_HORZ, _drawtile_track_palette,
 		ti->x + TILE_SIZE / 2, ti->y + TILE_SIZE / 2, 1, 1, 4, z);
 }
@@ -2335,17 +2336,17 @@ void DrawTrainDepotSprite(int x, int y, int dir, RailType railtype)
 	DrawRailTileSeqInGUI(x, y, dts, offset, 0, palette);
 }
 
-static uint GetSlopeZ_Track(TileIndex tile, uint x, uint y)
+static int GetSlopePixelZ_Track(TileIndex tile, uint x, uint y)
 {
 	if (IsPlainRail(tile)) {
-		uint z;
-		Slope tileh = GetTileSlope(tile, &z);
+		int z;
+		Slope tileh = GetTilePixelSlope(tile, &z);
 		if (tileh == SLOPE_FLAT) return z;
 
-		z += ApplyFoundationToSlope(GetRailFoundation(tileh, GetTrackBits(tile)), &tileh);
-		return z + GetPartialZ(x & 0xF, y & 0xF, tileh);
+		z += ApplyPixelFoundationToSlope(GetRailFoundation(tileh, GetTrackBits(tile)), &tileh);
+		return z + GetPartialPixelZ(x & 0xF, y & 0xF, tileh);
 	} else {
-		return GetTileMaxZ(tile);
+		return GetTileMaxPixelZ(tile);
 	}
 }
 
@@ -2366,7 +2367,7 @@ static void TileLoop_Track(TileIndex tile)
 
 	switch (_settings_game.game_creation.landscape) {
 		case LT_ARCTIC: {
-			uint z;
+			int z;
 			Slope slope = GetTileSlope(tile, &z);
 			bool half = false;
 
@@ -2379,31 +2380,31 @@ static void TileLoop_Track(TileIndex tile)
 				switch (f) {
 					case FOUNDATION_NONE:
 						/* no foundation - is the track on the upper side of three corners raised tile? */
-						if (IsSlopeWithThreeCornersRaised(slope)) z += TILE_HEIGHT;
+						if (IsSlopeWithThreeCornersRaised(slope)) z++;
 						break;
 
 					case FOUNDATION_INCLINED_X:
 					case FOUNDATION_INCLINED_Y:
 						/* sloped track - is it on a steep slope? */
-						if (IsSteepSlope(slope)) z += TILE_HEIGHT;
+						if (IsSteepSlope(slope)) z++;
 						break;
 
 					case FOUNDATION_STEEP_LOWER:
 						/* only lower part of steep slope */
-						z += TILE_HEIGHT;
+						z++;
 						break;
 
 					default:
 						/* if it is a steep slope, then there is a track on higher part */
-						if (IsSteepSlope(slope)) z += TILE_HEIGHT;
-						z += TILE_HEIGHT;
+						if (IsSteepSlope(slope)) z++;
+						z++;
 						break;
 				}
 
 				half = IsInsideMM(f, FOUNDATION_STEEP_BOTH, FOUNDATION_HALFTILE_N + 1);
 			} else {
 				/* is the depot on a non-flat tile? */
-				if (slope != SLOPE_FLAT) z += TILE_HEIGHT;
+				if (slope != SLOPE_FLAT) z++;
 			}
 
 			/* 'z' is now the lowest part of the highest track bit -
@@ -2411,7 +2412,7 @@ static void TileLoop_Track(TileIndex tile)
 			 * for two track bits, it is 'z' of higher track bit
 			 * For non-continuous foundations (and STEEP_BOTH), 'half' is set */
 			if (z > GetSnowLine()) {
-				if (half && z - GetSnowLine() == TILE_HEIGHT) {
+				if (half && z - GetSnowLine() == 1) {
 					/* track on non-continuous foundation, lower part is not under snow */
 					new_ground = RAIL_GROUND_HALF_SNOW;
 				} else {
@@ -2452,7 +2453,7 @@ static void TileLoop_Track(TileIndex tile)
 					TileIndex n = tile + TileDiffXY(0, -1);
 					TrackBits nrail = (IsPlainRailTile(n) ? GetTrackBits(n) : TRACK_BIT_NONE);
 
-					if (!IsTileType(n, MP_RAILWAY) ||
+					if ((!IsTileType(n, MP_RAILWAY) && !IsRailWaypointTile(n)) ||
 							!IsTileOwner(n, owner) ||
 							nrail == TRACK_BIT_UPPER ||
 							nrail == TRACK_BIT_LEFT) {
@@ -2467,7 +2468,7 @@ static void TileLoop_Track(TileIndex tile)
 					TileIndex n = tile + TileDiffXY(0, 1);
 					TrackBits nrail = (IsPlainRailTile(n) ? GetTrackBits(n) : TRACK_BIT_NONE);
 
-					if (!IsTileType(n, MP_RAILWAY) ||
+					if ((!IsTileType(n, MP_RAILWAY) && !IsRailWaypointTile(n)) ||
 							!IsTileOwner(n, owner) ||
 							nrail == TRACK_BIT_LOWER ||
 							nrail == TRACK_BIT_RIGHT) {
@@ -2483,7 +2484,7 @@ static void TileLoop_Track(TileIndex tile)
 					TileIndex n = tile + TileDiffXY(-1, 0);
 					TrackBits nrail = (IsPlainRailTile(n) ? GetTrackBits(n) : TRACK_BIT_NONE);
 
-					if (!IsTileType(n, MP_RAILWAY) ||
+					if ((!IsTileType(n, MP_RAILWAY) && !IsRailWaypointTile(n)) ||
 							!IsTileOwner(n, owner) ||
 							nrail == TRACK_BIT_UPPER ||
 							nrail == TRACK_BIT_RIGHT) {
@@ -2498,7 +2499,7 @@ static void TileLoop_Track(TileIndex tile)
 					TileIndex n = tile + TileDiffXY(1, 0);
 					TrackBits nrail = (IsPlainRailTile(n) ? GetTrackBits(n) : TRACK_BIT_NONE);
 
-					if (!IsTileType(n, MP_RAILWAY) ||
+					if ((!IsTileType(n, MP_RAILWAY) && !IsRailWaypointTile(n)) ||
 							!IsTileOwner(n, owner) ||
 							nrail == TRACK_BIT_LOWER ||
 							nrail == TRACK_BIT_LEFT) {
@@ -2594,6 +2595,7 @@ static void GetTileDesc_Track(TileIndex tile, TileDesc *td)
 	const RailtypeInfo *rti = GetRailTypeInfo(GetRailType(tile));
 	td->rail_speed = rti->max_speed;
 	td->owner[0] = GetTileOwner(tile);
+	SetDParamX(td->dparam, 0, rti->strings.name);
 	switch (GetRailTileType(tile)) {
 		case RAIL_TILE_NORMAL:
 			td->str = STR_LAI_RAIL_DESCRIPTION_TRACK;
@@ -2787,7 +2789,7 @@ static VehicleEnterTileStatus VehicleEnter_Track(Vehicle *u, TileIndex tile, int
  * @param tileh_new New TileSlope.
  * @param rail_bits Trackbits.
  */
-static CommandCost TestAutoslopeOnRailTile(TileIndex tile, uint flags, uint z_old, Slope tileh_old, uint z_new, Slope tileh_new, TrackBits rail_bits)
+static CommandCost TestAutoslopeOnRailTile(TileIndex tile, uint flags, int z_old, Slope tileh_old, int z_new, Slope tileh_new, TrackBits rail_bits)
 {
 	if (!_settings_game.construction.build_on_slopes || !AutoslopeEnabled()) return_cmd_error(STR_ERROR_MUST_REMOVE_RAILROAD_TRACK);
 
@@ -2826,9 +2828,9 @@ static CommandCost TestAutoslopeOnRailTile(TileIndex tile, uint flags, uint z_ol
 	return  cost;
 }
 
-static CommandCost TerraformTile_Track(TileIndex tile, DoCommandFlag flags, uint z_new, Slope tileh_new)
+static CommandCost TerraformTile_Track(TileIndex tile, DoCommandFlag flags, int z_new, Slope tileh_new)
 {
-	uint z_old;
+	int z_old;
 	Slope tileh_old = GetTileSlope(tile, &z_old);
 	if (IsPlainRail(tile)) {
 		TrackBits rail_bits = GetTrackBits(tile);
@@ -2874,15 +2876,15 @@ static CommandCost TerraformTile_Track(TileIndex tile, DoCommandFlag flags, uint
 
 extern const TileTypeProcs _tile_type_rail_procs = {
 	DrawTile_Track,           // draw_tile_proc
-	GetSlopeZ_Track,          // get_slope_z_proc
+	GetSlopePixelZ_Track,     // get_slope_z_proc
 	ClearTile_Track,          // clear_tile_proc
 	NULL,                     // add_accepted_cargo_proc
 	GetTileDesc_Track,        // get_tile_desc_proc
 	GetTileTrackStatus_Track, // get_tile_track_status_proc
 	ClickTile_Track,          // click_tile_proc
 	NULL,                     // animate_tile_proc
-	TileLoop_Track,           // tile_loop_clear
-	ChangeTileOwner_Track,    // change_tile_owner_clear
+	TileLoop_Track,           // tile_loop_proc
+	ChangeTileOwner_Track,    // change_tile_owner_proc
 	NULL,                     // add_produced_cargo_proc
 	VehicleEnter_Track,       // vehicle_enter_tile_proc
 	GetFoundation_Track,      // get_foundation_proc

@@ -254,7 +254,7 @@ static CommandCost RemoveRoad(TileIndex tile, DoCommandFlag flags, RoadBits piec
 
 	switch (GetRoadTileType(tile)) {
 		case ROAD_TILE_NORMAL: {
-			Slope tileh = GetTileSlope(tile, NULL);
+			Slope tileh = GetTileSlope(tile);
 
 			/* Steep slopes behave the same as slopes with one corner raised. */
 			if (IsSteepSlope(tileh)) {
@@ -467,7 +467,7 @@ CommandCost CmdBuildRoad(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 
 	DisallowedRoadDirections toggle_drd = Extract<DisallowedRoadDirections, 6, 2>(p1);
 
-	Slope tileh = GetTileSlope(tile, NULL);
+	Slope tileh = GetTileSlope(tile);
 
 	bool need_to_clear = false;
 	switch (GetTileType(tile)) {
@@ -636,7 +636,7 @@ do_clear:;
 
 			/* Check if new road bits will have the same foundation as other existing road types */
 			if (IsNormalRoad(tile)) {
-				Slope slope = GetTileSlope(tile, NULL);
+				Slope slope = GetTileSlope(tile);
 				Foundation found_new = GetRoadFoundation(slope, pieces | existing);
 
 				/* Test if all other roadtypes can be built at that foundation */
@@ -909,7 +909,7 @@ CommandCost CmdBuildRoadDepot(TileIndex tile, DoCommandFlag flags, uint32 p1, ui
 
 	if (!IsValidRoadType(rt) || !ValParamRoadType(rt)) return CMD_ERROR;
 
-	Slope tileh = GetTileSlope(tile, NULL);
+	Slope tileh = GetTileSlope(tile);
 	if (tileh != SLOPE_FLAT && (
 				!_settings_game.construction.build_on_slopes ||
 				!CanBuildDepotByTileh(dir, tileh)
@@ -1080,9 +1080,9 @@ void DrawTramCatenary(const TileInfo *ti, RoadBits tram)
 
 	/* Don't draw the catenary under a low bridge */
 	if (MayHaveBridgeAbove(ti->tile) && IsBridgeAbove(ti->tile) && !IsTransparencySet(TO_CATENARY)) {
-		uint height = GetBridgeHeight(GetNorthernBridgeEnd(ti->tile));
+		int height = GetBridgeHeight(GetNorthernBridgeEnd(ti->tile));
 
-		if (height <= GetTileMaxZ(ti->tile) + TILE_HEIGHT) return;
+		if (height <= GetTileMaxZ(ti->tile) + 1) return;
 	}
 
 	SpriteID front;
@@ -1112,8 +1112,8 @@ static void DrawRoadDetail(SpriteID img, const TileInfo *ti, int dx, int dy, int
 {
 	int x = ti->x | dx;
 	int y = ti->y | dy;
-	byte z = ti->z;
-	if (ti->tileh != SLOPE_FLAT) z = GetSlopeZ(x, y);
+	int z = ti->z;
+	if (ti->tileh != SLOPE_FLAT) z = GetSlopePixelZ(x, y);
 	AddSortableSpriteToDraw(img, PAL_NONE, x, y, 2, 2, h, z);
 }
 
@@ -1170,7 +1170,7 @@ static void DrawRoadBits(TileInfo *ti)
 	if (road != ROAD_NONE) {
 		DisallowedRoadDirections drd = GetDisallowedRoadDirections(ti->tile);
 		if (drd != DRD_NONE) {
-			DrawGroundSpriteAt(SPR_ONEWAY_BASE + drd - 1 + ((road == ROAD_X) ? 0 : 3), PAL_NONE, 8, 8, GetPartialZ(8, 8, ti->tileh));
+			DrawGroundSpriteAt(SPR_ONEWAY_BASE + drd - 1 + ((road == ROAD_X) ? 0 : 3), PAL_NONE, 8, 8, GetPartialPixelZ(8, 8, ti->tileh));
 		}
 	}
 
@@ -1187,10 +1187,10 @@ static void DrawRoadBits(TileInfo *ti)
 
 	/* Do not draw details (street lights, trees) under low bridge */
 	if (MayHaveBridgeAbove(ti->tile) && IsBridgeAbove(ti->tile) && (roadside == ROADSIDE_TREES || roadside == ROADSIDE_STREET_LIGHTS)) {
-		uint height = GetBridgeHeight(GetNorthernBridgeEnd(ti->tile));
-		uint minz = GetTileMaxZ(ti->tile) + 2 * TILE_HEIGHT;
+		int height = GetBridgeHeight(GetNorthernBridgeEnd(ti->tile));
+		int minz = GetTileMaxZ(ti->tile) + 2;
 
-		if (roadside == ROADSIDE_TREES) minz += TILE_HEIGHT;
+		if (roadside == ROADSIDE_TREES) minz++;
 
 		if (height < minz) return;
 	}
@@ -1337,19 +1337,19 @@ void UpdateNearestTownForRoadTiles(bool invalidate)
 	}
 }
 
-static uint GetSlopeZ_Road(TileIndex tile, uint x, uint y)
+static int GetSlopePixelZ_Road(TileIndex tile, uint x, uint y)
 {
 
 	if (IsNormalRoad(tile)) {
-		uint z;
-		Slope tileh = GetTileSlope(tile, &z);
+		int z;
+		Slope tileh = GetTilePixelSlope(tile, &z);
 		if (tileh == SLOPE_FLAT) return z;
 
 		Foundation f = GetRoadFoundation(tileh, GetAllRoadBits(tile));
-		z += ApplyFoundationToSlope(f, &tileh);
-		return z + GetPartialZ(x & 0xF, y & 0xF, tileh);
+		z += ApplyPixelFoundationToSlope(f, &tileh);
+		return z + GetPartialPixelZ(x & 0xF, y & 0xF, tileh);
 	} else {
-		return GetTileMaxZ(tile);
+		return GetTileMaxPixelZ(tile);
 	}
 }
 
@@ -1410,7 +1410,7 @@ static void TileLoop_Road(TileIndex tile)
 			if (t->road_build_months != 0 &&
 					(DistanceManhattan(t->xy, tile) < 8 || grp != HZB_TOWN_EDGE) &&
 					IsNormalRoad(tile) && !HasAtMostOneBit(GetAllRoadBits(tile))) {
-				if (GetFoundationSlope(tile, NULL) == SLOPE_FLAT && EnsureNoVehicleOnGround(tile).Succeeded() && Chance16(1, 40)) {
+				if (GetFoundationSlope(tile) == SLOPE_FLAT && EnsureNoVehicleOnGround(tile).Succeeded() && Chance16(1, 40)) {
 					StartRoadWorks(tile);
 
 					SndPlayTileFx(SND_21_JACKHAMMER, tile);
@@ -1677,7 +1677,7 @@ static void ChangeTileOwner_Road(TileIndex tile, Owner old_owner, Owner new_owne
 	}
 }
 
-static CommandCost TerraformTile_Road(TileIndex tile, DoCommandFlag flags, uint z_new, Slope tileh_new)
+static CommandCost TerraformTile_Road(TileIndex tile, DoCommandFlag flags, int z_new, Slope tileh_new)
 {
 	if (_settings_game.construction.build_on_slopes && AutoslopeEnabled()) {
 		switch (GetRoadTileType(tile)) {
@@ -1696,7 +1696,7 @@ static CommandCost TerraformTile_Road(TileIndex tile, DoCommandFlag flags, uint 
 				if (CheckRoadSlope(tileh_new, &bits_copy, ROAD_NONE, ROAD_NONE).Succeeded()) {
 					/* CheckRoadSlope() sometimes changes the road_bits, if it does not agree with them. */
 					if (bits == bits_copy) {
-						uint z_old;
+						int z_old;
 						Slope tileh_old = GetTileSlope(tile, &z_old);
 
 						/* Get the slope on top of the foundation */
@@ -1720,15 +1720,15 @@ static CommandCost TerraformTile_Road(TileIndex tile, DoCommandFlag flags, uint 
 /** Tile callback functions for road tiles */
 extern const TileTypeProcs _tile_type_road_procs = {
 	DrawTile_Road,           // draw_tile_proc
-	GetSlopeZ_Road,          // get_slope_z_proc
+	GetSlopePixelZ_Road,     // get_slope_z_proc
 	ClearTile_Road,          // clear_tile_proc
 	NULL,                    // add_accepted_cargo_proc
 	GetTileDesc_Road,        // get_tile_desc_proc
 	GetTileTrackStatus_Road, // get_tile_track_status_proc
 	ClickTile_Road,          // click_tile_proc
 	NULL,                    // animate_tile_proc
-	TileLoop_Road,           // tile_loop_clear
-	ChangeTileOwner_Road,    // change_tile_owner_clear
+	TileLoop_Road,           // tile_loop_proc
+	ChangeTileOwner_Road,    // change_tile_owner_proc
 	NULL,                    // add_produced_cargo_proc
 	VehicleEnter_Road,       // vehicle_enter_tile_proc
 	GetFoundation_Road,      // get_foundation_proc

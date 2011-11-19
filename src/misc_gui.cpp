@@ -221,7 +221,7 @@ public:
 		snprintf(tmp, lengthof(tmp), "0x%.4X", tile);
 		SetDParam(0, TileX(tile));
 		SetDParam(1, TileY(tile));
-		SetDParam(2, GetTileZ(tile) / TILE_HEIGHT);
+		SetDParam(2, GetTileZ(tile));
 		SetDParamStr(3, tmp);
 		GetString(this->landinfo_data[line_nr], STR_LAND_AREA_INFORMATION_LANDINFO_COORDS, lastof(this->landinfo_data[line_nr]));
 		line_nr++;
@@ -1516,7 +1516,7 @@ static const NWidgetPart _nested_query_string_widgets[] = {
 };
 
 static const WindowDesc _query_string_desc(
-	WDP_AUTO, 0, 0,
+	WDP_CENTER, 0, 0,
 	WC_QUERY_STRING, WC_NONE,
 	0,
 	_nested_query_string_widgets, lengthof(_nested_query_string_widgets)

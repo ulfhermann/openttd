@@ -84,22 +84,6 @@ byte FreightWagonMult(CargoID cargo)
 	return _settings_game.vehicle.freight_trains;
 }
 
-/**
- * Logs a bug in GRF and shows a warning message if this
- * is for the first time this happened.
- * @param u first vehicle of chain
- */
-static void RailVehicleLengthChanged(const Train *u)
-{
-	/* show a warning once for each engine in whole game and once for each GRF after each game load */
-	const Engine *engine = u->GetEngine();
-	uint32 grfid = engine->grf_prop.grffile->grfid;
-	GRFConfig *grfconfig = GetGRFConfig(grfid);
-	if (GamelogGRFBugReverse(grfid, engine->grf_prop.local_id) || !HasBit(grfconfig->grf_bugs, GBUG_VEH_LENGTH)) {
-		ShowNewGrfVehicleError(u->engine_type, STR_NEWGRF_BROKEN, STR_NEWGRF_BROKEN_VEHICLE_LENGTH, GBUG_VEH_LENGTH, true);
-	}
-}
-
 /** Checks if lengths of all rail vehicles are valid. If not, shows an error message. */
 void CheckTrainsLengths()
 {
@@ -232,19 +216,26 @@ void Train::ConsistChanged(bool same_length)
 			}
 		}
 
-		u->cargo_cap = GetVehicleCapacity(u);
+		u->cargo_cap = e_u->DetermineCapacity(u);
 		u->vcache.cached_cargo_age_period = GetVehicleProperty(u, PROP_TRAIN_CARGO_AGE_PERIOD, e_u->info.cargo_age_period);
 
 		/* check the vehicle length (callback) */
 		uint16 veh_len = CALLBACK_FAILED;
-		if (HasBit(e_u->info.callback_mask, CBM_VEHICLE_LENGTH)) {
+		if (e_u->GetGRF() != NULL && e_u->GetGRF()->grf_version >= 8) {
+			/* Use callback 36 */
+			veh_len = GetVehicleProperty(u, PROP_TRAIN_SHORTEN_FACTOR, CALLBACK_FAILED);
+		} else if (HasBit(e_u->info.callback_mask, CBM_VEHICLE_LENGTH)) {
+			/* Use callback 11 */
 			veh_len = GetVehicleCallback(CBID_VEHICLE_LENGTH, 0, 0, u->engine_type, u);
+		}
+		if (veh_len != CALLBACK_FAILED && veh_len >= VEHICLE_LENGTH) {
+			ErrorUnknownCallbackResult(e_u->GetGRFID(), CBID_VEHICLE_LENGTH, veh_len);
 		}
 		if (veh_len == CALLBACK_FAILED) veh_len = rvi_u->shorten_factor;
 		veh_len = VEHICLE_LENGTH - Clamp(veh_len, 0, VEHICLE_LENGTH - 1);
 
 		/* verify length hasn't changed */
-		if (same_length && veh_len != u->gcache.cached_veh_length) RailVehicleLengthChanged(u);
+		if (same_length && veh_len != u->gcache.cached_veh_length) VehicleLengthChanged(u);
 
 		/* update vehicle length? */
 		if (!same_length) u->gcache.cached_veh_length = veh_len;
@@ -573,7 +564,7 @@ static CommandCost CmdBuildRailWagon(TileIndex tile, DoCommandFlag flags, const 
 
 		v->x_pos = x;
 		v->y_pos = y;
-		v->z_pos = GetSlopeZ(x, y);
+		v->z_pos = GetSlopePixelZ(x, y);
 		v->owner = _current_company;
 		v->track = TRACK_BIT_DEPOT;
 		v->vehstatus = VS_HIDDEN | VS_DEFPAL;
@@ -698,7 +689,7 @@ CommandCost CmdBuildRailVehicle(TileIndex tile, DoCommandFlag flags, const Engin
 		v->owner = _current_company;
 		v->x_pos = x;
 		v->y_pos = y;
-		v->z_pos = GetSlopeZ(x, y);
+		v->z_pos = GetSlopePixelZ(x, y);
 		v->track = TRACK_BIT_DEPOT;
 		v->vehstatus = VS_HIDDEN | VS_STOPPED | VS_DEFPAL;
 		v->spritenum = rvi->image_index;
@@ -993,8 +984,26 @@ static CommandCost CheckTrainAttachment(Train *t)
 				/* A failing callback means everything is okay */
 				StringID error = STR_NULL;
 
-				if (callback == 0xFD) error = STR_ERROR_INCOMPATIBLE_RAIL_TYPES;
-				if (callback  < 0xFD) error = GetGRFStringID(head->GetGRFID(), 0xD000 + callback);
+				if (t->GetGRF()->grf_version < 8) {
+					if (callback == 0xFD) error = STR_ERROR_INCOMPATIBLE_RAIL_TYPES;
+					if (callback  < 0xFD) error = GetGRFStringID(head->GetGRFID(), 0xD000 + callback);
+					if (callback >= 0x100) ErrorUnknownCallbackResult(head->GetGRFID(), CBID_TRAIN_ALLOW_WAGON_ATTACH, callback);
+				} else {
+					if (callback < 0x400) {
+						error = GetGRFStringID(head->GetGRFID(), 0xD000 + callback);
+					} else {
+						switch (callback) {
+							case 0x400: // allow if railtypes match (always the case for OpenTTD)
+							case 0x401: // allow
+								break;
+
+							default:    // unknown reason -> disallow
+							case 0x402: // disallow attaching
+								error = STR_ERROR_INCOMPATIBLE_RAIL_TYPES;
+								break;
+						}
+					}
+				}
 
 				if (error != STR_NULL) return_cmd_error(error);
 			}
@@ -2697,7 +2706,7 @@ static const RailtypeSlowdownParams _railtype_slowdown[] = {
 };
 
 /** Modify the speed of the vehicle due to a change in altitude */
-static inline void AffectSpeedByZChange(Train *v, byte old_z)
+static inline void AffectSpeedByZChange(Train *v, int old_z)
 {
 	if (old_z == v->z_pos || _settings_game.vehicle.train_acceleration_model != AM_ORIGINAL) return;
 
@@ -3161,7 +3170,7 @@ static void TrainController(Train *v, Vehicle *nomove)
 		v->y_pos = gp.y;
 
 		/* update the Z position of the vehicle */
-		byte old_z = v->UpdateInclination(gp.new_tile != gp.old_tile, false);
+		int old_z = v->UpdateInclination(gp.new_tile != gp.old_tile, false);
 
 		if (prev == NULL) {
 			/* This is the first vehicle in the train */

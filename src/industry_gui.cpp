@@ -73,7 +73,10 @@ static void GetCargoSuffix(uint cargo, CargoSuffixType cst, const Industry *ind,
 	suffix[0] = '\0';
 	if (HasBit(indspec->callback_mask, CBM_IND_CARGO_SUFFIX)) {
 		uint16 callback = GetIndustryCallback(CBID_INDUSTRY_CARGO_SUFFIX, 0, (cst << 8) | cargo, const_cast<Industry *>(ind), ind_type, (cst != CST_FUND) ? ind->location.tile : INVALID_TILE);
-		if (GB(callback, 0, 8) != 0xFF) {
+		if (callback == CALLBACK_FAILED || callback == 0x400) return;
+		if (callback > 0x400) {
+			ErrorUnknownCallbackResult(indspec->grf_prop.grffile->grfid, CBID_INDUSTRY_CARGO_SUFFIX, callback);
+		} else if (indspec->grf_prop.grffile->grf_version >= 8 || GB(callback, 0, 8) != 0xFF) {
 			StartTextRefStackUsage(6);
 			GetString(suffix, GetGRFStringID(indspec->grf_prop.grffile->grfid, 0xD000 + callback), suffix_last);
 			StopTextRefStackUsage();
@@ -206,7 +209,7 @@ class BuildIndustryWindow : public Window {
 	bool timer_enabled;                         ///< timer can be used
 	uint16 count;                               ///< How many industries are loaded
 	IndustryType index[NUM_INDUSTRYTYPES + 1];  ///< Type of industry, in the order it was loaded
-	bool enabled[NUM_INDUSTRYTYPES + 1];        ///< availability state, coming from CBID_INDUSTRY_AVAILABLE (if ever)
+	bool enabled[NUM_INDUSTRYTYPES + 1];        ///< availability state, coming from CBID_INDUSTRY_PROBABILITY (if ever)
 	Scrollbar *vscroll;
 
 	/** The offset for the text in the matrix. */
@@ -244,7 +247,7 @@ class BuildIndustryWindow : public Window {
 					continue;
 				}
 				this->index[this->count] = ind;
-				this->enabled[this->count] = (_game_mode == GM_EDITOR) || CheckIfCallBackAllowsAvailability(ind, IACT_USERCREATION);
+				this->enabled[this->count] = (_game_mode == GM_EDITOR) || GetIndustryProbabilityCallback(ind, IACT_USERCREATION, 1) > 0;
 				/* Keep the selection to the correct line */
 				if (this->selected_type == ind) this->selected_index = this->count;
 				this->count++;
@@ -455,12 +458,16 @@ public:
 				str = STR_NULL;
 				if (HasBit(indsp->callback_mask, CBM_IND_FUND_MORE_TEXT)) {
 					uint16 callback_res = GetIndustryCallback(CBID_INDUSTRY_FUND_MORE_TEXT, 0, 0, NULL, this->selected_type, INVALID_TILE);
-					if (callback_res != CALLBACK_FAILED) {  // Did it fail?
-						str = GetGRFStringID(indsp->grf_prop.grffile->grfid, 0xD000 + callback_res);  // No. here's the new string
-						if (str != STR_UNDEFINED) {
-							StartTextRefStackUsage(6);
-							DrawStringMultiLine(left, right, y, bottom, str, TC_YELLOW);
-							StopTextRefStackUsage();
+					if (callback_res != CALLBACK_FAILED && callback_res != 0x400) {
+						if (callback_res > 0x400) {
+							ErrorUnknownCallbackResult(indsp->grf_prop.grffile->grfid, CBID_INDUSTRY_FUND_MORE_TEXT, callback_res);
+						} else {
+							str = GetGRFStringID(indsp->grf_prop.grffile->grfid, 0xD000 + callback_res);  // No. here's the new string
+							if (str != STR_UNDEFINED) {
+								StartTextRefStackUsage(6);
+								DrawStringMultiLine(left, right, y, bottom, str, TC_YELLOW);
+								StopTextRefStackUsage();
+							}
 						}
 					}
 				}
@@ -575,7 +582,7 @@ public:
 			const IndustrySpec *indsp = GetIndustrySpec(this->selected_type);
 
 			if (indsp->enabled) {
-				bool call_back_result = CheckIfCallBackAllowsAvailability(this->selected_type, IACT_USERCREATION);
+				bool call_back_result = GetIndustryProbabilityCallback(this->selected_type, IACT_USERCREATION, 1) > 0;
 
 				/* Only if result does match the previous state would it require a redraw. */
 				if (call_back_result != this->enabled[this->selected_index]) {
@@ -783,17 +790,21 @@ public:
 		/* Get the extra message for the GUI */
 		if (HasBit(ind->callback_mask, CBM_IND_WINDOW_MORE_TEXT)) {
 			uint16 callback_res = GetIndustryCallback(CBID_INDUSTRY_WINDOW_MORE_TEXT, 0, 0, i, i->type, i->location.tile);
-			if (callback_res != CALLBACK_FAILED) {
-				StringID message = GetGRFStringID(ind->grf_prop.grffile->grfid, 0xD000 + callback_res);
-				if (message != STR_NULL && message != STR_UNDEFINED) {
-					y += WD_PAR_VSEP_WIDE;
+			if (callback_res != CALLBACK_FAILED && callback_res != 0x400) {
+				if (callback_res > 0x400) {
+					ErrorUnknownCallbackResult(ind->grf_prop.grffile->grfid, CBID_INDUSTRY_WINDOW_MORE_TEXT, callback_res);
+				} else {
+					StringID message = GetGRFStringID(ind->grf_prop.grffile->grfid, 0xD000 + callback_res);
+					if (message != STR_NULL && message != STR_UNDEFINED) {
+						y += WD_PAR_VSEP_WIDE;
 
-					StartTextRefStackUsage(6);
-					/* Use all the available space left from where we stand up to the
-					 * end of the window. We ALSO enlarge the window if needed, so we
-					 * can 'go' wild with the bottom of the window. */
-					y = DrawStringMultiLine(left + WD_FRAMERECT_LEFT, right - WD_FRAMERECT_RIGHT, y, UINT16_MAX, message, TC_BLACK);
-					StopTextRefStackUsage();
+						StartTextRefStackUsage(6);
+						/* Use all the available space left from where we stand up to the
+						 * end of the window. We ALSO enlarge the window if needed, so we
+						 * can 'go' wild with the bottom of the window. */
+						y = DrawStringMultiLine(left + WD_FRAMERECT_LEFT, right - WD_FRAMERECT_RIGHT, y, UINT16_MAX, message, TC_BLACK);
+						StopTextRefStackUsage();
+					}
 				}
 			}
 		}
