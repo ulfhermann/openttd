@@ -20,8 +20,8 @@ INSTANTIATE_POOL_METHODS(SpriteGroup)
 
 RealSpriteGroup::~RealSpriteGroup()
 {
-	free((void*)this->loaded);
-	free((void*)this->loading);
+	free(this->loaded);
+	free(this->loading);
 }
 
 DeterministicSpriteGroup::~DeterministicSpriteGroup()
@@ -32,17 +32,17 @@ DeterministicSpriteGroup::~DeterministicSpriteGroup()
 
 RandomizedSpriteGroup::~RandomizedSpriteGroup()
 {
-	free((void*)this->groups);
+	free(this->groups);
 }
 
 TemporaryStorageArray<int32, 0x110> _temp_store;
 
 
-static inline uint32 GetVariable(const ResolverObject *object, byte variable, byte parameter, bool *available)
+static inline uint32 GetVariable(const ResolverObject *object, byte variable, uint32 parameter, bool *available)
 {
 	/* First handle variables common with Action7/9/D */
 	uint32 value;
-	if (GetGlobalVariable(variable, &value)) return value;
+	if (GetGlobalVariable(variable, &value, object->grffile)) return value;
 
 	/* Non-common variable */
 	switch (variable) {
@@ -175,7 +175,7 @@ const SpriteGroup *DeterministicSpriteGroup::Resolve(ResolverObject *object) con
 	if (this->num_ranges == 0) {
 		/* nvar == 0 is a special case -- we turn our value into a callback result */
 		if (value != CALLBACK_FAILED) value = GB(value, 0, 15);
-		static CallbackResultSpriteGroup nvarzero(0);
+		static CallbackResultSpriteGroup nvarzero(0, true);
 		nvarzero.result = value;
 		return &nvarzero;
 	}

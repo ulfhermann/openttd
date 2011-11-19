@@ -47,49 +47,88 @@ enum OrderWindowWidgets {
 	ORDER_WIDGET_UNLOAD,
 	ORDER_WIDGET_REFIT,
 	ORDER_WIDGET_SERVICE,
+	ORDER_WIDGET_EMPTY,
+	ORDER_WIDGET_REFIT_DROPDOWN,
 	ORDER_WIDGET_COND_VARIABLE,
 	ORDER_WIDGET_COND_COMPARATOR,
 	ORDER_WIDGET_COND_VALUE,
-	ORDER_WIDGET_SEL_TOP_LEFT,   ///< #NWID_SELECTION widget for left part of the top row of the 'your train' order window.
-	ORDER_WIDGET_SEL_TOP_MIDDLE, ///< #NWID_SELECTION widget for middle part of the top row of the 'your train' order window.
-	ORDER_WIDGET_SEL_TOP_RIGHT,  ///< #NWID_SELECTION widget for right part of the top row of the 'your train' order window.
-	ORDER_WIDGET_SEL_TOP_ROW,    ///< #NWID_SELECTION widget for the top row of the 'your non-trains' order window.
-	ORDER_WIDGET_SEL_BOTTOM_MIDDLE, ///< #NWID_SELECTION widget for the middle part of the bottom row of the 'your train' order window.
+	ORDER_WIDGET_SEL_TOP_LEFT,              ///< #NWID_SELECTION widget for left part of the top row of the 'your train' order window.
+	ORDER_WIDGET_SEL_TOP_MIDDLE,            ///< #NWID_SELECTION widget for middle part of the top row of the 'your train' order window.
+	ORDER_WIDGET_SEL_TOP_RIGHT,             ///< #NWID_SELECTION widget for right part of the top row of the 'your train' order window.
+	ORDER_WIDGET_SEL_TOP_ROW_GROUNDVEHICLE, ///< #NWID_SELECTION widget for the top row of the 'your train' order window.
+	ORDER_WIDGET_SEL_TOP_ROW,               ///< #NWID_SELECTION widget for the top row of the 'your non-trains' order window.
+	ORDER_WIDGET_SEL_BOTTOM_MIDDLE,         ///< #NWID_SELECTION widget for the middle part of the bottom row of the 'your train' order window.
 	ORDER_WIDGET_SHARED_ORDER_LIST,
 };
 
 /** Order load types that could be given to station orders. */
-static const StringID _station_load_types[][5] = {
+static const StringID _station_load_types[][5][5] = {
 	{
-		STR_EMPTY,
-		INVALID_STRING_ID,
-		STR_ORDER_FULL_LOAD,
-		STR_ORDER_FULL_LOAD_ANY,
-		STR_ORDER_NO_LOAD,
+		/* No refitting. */
+		{
+			STR_EMPTY,
+			INVALID_STRING_ID,
+			STR_ORDER_FULL_LOAD,
+			STR_ORDER_FULL_LOAD_ANY,
+			STR_ORDER_NO_LOAD,
+		}, {
+			STR_ORDER_UNLOAD,
+			INVALID_STRING_ID,
+			STR_ORDER_UNLOAD_FULL_LOAD,
+			STR_ORDER_UNLOAD_FULL_LOAD_ANY,
+			STR_ORDER_UNLOAD_NO_LOAD,
+		}, {
+			STR_ORDER_TRANSFER,
+			INVALID_STRING_ID,
+			STR_ORDER_TRANSFER_FULL_LOAD,
+			STR_ORDER_TRANSFER_FULL_LOAD_ANY,
+			STR_ORDER_TRANSFER_NO_LOAD,
+		}, {
+			/* Unload and transfer do not work together. */
+			INVALID_STRING_ID,
+			INVALID_STRING_ID,
+			INVALID_STRING_ID,
+			INVALID_STRING_ID,
+		}, {
+			STR_ORDER_NO_UNLOAD,
+			INVALID_STRING_ID,
+			STR_ORDER_NO_UNLOAD_FULL_LOAD,
+			STR_ORDER_NO_UNLOAD_FULL_LOAD_ANY,
+			STR_ORDER_NO_UNLOAD_NO_LOAD,
+		}
 	}, {
-		STR_ORDER_UNLOAD,
-		INVALID_STRING_ID,
-		STR_ORDER_UNLOAD_FULL_LOAD,
-		STR_ORDER_UNLOAD_FULL_LOAD_ANY,
-		STR_ORDER_UNLOAD_NO_LOAD,
-	}, {
-		STR_ORDER_TRANSFER,
-		INVALID_STRING_ID,
-		STR_ORDER_TRANSFER_FULL_LOAD,
-		STR_ORDER_TRANSFER_FULL_LOAD_ANY,
-		STR_ORDER_TRANSFER_NO_LOAD,
-	}, {
-		/* Unload and transfer do not work together. */
-		INVALID_STRING_ID,
-		INVALID_STRING_ID,
-		INVALID_STRING_ID,
-		INVALID_STRING_ID,
-	}, {
-		STR_ORDER_NO_UNLOAD,
-		INVALID_STRING_ID,
-		STR_ORDER_NO_UNLOAD_FULL_LOAD,
-		STR_ORDER_NO_UNLOAD_FULL_LOAD_ANY,
-		STR_ORDER_NO_UNLOAD_NO_LOAD,
+		/* With auto-refitting. No loading and auto-refitting do not work together. */
+		{
+			STR_ORDER_AUTO_REFIT,
+			INVALID_STRING_ID,
+			STR_ORDER_FULL_LOAD_REFIT,
+			STR_ORDER_FULL_LOAD_ANY_REFIT,
+			INVALID_STRING_ID,
+		}, {
+			STR_ORDER_UNLOAD_REFIT,
+			INVALID_STRING_ID,
+			STR_ORDER_UNLOAD_FULL_LOAD_REFIT,
+			STR_ORDER_UNLOAD_FULL_LOAD_ANY_REFIT,
+			INVALID_STRING_ID,
+		}, {
+			STR_ORDER_TRANSFER_REFIT,
+			INVALID_STRING_ID,
+			STR_ORDER_TRANSFER_FULL_LOAD_REFIT,
+			STR_ORDER_TRANSFER_FULL_LOAD_ANY_REFIT,
+			INVALID_STRING_ID,
+		}, {
+			/* Unload and transfer do not work together. */
+			INVALID_STRING_ID,
+			INVALID_STRING_ID,
+			INVALID_STRING_ID,
+			INVALID_STRING_ID,
+		}, {
+			STR_ORDER_NO_UNLOAD_REFIT,
+			INVALID_STRING_ID,
+			STR_ORDER_NO_UNLOAD_FULL_LOAD_REFIT,
+			STR_ORDER_NO_UNLOAD_FULL_LOAD_ANY_REFIT,
+			INVALID_STRING_ID,
+		}
 	}
 };
 
@@ -179,6 +218,12 @@ static int DepotActionStringIndex(const Order *order)
 	}
 }
 
+static const StringID _order_refit_action_dropdown[] = {
+	STR_ORDER_DROP_REFIT_AUTO,
+	STR_ORDER_DROP_REFIT_AUTO_ANY,
+	INVALID_STRING_ID
+};
+
 /**
  * Draws an order in order or timetable GUI
  * @param v Vehicle the order belongs to
@@ -245,7 +290,10 @@ void DrawOrderString(const Vehicle *v, const Order *order, int order_index, int 
 					SetTimetableParams(6, 7, order->wait_time);
 				}
 			} else {
-				SetDParam(3, (order->GetNonStopType() & ONSF_NO_STOP_AT_DESTINATION_STATION) ? STR_EMPTY : _station_load_types[unload][load]);
+				SetDParam(3, (order->GetNonStopType() & ONSF_NO_STOP_AT_DESTINATION_STATION) ? STR_EMPTY : _station_load_types[order->IsRefit()][unload][load]);
+				if (order->IsRefit()) {
+					SetDParam(4, order->IsAutoRefit() ? STR_ORDER_AUTO_REFIT_ANY : CargoSpec::Get(order->GetRefitCargo())->name);
+				}
 				if (v->type == VEH_TRAIN && (order->GetNonStopType() & ONSF_NO_STOP_AT_DESTINATION_STATION) == 0) {
 					SetDParam(5, order->GetStopLocation() + STR_ORDER_STOP_LOCATION_NEAR_END);
 				}
@@ -420,20 +468,20 @@ static Order GetOrderCmdFromTile(const Vehicle *v, TileIndex tile)
  *
  * The top-row buttons of one of your trains or road vehicles is one of the following three cases:
  * \verbatim
- * +-----------------+-----------------+-----------------+
- * |    NON-STOP     |    FULL_LOAD    |     UNLOAD      | (normal)
- * +-----------------+-----------------+-----------------+
- * |    COND_VAR     | COND_COMPARATOR |   COND_VALUE    | (for conditional orders)
- * +-----------------+-----------------+-----------------+
- * |    NON-STOP     |      REFIT      |     SERVICE     | (for depot orders)
- * +-----------------+-----------------+-----------------+
+ * +-----------------+-----------------+-----------------+-----------------+
+ * |    NON-STOP     |    FULL_LOAD    |     UNLOAD      |      REFIT      | (normal)
+ * +-----------------+-----+-----------+-----------+-----+-----------------+
+ * |       COND_VAR        |    COND_COMPARATOR    |      COND_VALUE       | (for conditional orders)
+ * +-----------------+-----+-----------+-----------+-----+-----------------+
+ * |    NON-STOP     |      REFIT      |     SERVICE     |     (empty)     | (for depot orders)
+ * +-----------------+-----------------+-----------------+-----------------+
  * \endverbatim
  *
  * Airplanes and ships have one of the following three top-row button rows:
  * \verbatim
- * +--------------------------+--------------------------+
- * |          FULL_LOAD       |          UNLOAD          | (normal)
- * +-----------------+--------+--------+-----------------+
+ * +-----------------+-----------------+-----------------+
+ * |    FULL_LOAD    |     UNLOAD      |      REFIT      | (normal)
+ * +-----------------+-----------------+-----------------+
  * |    COND_VAR     | COND_COMPARATOR |   COND_VALUE    | (for conditional orders)
  * +-----------------+--------+--------+-----------------+
  * |            REFIT         |          SERVICE         | (for depot order)
@@ -461,22 +509,24 @@ private:
 
 	/** Displayed planes of the #NWID_SELECTION widgets. */
 	enum DisplayPane {
+		/* ORDER_WIDGET_SEL_TOP_ROW_GROUNDVEHICLE */
+		DP_GROUNDVEHICLE_ROW_NORMAL      = 0, ///< Display the row for normal/depot orders in the top row of the train/rv order window.
+		DP_GROUNDVEHICLE_ROW_CONDITIONAL = 1, ///< Display the row for conditional orders in the top row of the train/rv order window.
+
 		/* ORDER_WIDGET_SEL_TOP_LEFT */
-		DP_LEFT_NONSTOP    = 0, ///< Display 'non stop' in the left button of the top row of the train/rv order window.
-		DP_LEFT_CONDVAR    = 1, ///< Display condition variable in the left button of the top row of the train/rv order window.
+		DP_LEFT_LOAD       = 0, ///< Display 'load' in the left button of the top row of the train/rv order window.
+		DP_LEFT_REFIT      = 1, ///< Display 'refit' in the left button of the top row of the train/rv order window.
 
 		/* ORDER_WIDGET_SEL_TOP_MIDDLE */
-		DP_MIDDLE_LOAD     = 0, ///< Display 'load' in the middle button of the top row of the train/rv order window.
-		DP_MIDDLE_REFIT    = 1, ///< Display 'refit' in the middle button of the top row of the train/rv order window.
-		DP_MIDDLE_COMPARE  = 2, ///< Display compare operator in the middle button of the top row of the train/rv order window.
+		DP_MIDDLE_UNLOAD   = 0, ///< Display 'unload' in the middle button of the top row of the train/rv order window.
+		DP_MIDDLE_SERVICE  = 1, ///< Display 'service' in the middle button of the top row of the train/rv order window.
 
 		/* ORDER_WIDGET_SEL_TOP_RIGHT */
-		DP_RIGHT_UNLOAD    = 0, ///< Display 'unload' in the right button of the top row of the train/rv order window.
-		DP_RIGHT_SERVICE   = 1, ///< Display 'service' in the right button of the top row of the train/rv order window.
-		DP_RIGHT_CONDVAL   = 2, ///< Display condition value in the right button of the top row of the train/rv order window.
+		DP_RIGHT_EMPTY     = 0, ///< Display an empty panel in the right button of the top row of the train/rv order window.
+		DP_RIGHT_REFIT     = 1, ///< Display 'refit' in the right button of the top  row of the train/rv order window.
 
 		/* ORDER_WIDGET_SEL_TOP_ROW */
-		DP_ROW_LOAD        = 0, ///< Display 'load' / 'unload' buttons in the top row of the ship/airplane order window.
+		DP_ROW_LOAD        = 0, ///< Display 'load' / 'unload' / 'refit' buttons in the top row of the ship/airplane order window.
 		DP_ROW_DEPOT       = 1, ///< Display 'refit' / 'service' buttons in the top row of the ship/airplane order window.
 		DP_ROW_CONDITIONAL = 2, ///< Display the conditional order buttons in the top row of the ship/airplane order window.
 
@@ -490,6 +540,7 @@ private:
 	OrderPlaceObjectState goto_type;
 	const Vehicle *vehicle; ///< Vehicle owning the orders being displayed and manipulated.
 	Scrollbar *vscroll;
+	bool can_do_autorefit; ///< Vehicle chain can be auto-refitted.
 
 	/**
 	 * Return the memorised selected order.
@@ -737,15 +788,29 @@ private:
 	/**
 	 * Handle the click on the refit button.
 	 * If ctrl is pressed, cancel refitting, else show the refit window.
-	 * @param i Dummy parameter.
+	 * @param i Selected refit command.
+	 * @param auto_refit Select refit for auto-refitting.
 	 */
-	void OrderClick_Refit(int i)
+	void OrderClick_Refit(int i, bool auto_refit)
 	{
 		if (_ctrl_pressed) {
 			/* Cancel refitting */
 			DoCommandP(this->vehicle->tile, this->vehicle->index, (this->OrderGetSel() << 16) | (CT_NO_REFIT << 8) | CT_NO_REFIT, CMD_ORDER_REFIT);
 		} else {
-			ShowVehicleRefitWindow(this->vehicle, this->OrderGetSel(), this);
+			if (i == 1) { // Auto-refit to available cargo type.
+				DoCommandP(this->vehicle->tile, this->vehicle->index, (this->OrderGetSel() << 16) | CT_AUTO_REFIT, CMD_ORDER_REFIT);
+			} else {
+				ShowVehicleRefitWindow(this->vehicle, this->OrderGetSel(), this, auto_refit);
+			}
+		}
+	}
+
+	/** Cache auto-refittability of the vehicle chain. */
+	void UpdateAutoRefitState()
+	{
+		this->can_do_autorefit = false;
+		for (const Vehicle *w = this->vehicle; w != NULL; w = w->Next()) {
+			if (HasBit(Engine::Get(w->engine_type)->info.misc_flags, EF_AUTO_REFIT)) this->can_do_autorefit = true;
 		}
 	}
 
@@ -757,10 +822,15 @@ public:
 		this->CreateNestedTree(desc);
 		this->vscroll = this->GetScrollbar(ORDER_WIDGET_SCROLLBAR);
 		this->FinishInitNested(desc, v->index);
+		if (v->owner == _local_company) {
+			this->DisableWidget(ORDER_WIDGET_EMPTY);
+		}
 
 		this->selected_order = -1;
 		this->order_over = INVALID_VEH_ORDER_ID;
 		this->owner = v->owner;
+
+		this->UpdateAutoRefitState();
 
 		if (_settings_client.gui.quick_goto && v->owner == _local_company) {
 			/* If there are less than 2 station, make Go To active. */
@@ -821,6 +891,7 @@ public:
 			case -666:
 				/* Autoreplace replaced the vehicle */
 				this->vehicle = Vehicle::Get(this->window_number);
+				this->UpdateAutoRefitState();
 				break;
 
 			case -1:
@@ -919,26 +990,29 @@ public:
 
 		/* Selection widgets. */
 		/* Train or road vehicle. */
-		NWidgetStacked *left_sel   = this->GetWidget<NWidgetStacked>(ORDER_WIDGET_SEL_TOP_LEFT);
-		NWidgetStacked *middle_sel = this->GetWidget<NWidgetStacked>(ORDER_WIDGET_SEL_TOP_MIDDLE);
-		NWidgetStacked *right_sel  = this->GetWidget<NWidgetStacked>(ORDER_WIDGET_SEL_TOP_RIGHT);
+		NWidgetStacked *train_row_sel = this->GetWidget<NWidgetStacked>(ORDER_WIDGET_SEL_TOP_ROW_GROUNDVEHICLE);
+		NWidgetStacked *left_sel      = this->GetWidget<NWidgetStacked>(ORDER_WIDGET_SEL_TOP_LEFT);
+		NWidgetStacked *middle_sel    = this->GetWidget<NWidgetStacked>(ORDER_WIDGET_SEL_TOP_MIDDLE);
+		NWidgetStacked *right_sel     = this->GetWidget<NWidgetStacked>(ORDER_WIDGET_SEL_TOP_RIGHT);
 		/* Ship or airplane. */
 		NWidgetStacked *row_sel = this->GetWidget<NWidgetStacked>(ORDER_WIDGET_SEL_TOP_ROW);
-		assert(row_sel != NULL || (left_sel != NULL && middle_sel != NULL && right_sel != NULL));
+		assert(row_sel != NULL || (train_row_sel != NULL && left_sel != NULL && middle_sel != NULL && right_sel != NULL));
 
 
 		if (order == NULL) {
 			if (row_sel != NULL) {
 				row_sel->SetDisplayedPlane(DP_ROW_LOAD);
 			} else {
-				left_sel->SetDisplayedPlane(DP_LEFT_NONSTOP);
-				middle_sel->SetDisplayedPlane(DP_MIDDLE_LOAD);
-				right_sel->SetDisplayedPlane(DP_RIGHT_UNLOAD);
+				train_row_sel->SetDisplayedPlane(DP_GROUNDVEHICLE_ROW_NORMAL);
+				left_sel->SetDisplayedPlane(DP_LEFT_LOAD);
+				middle_sel->SetDisplayedPlane(DP_MIDDLE_UNLOAD);
+				right_sel->SetDisplayedPlane(DP_RIGHT_EMPTY);
 				this->DisableWidget(ORDER_WIDGET_NON_STOP);
 				this->RaiseWidget(ORDER_WIDGET_NON_STOP);
 			}
 			this->DisableWidget(ORDER_WIDGET_FULL_LOAD);
 			this->DisableWidget(ORDER_WIDGET_UNLOAD);
+			this->DisableWidget(ORDER_WIDGET_REFIT_DROPDOWN);
 		} else {
 			this->SetWidgetDisabledState(ORDER_WIDGET_FULL_LOAD, (order->GetNonStopType() & ONSF_NO_STOP_AT_DESTINATION_STATION) != 0); // full load
 			this->SetWidgetDisabledState(ORDER_WIDGET_UNLOAD,    (order->GetNonStopType() & ONSF_NO_STOP_AT_DESTINATION_STATION) != 0); // unload
@@ -948,37 +1022,45 @@ public:
 					if (row_sel != NULL) {
 						row_sel->SetDisplayedPlane(DP_ROW_LOAD);
 					} else {
-						left_sel->SetDisplayedPlane(DP_LEFT_NONSTOP);
-						middle_sel->SetDisplayedPlane(DP_MIDDLE_LOAD);
-						right_sel->SetDisplayedPlane(DP_RIGHT_UNLOAD);
+						train_row_sel->SetDisplayedPlane(DP_GROUNDVEHICLE_ROW_NORMAL);
+						left_sel->SetDisplayedPlane(DP_LEFT_LOAD);
+						middle_sel->SetDisplayedPlane(DP_MIDDLE_UNLOAD);
+						right_sel->SetDisplayedPlane(DP_RIGHT_REFIT);
 						this->EnableWidget(ORDER_WIDGET_NON_STOP);
 						this->SetWidgetLoweredState(ORDER_WIDGET_NON_STOP, order->GetNonStopType() & ONSF_NO_STOP_AT_INTERMEDIATE_STATIONS);
 					}
 					this->SetWidgetLoweredState(ORDER_WIDGET_FULL_LOAD, order->GetLoadType() == OLF_FULL_LOAD_ANY);
 					this->SetWidgetLoweredState(ORDER_WIDGET_UNLOAD, order->GetUnloadType() == OUFB_UNLOAD);
+
+					/* Can only do refitting when stopping at the destination and loading cargo. */
+					this->SetWidgetDisabledState(ORDER_WIDGET_REFIT_DROPDOWN, !this->can_do_autorefit || order->GetLoadType() == OLFB_NO_LOAD || order->GetNonStopType() & ONSF_NO_STOP_AT_DESTINATION_STATION);
+
 					break;
 
 				case OT_GOTO_WAYPOINT:
 					if (row_sel != NULL) {
 						row_sel->SetDisplayedPlane(DP_ROW_LOAD);
 					} else {
-						left_sel->SetDisplayedPlane(DP_LEFT_NONSTOP);
-						middle_sel->SetDisplayedPlane(DP_MIDDLE_LOAD);
-						right_sel->SetDisplayedPlane(DP_RIGHT_UNLOAD);
+						train_row_sel->SetDisplayedPlane(DP_GROUNDVEHICLE_ROW_NORMAL);
+						left_sel->SetDisplayedPlane(DP_LEFT_LOAD);
+						middle_sel->SetDisplayedPlane(DP_MIDDLE_UNLOAD);
+						right_sel->SetDisplayedPlane(DP_RIGHT_EMPTY);
 						this->EnableWidget(ORDER_WIDGET_NON_STOP);
 						this->SetWidgetLoweredState(ORDER_WIDGET_NON_STOP, order->GetNonStopType() & ONSF_NO_STOP_AT_INTERMEDIATE_STATIONS);
 					}
 					this->DisableWidget(ORDER_WIDGET_FULL_LOAD);
 					this->DisableWidget(ORDER_WIDGET_UNLOAD);
+					this->DisableWidget(ORDER_WIDGET_REFIT_DROPDOWN);
 					break;
 
 				case OT_GOTO_DEPOT:
 					if (row_sel != NULL) {
 						row_sel->SetDisplayedPlane(DP_ROW_DEPOT);
 					} else {
-						left_sel->SetDisplayedPlane(DP_LEFT_NONSTOP);
-						middle_sel->SetDisplayedPlane(DP_MIDDLE_REFIT);
-						right_sel->SetDisplayedPlane(DP_RIGHT_SERVICE);
+						train_row_sel->SetDisplayedPlane(DP_GROUNDVEHICLE_ROW_NORMAL);
+						left_sel->SetDisplayedPlane(DP_LEFT_REFIT);
+						middle_sel->SetDisplayedPlane(DP_MIDDLE_SERVICE);
+						right_sel->SetDisplayedPlane(DP_RIGHT_EMPTY);
 						this->EnableWidget(ORDER_WIDGET_NON_STOP);
 						this->SetWidgetLoweredState(ORDER_WIDGET_NON_STOP, order->GetNonStopType() & ONSF_NO_STOP_AT_INTERMEDIATE_STATIONS);
 					}
@@ -992,9 +1074,7 @@ public:
 					if (row_sel != NULL) {
 						row_sel->SetDisplayedPlane(DP_ROW_CONDITIONAL);
 					} else {
-						left_sel->SetDisplayedPlane(DP_LEFT_CONDVAR);
-						middle_sel->SetDisplayedPlane(DP_MIDDLE_COMPARE);
-						right_sel->SetDisplayedPlane(DP_RIGHT_CONDVAL);
+						train_row_sel->SetDisplayedPlane(DP_GROUNDVEHICLE_ROW_CONDITIONAL);
 					}
 					OrderConditionVariable ocv = order->GetConditionVariable();
 					/* Set the strings for the dropdown boxes. */
@@ -1009,13 +1089,15 @@ public:
 					if (row_sel != NULL) {
 						row_sel->SetDisplayedPlane(DP_ROW_LOAD);
 					} else {
-						left_sel->SetDisplayedPlane(DP_LEFT_NONSTOP);
-						middle_sel->SetDisplayedPlane(DP_MIDDLE_LOAD);
-						right_sel->SetDisplayedPlane(DP_RIGHT_UNLOAD);
+						train_row_sel->SetDisplayedPlane(DP_GROUNDVEHICLE_ROW_NORMAL);
+						left_sel->SetDisplayedPlane(DP_LEFT_LOAD);
+						middle_sel->SetDisplayedPlane(DP_MIDDLE_UNLOAD);
+						right_sel->SetDisplayedPlane(DP_RIGHT_EMPTY);
 						this->DisableWidget(ORDER_WIDGET_NON_STOP);
 					}
 					this->DisableWidget(ORDER_WIDGET_FULL_LOAD);
 					this->DisableWidget(ORDER_WIDGET_UNLOAD);
+					this->DisableWidget(ORDER_WIDGET_REFIT_DROPDOWN);
 					break;
 			}
 		}
@@ -1212,7 +1294,7 @@ public:
 				break;
 
 			case ORDER_WIDGET_REFIT:
-				this->OrderClick_Refit(0);
+				this->OrderClick_Refit(0, false);
 				break;
 
 			case ORDER_WIDGET_SERVICE:
@@ -1220,6 +1302,14 @@ public:
 					this->OrderClick_Service(-1);
 				} else {
 					ShowDropDownMenu(this, _order_depot_action_dropdown, DepotActionStringIndex(this->vehicle->GetOrder(this->OrderGetSel())), ORDER_WIDGET_SERVICE, 0, 0);
+				}
+				break;
+
+			case ORDER_WIDGET_REFIT_DROPDOWN:
+				if (this->GetWidget<NWidgetLeaf>(widget)->ButtonHit(pt)) {
+					this->OrderClick_Refit(0, true);
+				} else {
+					ShowDropDownMenu(this, _order_refit_action_dropdown, 0, ORDER_WIDGET_REFIT_DROPDOWN, 0, 0);
 				}
 				break;
 
@@ -1307,6 +1397,10 @@ public:
 
 			case ORDER_WIDGET_SERVICE:
 				this->OrderClick_Service(index);
+				break;
+
+			case ORDER_WIDGET_REFIT_DROPDOWN:
+				this->OrderClick_Refit(index, true);
 				break;
 
 			case ORDER_WIDGET_COND_VARIABLE:
@@ -1478,28 +1572,36 @@ static const NWidgetPart _nested_orders_train_widgets[] = {
 
 	/* First button row. */
 	NWidget(NWID_HORIZONTAL),
-		NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
-			NWidget(NWID_SELECTION, INVALID_COLOUR, ORDER_WIDGET_SEL_TOP_LEFT),
-				NWidget(NWID_BUTTON_DROPDOWN, COLOUR_GREY, ORDER_WIDGET_NON_STOP), SetMinimalSize(124, 12), SetFill(1, 0),
-														SetDataTip(STR_ORDER_NON_STOP, STR_ORDER_TOOLTIP_NON_STOP), SetResize(1, 0),
+		NWidget(NWID_SELECTION, INVALID_COLOUR, ORDER_WIDGET_SEL_TOP_ROW_GROUNDVEHICLE),
+			NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
+				NWidget(NWID_BUTTON_DROPDOWN, COLOUR_GREY, ORDER_WIDGET_NON_STOP), SetMinimalSize(93, 12), SetFill(1, 0),
+															SetDataTip(STR_ORDER_NON_STOP, STR_ORDER_TOOLTIP_NON_STOP), SetResize(1, 0),
+				NWidget(NWID_SELECTION, INVALID_COLOUR, ORDER_WIDGET_SEL_TOP_LEFT),
+					NWidget(NWID_BUTTON_DROPDOWN, COLOUR_GREY, ORDER_WIDGET_FULL_LOAD), SetMinimalSize(93, 12), SetFill(1, 0),
+															SetDataTip(STR_ORDER_TOGGLE_FULL_LOAD, STR_ORDER_TOOLTIP_FULL_LOAD), SetResize(1, 0),
+					NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, ORDER_WIDGET_REFIT), SetMinimalSize(93, 12), SetFill(1, 0),
+															SetDataTip(STR_ORDER_REFIT, STR_ORDER_REFIT_TOOLTIP), SetResize(1, 0),
+				EndContainer(),
+				NWidget(NWID_SELECTION, INVALID_COLOUR, ORDER_WIDGET_SEL_TOP_MIDDLE),
+					NWidget(NWID_BUTTON_DROPDOWN, COLOUR_GREY, ORDER_WIDGET_UNLOAD), SetMinimalSize(93, 12), SetFill(1, 0),
+															SetDataTip(STR_ORDER_TOGGLE_UNLOAD, STR_ORDER_TOOLTIP_UNLOAD), SetResize(1, 0),
+					NWidget(NWID_BUTTON_DROPDOWN, COLOUR_GREY, ORDER_WIDGET_SERVICE), SetMinimalSize(93, 12), SetFill(1, 0),
+															SetDataTip(STR_ORDER_SERVICE, STR_ORDER_SERVICE_TOOLTIP), SetResize(1, 0),
+				EndContainer(),
+				NWidget(NWID_SELECTION, INVALID_COLOUR, ORDER_WIDGET_SEL_TOP_RIGHT),
+					NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, ORDER_WIDGET_EMPTY), SetMinimalSize(93, 12), SetFill(1, 0),
+															SetDataTip(STR_ORDER_REFIT, STR_ORDER_REFIT_TOOLTIP), SetResize(1, 0),
+					NWidget(NWID_BUTTON_DROPDOWN, COLOUR_GREY, ORDER_WIDGET_REFIT_DROPDOWN), SetMinimalSize(93, 12), SetFill(1, 0),
+															SetDataTip(STR_ORDER_REFIT_AUTO, STR_ORDER_REFIT_AUTO_TOOLTIP), SetResize(1, 0),
+				EndContainer(),
+			EndContainer(),
+			NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
 				NWidget(WWT_DROPDOWN, COLOUR_GREY, ORDER_WIDGET_COND_VARIABLE), SetMinimalSize(124, 12), SetFill(1, 0),
-														SetDataTip(STR_NULL, STR_ORDER_CONDITIONAL_VARIABLE_TOOLTIP), SetResize(1, 0),
-			EndContainer(),
-			NWidget(NWID_SELECTION, INVALID_COLOUR, ORDER_WIDGET_SEL_TOP_MIDDLE),
-				NWidget(NWID_BUTTON_DROPDOWN, COLOUR_GREY, ORDER_WIDGET_FULL_LOAD), SetMinimalSize(124, 12), SetFill(1, 0),
-														SetDataTip(STR_ORDER_TOGGLE_FULL_LOAD, STR_ORDER_TOOLTIP_FULL_LOAD), SetResize(1, 0),
-				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, ORDER_WIDGET_REFIT), SetMinimalSize(124, 12), SetFill(1, 0),
-														SetDataTip(STR_ORDER_REFIT, STR_ORDER_REFIT_TOOLTIP), SetResize(1, 0),
+															SetDataTip(STR_NULL, STR_ORDER_CONDITIONAL_VARIABLE_TOOLTIP), SetResize(1, 0),
 				NWidget(WWT_DROPDOWN, COLOUR_GREY, ORDER_WIDGET_COND_COMPARATOR), SetMinimalSize(124, 12), SetFill(1, 0),
-														SetDataTip(STR_NULL, STR_ORDER_CONDITIONAL_COMPARATOR_TOOLTIP), SetResize(1, 0),
-			EndContainer(),
-			NWidget(NWID_SELECTION, INVALID_COLOUR, ORDER_WIDGET_SEL_TOP_RIGHT),
-				NWidget(NWID_BUTTON_DROPDOWN, COLOUR_GREY, ORDER_WIDGET_UNLOAD), SetMinimalSize(124, 12), SetFill(1, 0),
-														SetDataTip(STR_ORDER_TOGGLE_UNLOAD, STR_ORDER_TOOLTIP_UNLOAD), SetResize(1, 0),
-				NWidget(NWID_BUTTON_DROPDOWN, COLOUR_GREY, ORDER_WIDGET_SERVICE), SetMinimalSize(124, 12), SetFill(1, 0),
-														SetDataTip(STR_ORDER_SERVICE, STR_ORDER_SERVICE_TOOLTIP), SetResize(1, 0),
+															SetDataTip(STR_NULL, STR_ORDER_CONDITIONAL_COMPARATOR_TOOLTIP), SetResize(1, 0),
 				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, ORDER_WIDGET_COND_VALUE), SetMinimalSize(124, 12), SetFill(1, 0),
-														SetDataTip(STR_BLACK_COMMA, STR_ORDER_CONDITIONAL_VALUE_TOOLTIP), SetResize(1, 0),
+															SetDataTip(STR_BLACK_COMMA, STR_ORDER_CONDITIONAL_VALUE_TOOLTIP), SetResize(1, 0),
 			EndContainer(),
 		EndContainer(),
 		NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, ORDER_WIDGET_SHARED_ORDER_LIST), SetMinimalSize(12, 12), SetDataTip(SPR_SHARED_ORDERS_ICON, STR_ORDERS_VEH_WITH_SHARED_ORDERS_LIST_TOOLTIP),
@@ -1547,12 +1649,14 @@ static const NWidgetPart _nested_orders_widgets[] = {
 	/* First button row. */
 	NWidget(NWID_HORIZONTAL),
 		NWidget(NWID_SELECTION, INVALID_COLOUR, ORDER_WIDGET_SEL_TOP_ROW),
-			/* load + unload buttons. */
-			NWidget(NWID_HORIZONTAL),
-				NWidget(NWID_BUTTON_DROPDOWN, COLOUR_GREY, ORDER_WIDGET_FULL_LOAD), SetMinimalSize(186, 12), SetFill(1, 0),
+			/* Load + unload + refit buttons. */
+			NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
+				NWidget(NWID_BUTTON_DROPDOWN, COLOUR_GREY, ORDER_WIDGET_FULL_LOAD), SetMinimalSize(124, 12), SetFill(1, 0),
 													SetDataTip(STR_ORDER_TOGGLE_FULL_LOAD, STR_ORDER_TOOLTIP_FULL_LOAD), SetResize(1, 0),
-				NWidget(NWID_BUTTON_DROPDOWN, COLOUR_GREY, ORDER_WIDGET_UNLOAD), SetMinimalSize(186, 12), SetFill(1, 0),
+				NWidget(NWID_BUTTON_DROPDOWN, COLOUR_GREY, ORDER_WIDGET_UNLOAD), SetMinimalSize(124, 12), SetFill(1, 0),
 													SetDataTip(STR_ORDER_TOGGLE_UNLOAD, STR_ORDER_TOOLTIP_UNLOAD), SetResize(1, 0),
+				NWidget(NWID_BUTTON_DROPDOWN, COLOUR_GREY, ORDER_WIDGET_REFIT_DROPDOWN), SetMinimalSize(124, 12), SetFill(1, 0),
+													SetDataTip(STR_ORDER_REFIT_AUTO, STR_ORDER_REFIT_AUTO_TOOLTIP), SetResize(1, 0),
 			EndContainer(),
 			/* Refit + service buttons. */
 			NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
