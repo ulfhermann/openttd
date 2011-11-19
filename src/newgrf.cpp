@@ -888,7 +888,7 @@ static ChangeInfoResult CommonVehicleChangeInfo(EngineInfo *ei, int prop, ByteRe
 			ei->climates = buf->ReadByte();
 			break;
 
-		case 0x07: // Loading speed
+		case PROP_VEHICLE_LOAD_AMOUNT: // 0x07 Loading speed
 			/* Amount of cargo loaded during a vehicle's "loading tick" */
 			ei->load_amount = buf->ReadByte();
 			break;
@@ -1004,11 +1004,15 @@ static ChangeInfoResult RailVehicleChangeInfo(uint engine, int numinfo, int prop
 			case 0x15: { // Cargo type
 				uint8 ctype = buf->ReadByte();
 
-				if (ctype < NUM_CARGO && HasBit(_cargo_mask, ctype)) {
-					ei->cargo_type = ctype;
-				} else if (ctype == 0xFF) {
+				if (ctype == 0xFF) {
 					/* 0xFF is specified as 'use first refittable' */
 					ei->cargo_type = CT_INVALID;
+				} else if (_cur.grffile->grf_version >= 8) {
+					/* Use translated cargo. Might result in CT_INVALID (first refittable), if cargo is not defined. */
+					ei->cargo_type = GetCargoTranslation(ctype, _cur.grffile);
+				} else if (ctype < NUM_CARGO && HasBit(_cargo_mask, ctype)) {
+					/* Use untranslated cargo. */
+					ei->cargo_type = ctype;
 				} else {
 					ei->cargo_type = CT_INVALID;
 					grfmsg(2, "RailVehicleChangeInfo: Invalid cargo type %d, using first refittable", ctype);
@@ -1095,7 +1099,7 @@ static ChangeInfoResult RailVehicleChangeInfo(uint engine, int numinfo, int prop
 				rvi->air_drag = buf->ReadByte();
 				break;
 
-			case 0x21: // Shorter vehicle
+			case PROP_TRAIN_SHORTEN_FACTOR: // 0x21 Shorter vehicle
 				rvi->shorten_factor = buf->ReadByte();
 				break;
 
@@ -1214,15 +1218,20 @@ static ChangeInfoResult RoadVehicleChangeInfo(uint engine, int numinfo, int prop
 				break;
 
 			case 0x10: { // Cargo type
-				uint8 cargo = buf->ReadByte();
+				uint8 ctype = buf->ReadByte();
 
-				if (cargo < NUM_CARGO && HasBit(_cargo_mask, cargo)) {
-					ei->cargo_type = cargo;
-				} else if (cargo == 0xFF) {
+				if (ctype == 0xFF) {
+					/* 0xFF is specified as 'use first refittable' */
 					ei->cargo_type = CT_INVALID;
+				} else if (_cur.grffile->grf_version >= 8) {
+					/* Use translated cargo. Might result in CT_INVALID (first refittable), if cargo is not defined. */
+					ei->cargo_type = GetCargoTranslation(ctype, _cur.grffile);
+				} else if (ctype < NUM_CARGO && HasBit(_cargo_mask, ctype)) {
+					/* Use untranslated cargo. */
+					ei->cargo_type = ctype;
 				} else {
 					ei->cargo_type = CT_INVALID;
-					grfmsg(2, "RoadVehicleChangeInfo: Invalid cargo type %d, using first refittable", cargo);
+					grfmsg(2, "RailVehicleChangeInfo: Invalid cargo type %d, using first refittable", ctype);
 				}
 				break;
 			}
@@ -1310,6 +1319,10 @@ static ChangeInfoResult RoadVehicleChangeInfo(uint engine, int numinfo, int prop
 				ei->cargo_age_period = buf->ReadWord();
 				break;
 
+			case PROP_ROADVEH_SHORTEN_FACTOR: // 0x23 Shorter vehicle
+				rvi->shorten_factor = buf->ReadByte();
+				break;
+
 			default:
 				ret = CommonVehicleChangeInfo(ei, prop, buf);
 				break;
@@ -1364,15 +1377,20 @@ static ChangeInfoResult ShipVehicleChangeInfo(uint engine, int numinfo, int prop
 				break;
 
 			case 0x0C: { // Cargo type
-				uint8 cargo = buf->ReadByte();
+				uint8 ctype = buf->ReadByte();
 
-				if (cargo < NUM_CARGO && HasBit(_cargo_mask, cargo)) {
-					ei->cargo_type = cargo;
-				} else if (cargo == 0xFF) {
+				if (ctype == 0xFF) {
+					/* 0xFF is specified as 'use first refittable' */
 					ei->cargo_type = CT_INVALID;
+				} else if (_cur.grffile->grf_version >= 8) {
+					/* Use translated cargo. Might result in CT_INVALID (first refittable), if cargo is not defined. */
+					ei->cargo_type = GetCargoTranslation(ctype, _cur.grffile);
+				} else if (ctype < NUM_CARGO && HasBit(_cargo_mask, ctype)) {
+					/* Use untranslated cargo. */
+					ei->cargo_type = ctype;
 				} else {
 					ei->cargo_type = CT_INVALID;
-					grfmsg(2, "ShipVehicleChangeInfo: Invalid cargo type %d, using first refittable", cargo);
+					grfmsg(2, "RailVehicleChangeInfo: Invalid cargo type %d, using first refittable", ctype);
 				}
 				break;
 			}
@@ -2411,6 +2429,16 @@ static ChangeInfoResult GlobalVarChangeInfo(uint gvid, int numinfo, int prop, By
 					for (uint i = 0; i < SNOW_LINE_MONTHS; i++) {
 						for (uint j = 0; j < SNOW_LINE_DAYS; j++) {
 							table[i][j] = buf->ReadByte();
+							if (_cur.grffile->grf_version >= 8) {
+								if (table[i][j] != 0xFF) table[i][j] = table[i][j] * (1 + MAX_TILE_HEIGHT) / 256;
+							} else {
+								if (table[i][j] >= 128) {
+									/* no snow */
+									table[i][j] = 0xFF;
+								} else {
+									table[i][j] = table[i][j] * (1 + MAX_TILE_HEIGHT) / 128;
+								}
+							}
 						}
 					}
 					SetSnowLine(table);
@@ -3043,10 +3071,10 @@ static void CleanIndustryTileTable(IndustrySpec *ind)
 	if (HasBit(ind->cleanup_flag, CLEAN_TILELAYOUT) && ind->table != NULL) {
 		for (int j = 0; j < ind->num_table; j++) {
 			/* remove the individual layouts */
-			free((void*)ind->table[j]);
+			free(ind->table[j]);
 		}
 		/* remove the layouts pointers */
-		free((void*)ind->table);
+		free(ind->table);
 		ind->table = NULL;
 	}
 }
@@ -3294,7 +3322,7 @@ static ChangeInfoResult IndustriesChangeInfo(uint indid, int numinfo, int prop, 
 				}
 
 				if (HasBit(indsp->cleanup_flag, CLEAN_RANDOMSOUNDS)) {
-					free((void*)indsp->random_sounds);
+					free(indsp->random_sounds);
 				}
 				indsp->random_sounds = sounds;
 				SetBit(indsp->cleanup_flag, CLEAN_RANDOMSOUNDS);
@@ -3769,9 +3797,13 @@ static ChangeInfoResult RailTypeChangeInfo(uint id, int numinfo, int prop, ByteR
 				buf->ReadDWord();
 				break;
 
-			case 0x09: // Name of railtype
+			case 0x09: // Toolbar caption of railtype (sets name as well for backwards compatibility for grf ver < 8)
 				rti->strings.toolbar_caption = buf->ReadWord();
 				_string_to_grf_mapping[&rti->strings.toolbar_caption] = _cur.grffile->grfid;
+				if (_cur.grffile->grf_version < 8) {
+					rti->strings.name = rti->strings.toolbar_caption;
+					_string_to_grf_mapping[&rti->strings.name] = _cur.grffile->grfid;
+				}
 				break;
 
 			case 0x0A: // Menu text of railtype
@@ -3854,6 +3886,11 @@ static ChangeInfoResult RailTypeChangeInfo(uint id, int numinfo, int prop, ByteR
 				rti->sorting_order = buf->ReadByte();
 				break;
 
+			case 0x1B: // Name of railtype (overridden by prop 09 for grf ver < 8)
+				rti->strings.name = buf->ReadWord();
+				_string_to_grf_mapping[&rti->strings.name] = _cur.grffile->grfid;
+				break;
+
 			default:
 				ret = CIR_UNKNOWN;
 				break;
@@ -3889,13 +3926,14 @@ static ChangeInfoResult RailTypeReserveInfo(uint id, int numinfo, int prop, Byte
 				break;
 			}
 
-			case 0x09: // Name of railtype
+			case 0x09: // Toolbar caption of railtype
 			case 0x0A: // Menu text
 			case 0x0B: // Build window caption
 			case 0x0C: // Autoreplace text
 			case 0x0D: // New loco
 			case 0x13: // Construction cost
 			case 0x14: // Speed limit
+			case 0x1B: // Name of railtype
 				buf->ReadWord();
 				break;
 
@@ -4232,7 +4270,7 @@ static const SpriteGroup *GetGroupFromGroupID(byte setid, byte type, uint16 grou
 {
 	if (HasBit(groupid, 15)) {
 		assert(CallbackResultSpriteGroup::CanAllocateItem());
-		return new CallbackResultSpriteGroup(groupid);
+		return new CallbackResultSpriteGroup(groupid, _cur.grffile->grf_version >= 8);
 	}
 
 	if (groupid > MAX_SPRITEGROUP || _cur.spritegroups[groupid] == NULL) {
@@ -4255,7 +4293,7 @@ static const SpriteGroup *CreateGroupFromGroupID(byte feature, byte setid, byte 
 {
 	if (HasBit(spriteid, 15)) {
 		assert(CallbackResultSpriteGroup::CanAllocateItem());
-		return new CallbackResultSpriteGroup(spriteid);
+		return new CallbackResultSpriteGroup(spriteid, _cur.grffile->grf_version >= 8);
 	}
 
 	if (!_cur.IsValidSpriteSet(feature, spriteid)) {
@@ -5408,9 +5446,10 @@ void CheckForMissingSprites()
  *
  * @param param variable number (as for VarAction2, for Action7/9/D you have to subtract 0x80 first).
  * @param value returns the value of the variable.
+ * @param grffile NewGRF querying the variable
  * @return true iff the variable is known and the value is returned in 'value'.
  */
-bool GetGlobalVariable(byte param, uint32 *value)
+bool GetGlobalVariable(byte param, uint32 *value, const GRFFile *grffile)
 {
 	switch (param) {
 		case 0x00: // current date
@@ -5511,9 +5550,16 @@ bool GetGlobalVariable(byte param, uint32 *value)
 
 		/* case 0x1F: // locale dependent settings not implemented to avoid desync */
 
-		case 0x20: // snow line height
-			*value = _settings_game.game_creation.landscape == LT_ARCTIC ? GetSnowLine() : 0xFF;
+		case 0x20: { // snow line height
+			byte snowline = GetSnowLine();
+			if (_settings_game.game_creation.landscape == LT_ARCTIC && snowline <= MAX_TILE_HEIGHT) {
+				*value = Clamp(snowline * (grffile->grf_version >= 8 ? 1 : TILE_HEIGHT), 0, 0xFE);
+			} else {
+				/* No snow */
+				*value = 0xFF;
+			}
 			return true;
+		}
 
 		case 0x21: // OpenTTD version
 			*value = _openttd_newgrf_version;
@@ -5539,7 +5585,7 @@ static uint32 GetParamVal(byte param, uint32 *cond_val)
 {
 	/* First handle variable common with VarAction2 */
 	uint32 value;
-	if (GetGlobalVariable(param - 0x80, &value)) return value;
+	if (GetGlobalVariable(param - 0x80, &value, _cur.grffile)) return value;
 
 	/* Non-common variable */
 	switch (param) {
@@ -5863,7 +5909,7 @@ static void ScanInfo(ByteReader *buf)
 
 	_cur.grfconfig->ident.grfid = grfid;
 
-	if (grf_version < 2 || grf_version > 7) {
+	if (grf_version < 2 || grf_version > 8) {
 		SetBit(_cur.grfconfig->flags, GCF_INVALID);
 		DEBUG(grf, 0, "%s: NewGRF \"%s\" (GRFID %08X) uses GRF version %d, which is incompatible with this version of OpenTTD.", _cur.grfconfig->filename, name, BSWAP32(grfid), grf_version);
 	}
@@ -6158,6 +6204,10 @@ static uint32 GetPatchVariable(uint8 param)
 			return (map_bits << 24) | (min(log_X, log_Y) << 20) | (max_edge << 16) |
 				(log_X << 12) | (log_Y << 8) | (log_X + log_Y);
 		}
+
+		/* The maximum height of the map. */
+		case 0x14:
+			return MAX_TILE_HEIGHT;
 
 		default:
 			grfmsg(2, "ParamSet: Unknown Patch variable 0x%02X.", param);
@@ -7613,10 +7663,10 @@ static void ResetCustomAirports()
 					/* We need to remove the tiles layouts */
 					for (int j = 0; j < as->num_table; j++) {
 						/* remove the individual layouts */
-						free((void*)as->table[j]);
+						free(as->table[j]);
 					}
-					free((void*)as->table);
-					free((void*)as->depot_table);
+					free(as->table);
+					free(as->depot_table);
 
 					free(as);
 				}
@@ -7653,7 +7703,7 @@ static void ResetCustomIndustries()
 
 				/* We need to remove the sounds array */
 				if (HasBit(ind->cleanup_flag, CLEAN_RANDOMSOUNDS)) {
-					free((void*)ind->random_sounds);
+					free(ind->random_sounds);
 				}
 
 				/* We need to remove the tiles layouts */
@@ -7949,6 +7999,7 @@ static void CalculateRefitMasks()
 		EngineID engine = e->index;
 		EngineInfo *ei = &e->info;
 		bool only_defaultcargo; ///< Set if the vehicle shall carry only the default cargo
+		const uint8 *cargo_map_for_first_refittable = NULL;
 
 		/* Did the newgrf specify any refitting? If not, use defaults. */
 		if (_gted[engine].refitmask_valid) {
@@ -7960,9 +8011,13 @@ static void CalculateRefitMasks()
 			 * Note: After applying the translations, the vehicle may end up carrying no defined cargo. It becomes unavailable in that case. */
 			only_defaultcargo = (ei->refit_mask == 0 && _gted[engine].cargo_allowed == 0);
 
+			const GRFFile *file = _gted[engine].refitmask_grf;
+			if (file == NULL) file = e->GetGRF();
+			if (file != NULL && file->grf_version >= 8 && file->cargo_max != 0) {
+				cargo_map_for_first_refittable = file->cargo_map;
+			}
+
 			if (ei->refit_mask != 0) {
-				const GRFFile *file = _gted[engine].refitmask_grf;
-				if (file == NULL) file = e->GetGRF();
 				if (file != NULL && file->cargo_max != 0) {
 					/* Apply cargo translation table to the refit mask */
 					uint num_cargo = min(32, file->cargo_max);
@@ -8023,7 +8078,23 @@ static void CalculateRefitMasks()
 
 		/* Check if this engine's cargo type is valid. If not, set to the first refittable
 		 * cargo type. Finally disable the vehicle, if there is still no cargo. */
-		if (ei->cargo_type == CT_INVALID && ei->refit_mask != 0) ei->cargo_type = (CargoID)FindFirstBit(ei->refit_mask);
+		if (ei->cargo_type == CT_INVALID && ei->refit_mask != 0) {
+			if (cargo_map_for_first_refittable == NULL) {
+				/* Use first refittable cargo slot */
+				ei->cargo_type = (CargoID)FindFirstBit(ei->refit_mask);
+			} else {
+				/* Use first refittable cargo from cargo translation table */
+				byte best_local_slot = 0xFF;
+				CargoID cargo_type;
+				FOR_EACH_SET_CARGO_ID(cargo_type, ei->refit_mask) {
+					byte local_slot = cargo_map_for_first_refittable[cargo_type];
+					if (local_slot < best_local_slot) {
+						best_local_slot = local_slot;
+						ei->cargo_type = cargo_type;
+					}
+				}
+			}
+		}
 		if (ei->cargo_type == CT_INVALID) ei->climates = 0;
 
 		/* Clear refit_mask for not refittable ships */
@@ -8674,9 +8745,10 @@ static void FinalisePriceBaseMultipliers()
 		}
 	}
 
-	/* Apply fallback prices */
+	/* Apply fallback prices for grf version < 8 */
 	const GRFFile * const *end = _grf_files.End();
 	for (GRFFile **file = _grf_files.Begin(); file != end; file++) {
+		if ((*file)->grf_version >= 8) continue;
 		PriceMultipliers &price_base_multipliers = (*file)->price_base_multipliers;
 		for (Price p = PR_BEGIN; p < PR_END; p++) {
 			Price fallback_price = _price_base_specs[p].fallback_price;
@@ -8856,6 +8928,17 @@ void LoadNewGRF(uint load_index, uint file_index)
 		 * This ensures that action7/9 conditions 0x06 - 0x0A work correctly. */
 		for (GRFConfig *c = _grfconfig; c != NULL; c = c->next) {
 			if (c->status == GCS_ACTIVATED) c->status = GCS_INITIALISED;
+		}
+
+		if (stage == GLS_RESERVE) {
+			static const uint32 overrides[][2] = {
+				{ 0x44442202, 0x44440111 }, // UKRS addons modifies UKRS
+				{ 0x6D620402, 0x6D620401 }, // DBSetXL ECS extension modifies DBSetXL
+				{ 0x4D656f20, 0x4D656F17 }, // LV4cut modifies LV4
+			};
+			for (size_t i = 0; i < lengthof(overrides); i++) {
+				SetNewGRFOverride(BSWAP32(overrides[i][0]), BSWAP32(overrides[i][1]));
+			}
 		}
 
 		uint slot = file_index;

@@ -34,6 +34,7 @@
 #include "core/random_func.hpp"
 #include "company_base.h"
 #include "core/backup_type.hpp"
+#include "newgrf.h"
 
 #include "table/strings.h"
 
@@ -161,10 +162,20 @@ void DrawRoadVehEngine(int left, int right, int preferred_x, int y, EngineID eng
  */
 static uint GetRoadVehLength(const RoadVehicle *v)
 {
+	const Engine *e = v->GetEngine();
 	uint length = VEHICLE_LENGTH;
 
-	uint16 veh_len = GetVehicleCallback(CBID_VEHICLE_LENGTH, 0, 0, v->engine_type, v);
-	if (veh_len != CALLBACK_FAILED) {
+	uint16 veh_len = CALLBACK_FAILED;
+	if (e->GetGRF() != NULL && e->GetGRF()->grf_version >= 8) {
+		/* Use callback 36 */
+		veh_len = GetVehicleProperty(v, PROP_ROADVEH_SHORTEN_FACTOR, CALLBACK_FAILED);
+	} else {
+		/* Use callback 11 */
+		veh_len = GetVehicleCallback(CBID_VEHICLE_LENGTH, 0, 0, v->engine_type, v);
+	}
+	if (veh_len == CALLBACK_FAILED) veh_len = e->u.road.shorten_factor;
+	if (veh_len != 0) {
+		if (veh_len >= VEHICLE_LENGTH) ErrorUnknownCallbackResult(e->GetGRFID(), CBID_VEHICLE_LENGTH, veh_len);
 		length -= Clamp(veh_len, 0, VEHICLE_LENGTH - 1);
 	}
 
@@ -174,9 +185,10 @@ static uint GetRoadVehLength(const RoadVehicle *v)
 /**
  * Update the cache of a road vehicle.
  * @param v Road vehicle needing an update of its cache.
+ * @param same_length should length of vehicles stay the same?
  * @pre \a v must be first road vehicle.
  */
-void RoadVehUpdateCache(RoadVehicle *v)
+void RoadVehUpdateCache(RoadVehicle *v, bool same_length)
 {
 	assert(v->type == VEH_ROAD);
 	assert(v->IsFrontEngine());
@@ -193,7 +205,11 @@ void RoadVehUpdateCache(RoadVehicle *v)
 		u->gcache.first_engine = (v == u) ? INVALID_ENGINE : v->engine_type;
 
 		/* Update the length of the vehicle. */
-		u->gcache.cached_veh_length = GetRoadVehLength(u);
+		uint veh_len = GetRoadVehLength(u);
+		/* Verify length hasn't changed. */
+		if (same_length && veh_len != u->gcache.cached_veh_length) VehicleLengthChanged(u);
+
+		u->gcache.cached_veh_length = veh_len;
 		v->gcache.cached_total_length += u->gcache.cached_veh_length;
 
 		/* Update visual effect */
@@ -236,7 +252,7 @@ CommandCost CmdBuildRoadVehicle(TileIndex tile, DoCommandFlag flags, const Engin
 		int y = TileY(tile) * TILE_SIZE + TILE_SIZE / 2;
 		v->x_pos = x;
 		v->y_pos = y;
-		v->z_pos = GetSlopeZ(x, y);
+		v->z_pos = GetSlopePixelZ(x, y);
 
 		v->state = RVSB_IN_DEPOT;
 		v->vehstatus = VS_HIDDEN | VS_STOPPED | VS_DEFPAL;
@@ -275,7 +291,7 @@ CommandCost CmdBuildRoadVehicle(TileIndex tile, DoCommandFlag flags, const Engin
 
 		/* Call various callbacks after the whole consist has been constructed */
 		for (RoadVehicle *u = v; u != NULL; u = u->Next()) {
-			u->cargo_cap = GetVehicleCapacity(u);
+			u->cargo_cap = u->GetEngine()->DetermineCapacity(u);
 			v->InvalidateNewGRFCache();
 			u->InvalidateNewGRFCache();
 		}

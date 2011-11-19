@@ -52,6 +52,7 @@
 #include "bridge_map.h"
 #include "tunnel_map.h"
 #include "depot_map.h"
+#include "gamelog.h"
 
 #include "table/strings.h"
 
@@ -234,6 +235,22 @@ void ShowNewGrfVehicleError(EngineID engine, StringID part1, StringID part2, GRF
 }
 
 /**
+ * Logs a bug in GRF and shows a warning message if this
+ * is for the first time this happened.
+ * @param u first vehicle of chain
+ */
+void VehicleLengthChanged(const Vehicle *u)
+{
+	/* show a warning once for each engine in whole game and once for each GRF after each game load */
+	const Engine *engine = u->GetEngine();
+	uint32 grfid = engine->grf_prop.grffile->grfid;
+	GRFConfig *grfconfig = GetGRFConfig(grfid);
+	if (GamelogGRFBugReverse(grfid, engine->grf_prop.local_id) || !HasBit(grfconfig->grf_bugs, GBUG_VEH_LENGTH)) {
+		ShowNewGrfVehicleError(u->engine_type, STR_NEWGRF_BROKEN, STR_NEWGRF_BROKEN_VEHICLE_LENGTH, GBUG_VEH_LENGTH, true);
+	}
+}
+
+/**
  * Vehicle constructor.
  * @param type Type of the new vehicle.
  */
@@ -408,14 +425,14 @@ bool HasVehicleOnPos(TileIndex tile, void *data, VehicleFromPosProc *proc)
 }
 
 /**
- * Callback that returns 'real' vehicles lower or at height \c *(byte*)data .
+ * Callback that returns 'real' vehicles lower or at height \c *(int*)data .
  * @param v Vehicle to examine.
  * @param data Pointer to height data.
  * @return \a v if conditions are met, else \c NULL.
  */
 static Vehicle *EnsureNoVehicleProcZ(Vehicle *v, void *data)
 {
-	byte z = *(byte*)data;
+	int z = *(int*)data;
 
 	if (v->type == VEH_DISASTER || (v->type == VEH_AIRCRAFT && v->subtype == AIR_SHADOW)) return NULL;
 	if (v->z_pos > z) return NULL;
@@ -430,7 +447,7 @@ static Vehicle *EnsureNoVehicleProcZ(Vehicle *v, void *data)
  */
 CommandCost EnsureNoVehicleOnGround(TileIndex tile)
 {
-	byte z = GetTileMaxZ(tile);
+	int z = GetTileMaxPixelZ(tile);
 
 	/* Value v is not safe in MP games, however, it is used to generate a local
 	 * error message only (which may be different for different machines).
@@ -463,8 +480,8 @@ CommandCost TunnelBridgeIsFree(TileIndex tile, TileIndex endtile, const Vehicle 
 	 * error message only (which may be different for different machines).
 	 * Such a message does not affect MP synchronisation.
 	 */
-	Vehicle *v = VehicleFromPos(tile, (void *)ignore, &GetVehicleTunnelBridgeProc, true);
-	if (v == NULL) v = VehicleFromPos(endtile, (void *)ignore, &GetVehicleTunnelBridgeProc, true);
+	Vehicle *v = VehicleFromPos(tile, const_cast<Vehicle *>(ignore), &GetVehicleTunnelBridgeProc, true);
+	if (v == NULL) v = VehicleFromPos(endtile, const_cast<Vehicle *>(ignore), &GetVehicleTunnelBridgeProc, true);
 
 	if (v != NULL) return_cmd_error(STR_ERROR_TRAIN_IN_THE_WAY + v->type);
 	return CommandCost();
@@ -819,6 +836,8 @@ static void RunVehicleDayProc()
 			if (callback != CALLBACK_FAILED) {
 				if (HasBit(callback, 0)) TriggerVehicle(v, VEHICLE_TRIGGER_CALLBACK_32); // Trigger vehicle trigger 10
 				if (HasBit(callback, 1)) v->colourmap = PAL_NONE;
+
+				if (callback & ~3) ErrorUnknownCallbackResult(v->GetGRFID(), CBID_VEHICLE_32DAY_CALLBACK, callback);
 			}
 		}
 
@@ -1776,71 +1795,6 @@ PaletteID GetVehiclePalette(const Vehicle *v)
 }
 
 /**
- * Determines capacity of a given vehicle from scratch.
- * For aircraft the main capacity is determined. Mail might be present as well.
- * @note Keep this function consistent with Engine::GetDisplayDefaultCapacity().
- * @param v Vehicle of interest
- * @param mail_capacity returns secondary cargo (mail) capacity of aircraft
- * @return Capacity
- */
-uint GetVehicleCapacity(const Vehicle *v, uint16 *mail_capacity)
-{
-	if (mail_capacity != NULL) *mail_capacity = 0;
-	const Engine *e = v->GetEngine();
-
-	if (!e->CanCarryCargo()) return 0;
-
-	if (mail_capacity != NULL && e->type == VEH_AIRCRAFT && IsCargoInClass(v->cargo_type, CC_PASSENGERS)) {
-		*mail_capacity = GetVehicleProperty(v, PROP_AIRCRAFT_MAIL_CAPACITY, e->u.air.mail_capacity);
-	}
-	CargoID default_cargo = e->GetDefaultCargoType();
-
-	/* Check the refit capacity callback if we are not in the default configuration.
-	 * Note: This might change to become more consistent/flexible/sane, esp. when default cargo is first refittable. */
-	if (HasBit(e->info.callback_mask, CBM_VEHICLE_REFIT_CAPACITY) &&
-			(default_cargo != v->cargo_type || v->cargo_subtype != 0)) {
-		uint16 callback = GetVehicleCallback(CBID_VEHICLE_REFIT_CAPACITY, 0, 0, v->engine_type, v);
-		if (callback != CALLBACK_FAILED) return callback;
-	}
-
-	/* Get capacity according to property resp. CB */
-	uint capacity;
-	switch (e->type) {
-		case VEH_TRAIN:    capacity = GetVehicleProperty(v, PROP_TRAIN_CARGO_CAPACITY,        e->u.rail.capacity); break;
-		case VEH_ROAD:     capacity = GetVehicleProperty(v, PROP_ROADVEH_CARGO_CAPACITY,      e->u.road.capacity); break;
-		case VEH_SHIP:     capacity = GetVehicleProperty(v, PROP_SHIP_CARGO_CAPACITY,         e->u.ship.capacity); break;
-		case VEH_AIRCRAFT: capacity = GetVehicleProperty(v, PROP_AIRCRAFT_PASSENGER_CAPACITY, e->u.air.passenger_capacity); break;
-		default: NOT_REACHED();
-	}
-
-	/* Apply multipliers depending on cargo- and vehicletype.
-	 * Note: This might change to become more consistent/flexible. */
-	if (e->type != VEH_SHIP) {
-		if (e->type == VEH_AIRCRAFT) {
-			if (!IsCargoInClass(v->cargo_type, CC_PASSENGERS)) {
-				capacity += GetVehicleProperty(v, PROP_AIRCRAFT_MAIL_CAPACITY, e->u.air.mail_capacity);
-			}
-			if (v->cargo_type == CT_MAIL) return capacity;
-		} else {
-			switch (default_cargo) {
-				case CT_PASSENGERS: break;
-				case CT_MAIL:
-				case CT_GOODS: capacity *= 2; break;
-				default:       capacity *= 4; break;
-			}
-		}
-		switch (v->cargo_type) {
-			case CT_PASSENGERS: break;
-			case CT_MAIL:
-			case CT_GOODS: capacity /= 2; break;
-			default:       capacity /= 4; break;
-		}
-	}
-
-	return capacity;
-}
-
-/**
  * Delete all implicit orders which were not reached.
  */
 void Vehicle::DeleteUnreachedImplicitOrders()
@@ -2320,6 +2274,8 @@ void Vehicle::UpdateVisualEffect(bool allow_power_change)
 		uint16 callback = GetVehicleCallback(CBID_VEHICLE_VISUAL_EFFECT, 0, 0, this->engine_type, this);
 
 		if (callback != CALLBACK_FAILED) {
+			if (callback >= 0x100 && e->GetGRF()->grf_version >= 8) ErrorUnknownCallbackResult(e->GetGRFID(), CBID_VEHICLE_VISUAL_EFFECT, callback);
+
 			callback = GB(callback, 0, 8);
 			/* Avoid accidentally setting 'visual_effect' to the default value
 			 * Since bit 6 (disable effects) is set anyways, we can safely erase some bits. */
