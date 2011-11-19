@@ -259,7 +259,6 @@ STR_SORT_BY_CAPTION_POPULATION                                  :{BLACK}Asukaslu
 STR_SORT_BY_CAPTION_NAME                                        :{BLACK}Nimi
 STR_SORT_BY_CAPTION_DATE                                        :{BLACK}Päiväys
 # These are used in dropdowns
-STR_SORT_BY_POPULATION                                          :Asukasluku
 STR_SORT_BY_NAME                                                :Nimi
 STR_SORT_BY_PRODUCTION                                          :Tuotto
 STR_SORT_BY_TYPE                                                :Tyyppi
@@ -630,9 +629,7 @@ STR_PLAYLIST_TRACK_NAME                                         :{TINYFONT}{LTBL
 STR_PLAYLIST_TRACK_INDEX                                        :{TINYFONT}{BLACK}Raita
 STR_PLAYLIST_PROGRAM                                            :{TINYFONT}{BLACK}Soittolista - '{STRING}'
 STR_PLAYLIST_CLEAR                                              :{TINYFONT}{BLACK}Tyhjennä
-STR_PLAYLIST_SAVE                                               :{TINYFONT}{BLACK}Tallenna
 STR_PLAYLIST_TOOLTIP_CLEAR_CURRENT_PROGRAM_CUSTOM1              :{BLACK}Tyhjennä nykyinen soittolista (vain Oma1 tai Oma2)
-STR_PLAYLIST_TOOLTIP_SAVE_MUSIC_SETTINGS                        :{BLACK}Tallenna musiikkiasetukset
 STR_PLAYLIST_TOOLTIP_CLICK_TO_ADD_TRACK                         :{BLACK}Valitse musiikkiraita lisätäksesi sen nykyiseen soittolistaan (vain Oma1 tai Oma2).
 STR_PLAYLIST_TOOLTIP_CLICK_TO_REMOVE_TRACK                      :{BLACK}Klikkaa raitaa poistaaksesi se nykyisestä ohjelmasta (ainoastaan Custom1 tai Custom2)
 
@@ -1878,6 +1875,11 @@ STR_CONTENT_ERROR_COULD_NOT_DOWNLOAD_CONNECTION_LOST            :{WHITE}... yhte
 STR_CONTENT_ERROR_COULD_NOT_DOWNLOAD_FILE_NOT_WRITABLE          :{WHITE}... tiedostoa ei voitu kirjoittaa
 STR_CONTENT_ERROR_COULD_NOT_EXTRACT                             :{WHITE}Ei voitu purkaa ladattua tiedostoa
 
+STR_MISSING_GRAPHICS_SET_CAPTION                                :{WHITE}Puuttuvat grafiikat
+STR_MISSING_GRAPHICS_SET_MESSAGE                                :{BLACK}OpenTTD vaatii toimiakseen grafiikat, mutta niitä ei löydetty. Sallitaanko grafiikoiden lataus ja asennus?
+STR_MISSING_GRAPHICS_YES_DOWNLOAD                               :{BLACK}Kyllä, lataa grafiiikat
+STR_MISSING_GRAPHICS_NO_QUIT                                    :{BLACK}Ei, sulje OpenTTD
+
 # Transparency settings window
 STR_TRANSPARENCY_CAPTION                                        :{WHITE}Läpinäkyvyysasetukset
 STR_TRANSPARENT_SIGNS_TOOLTIP                                   :{BLACK}Muuta asemakylttien läpinäkyvyyttä. Ctrl+Klik lukitaksesi
@@ -1923,6 +1925,11 @@ STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_BRIDGE                  :{BLACK}Rakenna 
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TUNNEL                  :{BLACK}Rakenna rautatietunneli. Shift vaihtaa rakennustilan ja kustannearvion välillä
 STR_RAIL_TOOLBAR_TOOLTIP_TOGGLE_BUILD_REMOVE_FOR                :{BLACK}Rautatien, opastimien, reittipisteiden ja asemien rakentaminen/poisto päälle/pois. Pidä pohjassa Ctrl-näppäintä poistaaksesi myös aseman tai reittipisteen alla olevat raiteet.
 STR_RAIL_TOOLBAR_TOOLTIP_CONVERT_RAIL                           :{BLACK}Muunna/päivitä raidetyyppi. Shift vaihtaa muuntotilan ja kustannearvion välillä
+
+STR_RAIL_NAME_RAILROAD                                          :Rautatie
+STR_RAIL_NAME_ELRAIL                                            :Sähköistetty rautatie
+STR_RAIL_NAME_MONORAIL                                          :Yksiraiteinen
+STR_RAIL_NAME_MAGLEV                                            :Maglev-rata
 
 # Rail depot construction window
 STR_BUILD_DEPOT_TRAIN_ORIENTATION_CAPTION                       :{WHITE}Veturitallin suunta
@@ -2194,29 +2201,29 @@ STR_LAI_CLEAR_DESCRIPTION_FIELDS                                :Peltoja
 STR_LAI_CLEAR_DESCRIPTION_SNOW_COVERED_LAND                     :Lumen peittämää maata
 STR_LAI_CLEAR_DESCRIPTION_DESERT                                :Aavikkoa
 
-STR_LAI_RAIL_DESCRIPTION_TRACK                                  :Rautatie
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_SIGNALS              :Rautatie suojastusopastimin
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRESIGNALS                  :Rautatie tulo-opastimin
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXITSIGNALS                 :Rautatie poistumisopastimin
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBOSIGNALS                :Rautatie yhdistelmäopastein
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PBSSIGNALS                  :Rautatie reittiopastimin
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NOENTRYSIGNALS              :Rautatie yksisuuntaisin reittiopastimin
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_PRESIGNALS           :Rautatie suojastus- ja tulo-opastimin
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_EXITSIGNALS          :Rautatie suojastus- ja poistumisopastimin
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_COMBOSIGNALS         :Rautatie suojastus- ja yhdistelmäopastimin
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_PBSSIGNALS           :Rautatie suojastus- ja reittiopastimin
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_NOENTRYSIGNALS       :Rautatie suojastus- ja yksisuuntaisin reittiopastimin
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_EXITSIGNALS             :Rautatie esi- ja poistumisopastimin
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_COMBOSIGNALS            :Rautatie esi- ja yhdistelmäopastimin
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_PBSSIGNALS              :Rautatie esi- ja reittiopastimin
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_NOENTRYSIGNALS          :Rautatie esi- ja yksisuuntaisin reittiopastimin
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_COMBOSIGNALS           :Rautatie poistumis- ja yhdistelmäopastimin
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_PBSSIGNALS             :Rautatie poistumis- ja reittiopastimilla
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_NOENTRYSIGNALS         :Rautatie poistumis- ja yksisuuntaisopastimilla
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBO_PBSSIGNALS            :Rautatie yhdistelmä- ja reittiopastimilla
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBO_NOENTRYSIGNALS        :Rautatie yhdistelmä- ja yksisuuntaisilla reittiopastimilla
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PBS_NOENTRYSIGNALS          :Rautatie reitti- ja yksisuuntaisilla reittiopastimilla
-STR_LAI_RAIL_DESCRIPTION_TRAIN_DEPOT                            :Veturitalli
+STR_LAI_RAIL_DESCRIPTION_TRACK                                  :{STRING}
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_SIGNALS              :{STRING} suojastusopastimilla
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRESIGNALS                  :{STRING} tulo-opastimilla
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXITSIGNALS                 :{STRING} poistumisopastimilla
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBOSIGNALS                :{STRING} yhdistelmäopastimilla
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PBSSIGNALS                  :{STRING} reittiopastimilla
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NOENTRYSIGNALS              :{STRING} yksisuuntaisilla reittiopastimilla
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_PRESIGNALS           :{STRING} suojastus- ja tulo-opastimilla
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_EXITSIGNALS          :{STRING} suojastus- ja poistumisopastimilla
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_COMBOSIGNALS         :{STRING} suojastus- ja yhdistelmäopastimilla
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_PBSSIGNALS           :{STRING} suojastus- ja reittiopastimilla
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_NOENTRYSIGNALS       :{STRING} suojastus- ja yksisuuntaisilla reittiopastimilla
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_EXITSIGNALS             :{STRING} tulo- ja poistumisopastimilla
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_COMBOSIGNALS            :{STRING} tulo- ja yhdistelmäopastimilla
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_PBSSIGNALS              :{STRING} tulo- ja reittiopastimilla
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_NOENTRYSIGNALS          :{STRING} tulo- ja yksisuuntaisilla reittiopastimilla
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_COMBOSIGNALS           :{STRING} poistumis- ja yhdistelmäopastimilla
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_PBSSIGNALS             :{STRING} poistumis- ja reittiopastimilla
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_NOENTRYSIGNALS         :{STRING} poistumis- ja yksisuuntaisilla opastimilla
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBO_PBSSIGNALS            :{STRING} yhdistelmä- ja reittiopastimilla
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBO_NOENTRYSIGNALS        :{STRING} yhdistelmä- ja yksisuuntaisilla opastimilla
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PBS_NOENTRYSIGNALS          :{STRING} reitti- ja yksisuuntaisilla opastimilla
+STR_LAI_RAIL_DESCRIPTION_TRAIN_DEPOT                            :{STRING} veturitalli
 
 STR_LAI_ROAD_DESCRIPTION_ROAD                                   :Tie
 STR_LAI_ROAD_DESCRIPTION_ROAD_WITH_STREETLIGHTS                 :Tie katuvaloilla
@@ -2400,7 +2407,12 @@ STR_NEWGRF_SETTINGS_MOVEUP                                      :{BLACK}Siirrä 
 STR_NEWGRF_SETTINGS_MOVEUP_TOOLTIP                              :{BLACK}Siirrä valittua NewGRF-tiedostoa listassa ylöspäin
 STR_NEWGRF_SETTINGS_MOVEDOWN                                    :{BLACK}Siirrä alas
 STR_NEWGRF_SETTINGS_MOVEDOWN_TOOLTIP                            :{BLACK}Siirrä valittua NewGRF-tiedostoa listassa alaspäin
-STR_NEWGRF_SETTINGS_FILE_TOOLTIP                                :{BLACK}Lista asennetuista NewGRF-tiedostoista. Valitse tiedosto muokataksesi sen parametreja.
+STR_NEWGRF_SETTINGS_FILE_TOOLTIP                                :{BLACK}Lista asennetuista NewGRF-tiedostoista.
+
+# Additional textfiles accompanying NewGRFs
+STR_NEWGRF_SETTINGS_VIEW_README                                 :{BLACK}Näytä readme-tiedosto
+STR_NEWGRF_SETTINGS_VIEW_CHANGELOG                              :{BLACK}Muutosloki
+STR_NEWGRF_SETTINGS_VIEW_LICENSE                                :{BLACK}Lisenssi
 
 STR_NEWGRF_SETTINGS_SET_PARAMETERS                              :{BLACK}Aseta parametrit
 STR_NEWGRF_SETTINGS_TOGGLE_PALETTE                              :{BLACK}Käytä eri palettia
@@ -2423,8 +2435,6 @@ STR_NEWGRF_SETTINGS_NOT_FOUND                                   :{RED}Sopivaa ti
 STR_NEWGRF_SETTINGS_DISABLED                                    :{RED}Ei käytössä
 STR_NEWGRF_SETTINGS_INCOMPATIBLE                                :{RED}Epäyhteensopiva tämän OpenTTD-version kanssa
 
-STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}Anna NewGRF-parametrit
-
 # NewGRF parameters window
 STR_NEWGRF_PARAMETERS_CAPTION                                   :{WHITE}Muuta NewGRF-parametrejä
 STR_NEWGRF_PARAMETERS_CLOSE                                     :{BLACK}Sulje
@@ -2433,6 +2443,11 @@ STR_NEWGRF_PARAMETERS_RESET_TOOLTIP                             :{BLACK}Aseta ka
 STR_NEWGRF_PARAMETERS_DEFAULT_NAME                              :Parametri {NUM}
 STR_NEWGRF_PARAMETERS_SETTING                                   :{STRING}: {ORANGE}{STRING}
 STR_NEWGRF_PARAMETERS_NUM_PARAM                                 :{LTBLUE}Parametrien määrä: {ORANGE}{NUM}
+
+# NewGRF textfile window
+STR_NEWGRF_README_CAPTION                                       :{WHITE}NewGRF:n {STRING} readme-tiedosto
+STR_NEWGRF_CHANGELOG_CAPTION                                    :{WHITE}NewGRF:n {STRING} muutosloki
+STR_NEWGRF_LICENSE_CAPTION                                      :{WHITE}NewGRF:n {STRING} lisenssi
 
 # NewGRF inspect window
 STR_NEWGRF_INSPECT_CAPTION                                      :{WHITE}Tutki - {STRING}
@@ -2515,6 +2530,7 @@ STR_BROKEN_VEHICLE_LENGTH                                       :{WHITE}Yhtiöll
 STR_NEWGRF_BUGGY                                                :{WHITE}NewGRF '{0:STRING}' antaa väärää tietoa
 STR_NEWGRF_BUGGY_ARTICULATED_CARGO                              :{WHITE}Rahti/uudelleensovitustiedot kulkuneuvolle '{1:ENGINE}' ovat eri kuin ostolistassa rakentamisen jälkeen. Tämä voi aiheuttaa, että kulkuneuvon korvaus ei uudelleensovita oikein
 STR_NEWGRF_BUGGY_ENDLESS_PRODUCTION_CALLBACK                    :{WHITE}'{1:STRING}' aiheutti ikuisen silmukan tuotannon callback-funktiossa
+STR_NEWGRF_BUGGY_UNKNOWN_CALLBACK_RESULT                        :{WHITE}Callback-funktio 0x{HEX} palautti tuntemattoman/kelvottoman tuloksen 0x{HEX}
 
 # 'User removed essential NewGRFs'-placeholders for stuff without specs
 STR_NEWGRF_INVALID_CARGO                                        :<virheellinen rahti>
@@ -3190,6 +3206,10 @@ STR_ORDER_TOOLTIP_UNLOAD                                        :{BLACK}Muuta ko
 
 STR_ORDER_REFIT                                                 :{BLACK}Sovita
 STR_ORDER_REFIT_TOOLTIP                                         :{BLACK}Valitse mihin rahtityyppiin tämä käsky sovittaa. Ctrl+Klik poistaa sovituskäskyn
+STR_ORDER_REFIT_AUTO                                            :{BLACK}Automaattinen sovitus
+STR_ORDER_REFIT_AUTO_TOOLTIP                                    :{BLACK}Valitse tällä määräyksellä automaattisesti sovitettava rahtityyppi. Ctrl+Klik poistaaksesi sovitusmääräyksen. Automaattinen sovitus suoritetaan vain, jos kulkuneuvo sallii sen.
+STR_ORDER_DROP_REFIT_AUTO                                       :Määrätty rahti
+STR_ORDER_DROP_REFIT_AUTO_ANY                                   :Saatavilla oleva rahti
 
 STR_ORDER_SERVICE                                               :{BLACK}Huolto
 STR_ORDER_DROP_GO_ALWAYS_DEPOT                                  :Mene aina
@@ -3236,7 +3256,6 @@ STR_ORDER_GO_TO_NEAREST_HANGAR                                  :Mene lähimmäl
 STR_ORDER_CONDITIONAL                                           :Ehdollinen hyppykäsky
 STR_ORDER_SHARE                                                 :Jaa käskyt
 STR_ORDERS_GO_TO_TOOLTIP                                        :{BLACK}Lisää uusi käsky ennen valittua, tai lisää listan viimeiseksi. Ctrl tekee asemakäskyistä 'lastaa täyteen kaikki rahti', reittipistekäskyistä 'non-stop' ja veturitallikäskyistä 'huolto'. 'Jaa käskyt' jakaa käskyt valitun kulkuneuvon kanssa. Kulkuneuvon klikkaaminen kopioi käskyt siitä kulkuneuvosta
-STR_ORDERS_GO_TO_DROPDOWN_TOOLTIP                               :{BLACK}Lisää kehittynyt käsky
 
 STR_ORDERS_VEH_WITH_SHARED_ORDERS_LIST_TOOLTIP                  :{BLACK}Näytä kaikki ajoneuvot, jotka jakavat nämä käskyt
 
@@ -3278,6 +3297,21 @@ STR_ORDER_NO_UNLOAD                                             :(Ei purkua mutt
 STR_ORDER_NO_UNLOAD_FULL_LOAD                                   :(Ei lastin purkua, mutta odota uuden lastin täyttymistä)
 STR_ORDER_NO_UNLOAD_FULL_LOAD_ANY                               :(Ei lastin purkua, mutta odota minkä tahansa lastin täyttymistä)
 STR_ORDER_NO_UNLOAD_NO_LOAD                                     :(Ei purkua eikä lastausta)
+
+STR_ORDER_AUTO_REFIT                                            :(Sovita automaattisesti rahdille {STRING})
+STR_ORDER_FULL_LOAD_REFIT                                       :(Täysi lasti ja automaattinen sovitus rahdille {STRING})
+STR_ORDER_FULL_LOAD_ANY_REFIT                                   :(Täysi lasti mitä tahansa rahtia sekä sovita automaattisesti rahdille {STRING})
+STR_ORDER_UNLOAD_REFIT                                          :(Pura ja ota rahti sekä automaattinen sovitus rahdille {STRING})
+STR_ORDER_UNLOAD_FULL_LOAD_REFIT                                :(Pura ja odota täyttä lastia sekä sovita automaattisesti rahdille {STRING})
+STR_ORDER_UNLOAD_FULL_LOAD_ANY_REFIT                            :(Pura ja odota mitä tahansa täyttä lastia sekä sovita rahdille {STRING})
+STR_ORDER_TRANSFER_REFIT                                        :(Siirrä ja ota rahti sekä sovita automaattisesti rahdille {STRING})
+STR_ORDER_TRANSFER_FULL_LOAD_REFIT                              :(Siirrä ja odota täyttä lastia sekä sovita automaattisesti rahdille {STRING})
+STR_ORDER_TRANSFER_FULL_LOAD_ANY_REFIT                          :(Siirrä ja odota mitä tahansa täyttä lastia sekä sovita automaattisesti rahdille {STRING})
+STR_ORDER_NO_UNLOAD_REFIT                                       :(Ei purkua ja ota rahti sekä sovita automaattisesti rahdille {STRING})
+STR_ORDER_NO_UNLOAD_FULL_LOAD_REFIT                             :(Ei purkua ja odota täyttä lastia sekä sovita automaattisesti rahdille {STRING})
+STR_ORDER_NO_UNLOAD_FULL_LOAD_ANY_REFIT                         :(Ei purkua ja odota mitä tahansa täyttä lastia sekä sovita automaattisesti rahdille {STRING})
+
+STR_ORDER_AUTO_REFIT_ANY                                        :saatavilla oleva rahti
 
 STR_ORDER_STOP_LOCATION_NEAR_END                                :[alkupäähän]
 STR_ORDER_STOP_LOCATION_MIDDLE                                  :[keskelle]
@@ -3491,8 +3525,7 @@ STR_ERROR_NOT_ALLOWED_WHILE_PAUSED                              :{WHITE}Ei salli
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS                 :{WHITE}{TOWN}: paikallisviranomaiset kieltäytyvät.
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_AIRPORT                       :{WHITE}{TOWN} paikallisviranomaiset eivät salli toisen lentokentän rakentamista tähän kaupunkiin.
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_NOISE                         :{WHITE}{TOWN} paikallisviranomaiset kieltävät lentokentän rakennuksen äänekkyyden takia
-STR_ERROR_BRIBE_FAILED                                          :{WHITE}Yleinen syyttäjä on saanut selville
-STR_ERROR_BRIBE_FAILED_2                                        :{WHITE}lahjontayrityksesi.
+STR_ERROR_BRIBE_FAILED                                          :{WHITE}Paikallisviranomaiset ovat huomanneet lahjontayrityksesi
 
 # Levelling errors
 STR_ERROR_CAN_T_RAISE_LAND_HERE                                 :{WHITE}Maata ei voi korottaa.
@@ -3566,7 +3599,6 @@ STR_ERROR_TOO_MANY_STATIONS_LOADING                             :{WHITE}Liian mo
 STR_ERROR_TOO_MANY_STATION_SPECS                                :{WHITE}Rautatieasema on jakautunut liian moneen osaan
 STR_ERROR_TOO_MANY_BUS_STOPS                                    :{WHITE}Liian monta linja-autopysäkkiä.
 STR_ERROR_TOO_MANY_TRUCK_STOPS                                  :{WHITE}Liian monta lastauslaituria.
-STR_ERROR_TOO_CLOSE_TO_ANOTHER_RAILROAD                         :{WHITE}Liian lähellä toista rautatieasemaa.
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_STATION                          :{WHITE}Liian lähellä toista asemaa tai lastausaluetta.
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_DOCK                             :{WHITE}Liian lähellä toista satamaa.
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_AIRPORT                          :{WHITE}Liian lähellä toista lentokenttää.

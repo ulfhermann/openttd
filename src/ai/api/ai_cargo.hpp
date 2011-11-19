@@ -19,9 +19,6 @@
  */
 class AICargo : public AIObject {
 public:
-	/** Get the name of this class to identify it towards squirrel. */
-	static const char *GetClassName() { return "AICargo"; }
-
 	/**
 	 * The classes of cargo (from newgrf_cargo.h).
 	 */
@@ -48,6 +45,14 @@ public:
 		TE_GOODS      = 3, ///< This cargo supplies goods to a town
 		TE_WATER      = 4, ///< This cargo supplies water to a town
 		TE_FOOD       = 5, ///< This cargo supplies food to a town
+	};
+
+	/**
+	 * Special cargo types.
+	 */
+	enum SpecialCargoID {
+		CT_AUTO_REFIT = 0xFD, ///< Automatically choose cargo type when doing auto-refitting.
+		CT_NO_REFIT   = 0xFE, ///< Do not refit cargo of a vehicle.
 	};
 
 	/**

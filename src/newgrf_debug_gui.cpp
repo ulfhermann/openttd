@@ -189,7 +189,7 @@ public:
 	 * @param grfid Parameter for the PSA. Only required for items with parameters.
 	 * @return Pointer to the first position of the storage array or NULL if not present.
 	 */
-	virtual int32 *GetPSAFirstPosition(uint index, uint32 grfid) const
+	virtual const int32 *GetPSAFirstPosition(uint index, uint32 grfid) const
 	{
 		return NULL;
 	}
@@ -291,7 +291,7 @@ struct NewGRFInspectWindow : Window {
 	static const int BOTTOM_OFFSET = 5; ///< Position of bottom edge
 
 	/** The value for the variable 60 parameters. */
-	static byte var60params[GSF_FAKE_END][0x20];
+	static uint32 var60params[GSF_FAKE_END][0x20];
 
 	/** GRFID of the caller of this window, 0 if it has no caller. */
 	uint32 caller_grfid;
@@ -398,7 +398,7 @@ struct NewGRFInspectWindow : Window {
 		}
 
 		uint psa_size = nih->GetPSASize(index, this->caller_grfid);
-		int32 *psa = nih->GetPSAFirstPosition(index, this->caller_grfid);
+		const int32 *psa = nih->GetPSAFirstPosition(index, this->caller_grfid);
 		if (psa_size != 0 && psa != NULL) {
 			if (nih->PSAWithParameter()) {
 				this->DrawString(r, i++, "Persistent storage [%08X]:", BSWAP32(this->caller_grfid));
@@ -414,12 +414,12 @@ struct NewGRFInspectWindow : Window {
 		if (nif->properties != NULL) {
 			this->DrawString(r, i++, "Properties:");
 			for (const NIProperty *nip = nif->properties; nip->name != NULL; nip++) {
-				void *ptr = (byte*)base + nip->offset;
+				const void *ptr = (const byte *)base + nip->offset;
 				uint value;
 				switch (nip->read_size) {
-					case 1: value = *(uint8  *)ptr; break;
-					case 2: value = *(uint16 *)ptr; break;
-					case 4: value = *(uint32 *)ptr; break;
+					case 1: value = *(const uint8  *)ptr; break;
+					case 2: value = *(const uint16 *)ptr; break;
+					case 4: value = *(const uint32 *)ptr; break;
 					default: NOT_REACHED();
 				}
 
@@ -448,12 +448,12 @@ struct NewGRFInspectWindow : Window {
 			this->DrawString(r, i++, "Callbacks:");
 			for (const NICallback *nic = nif->callbacks; nic->name != NULL; nic++) {
 				if (nic->cb_bit != CBM_NO_BIT) {
-					void *ptr = (byte*)base_spec + nic->offset;
+					const void *ptr = (const byte *)base_spec + nic->offset;
 					uint value;
 					switch (nic->read_size) {
-						case 1: value = *(uint8  *)ptr; break;
-						case 2: value = *(uint16 *)ptr; break;
-						case 4: value = *(uint32 *)ptr; break;
+						case 1: value = *(const uint8  *)ptr; break;
+						case 2: value = *(const uint16 *)ptr; break;
+						case 4: value = *(const uint32 *)ptr; break;
 						default: NOT_REACHED();
 					}
 
@@ -497,7 +497,7 @@ struct NewGRFInspectWindow : Window {
 					if (!HasVariableParameter(niv->var)) break;
 
 					this->current_edit_param = niv->var;
-					ShowQueryString(STR_EMPTY, STR_NEWGRF_INSPECT_QUERY_CAPTION, 3, this, CS_HEXADECIMAL, QSF_NONE);
+					ShowQueryString(STR_EMPTY, STR_NEWGRF_INSPECT_QUERY_CAPTION, 9, this, CS_HEXADECIMAL, QSF_NONE);
 				}
 			}
 		}
@@ -517,7 +517,7 @@ struct NewGRFInspectWindow : Window {
 	}
 };
 
-/* static */ byte NewGRFInspectWindow::var60params[GSF_FAKE_END][0x20] = { {0} }; // Use spec to have 0s in whole array
+/* static */ uint32 NewGRFInspectWindow::var60params[GSF_FAKE_END][0x20] = { {0} }; // Use spec to have 0s in whole array
 
 static const NWidgetPart _nested_newgrf_inspect_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
