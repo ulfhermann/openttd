@@ -170,7 +170,7 @@ static uint32 GetCountAndDistanceOfClosestInstance(byte param_setID, byte layout
  * @param available will return false if ever the variable asked for does not exist
  * @return the value stored in the corresponding variable
  */
-uint32 IndustryGetVariable(const ResolverObject *object, byte variable, byte parameter, bool *available)
+uint32 IndustryGetVariable(const ResolverObject *object, byte variable, uint32 parameter, bool *available)
 {
 	const Industry *industry = object->u.industry.ind;
 	TileIndex tile = object->u.industry.tile;
@@ -251,7 +251,7 @@ uint32 IndustryGetVariable(const ResolverObject *object, byte variable, byte par
 			return (IsTileType(tile, MP_INDUSTRY) && Industry::GetByTile(tile) == industry) ? GetIndustryRandomBits(tile) : 0;
 
 		/* Land info of nearby tiles */
-		case 0x62: return GetNearbyIndustryTileInformation(parameter, tile, INVALID_INDUSTRY, false);
+		case 0x62: return GetNearbyIndustryTileInformation(parameter, tile, INVALID_INDUSTRY, false, object->grffile->grf_version >= 8);
 
 		/* Animation stage of nearby tiles */
 		case 0x63:
@@ -456,7 +456,7 @@ uint16 GetIndustryCallback(CallbackID callback, uint32 param1, uint32 param2, In
 	return group->GetCallbackResult();
 }
 
-uint32 IndustryLocationGetVariable(const ResolverObject *object, byte variable, byte parameter, bool *available)
+uint32 IndustryLocationGetVariable(const ResolverObject *object, byte variable, uint32 parameter, bool *available)
 {
 	const Industry *industry = object->u.industry.ind;
 	TileIndex tile = object->u.industry.tile;
@@ -488,7 +488,7 @@ uint32 IndustryLocationGetVariable(const ResolverObject *object, byte variable, 
 		case 0x89: return min(DistanceManhattan(industry->town->xy, tile), 255);
 
 		/* Lowest height of the tile */
-		case 0x8A: return GetTileZ(tile);
+		case 0x8A: return Clamp(GetTileZ(tile) * (object->grffile->grf_version >= 8 ? 1 : TILE_HEIGHT), 0, 0xFF);
 
 		/* Distance to the nearest water/land tile */
 		case 0x8B: return GetClosestWaterDistance(tile, (GetIndustrySpec(industry->type)->behaviour & INDUSTRYBEH_BUILT_ONWATER) == 0);
@@ -550,22 +550,32 @@ CommandCost CheckIfCallBackAllowsCreation(TileIndex tile, IndustryType type, uin
 }
 
 /**
- * Check with callback #CBM_IND_AVAILABLE whether the industry can be built.
+ * Check with callback #CBID_INDUSTRY_PROBABILITY whether the industry can be built.
  * @param type Industry type to check.
  * @param creation_type Reason to construct a new industry.
  * @return If the industry has no callback or allows building, \c true is returned. Otherwise, \c false is returned.
  */
-bool CheckIfCallBackAllowsAvailability(IndustryType type, IndustryAvailabilityCallType creation_type)
+uint32 GetIndustryProbabilityCallback(IndustryType type, IndustryAvailabilityCallType creation_type, uint32 default_prob)
 {
 	const IndustrySpec *indspec = GetIndustrySpec(type);
 
-	if (HasBit(indspec->callback_mask, CBM_IND_AVAILABLE)) {
-		uint16 res = GetIndustryCallback(CBID_INDUSTRY_AVAILABLE, 0, creation_type, NULL, type, INVALID_TILE);
+	if (HasBit(indspec->callback_mask, CBM_IND_PROBABILITY)) {
+		uint16 res = GetIndustryCallback(CBID_INDUSTRY_PROBABILITY, 0, creation_type, NULL, type, INVALID_TILE);
 		if (res != CALLBACK_FAILED) {
-			return (res == 0);
+			if (indspec->grf_prop.grffile->grf_version < 8) {
+				/* Disallow if result != 0 */
+				if (res != 0) default_prob = 0;
+			} else {
+				/* Use returned probability. 0x100 to use default */
+				if (res < 0x100) {
+					default_prob = res;
+				} else if (res > 0x100) {
+					ErrorUnknownCallbackResult(indspec->grf_prop.grffile->grfid, CBID_INDUSTRY_PROBABILITY, res);
+				}
+			}
 		}
 	}
-	return true;
+	return default_prob;
 }
 
 static int32 DerefIndProd(int field, bool use_register)
@@ -651,7 +661,7 @@ bool IndustryTemporarilyRefusesCargo(Industry *ind, CargoID cargo_type)
 		uint16 res = GetIndustryCallback(CBID_INDUSTRY_REFUSE_CARGO,
 				0, GetReverseCargoTranslation(cargo_type, indspec->grf_prop.grffile),
 				ind, ind->type, ind->location.tile);
-		return res == 0;
+		if (res != CALLBACK_FAILED) return !ConvertBooleanCallback(indspec->grf_prop.grffile, CBID_INDUSTRY_REFUSE_CARGO, res);
 	}
 	return false;
 }

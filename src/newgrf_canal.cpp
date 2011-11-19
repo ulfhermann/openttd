@@ -41,14 +41,14 @@ static void CanalSetTriggers(const ResolverObject *object, int triggers)
 }
 
 
-static uint32 CanalGetVariable(const ResolverObject *object, byte variable, byte parameter, bool *available)
+static uint32 CanalGetVariable(const ResolverObject *object, byte variable, uint32 parameter, bool *available)
 {
 	TileIndex tile = object->u.canal.tile;
 
 	switch (variable) {
 		/* Height of tile */
 		case 0x80: {
-			uint z = GetTileZ(tile) / TILE_HEIGHT;
+			int z = GetTileZ(tile);
 			/* Return consistent height within locks */
 			if (IsTileType(tile, MP_WATER) && IsLock(tile) && GetLockPart(tile) == LOCK_PART_UPPER) z--;
 			return z;
