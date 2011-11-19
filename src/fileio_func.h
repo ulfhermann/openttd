@@ -12,6 +12,7 @@
 #ifndef FILEIO_FUNC_H
 #define FILEIO_FUNC_H
 
+#include "core/enum_type.hpp"
 #include "fileio_type.h"
 
 void FioSeekTo(size_t pos, int mode);
@@ -60,9 +61,9 @@ bool AppendPathSeparator(char *buf, size_t buflen);
 void DeterminePaths(const char *exe);
 void *ReadFileToMem(const char *filename, size_t *lenp, size_t maxsize);
 bool FileExists(const char *filename);
-const char *FioTarFirstDir(const char *tarname);
-void FioTarAddLink(const char *src, const char *dest);
-bool ExtractTar(const char *tar_filename);
+const char *FioTarFirstDir(const char *tarname, Subdirectory subdir);
+void FioTarAddLink(const char *src, const char *dest, Subdirectory subdir);
+bool ExtractTar(const char *tar_filename, Subdirectory subdir);
 
 extern char *_personal_dir; ///< custom directory for personal settings, saves, newgrf, etc.
 
@@ -90,12 +91,27 @@ public:
 
 /** Helper for scanning for files with tar as extension */
 class TarScanner : FileScanner {
+	uint DoScan(Subdirectory sd);
 public:
+	/** The mode of tar scanning. */
+	enum Mode {
+		NONE     = 0,      ///< Scan nothing.
+		BASESET  = 1 << 0, ///< Scan for base sets.
+		NEWGRF   = 1 << 1, ///< Scan for non-base sets.
+		AI       = 1 << 2, ///< Scan for AIs and its libraries.
+		SCENARIO = 1 << 3, ///< Scan for scenarios and heightmaps.
+		ALL      = BASESET | NEWGRF | AI | SCENARIO ///< Scan for everything.
+	};
+
 	/* virtual */ bool AddFile(const char *filename, size_t basepath_length, const char *tar_filename = NULL);
 
+	bool AddFile(Subdirectory sd, const char *filename);
+
 	/** Do the scan for Tars. */
-	static uint DoScan();
+	static uint DoScan(TarScanner::Mode mode);
 };
+
+DECLARE_ENUM_AS_BIT_SET(TarScanner::Mode)
 
 /* Implementation of opendir/readdir/closedir for Windows */
 #if defined(WIN32)

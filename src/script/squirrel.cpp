@@ -237,7 +237,7 @@ bool Squirrel::CallMethod(HSQOBJECT instance, const char *method_name, HSQOBJECT
 	sq_pushobject(this->vm, instance);
 	if (SQ_FAILED(sq_call(this->vm, 1, ret == NULL ? SQFalse : SQTrue, SQTrue, suspend))) return false;
 	if (ret != NULL) sq_getstackobj(vm, -1, ret);
-	/* Reset the top, but don't do so for the AI main function, as we need
+	/* Reset the top, but don't do so for the script main function, as we need
 	 *  a correct stack when resuming. */
 	if (suspend == -1 || !this->IsSuspended()) sq_settop(this->vm, top);
 	/* Restore the return-value location. */
@@ -429,6 +429,7 @@ static SQInteger _io_file_read(SQUserPointer file, SQUserPointer buf, SQInteger 
 {
 	size_t size;
 	FILE *file = FioFOpenFile(filename, "rb", AI_DIR, &size);
+	if (file == NULL) file = FioFOpenFile(filename, "rb", AI_LIBRARY_DIR, &size);
 	SQInteger ret;
 	unsigned short us;
 	unsigned char uc;
@@ -481,15 +482,19 @@ static SQInteger _io_file_read(SQUserPointer file, SQUserPointer buf, SQInteger 
 	/* Make sure we are always in the root-table */
 	if (in_root) sq_pushroottable(vm);
 
+	SQInteger ops_left = vm->_ops_till_suspend;
 	/* Load and run the script */
 	if (SQ_SUCCEEDED(LoadFile(vm, script, SQTrue))) {
 		sq_push(vm, -2);
 		if (SQ_SUCCEEDED(sq_call(vm, 1, SQFalse, SQTrue, 100000))) {
 			sq_pop(vm, 1);
+			/* After compiling the file we want to reset the amount of opcodes. */
+			vm->_ops_till_suspend = ops_left;
 			return true;
 		}
 	}
 
+	vm->_ops_till_suspend = ops_left;
 	DEBUG(misc, 0, "[squirrel] Failed to compile '%s'", script);
 	return false;
 }
@@ -548,4 +553,9 @@ void Squirrel::CrashOccurred()
 bool Squirrel::CanSuspend()
 {
 	return sq_can_suspend(this->vm);
+}
+
+SQInteger Squirrel::GetOpsTillSuspend()
+{
+	return this->vm->_ops_till_suspend;
 }

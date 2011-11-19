@@ -13,10 +13,12 @@
  */
 
 #include "stdafx.h"
+#include "debug.h"
 #include "landscape.h"
 #include "house.h"
 #include "industrytype.h"
 #include "newgrf.h"
+#include "newgrf_config.h"
 #include "clear_map.h"
 #include "station_map.h"
 #include "tree_map.h"
@@ -27,6 +29,8 @@
 #include "newgrf_text.h"
 #include "livery.h"
 #include "company_base.h"
+#include "gui.h"
+#include "strings_func.h"
 
 #include "table/strings.h"
 
@@ -438,20 +442,22 @@ TileIndex GetNearbyTile(byte parameter, TileIndex tile, bool signed_offsets, Axi
  * Common part of station var 0x67, house var 0x62, indtile var 0x60, industry var 0x62.
  *
  * @param tile the tile of interest.
+ * @param grf_version8 True, if we are dealing with a new NewGRF which uses GRF version >= 8.
  * @return 0czzbbss: c = TileType; zz = TileZ; bb: 7-3 zero, 4-2 TerrainType, 1 water/shore, 0 zero; ss = TileSlope
  */
-uint32 GetNearbyTileInformation(TileIndex tile)
+uint32 GetNearbyTileInformation(TileIndex tile, bool grf_version8)
 {
 	TileType tile_type = GetTileType(tile);
 
 	/* Fake tile type for trees on shore */
 	if (IsTileType(tile, MP_TREES) && GetTreeGround(tile) == TREE_GROUND_SHORE) tile_type = MP_WATER;
 
-	uint z;
-	Slope tileh = GetTileSlope(tile, &z);
+	int z;
+	Slope tileh = GetTilePixelSlope(tile, &z);
 	/* Return 0 if the tile is a land tile */
 	byte terrain_type = (HasTileWaterClass(tile) ? (GetWaterClass(tile) + 1) & 3 : 0) << 5 | GetTerrainType(tile) << 2 | (tile_type == MP_WATER ? 1 : 0) << 1;
-	return tile_type << 24 | z << 16 | terrain_type << 8 | tileh;
+	if (grf_version8) z /= TILE_HEIGHT;
+	return tile_type << 24 | Clamp(z, 0, 0xFF) << 16 | terrain_type << 8 | tileh;
 }
 
 /**
@@ -476,17 +482,24 @@ uint32 GetCompanyInfo(CompanyID owner, const Livery *l)
 CommandCost GetErrorMessageFromLocationCallbackResult(uint16 cb_res, uint32 grfid, StringID default_error)
 {
 	CommandCost res;
-	switch (cb_res) {
-		case 0x400: return res; // No error.
-		case 0x401: res = CommandCost(default_error); break;
-		case 0x402: res = CommandCost(STR_ERROR_CAN_ONLY_BE_BUILT_IN_RAINFOREST); break;
-		case 0x403: res = CommandCost(STR_ERROR_CAN_ONLY_BE_BUILT_IN_DESERT); break;
-		case 0x404: res = CommandCost(STR_ERROR_CAN_ONLY_BE_BUILT_ABOVE_SNOW_LINE); break;
-		case 0x405: res = CommandCost(STR_ERROR_CAN_ONLY_BE_BUILT_BELOW_SNOW_LINE); break;
-		case 0x406: res = CommandCost(STR_ERROR_CAN_T_BUILD_ON_SEA); break;
-		case 0x407: res = CommandCost(STR_ERROR_CAN_T_BUILD_ON_CANAL); break;
-		case 0x408: res = CommandCost(STR_ERROR_CAN_T_BUILD_ON_RIVER); break;
-		default:    res = CommandCost(GetGRFStringID(grfid, 0xD000 + cb_res)); break;
+
+	if (cb_res < 0x400) {
+		res = CommandCost(GetGRFStringID(grfid, 0xD000 + cb_res));
+	} else {
+		switch (cb_res) {
+			case 0x400: return res; // No error.
+
+			default:    // unknown reason -> default error
+			case 0x401: res = CommandCost(default_error); break;
+
+			case 0x402: res = CommandCost(STR_ERROR_CAN_ONLY_BE_BUILT_IN_RAINFOREST); break;
+			case 0x403: res = CommandCost(STR_ERROR_CAN_ONLY_BE_BUILT_IN_DESERT); break;
+			case 0x404: res = CommandCost(STR_ERROR_CAN_ONLY_BE_BUILT_ABOVE_SNOW_LINE); break;
+			case 0x405: res = CommandCost(STR_ERROR_CAN_ONLY_BE_BUILT_BELOW_SNOW_LINE); break;
+			case 0x406: res = CommandCost(STR_ERROR_CAN_T_BUILD_ON_SEA); break;
+			case 0x407: res = CommandCost(STR_ERROR_CAN_T_BUILD_ON_CANAL); break;
+			case 0x408: res = CommandCost(STR_ERROR_CAN_T_BUILD_ON_RIVER); break;
+		}
 	}
 
 	/* Copy some parameters from the registers to the error message text ref. stack */
@@ -494,6 +507,77 @@ CommandCost GetErrorMessageFromLocationCallbackResult(uint16 cb_res, uint32 grfi
 
 	return res;
 }
+
+/**
+ * Record that a NewGRF returned an unknown/invalid callback result.
+ * Also show an error to the user.
+ * @param grfid ID of the NewGRF causing the problem.
+ * @param cbid Callback causing the problem.
+ * @param cb_res Invalid result returned by the callback.
+ */
+void ErrorUnknownCallbackResult(uint32 grfid, uint16 cbid, uint16 cb_res)
+{
+	GRFConfig *grfconfig = GetGRFConfig(grfid);
+
+	if (!HasBit(grfconfig->grf_bugs, GBUG_UNKNOWN_CB_RESULT)) {
+		SetBit(grfconfig->grf_bugs, GBUG_UNKNOWN_CB_RESULT);
+		SetDParamStr(0, grfconfig->GetName());
+		SetDParam(1, cbid);
+		SetDParam(2, cb_res);
+		ShowErrorMessage(STR_NEWGRF_BUGGY, STR_NEWGRF_BUGGY_UNKNOWN_CALLBACK_RESULT, WL_CRITICAL);
+	}
+
+	/* debug output */
+	char buffer[512];
+
+	SetDParamStr(0, grfconfig->GetName());
+	GetString(buffer, STR_NEWGRF_BUGGY, lastof(buffer));
+	DEBUG(grf, 0, "%s", buffer + 3);
+
+	SetDParam(1, cbid);
+	SetDParam(2, cb_res);
+	GetString(buffer, STR_NEWGRF_BUGGY_UNKNOWN_CALLBACK_RESULT, lastof(buffer));
+	DEBUG(grf, 0, "%s", buffer + 3);
+}
+
+/**
+ * Converts a callback result into a boolean.
+ * For grf version < 8 the result is checked for zero or non-zero.
+ * For grf version >= 8 the callback result must be 0 or 1.
+ * @param grffile NewGRF returning the value.
+ * @param cbid Callback returning the value.
+ * @param cb_res Callback result.
+ * @return Boolean value. True if cb_res != 0.
+ */
+bool ConvertBooleanCallback(const GRFFile *grffile, uint16 cbid, uint16 cb_res)
+{
+	assert(cb_res != CALLBACK_FAILED); // We do not know what to return
+
+	if (grffile->grf_version < 8) return cb_res != 0;
+
+	if (cb_res > 1) ErrorUnknownCallbackResult(grffile->grfid, cbid, cb_res);
+	return cb_res != 0;
+}
+
+/**
+ * Converts a callback result into a boolean.
+ * For grf version < 8 the first 8 bit of the result are checked for zero or non-zero.
+ * For grf version >= 8 the callback result must be 0 or 1.
+ * @param grffile NewGRF returning the value.
+ * @param cbid Callback returning the value.
+ * @param cb_res Callback result.
+ * @return Boolean value. True if cb_res != 0.
+ */
+bool Convert8bitBooleanCallback(const GRFFile *grffile, uint16 cbid, uint16 cb_res)
+{
+	assert(cb_res != CALLBACK_FAILED); // We do not know what to return
+
+	if (grffile->grf_version < 8) return GB(cb_res, 0, 8) != 0;
+
+	if (cb_res > 1) ErrorUnknownCallbackResult(grffile->grfid, cbid, cb_res);
+	return cb_res != 0;
+}
+
 
 /* static */ SmallVector<DrawTileSeqStruct, 8> NewGRFSpriteLayout::result_seq;
 

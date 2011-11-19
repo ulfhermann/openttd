@@ -259,7 +259,6 @@ STR_SORT_BY_CAPTION_POPULATION                                  :{BLACK}Poblogae
 STR_SORT_BY_CAPTION_NAME                                        :{BLACK}Enw
 STR_SORT_BY_CAPTION_DATE                                        :{BLACK}Dyddiad
 # These are used in dropdowns
-STR_SORT_BY_POPULATION                                          :Poblogaeth
 STR_SORT_BY_NAME                                                :Enw
 STR_SORT_BY_PRODUCTION                                          :Cynyrch
 STR_SORT_BY_TYPE                                                :Math
@@ -630,9 +629,7 @@ STR_PLAYLIST_TRACK_NAME                                         :{TINYFONT}{LTBL
 STR_PLAYLIST_TRACK_INDEX                                        :{TINYFONT}{BLACK}Indecs Traciau
 STR_PLAYLIST_PROGRAM                                            :{TINYFONT}{BLACK}Rhaglen - '{STRING}'
 STR_PLAYLIST_CLEAR                                              :{TINYFONT}{BLACK}Clirio
-STR_PLAYLIST_SAVE                                               :{TINYFONT}{BLACK}Cadw
 STR_PLAYLIST_TOOLTIP_CLEAR_CURRENT_PROGRAM_CUSTOM1              :{BLACK}Clirio'r rhaglen gyfredol (Cyfaddas 1 neu Cyfaddas 2)
-STR_PLAYLIST_TOOLTIP_SAVE_MUSIC_SETTINGS                        :{BLACK}Cadw gosodiadau cerddoriaeth
 STR_PLAYLIST_TOOLTIP_CLICK_TO_ADD_TRACK                         :{BLACK}Cliciwch i ychwanegu trac cerddoriaeth i'r rhaglen gyfredol (Cyfaddas 1 Neu Cyfaddas 2 yn unig)
 STR_PLAYLIST_TOOLTIP_CLICK_TO_REMOVE_TRACK                      :{BLACK}Cliciwch i dynnu trac cerddoriaeth o'r rhaglen gyfredol (Cyfaddas 1 Neu Cyfaddas 2 yn unig)
 
@@ -1247,7 +1244,7 @@ STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Dangos 
 STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}Dangos cyrraedd a gadael mewn amserlenni: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Creu cyflym ar gyfer gorchmynion cerbydau: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE                            :{LTBLUE}Math rheilffordd ragosodedig (ar ôl gêm newydd/llwytho gêm ): {ORANGE}{STRING}
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_FIRST                      :Y Cyntaf sydd ar gael
+STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_FIRST                      :Y cyntaf sydd ar gael
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_LAST                       :Yr olaf sydd ar gael
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MOST_USED                  :Defnydd mwyaf
 STR_CONFIG_SETTING_SHOW_TRACK_RESERVATION                       :{LTBLUE}Dangos traciau wedi'u cadw: {ORANGE}{STRING}
@@ -1290,11 +1287,11 @@ STR_CONFIG_SETTING_DRAG_SIGNALS_DENSITY                         :{LTBLUE}Pan yn 
 STR_CONFIG_SETTING_SEMAPHORE_BUILD_BEFORE_DATE                  :{LTBLUE}Adeiladu semafforau cyn: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ENABLE_SIGNAL_GUI                            :{LTBLUE}Galluogi'r GUI signalau: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_SIGNAL_TYPE                          :{LTBLUE}Y math o signal i'w adeiladu fel rhagosodiad: {ORANGE}{STRING}
-STR_CONFIG_SETTING_DEFAULT_SIGNAL_NORMAL                        :Blocio signalau
+STR_CONFIG_SETTING_DEFAULT_SIGNAL_NORMAL                        :Signalau Bloc
 STR_CONFIG_SETTING_DEFAULT_SIGNAL_PBS                           :Signalau Llwybr
 STR_CONFIG_SETTING_DEFAULT_SIGNAL_PBSOWAY                       :Signalau Llwybr Un-ffordd
 STR_CONFIG_SETTING_CYCLE_SIGNAL_TYPES                           :{LTBLUE}Cylchu trwy mathau signal: {ORANGE}{STRING}
-STR_CONFIG_SETTING_CYCLE_SIGNAL_NORMAL                          :Signalau blocio'n unig
+STR_CONFIG_SETTING_CYCLE_SIGNAL_NORMAL                          :Signalau bloc yn unig
 STR_CONFIG_SETTING_CYCLE_SIGNAL_PBS                             :Signalau llwybr yn unig
 STR_CONFIG_SETTING_CYCLE_SIGNAL_ALL                             :Pob math
 
@@ -1878,6 +1875,11 @@ STR_CONTENT_ERROR_COULD_NOT_DOWNLOAD_CONNECTION_LOST            :{WHITE}... coll
 STR_CONTENT_ERROR_COULD_NOT_DOWNLOAD_FILE_NOT_WRITABLE          :{WHITE}... dim modd ysgrifennu'r ffeil
 STR_CONTENT_ERROR_COULD_NOT_EXTRACT                             :{WHITE}Doedd dim modd datgywasgu'r ffeil
 
+STR_MISSING_GRAPHICS_SET_CAPTION                                :{WHITE}Graffigau coll
+STR_MISSING_GRAPHICS_SET_MESSAGE                                :{BLACK}Mae OpenTTD angen graffigau i weithio ond ni ganfuwyd rhai. Ydych eisiau i OpenTTD lawrlwytho a gosod y graffigau yma?
+STR_MISSING_GRAPHICS_YES_DOWNLOAD                               :{BLACK}Ia, llawrlwytho'r graffigau
+STR_MISSING_GRAPHICS_NO_QUIT                                    :{BLACK}Na, gadael OpenTTD
+
 # Transparency settings window
 STR_TRANSPARENCY_CAPTION                                        :{WHITE}Dewisiadau Tryloywder
 STR_TRANSPARENT_SIGNS_TOOLTIP                                   :{BLACK}Toglu tryloywder ar gyfer arwyddion gorsafoedd. Mae Ctrl+Clic yn cloi
@@ -1923,6 +1925,11 @@ STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_BRIDGE                  :{BLACK}Adeiladu
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TUNNEL                  :{BLACK}Adeiladu twnnel rheilffordd. Mae Shift yn toglo adeiladu/amcangyfrif y gost
 STR_RAIL_TOOLBAR_TOOLTIP_TOGGLE_BUILD_REMOVE_FOR                :{BLACK}Toglu adeiladu/tynnu ar gyfer traciau, signalau, a pwyntiau llwybro. Wrth ddal Ctrl, caiff cledrau pwyntiau llwybro a gorsafoedd eu tynnu hefyd
 STR_RAIL_TOOLBAR_TOOLTIP_CONVERT_RAIL                           :{BLACK}Trosi/Diweddaru math y rheilffordd. Mae Shift yn toglo adeiladu/amcangyfrif y gost
+
+STR_RAIL_NAME_RAILROAD                                          :rheilffordd
+STR_RAIL_NAME_ELRAIL                                            :rheilffordd drydan
+STR_RAIL_NAME_MONORAIL                                          :monoreilffordd
+STR_RAIL_NAME_MAGLEV                                            :maglef
 
 # Rail depot construction window
 STR_BUILD_DEPOT_TRAIN_ORIENTATION_CAPTION                       :{WHITE}Cyfeiriad Depo Trên
@@ -2194,29 +2201,29 @@ STR_LAI_CLEAR_DESCRIPTION_FIELDS                                :Caeau
 STR_LAI_CLEAR_DESCRIPTION_SNOW_COVERED_LAND                     :Tir ag eira
 STR_LAI_CLEAR_DESCRIPTION_DESERT                                :Anialdir
 
-STR_LAI_RAIL_DESCRIPTION_TRACK                                  :Trac rheilffordd
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_SIGNALS              :Trac rheilffordd gyda signalau cyffredin
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRESIGNALS                  :Trac rheilffordd gyda chynsignalau
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXITSIGNALS                 :Trac rheilffordd gyda allsignalau
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBOSIGNALS                :Trac rheilffordd gyda chyfunsignalau
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PBSSIGNALS                  :Trac rheilffordd gyda signalau llwybr
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NOENTRYSIGNALS              :Trac rheilffordd gyda signalau llwybr un-ffordd
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_PRESIGNALS           :Trac rheilffordd gyda signalau bloc a rhagsignalau
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_EXITSIGNALS          :Trac rheilffordd gyda signalau bloc a signalau gadael
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_COMBOSIGNALS         :Trac rheilffordd gyda signalau bloc a signalau cyfun
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_PBSSIGNALS           :Trac rheilffordd gyda signalau bloc a signalau llwybr
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_NOENTRYSIGNALS       :Trac rheilffordd gyda signalau bloc a signalau llwybr un-ffordd
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_EXITSIGNALS             :Trac rheilffordd gyda rhagsignalau a signalau gadael
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_COMBOSIGNALS            :Trac rheilffordd gyda rhagsignalau a signalau cyfun
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_PBSSIGNALS              :Trac rheilffordd gyda rhagsignalau a signalau llwybr
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_NOENTRYSIGNALS          :Trac rheilffordd gyda rhagsignalau a signalau llwybr un-ffordd
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_COMBOSIGNALS           :Trac rheilffordd gyda signalau gadael a signalau cyfun
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_PBSSIGNALS             :Trac rheilffordd gyda signalau gadaela signalau llwybr
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_NOENTRYSIGNALS         :Trac rheilffordd gyda signalau gadael a signalau llwybr un-ffordd
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBO_PBSSIGNALS            :Trac rheilffordd gyda signalau cyfun a signalau llwybr
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBO_NOENTRYSIGNALS        :Trac rheilffordd gyda signalau cyfun a signalau llwybr un-ffordd
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PBS_NOENTRYSIGNALS          :Trac rheilffordd gyda signalau llwybr a signalau llwybr un-ffordd
-STR_LAI_RAIL_DESCRIPTION_TRAIN_DEPOT                            :Rheilffordd trên depo
+STR_LAI_RAIL_DESCRIPTION_TRACK                                  :Cledrau {STRING}
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_SIGNALS              :Cledrau {STRING} gyda signalau bloc
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRESIGNALS                  :Cledrau {STRING} gyda rhagsignalau
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXITSIGNALS                 :Cledrau {STRING} gyda signalau gadael
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBOSIGNALS                :Cledrau {STRING} gyda signalau cyfun
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PBSSIGNALS                  :Cledrau {STRING} gyda signalau llwybro
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NOENTRYSIGNALS              :Cledrau {STRING} gyda signalau llwybro unffordd
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_PRESIGNALS           :Cledrau {STRING} gyda signalau bloc a rhagsignalau
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_EXITSIGNALS          :Cledrau {STRING} gyda signalau bloc a signalau gadael
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_COMBOSIGNALS         :Cledrau {STRING} gyda signalau bloc a signalau cyfun
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_PBSSIGNALS           :Cledrau {STRING} gyda signalau bloc a signalau llwybro
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_NOENTRYSIGNALS       :Cledrau {STRING} gyda signalau bloc a signalau llwybro unffordd
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_EXITSIGNALS             :Cledrau {STRING} gyda rhagsignalau a signalau gadael
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_COMBOSIGNALS            :Cledrau {STRING} gyda rhagsignalau a signalau cyfun
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_PBSSIGNALS              :Cledrau {STRING} gyda rhagsignalau a signalau llwybro
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_NOENTRYSIGNALS          :Cledrau {STRING} gyda rhag-signalau a signalau llwybro unffordd
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_COMBOSIGNALS           :Cledrau {STRING} gyda signalau gadael a signalau cyfun
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_PBSSIGNALS             :Cledrau {STRING} gyda signalau gadael a signalau llwybro
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_NOENTRYSIGNALS         :Cledrau {STRING} gyda signalau gadael a signalau llwybro unffordd
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBO_PBSSIGNALS            :Cledrau {STRING} gyda signalau cyfun a llwybro
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBO_NOENTRYSIGNALS        :Cledrau {STRING} gyda signalau cyfun a signalau llwybr unffordd
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PBS_NOENTRYSIGNALS          :Cledrau {STRING} gyda signalau llwybro a signalau llwybro unffordd
+STR_LAI_RAIL_DESCRIPTION_TRAIN_DEPOT                            :Depo trên {STRING}
 
 STR_LAI_ROAD_DESCRIPTION_ROAD                                   :Ffordd
 STR_LAI_ROAD_DESCRIPTION_ROAD_WITH_STREETLIGHTS                 :Ffordd gyda goleuadau stryd
@@ -2400,7 +2407,10 @@ STR_NEWGRF_SETTINGS_MOVEUP                                      :{BLACK}Symud i 
 STR_NEWGRF_SETTINGS_MOVEUP_TOOLTIP                              :{BLACK}Symud y ffeil NewGRF sydd wedi'i ddewis i fyny'r rhestr
 STR_NEWGRF_SETTINGS_MOVEDOWN                                    :{BLACK}Symud i Lawr
 STR_NEWGRF_SETTINGS_MOVEDOWN_TOOLTIP                            :{BLACK}Symud y ffeil NewGRF sydd wedi'i ddewis i lawr y rhestr
-STR_NEWGRF_SETTINGS_FILE_TOOLTIP                                :{BLACK}Rhestr o bob ffeil NewGRF sydd wedi'u gosod. Cliciwch ar ffeil i newid ei baramedrau
+STR_NEWGRF_SETTINGS_FILE_TOOLTIP                                :{BLACK}Rhestr o bob ffeil NewGRF sydd wedi'u gosod.
+
+# Additional textfiles accompanying NewGRFs
+STR_NEWGRF_SETTINGS_VIEW_README                                 :{BLACK}Gweld dogfenyddiaeth
 
 STR_NEWGRF_SETTINGS_SET_PARAMETERS                              :{BLACK}Gosod paramedrau
 STR_NEWGRF_SETTINGS_TOGGLE_PALETTE                              :{BLACK}Toglu palet
@@ -2423,8 +2433,6 @@ STR_NEWGRF_SETTINGS_NOT_FOUND                                   :{RED}Ni ddargan
 STR_NEWGRF_SETTINGS_DISABLED                                    :{RED}Analluogwyd
 STR_NEWGRF_SETTINGS_INCOMPATIBLE                                :{RED}Anghydnaws gyda'r fersiwn yma o OpenTTD
 
-STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}Rhoi paramedrau NewGRF newydd
-
 # NewGRF parameters window
 STR_NEWGRF_PARAMETERS_CAPTION                                   :{WHITE}Newid paramedrau NewGRF
 STR_NEWGRF_PARAMETERS_CLOSE                                     :{BLACK}Cau
@@ -2433,6 +2441,9 @@ STR_NEWGRF_PARAMETERS_RESET_TOOLTIP                             :{BLACK}Gosod po
 STR_NEWGRF_PARAMETERS_DEFAULT_NAME                              :Paramedr {NUM}
 STR_NEWGRF_PARAMETERS_SETTING                                   :{STRING}: {ORANGE}{STRING}
 STR_NEWGRF_PARAMETERS_NUM_PARAM                                 :{LTBLUE}Nifer y paramedrau: {ORANGE}{NUM}
+
+# NewGRF textfile window
+STR_NEWGRF_README_CAPTION                                       :{WHITE}Dogfenyddiaeth NewGRF {STRING}
 
 # NewGRF inspect window
 STR_NEWGRF_INSPECT_CAPTION                                      :{WHITE}Arolygu - {STRING}
@@ -2515,6 +2526,7 @@ STR_BROKEN_VEHICLE_LENGTH                                       :{WHITE}Mae gan 
 STR_NEWGRF_BUGGY                                                :{WHITE}Mae NewGRF '{0:STRING}' yn darparu gwybodaeth anghywir
 STR_NEWGRF_BUGGY_ARTICULATED_CARGO                              :{WHITE}Mae'r wybodaeth cargo/ailffitio ar gyfer '{1:ENGINE}' yn wahanol i'r rhestr brynu wedi'r adeiladu. Gall hyn beri i awtoadnewyddu/-ddisodli fethu ag ailfitio'n gywir
 STR_NEWGRF_BUGGY_ENDLESS_PRODUCTION_CALLBACK                    :{WHITE}'{1:STRING}' wedi creu lŵp diddiwedd yn y system adalw cynhyrchu
+STR_NEWGRF_BUGGY_UNKNOWN_CALLBACK_RESULT                        :{WHITE}Dychwelodd adalwad 0x{HEX} ganlyniad anhysbys/annilys 0x{HEX}
 
 # 'User removed essential NewGRFs'-placeholders for stuff without specs
 STR_NEWGRF_INVALID_CARGO                                        :<cargo annilys>
@@ -3190,6 +3202,10 @@ STR_ORDER_TOOLTIP_UNLOAD                                        :{BLACK}Newid ym
 
 STR_ORDER_REFIT                                                 :{BLACK}Ailffitio
 STR_ORDER_REFIT_TOOLTIP                                         :{BLACK}Dewiswch y math o lwyth yr hoffech chi ailffitio gyda'r gorchymyn hwn. Cliciwch Ctrl-clic er mwyn diddymu'r cyfarwyddyd hwn.
+STR_ORDER_REFIT_AUTO                                            :{BLACK}Awto-ailffitio
+STR_ORDER_REFIT_AUTO_TOOLTIP                                    :{BLACK}Dewis y math o lwyth i awto-ailffitio ar ei gyfer yn y gorchymyn yma. Mae Ctrl+Clic yn tynnu'r gorchymyn. Bydd awto-ailffitio ond yn digwydd os yw'r cerbyd yn caniatáu hynny
+STR_ORDER_DROP_REFIT_AUTO                                       :Llwyth gosodedig
+STR_ORDER_DROP_REFIT_AUTO_ANY                                   :Llwythi ar gael
 
 STR_ORDER_SERVICE                                               :{BLACK}Gwasanaeth
 STR_ORDER_DROP_GO_ALWAYS_DEPOT                                  :Mynd bob tro
@@ -3236,7 +3252,6 @@ STR_ORDER_GO_TO_NEAREST_HANGAR                                  :Mynd i'r awyren
 STR_ORDER_CONDITIONAL                                           :Naid gorchymyn amodol
 STR_ORDER_SHARE                                                 :Rhannu gorchmynion
 STR_ORDERS_GO_TO_TOOLTIP                                        :{BLACK}Creu gorchymyn newydd cyn yr orchymyn a amlygwyd, neu creu ar ddiwedd y daflen. Mae Ctrl yn gwneud gorchymynion orsaf yn rhai 'llwyth llawn unrhyw cargo', gorchymynion pwyntiau llwybro 'heb aros' a gorchmynion depot 'gwasanaethu'. Mae 'Rhannu gorchmynion' neu Ctrl yn gadael i'r cerbyd yma rannu gorchmynion gyda'r cerbyd a ddewisir. Mae clicio ar gerbyd yn copïo gorchmynion o'r cerbyd hwnnw
-STR_ORDERS_GO_TO_DROPDOWN_TOOLTIP                               :{BLACK}Mewnosod gorchymyn uwch
 
 STR_ORDERS_VEH_WITH_SHARED_ORDERS_LIST_TOOLTIP                  :{BLACK}Dangos pob cerbydau sy'n rhannu'r amserlen hon
 
@@ -3278,6 +3293,21 @@ STR_ORDER_NO_UNLOAD                                             :(Dim dadlwytho 
 STR_ORDER_NO_UNLOAD_FULL_LOAD                                   :(Dim dadlwytho, aros am lwyth llawn)
 STR_ORDER_NO_UNLOAD_FULL_LOAD_ANY                               :(Dim dadlwytho, aros am unrhyw lwyth llawn)
 STR_ORDER_NO_UNLOAD_NO_LOAD                                     :(Dim llwytho na dadlwytho)
+
+STR_ORDER_AUTO_REFIT                                            :(Awto-ailffitio i {STRING})
+STR_ORDER_FULL_LOAD_REFIT                                       :(Llwyth llawn gan awto-ailffitio i {STRING})
+STR_ORDER_FULL_LOAD_ANY_REFIT                                   :(Llwyth llawn o unrhyw gargo gan awto-ailffitio i {STRING})
+STR_ORDER_UNLOAD_REFIT                                          :(Dadlwytho a cymryd cargo gan awto-ailffitio i {STRING})
+STR_ORDER_UNLOAD_FULL_LOAD_REFIT                                :(Dadlwytho ac aros am lwyth llawn o gargo gan awto-ailffitio i {STRING})
+STR_ORDER_UNLOAD_FULL_LOAD_ANY_REFIT                            :(Dadlwytho ac aros am unrhyw lwyth llawn gan awto-ailffitio o {STRING})
+STR_ORDER_TRANSFER_REFIT                                        :(Trosglwyddo a cymryd cargo gan awto-ailffitio i {STRING})
+STR_ORDER_TRANSFER_FULL_LOAD_REFIT                              :(Trosglwyddo ac aros am lwyth llawn gan awto-ailffitio i {STRING})
+STR_ORDER_TRANSFER_FULL_LOAD_ANY_REFIT                          :(Trosglwyddo ac aros am unrhyw lwyth llawn gan awto-ailffitio i {STRING})
+STR_ORDER_NO_UNLOAD_REFIT                                       :(Dim dadlwytho ond cymryd cargo gan awto-ailffitio i {STRING})
+STR_ORDER_NO_UNLOAD_FULL_LOAD_REFIT                             :(Dim dadlwytho ac aros am lwyth llawn gan awto-ailffitio i {STRING})
+STR_ORDER_NO_UNLOAD_FULL_LOAD_ANY_REFIT                         :(Dim dadlwytho ac aros am unrhyw lwyth llawn gan awto-ailffitio i {STRING})
+
+STR_ORDER_AUTO_REFIT_ANY                                        :llwythi ar gael
 
 STR_ORDER_STOP_LOCATION_NEAR_END                                :[ochr agos]
 STR_ORDER_STOP_LOCATION_MIDDLE                                  :[canol]
@@ -3491,8 +3521,7 @@ STR_ERROR_NOT_ALLOWED_WHILE_PAUSED                              :{WHITE}Ni chani
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS                 :{WHITE}Nid yw awdurdod lleol {TOWN}yn caniatáu hyn
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_AIRPORT                       :{WHITE}Mae awdurdod lleol {TOWN} yn gwrthod caniatáu i faes awyr arall gael ei adeiladu ger y dref hon
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_NOISE                         :{WHITE}Mae awdurdod lleol {TOWN} wedi gwrthod caniatâd ar gyfer maes awyr oherwydd pryderon ynglŷn â sŵn
-STR_ERROR_BRIBE_FAILED                                          :{WHITE}Cafodd eich ymgais i lwgrwobrwyo ei
-STR_ERROR_BRIBE_FAILED_2                                        :{WHITE}ddarganfod gan ymchwilydd ardal
+STR_ERROR_BRIBE_FAILED                                          :{WHITE}Cawsoch eich dal gan ymchwilydd rhanbarth wrth geisio llwgrwobrwyo
 
 # Levelling errors
 STR_ERROR_CAN_T_RAISE_LAND_HERE                                 :{WHITE}Does dim modd codi tir yma...
@@ -3566,7 +3595,6 @@ STR_ERROR_TOO_MANY_STATIONS_LOADING                             :{WHITE}Gormod o
 STR_ERROR_TOO_MANY_STATION_SPECS                                :{WHITE}Mae gan yr orsaf ormod o rannau
 STR_ERROR_TOO_MANY_BUS_STOPS                                    :{WHITE}Gormod o arosfannau bysus
 STR_ERROR_TOO_MANY_TRUCK_STOPS                                  :{WHITE}Gormod o orsafoedd lorïau
-STR_ERROR_TOO_CLOSE_TO_ANOTHER_RAILROAD                         :{WHITE}Rhy agos i orsaf reilffordd arall
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_STATION                          :{WHITE}Rhy agos i orsaf/ardal lwytho
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_DOCK                             :{WHITE}Rhy agos i ddoc arall
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_AIRPORT                          :{WHITE}Rhy agos i faes awyr arall

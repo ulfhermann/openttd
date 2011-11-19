@@ -17,6 +17,7 @@
 #include "../network/network.h"
 #include "../window_func.h"
 #include "../command_func.h"
+#include "../fileio_func.h"
 #include "ai_scanner.hpp"
 #include "ai_instance.hpp"
 #include "ai_config.hpp"
@@ -52,7 +53,8 @@
 
 	c->ai_info = info;
 	assert(c->ai_instance == NULL);
-	c->ai_instance = new AIInstance(info);
+	c->ai_instance = new AIInstance();
+	c->ai_instance->Initialize(info);
 
 	cur_company.Restore();
 
@@ -135,7 +137,10 @@
 	if (AI::ai_scanner != NULL) AI::Uninitialize(true);
 
 	AI::frame_counter = 0;
-	if (AI::ai_scanner == NULL) AI::ai_scanner = new AIScanner();
+	if (AI::ai_scanner == NULL) {
+		TarScanner::DoScan(TarScanner::AI);
+		AI::ai_scanner = new AIScanner();
+	}
 }
 
 /* static */ void AI::Uninitialize(bool keepConfig)
@@ -214,7 +219,7 @@
 
 	/* Queue the event */
 	Backup<CompanyByte> cur_company(_current_company, company, FILE_LINE);
-	AIEventController::InsertEvent(event);
+	Company::Get(_current_company)->ai_instance->InsertEvent(event);
 	cur_company.Restore();
 
 	event->Release();
@@ -248,15 +253,7 @@
  */
 void CcAI(const CommandCost &result, TileIndex tile, uint32 p1, uint32 p2)
 {
-	AIObject::SetLastCommandRes(result.Succeeded());
-
-	if (result.Failed()) {
-		AIObject::SetLastError(AIError::StringToError(result.GetErrorMessage()));
-	} else {
-		AIObject::IncreaseDoCommandCosts(result.GetCost());
-		AIObject::SetLastCost(result.GetCost());
-	}
-
+	Company::Get(_current_company)->ai_instance->DoCommandCallback(result, tile, p1, p2);
 	Company::Get(_current_company)->ai_instance->Continue();
 }
 
@@ -327,11 +324,13 @@ void CcAI(const CommandCost &result, TileIndex tile, uint32 p1, uint32 p2)
 
 /* static */ bool AI::ImportLibrary(const char *library, const char *class_name, int version, HSQUIRRELVM vm)
 {
-	return AI::ai_scanner->ImportLibrary(library, class_name, version, vm, Company::Get(_current_company)->ai_instance->GetController());
+	return AI::ai_scanner->ImportLibrary(library, class_name, version, vm, AIObject::GetActiveInstance()->GetController());
 }
 
 /* static */ void AI::Rescan()
 {
+	TarScanner::DoScan(TarScanner::AI);
+
 	AI::ai_scanner->RescanAIDir();
 	ResetConfig();
 
