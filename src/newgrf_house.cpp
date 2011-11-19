@@ -132,10 +132,17 @@ static uint32 GetNumHouses(HouseID house_id, const Town *town)
 	return map_class_count << 24 | town_class_count << 16 | map_id_count << 8 | town_id_count;
 }
 
-uint32 GetNearbyTileInformation(byte parameter, TileIndex tile)
+/**
+ * Get information about a nearby tile.
+ * @param parameter from callback. It's in fact a pair of coordinates
+ * @param tile TileIndex from which the callback was initiated
+ * @param grf_version8 True, if we are dealing with a new NewGRF which uses GRF version >= 8.
+ * @return a construction of bits obeying the newgrf format
+ */
+static uint32 GetNearbyTileInformation(byte parameter, TileIndex tile, bool grf_version8)
 {
 	tile = GetNearbyTile(parameter, tile);
-	return GetNearbyTileInformation(tile);
+	return GetNearbyTileInformation(tile, grf_version8);
 }
 
 /** Structure with user-data for SearchNearbyHouseXXX - functions */
@@ -254,7 +261,7 @@ static uint32 GetDistanceFromNearbyHouse(uint8 parameter, TileIndex tile, HouseI
  *
  * Used by the resolver to get values for feature 07 deterministic spritegroups.
  */
-static uint32 HouseGetVariable(const ResolverObject *object, byte variable, byte parameter, bool *available)
+static uint32 HouseGetVariable(const ResolverObject *object, byte variable, uint32 parameter, bool *available)
 {
 	Town *town = object->u.house.town;
 	TileIndex tile   = object->u.house.tile;
@@ -302,7 +309,7 @@ static uint32 HouseGetVariable(const ResolverObject *object, byte variable, byte
 		}
 
 		/* Land info for nearby tiles. */
-		case 0x62: return GetNearbyTileInformation(parameter, tile);
+		case 0x62: return GetNearbyTileInformation(parameter, tile, object->grffile->grf_version >= 8);
 
 		/* Current animation frame of nearby house tiles */
 		case 0x63: {
@@ -489,7 +496,7 @@ void DrawNewHouseTile(TileInfo *ti, HouseID house_id)
 		if (HasBit(hs->callback_mask, CBM_HOUSE_DRAW_FOUNDATIONS)) {
 			/* Called to determine the type (if any) of foundation to draw for the house tile */
 			uint32 callback_res = GetHouseCallback(CBID_HOUSE_DRAW_FOUNDATIONS, 0, 0, house_id, Town::GetByTile(ti->tile), ti->tile);
-			draw_old_one = (callback_res != 0);
+			if (callback_res != CALLBACK_FAILED) draw_old_one = ConvertBooleanCallback(hs->grf_prop.grffile, CBID_HOUSE_DRAW_FOUNDATIONS, callback_res);
 		}
 
 		if (draw_old_one) DrawFoundation(ti, FOUNDATION_LEVELED);
@@ -552,7 +559,7 @@ bool CanDeleteHouse(TileIndex tile)
 
 	if (HasBit(hs->callback_mask, CBM_HOUSE_DENY_DESTRUCTION)) {
 		uint16 callback_res = GetHouseCallback(CBID_HOUSE_DENY_DESTRUCTION, 0, 0, GetHouseType(tile), Town::GetByTile(tile), tile);
-		return (callback_res == CALLBACK_FAILED || callback_res == 0);
+		return (callback_res == CALLBACK_FAILED || !ConvertBooleanCallback(hs->grf_prop.grffile, CBID_HOUSE_DENY_DESTRUCTION, callback_res));
 	} else {
 		return !(hs->extra_flags & BUILDING_IS_PROTECTED);
 	}
@@ -600,7 +607,7 @@ bool NewHouseTileLoop(TileIndex tile)
 	/* Check callback 21, which determines if a house should be destroyed. */
 	if (HasBit(hs->callback_mask, CBM_HOUSE_DESTRUCTION)) {
 		uint16 callback_res = GetHouseCallback(CBID_HOUSE_DESTRUCTION, 0, 0, GetHouseType(tile), Town::GetByTile(tile), tile);
-		if (callback_res != CALLBACK_FAILED && GB(callback_res, 0, 8) > 0) {
+		if (callback_res != CALLBACK_FAILED && Convert8bitBooleanCallback(hs->grf_prop.grffile, CBID_HOUSE_DESTRUCTION, callback_res)) {
 			ClearTownHouse(Town::GetByTile(tile), tile);
 			return false;
 		}
