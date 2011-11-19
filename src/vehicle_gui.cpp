@@ -213,9 +213,10 @@ static const uint MAX_REFIT_CYCLE = 256;
  * Assuming they are going to carry the same cargo ofcourse!
  * @param v_from the vehicle to match the subtype from
  * @param v_for  the vehicle to get the subtype for
+ * @param dest_cargo_type Destination cargo type, taken from #v_from if set to #INVALID_CARGO.
  * @return the best sub type
  */
-byte GetBestFittingSubType(Vehicle *v_from, Vehicle *v_for)
+byte GetBestFittingSubType(Vehicle *v_from, Vehicle *v_for, CargoID dest_cargo_type)
 {
 	const Engine *e_from = v_from->GetEngine();
 	const Engine *e_for  = v_for->GetEngine();
@@ -229,8 +230,10 @@ byte GetBestFittingSubType(Vehicle *v_from, Vehicle *v_for)
 		return 0;
 	}
 
+	if (dest_cargo_type == INVALID_CARGO) dest_cargo_type = v_from->cargo_type;
+
 	/* It has to be possible for v_for to carry the cargo of v_from. */
-	if (!HasBit(e_for->info.refit_mask, v_from->cargo_type)) return 0;
+	if (!HasBit(e_for->info.refit_mask, dest_cargo_type)) return 0;
 
 	StringID expected_string = GetCargoSubtypeText(v_from);
 
@@ -239,7 +242,7 @@ byte GetBestFittingSubType(Vehicle *v_from, Vehicle *v_for)
 	byte ret_refit_cyc = 0;
 
 	/* Set the 'destination' cargo */
-	v_for->cargo_type = v_from->cargo_type;
+	v_for->cargo_type = dest_cargo_type;
 
 	/* Cycle through the refits */
 	for (uint refit_cyc = 0; refit_cyc < MAX_REFIT_CYCLE; refit_cyc++) {
@@ -250,7 +253,10 @@ byte GetBestFittingSubType(Vehicle *v_from, Vehicle *v_for)
 		v_for->InvalidateNewGRFCache();
 		uint16 callback = GetVehicleCallback(CBID_VEHICLE_CARGO_SUFFIX, 0, 0, v_for->engine_type, v_for);
 
-		if (callback == 0xFF) callback = CALLBACK_FAILED;
+		if (callback != CALLBACK_FAILED) {
+			if (callback > 0x400) ErrorUnknownCallbackResult(v_for->GetGRFID(), CBID_VEHICLE_CARGO_SUFFIX, callback);
+			if (callback >= 0x400 || (v_for->GetGRF()->grf_version < 8 && callback == 0xFF)) callback = CALLBACK_FAILED;
+		}
 		if (callback == CALLBACK_FAILED) break;
 
 		if (GetCargoSubtypeText(v_for) != expected_string) continue;
@@ -329,7 +335,7 @@ static void DrawVehicleRefitWindow(const SubtypeList list[NUM_CARGO], int sel, u
 			/* Get the cargo name. */
 			SetDParam(0, CargoSpec::Get(refit.cargo)->name);
 			/* If the callback succeeded, draw the cargo suffix. */
-			if (refit.value != CALLBACK_FAILED) {
+			if (refit.value != CALLBACK_FAILED && refit.value < 0x400) {
 				SetDParam(1, GetGRFStringID(refit.engine->GetGRFID(), 0xD000 + refit.value));
 				DrawString(r.left + WD_MATRIX_LEFT, r.right - WD_MATRIX_RIGHT, y, STR_JUST_STRING_SPACE_STRING, colour);
 			} else {
@@ -371,6 +377,7 @@ struct RefitWindow : public Window {
 	int click_x;                 ///< Position of the first click while dragging.
 	VehicleID selected_vehicle;  ///< First vehicle in the current selection.
 	uint8 num_vehicles;          ///< Number of selected vehicles.
+	bool auto_refit;             ///< Select cargo for auto-refitting.
 
 	/**
 	 * Collects all (cargo, subcargo) refit options of a vehicle chain.
@@ -392,6 +399,8 @@ struct RefitWindow : public Window {
 
 			/* Skip this engine if it does not carry anything */
 			if (!e->CanCarryCargo()) continue;
+			/* Skip this engine if we build the list for auto-refitting and engine doesn't allow it. */
+			if (this->auto_refit && !HasBit(e->info.misc_flags, EF_AUTO_REFIT)) continue;
 
 			/* Loop through all cargos in the refit mask */
 			int current_index = 0;
@@ -421,7 +430,10 @@ struct RefitWindow : public Window {
 						v->InvalidateNewGRFCache();
 						uint16 callback = GetVehicleCallback(CBID_VEHICLE_CARGO_SUFFIX, 0, 0, v->engine_type, v);
 
-						if (callback == 0xFF) callback = CALLBACK_FAILED;
+						if (callback != CALLBACK_FAILED) {
+							if (callback > 0x400) ErrorUnknownCallbackResult(v->GetGRFID(), CBID_VEHICLE_CARGO_SUFFIX, callback);
+							if (callback >= 0x400 || (v->GetGRF()->grf_version < 8 && callback == 0xFF)) callback = CALLBACK_FAILED;
+						}
 						if (refit_cyc != 0 && callback == CALLBACK_FAILED) break;
 
 						RefitOption option;
@@ -479,9 +491,10 @@ struct RefitWindow : public Window {
 		return NULL;
 	}
 
-	RefitWindow(const WindowDesc *desc, const Vehicle *v, VehicleOrderID order) : Window()
+	RefitWindow(const WindowDesc *desc, const Vehicle *v, VehicleOrderID order, bool auto_refit) : Window()
 	{
 		this->sel = -1;
+		this->auto_refit = auto_refit;
 		this->CreateNestedTree(desc);
 
 		this->vscroll = this->GetScrollbar(VRW_SCROLLBAR);
@@ -587,7 +600,7 @@ struct RefitWindow : public Window {
 	{
 		assert(_current_company == _local_company);
 		Vehicle *v = Vehicle::Get(this->window_number);
-		CommandCost cost = DoCommand(v->tile, this->selected_vehicle, option->cargo | option->subtype << 8 |
+		CommandCost cost = DoCommand(v->tile, this->selected_vehicle, option->cargo | (int)this->auto_refit << 6 | option->subtype << 8 |
 				this->num_vehicles << 16, DC_QUERY_COST, GetCmdRefitVeh(v->type));
 
 		if (cost.Failed()) return INVALID_STRING_ID;
@@ -910,11 +923,12 @@ static const WindowDesc _vehicle_refit_desc(
  * @param *v The vehicle to show the refit window for
  * @param order of the vehicle ( ? )
  * @param parent the parent window of the refit window
+ * @param auto_refit Choose cargo for auto-refitting
  */
-void ShowVehicleRefitWindow(const Vehicle *v, VehicleOrderID order, Window *parent)
+void ShowVehicleRefitWindow(const Vehicle *v, VehicleOrderID order, Window *parent, bool auto_refit)
 {
 	DeleteWindowById(WC_VEHICLE_REFIT, v->index);
-	RefitWindow *w = new RefitWindow(&_vehicle_refit_desc, v, order);
+	RefitWindow *w = new RefitWindow(&_vehicle_refit_desc, v, order, auto_refit);
 	w->parent = parent;
 }
 
@@ -975,6 +989,10 @@ StringID GetCargoSubtypeText(const Vehicle *v)
 {
 	if (HasBit(EngInfo(v->engine_type)->callback_mask, CBM_VEHICLE_CARGO_SUFFIX)) {
 		uint16 cb = GetVehicleCallback(CBID_VEHICLE_CARGO_SUFFIX, 0, 0, v->engine_type, v);
+		if (cb != CALLBACK_FAILED) {
+			if (cb > 0x400) ErrorUnknownCallbackResult(v->GetGRFID(), CBID_VEHICLE_CARGO_SUFFIX, cb);
+			if (cb >= 0x400 || (v->GetGRF()->grf_version < 8 && cb == 0xFF)) cb = CALLBACK_FAILED;
+		}
 		if (cb != CALLBACK_FAILED) {
 			return GetGRFStringID(v->GetGRFID(), 0xD000 + cb);
 		}

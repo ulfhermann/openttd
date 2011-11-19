@@ -248,17 +248,17 @@ static bool LoadIntList(const char *str, void *array, int nelems, VarType type)
 static void MakeIntList(char *buf, const char *last, const void *array, int nelems, VarType type)
 {
 	int i, v = 0;
-	byte *p = (byte*)array;
+	const byte *p = (const byte *)array;
 
 	for (i = 0; i != nelems; i++) {
 		switch (type) {
 		case SLE_VAR_BL:
-		case SLE_VAR_I8:  v = *(int8*)p;   p += 1; break;
-		case SLE_VAR_U8:  v = *(byte*)p;   p += 1; break;
-		case SLE_VAR_I16: v = *(int16*)p;  p += 2; break;
-		case SLE_VAR_U16: v = *(uint16*)p; p += 2; break;
-		case SLE_VAR_I32: v = *(int32*)p;  p += 4; break;
-		case SLE_VAR_U32: v = *(uint32*)p; p += 4; break;
+		case SLE_VAR_I8:  v = *(const   int8 *)p; p += 1; break;
+		case SLE_VAR_U8:  v = *(const  uint8 *)p; p += 1; break;
+		case SLE_VAR_I16: v = *(const  int16 *)p; p += 2; break;
+		case SLE_VAR_U16: v = *(const uint16 *)p; p += 2; break;
+		case SLE_VAR_I32: v = *(const  int32 *)p; p += 4; break;
+		case SLE_VAR_U32: v = *(const uint32 *)p; p += 4; break;
 		default: NOT_REACHED();
 		}
 		buf += seprintf(buf, last, (i == 0) ? "%d" : ",%d", v);
@@ -493,7 +493,7 @@ static void IniLoadSettings(IniFile *ini, const SettingDesc *sd, const char *grp
 					free(*(char**)ptr);
 					*(char**)ptr = p == NULL ? NULL : strdup((const char*)p);
 					break;
-				case SLE_VAR_CHAR: if (p != NULL) *(char*)ptr = *(char*)p; break;
+				case SLE_VAR_CHAR: if (p != NULL) *(char *)ptr = *(const char *)p; break;
 				default: NOT_REACHED();
 			}
 			break;
@@ -768,6 +768,7 @@ static bool UpdateConsists(int32 p1)
 		/* Update the consist of all trains so the maximum speed is set correctly. */
 		if (t->IsFrontEngine() || t->IsFreeWagon()) t->ConsistChanged(true);
 	}
+	InvalidateWindowClassesData(WC_BUILD_VEHICLE, 0);
 	return true;
 }
 
@@ -917,6 +918,12 @@ static bool InvalidateCompanyLiveryWindow(int32 p1)
 static bool InvalidateIndustryViewWindow(int32 p1)
 {
 	InvalidateWindowClassesData(WC_INDUSTRY_VIEW);
+	return true;
+}
+
+static bool InvalidateAISettingsWindow(int32 p1)
+{
+	InvalidateWindowClassesData(WC_AI_SETTINGS);
 	return true;
 }
 
@@ -1482,12 +1489,14 @@ static void GRFSaveConfig(IniFile *ini, const char *grpname, const GRFConfig *li
 }
 
 /* Common handler for saving/loading variables to the configuration file */
-static void HandleSettingDescs(IniFile *ini, SettingDescProc *proc, SettingDescProcList *proc_list)
+static void HandleSettingDescs(IniFile *ini, SettingDescProc *proc, SettingDescProcList *proc_list, bool minimal = false)
 {
 	proc(ini, (const SettingDesc*)_misc_settings,    "misc",  NULL);
 #if defined(WIN32) && !defined(DEDICATED)
 	proc(ini, (const SettingDesc*)_win32_settings,   "win32", NULL);
 #endif /* WIN32 */
+
+	if (minimal) return;
 
 	proc(ini, _settings,         "patches",  &_settings_newgame);
 	proc(ini, _currency_settings,"currency", &_custom_currency);
@@ -1507,23 +1516,30 @@ static IniFile *IniLoadConfig()
 	return ini;
 }
 
-/** Load the values from the configuration files */
-void LoadFromConfig()
+/**
+ * Load the values from the configuration files
+ * @param minimal Load the minimal amount of the configuration to "bootstrap" the blitter and such.
+ */
+void LoadFromConfig(bool minimal)
 {
 	IniFile *ini = IniLoadConfig();
-	ResetCurrencies(false); // Initialize the array of curencies, without preserving the custom one
+	if (!minimal) ResetCurrencies(false); // Initialize the array of curencies, without preserving the custom one
 
-	HandleSettingDescs(ini, IniLoadSettings, IniLoadSettingList);
-	_grfconfig_newgame = GRFLoadConfig(ini, "newgrf", false);
-	_grfconfig_static  = GRFLoadConfig(ini, "newgrf-static", true);
-	NewsDisplayLoadConfig(ini, "news_display");
-	AILoadConfig(ini, "ai_players");
+	HandleSettingDescs(ini, IniLoadSettings, IniLoadSettingList, minimal);
 
-	PrepareOldDiffCustom();
-	IniLoadSettings(ini, _gameopt_settings, "gameopt", &_settings_newgame);
-	HandleOldDiffCustom(false);
+	if (!minimal) {
+		_grfconfig_newgame = GRFLoadConfig(ini, "newgrf", false);
+		_grfconfig_static  = GRFLoadConfig(ini, "newgrf-static", true);
+		NewsDisplayLoadConfig(ini, "news_display");
+		AILoadConfig(ini, "ai_players");
 
-	ValidateSettings();
+		PrepareOldDiffCustom();
+		IniLoadSettings(ini, _gameopt_settings, "gameopt", &_settings_newgame);
+		HandleOldDiffCustom(false);
+
+		ValidateSettings();
+	}
+
 	delete ini;
 }
 
@@ -1941,10 +1957,10 @@ void IConsoleGetSetting(const char *name, bool force_newgame)
 	ptr = GetVariableAddress((_game_mode == GM_MENU || force_newgame) ? &_settings_newgame : &_settings_game, &sd->save);
 
 	if (sd->desc.cmd == SDT_STRING) {
-		IConsolePrintF(CC_WARNING, "Current value for '%s' is: '%s'", name, (GetVarMemType(sd->save.conv) == SLE_VAR_STRQ) ? *(const char **)ptr : (const char *)ptr);
+		IConsolePrintF(CC_WARNING, "Current value for '%s' is: '%s'", name, (GetVarMemType(sd->save.conv) == SLE_VAR_STRQ) ? *(const char * const *)ptr : (const char *)ptr);
 	} else {
 		if (sd->desc.cmd == SDT_BOOLX) {
-			snprintf(value, sizeof(value), (*(bool*)ptr == 1) ? "on" : "off");
+			snprintf(value, sizeof(value), (*(const bool*)ptr != 0) ? "on" : "off");
 		} else {
 			snprintf(value, sizeof(value), sd->desc.min < 0 ? "%d" : "%u", (int32)ReadValue(ptr, sd->save.conv));
 		}
@@ -1970,9 +1986,9 @@ void IConsoleListSettings(const char *prefilter)
 		const void *ptr = GetVariableAddress(&GetGameSettings(), &sd->save);
 
 		if (sd->desc.cmd == SDT_BOOLX) {
-			snprintf(value, lengthof(value), (*(bool*)ptr == 1) ? "on" : "off");
+			snprintf(value, lengthof(value), (*(const bool *)ptr != 0) ? "on" : "off");
 		} else if (sd->desc.cmd == SDT_STRING) {
-			snprintf(value, sizeof(value), "%s", (GetVarMemType(sd->save.conv) == SLE_VAR_STRQ) ? *(const char **)ptr : (const char *)ptr);
+			snprintf(value, sizeof(value), "%s", (GetVarMemType(sd->save.conv) == SLE_VAR_STRQ) ? *(const char * const *)ptr : (const char *)ptr);
 		} else {
 			snprintf(value, lengthof(value), sd->desc.min < 0 ? "%d" : "%u", (int32)ReadValue(ptr, sd->save.conv));
 		}
