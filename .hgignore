@@ -1,6 +1,7 @@
 syntax: glob
 
-bin/data/openttd.32.bmp
+.svn
+bin/baseset/openttd.32.bmp
 bin/lang/*
 bin/openttd*
 bin/*.cfg

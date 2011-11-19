@@ -261,7 +261,6 @@ STR_SORT_BY_CAPTION_POPULATION                                  :{BLACK}Innbyggj
 STR_SORT_BY_CAPTION_NAME                                        :{BLACK}Namn
 STR_SORT_BY_CAPTION_DATE                                        :{BLACK}Dato
 # These are used in dropdowns
-STR_SORT_BY_POPULATION                                          :Innbyggjartal
 STR_SORT_BY_NAME                                                :Namn
 STR_SORT_BY_PRODUCTION                                          :Produksjon
 STR_SORT_BY_TYPE                                                :Type
@@ -630,9 +629,7 @@ STR_PLAYLIST_TRACK_NAME                                         :{TINYFONT}{LTBL
 STR_PLAYLIST_TRACK_INDEX                                        :{TINYFONT}{BLACK}Sporregister
 STR_PLAYLIST_PROGRAM                                            :{TINYFONT}{BLACK}Program - '{STRING}'
 STR_PLAYLIST_CLEAR                                              :{TINYFONT}{BLACK}Tøm
-STR_PLAYLIST_SAVE                                               :{TINYFONT}{BLACK}Lagre
 STR_PLAYLIST_TOOLTIP_CLEAR_CURRENT_PROGRAM_CUSTOM1              :{BLACK}Slett gjeldande program (gjeld berre Eigendefinert 1 og 2)
-STR_PLAYLIST_TOOLTIP_SAVE_MUSIC_SETTINGS                        :{BLACK}Lagre musikkval
 STR_PLAYLIST_TOOLTIP_CLICK_TO_ADD_TRACK                         :{BLACK}Klikk på musikkspor for å leggje til gjeldande program (gjeld berre Eigendefinert 1 og 2)
 STR_PLAYLIST_TOOLTIP_CLICK_TO_REMOVE_TRACK                      :{BLACK}Klikk på eit musikkspor for å fjerne det frå gjeldande program (Gjeld berre eigendefinert 1 og 2)
 
@@ -1058,6 +1055,7 @@ STR_SEA_LEVEL_HIGH                                              :Høgt
 STR_SEA_LEVEL_CUSTOM                                            :Eigendefinert
 STR_SEA_LEVEL_CUSTOM_PERCENTAGE                                 :Eigendefinert ({NUM}%)
 
+
 STR_DISASTER_NONE                                               :Ingen
 STR_DISASTER_REDUCED                                            :Redusert
 STR_DISASTER_NORMAL                                             :Normalt
@@ -1121,7 +1119,7 @@ STR_CONFIG_SETTING_GRADUAL_LOADING                              :{LTBLUE}Last k�
 STR_CONFIG_SETTING_INFLATION                                    :{LTBLUE}Inflasjon: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SELECTGOODS                                  :{LTBLUE}Lever varer til ein stasjon kun hvis det er etterspørjing: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_BRIDGE_LENGTH                            :{LTBLUE}Maksimal lengde på bru: {ORANGE}{STRING} rute{P 0:1 "" r}
-STR_CONFIG_SETTING_MAX_TUNNEL_LENGTH                            :{LTBLUE}Maksimal tunnel lengde: {ORANGE}{STRING} rute{P 0:1 "" r}
+STR_CONFIG_SETTING_MAX_TUNNEL_LENGTH                            :{LTBLUE}Maksimal tunnellengde: {ORANGE}{STRING} rute{P 0:1 "" r}
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD             :{LTBLUE}Konstruksjonsmetode for primærindustri: {ORANGE}{STRING}
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NONE        :inga
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NORMAL      :som andre industriar
@@ -1391,6 +1389,7 @@ STR_INTRO_TOOLTIP_NEWGRF_SETTINGS                               :{BLACK}Syne New
 STR_INTRO_TOOLTIP_ONLINE_CONTENT                                :{BLACK}Sjå etter nytt og oppdatert innhald som kan lastas ned
 STR_INTRO_TOOLTIP_AI_SETTINGS                                   :{BLACK}Syne AI-instillingar
 STR_INTRO_TOOLTIP_QUIT                                          :{BLACK}Avslutt 'OpenTTD'
+
 
 # Quit window
 STR_QUIT_CAPTION                                                :{WHITE}Avslutt
@@ -2180,30 +2179,6 @@ STR_LAI_CLEAR_DESCRIPTION_FIELDS                                :Jorde
 STR_LAI_CLEAR_DESCRIPTION_SNOW_COVERED_LAND                     :Snødekt land
 STR_LAI_CLEAR_DESCRIPTION_DESERT                                :Ørken
 
-STR_LAI_RAIL_DESCRIPTION_TRACK                                  :Jernbanespor
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_SIGNALS              :Jernbanespor med blokksignaler
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRESIGNALS                  :Jernbanespor med forsignaler
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXITSIGNALS                 :Jernbanespor med utgangssignaler
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBOSIGNALS                :Jernbanespor med kombinasjonssignaler
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PBSSIGNALS                  :Jernbanespor med avanserte signaler
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NOENTRYSIGNALS              :Jernbanespor med einvegs avanserte signaler
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_PRESIGNALS           :Jernbanespor med blokk- og forsignaler
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_EXITSIGNALS          :Jernbanespor med blokk- og utgangssignaler
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_COMBOSIGNALS         :Jernbanespor med blokk- og kombinasjonssignaler
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_PBSSIGNALS           :Jernbanespor med blokk- og avanserte signaler
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_NOENTRYSIGNALS       :Jernbanespor med blokk- og einvegs avanserte signaler
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_EXITSIGNALS             :Jernbanespor med for- og utgangssignaler
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_COMBOSIGNALS            :Jernbanespor med for- og kombinasjonssignaler
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_PBSSIGNALS              :Jernbanespor med forsignaler og avanserte signaler
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_NOENTRYSIGNALS          :Jernbanespor med forsignaler og einvegs avanserte signaler
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_COMBOSIGNALS           :Jernbanespor med utgangs- og kombinasjonssignaler
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_PBSSIGNALS             :Jernbanespor med utgangssignaler og avanserte signaler
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_NOENTRYSIGNALS         :Jernbanespor med utgangssignaler og einvegs avanserte signaler
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBO_PBSSIGNALS            :Jernbanespor med kombinasjonssignaler og avanserte signaler
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBO_NOENTRYSIGNALS        :Jernbanespor med kombinasjonssignaler og einvegs avanserte signaler
-STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PBS_NOENTRYSIGNALS          :Jernbanespor med vanlege og einvegs avanserte signaler
-STR_LAI_RAIL_DESCRIPTION_TRAIN_DEPOT                            :Togstall
-
 STR_LAI_ROAD_DESCRIPTION_ROAD                                   :Veg
 STR_LAI_ROAD_DESCRIPTION_ROAD_WITH_STREETLIGHTS                 :Veg med gatelykter
 STR_LAI_ROAD_DESCRIPTION_TREE_LINED_ROAD                        :Aveny
@@ -2407,7 +2382,6 @@ STR_NEWGRF_SETTINGS_NOT_FOUND                                   :{RED}Matchande 
 STR_NEWGRF_SETTINGS_DISABLED                                    :{RED}Deaktivert
 STR_NEWGRF_SETTINGS_INCOMPATIBLE                                :{RED}Ikkje kompatibel med denne versjonen av OpenTTD
 
-STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}Skriv inn NewGRF-parametrar
 
 # NewGRF parameters window
 STR_NEWGRF_PARAMETERS_CAPTION                                   :{WHITE}Endre NewGRF-parametrar
@@ -2503,6 +2477,8 @@ STR_NEWGRF_INVALID_CARGO_ABBREV                                 :??
 STR_NEWGRF_INVALID_CARGO_QUANTITY                               :{COMMA} med <invalid cargo>
 STR_NEWGRF_INVALID_ENGINE                                       :<invalid vehicle model>
 STR_NEWGRF_INVALID_INDUSTRYTYPE                                 :<invalid industry>
+
+# NewGRF scanning window
 
 # Sign list window
 STR_SIGN_LIST_CAPTION                                           :{WHITE}Skiltliste - {COMMA} Skilt{P "" er}
@@ -3170,6 +3146,8 @@ STR_ORDER_DROP_HALT_DEPOT                                       :Stopp
 STR_ORDER_SERVICE_TOOLTIP                                       :{BLACK}Hopp over ordren dersom ikkje vedlikehald trengst
 
 STR_ORDER_CONDITIONAL_VARIABLE_TOOLTIP                          :{BLACK}Køyretøy-data å basere hopp på
+
+# Conditional order variables, must follow order of OrderConditionVariable enum
 STR_ORDER_CONDITIONAL_LOAD_PERCENTAGE                           :Lastprosent
 STR_ORDER_CONDITIONAL_RELIABILITY                               :Pålitelegheit
 STR_ORDER_CONDITIONAL_MAX_SPEED                                 :Maks. hastigheit
@@ -3205,7 +3183,6 @@ STR_ORDER_GO_TO_NEAREST_HANGAR                                  :Gå til nærast
 STR_ORDER_CONDITIONAL                                           :Betinga ordrehopp
 STR_ORDER_SHARE                                                 :Del ordrar
 STR_ORDERS_GO_TO_TOOLTIP                                        :{BLACK}Set inn ein ny ordre før den valde ordren, eller legg til i slutten av lista. CTRL gjer ordren 'full last, enhver varetype', kontrollpunktordre 'direkte' og verkstadsordre 'vedlikehald'
-STR_ORDERS_GO_TO_DROPDOWN_TOOLTIP                               :{BLACK}Set inn ein avansert odre
 
 STR_ORDERS_VEH_WITH_SHARED_ORDERS_LIST_TOOLTIP                  :{BLACK}Syne alle køyretøy som delar denne ruteplanen
 
@@ -3247,6 +3224,8 @@ STR_ORDER_NO_UNLOAD                                             :(Ingen lossing 
 STR_ORDER_NO_UNLOAD_FULL_LOAD                                   :(Ingen lossing og vent på full last)
 STR_ORDER_NO_UNLOAD_FULL_LOAD_ANY                               :(Ingen lossing og vent på første fulle last)
 STR_ORDER_NO_UNLOAD_NO_LOAD                                     :(Ingen lossing og ingen lasting)
+
+
 
 STR_ORDER_STOP_LOCATION_NEAR_END                                :[starten]
 STR_ORDER_STOP_LOCATION_MIDDLE                                  :[midten]
@@ -3420,6 +3399,7 @@ STR_ERROR_PNGMAP_MISC                                           :{WHITE}... noko
 STR_ERROR_BMPMAP                                                :{WHITE}Kan ikkje laste inn landskap frå BMP...
 STR_ERROR_BMPMAP_IMAGE_TYPE                                     :{WHITE}... kan ikkje konvertere bilettype
 
+
 STR_WARNING_HEIGHTMAP_SCALE_CAPTION                             :{WHITE}Skalaåtvaring
 STR_WARNING_HEIGHTMAP_SCALE_MESSAGE                             :{YELLOW}Å endre storleiken på kjeldekartet for mykje er ikkje anbefalt. Vil du halde fram med genereringa?
 
@@ -3456,8 +3436,6 @@ STR_ERROR_NOT_ALLOWED_WHILE_PAUSED                              :{WHITE}Ikkje ti
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS                 :{WHITE}Bystyret i {TOWN} nektar deg å gjere dette
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_AIRPORT                       :{WHITE}Bystyret i {TOWN} tillet ikkje fleire flyplassar i denne byen
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_NOISE                         :{WHITE}{TOWN}s bystyre nektar deg byggjetillatelse til flyplass pga. støybekymringar
-STR_ERROR_BRIBE_FAILED                                          :{WHITE}Freistinga di på bestikking
-STR_ERROR_BRIBE_FAILED_2                                        :{WHITE}er oppdaga av ein regional inspektør.
 
 # Levelling errors
 STR_ERROR_CAN_T_RAISE_LAND_HERE                                 :{WHITE}Kan ikkje heve land her...
@@ -3529,7 +3507,6 @@ STR_ERROR_TOO_MANY_STATIONS_LOADING                             :{WHITE}For mang
 STR_ERROR_TOO_MANY_STATION_SPECS                                :{WHITE}For mange togstasjon-delar
 STR_ERROR_TOO_MANY_BUS_STOPS                                    :{WHITE}For mange busshaldeplassar
 STR_ERROR_TOO_MANY_TRUCK_STOPS                                  :{WHITE}For mange lasteterminalar
-STR_ERROR_TOO_CLOSE_TO_ANOTHER_RAILROAD                         :{WHITE}For nær ein annan jernbanestasjon
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_STATION                          :{WHITE}For nær ein annan jernbanestasjon/lasteterminal
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_DOCK                             :{WHITE}For nær ei anna hamn
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_AIRPORT                          :{WHITE}For nær ein annan flyplass

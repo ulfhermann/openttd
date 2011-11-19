@@ -991,8 +991,8 @@ static Money DeliverGoods(int num_pieces, CargoID cargo_type, StationID dest, Ti
 
 	/* Increase town's counter for some special goods types */
 	const CargoSpec *cs = CargoSpec::Get(cargo_type);
-	if (cs->town_effect == TE_FOOD) st->town->new_act_food += accepted;
-	if (cs->town_effect == TE_WATER) st->town->new_act_water += accepted;
+	if (cs->town_effect == TE_FOOD) st->town->food.new_act += accepted;
+	if (cs->town_effect == TE_WATER) st->town->water.new_act += accepted;
 
 	/* Determine profit */
 	Money profit = GetTransportedGoodsIncome(accepted, DistanceManhattan(source_tile, st->xy), days_in_transit, cargo_type);
@@ -1272,9 +1272,23 @@ static uint32 LoadUnloadVehicle(Vehicle *front, uint32 cargos_reserved)
 		/* The default loadamount for mail is 1/4 of the load amount for passengers */
 		if (v->type == VEH_AIRCRAFT && !Aircraft::From(v)->IsNormalAircraft()) load_amount = CeilDiv(load_amount, 4);
 
-		if (_settings_game.order.gradual_loading && HasBit(e->info.callback_mask, CBM_VEHICLE_LOAD_AMOUNT)) {
-			uint16 cb_load_amount = GetVehicleCallback(CBID_VEHICLE_LOAD_AMOUNT, 0, 0, v->engine_type, v);
-			if (cb_load_amount != CALLBACK_FAILED && GB(cb_load_amount, 0, 8) != 0) load_amount = GB(cb_load_amount, 0, 8);
+		if (_settings_game.order.gradual_loading) {
+			uint16 cb_load_amount = CALLBACK_FAILED;
+			if (e->GetGRF() != NULL && e->GetGRF()->grf_version >= 8) {
+				/* Use callback 36 */
+				cb_load_amount = GetVehicleProperty(v, PROP_VEHICLE_LOAD_AMOUNT, CALLBACK_FAILED);
+			} else if (HasBit(e->info.callback_mask, CBM_VEHICLE_LOAD_AMOUNT)) {
+				/* Use callback 12 */
+				cb_load_amount = GetVehicleCallback(CBID_VEHICLE_LOAD_AMOUNT, 0, 0, v->engine_type, v);
+			}
+			if (cb_load_amount != CALLBACK_FAILED) {
+				if (e->GetGRF()->grf_version < 8) cb_load_amount = GB(cb_load_amount, 0, 8);
+				if (cb_load_amount >= 0x100) {
+					ErrorUnknownCallbackResult(e->GetGRFID(), CBID_VEHICLE_LOAD_AMOUNT, cb_load_amount);
+				} else if (cb_load_amount != 0) {
+					load_amount = cb_load_amount;
+				}
+			}
 		}
 
 		GoodsEntry *ge = &st->goods[v->cargo_type];
@@ -1320,6 +1334,51 @@ static uint32 LoadUnloadVehicle(Vehicle *front, uint32 cargos_reserved)
 
 		/* Do not pick up goods when we have no-load set or loading is stopped. */
 		if (front->current_order.GetLoadType() & OLFB_NO_LOAD || HasBit(front->vehicle_flags, VF_STOP_LOADING)) continue;
+
+		/* This order has a refit, the vehicle is a normal vehicle and completely empty, do it now. */
+		if (front->current_order.IsRefit() && !v->IsArticulatedPart() && v->cargo.Count() == 0 &&
+				(v->type != VEH_AIRCRAFT || (Aircraft::From(v)->IsNormalAircraft() && v->Next()->cargo.Count() == 0))) {
+			CargoID new_cid = front->current_order.GetRefitCargo();
+			byte new_subtype = front->current_order.GetRefitSubtype();
+
+			Backup<CompanyByte> cur_company(_current_company, front->owner, FILE_LINE);
+
+			/* Check if all articulated parts are empty and collect refit mask. */
+			uint32 refit_mask = e->info.refit_mask;
+			Vehicle *w = v;
+			while (w->HasArticulatedPart()) {
+				w = w->GetNextArticulatedPart();
+				if (w->cargo.Count() > 0) new_cid = CT_NO_REFIT;
+				refit_mask |= EngInfo(w->engine_type)->refit_mask;
+			}
+
+			if (new_cid == CT_AUTO_REFIT) {
+				/* Get refittable cargo type with the most waiting cargo. */
+				uint amount = 0;
+				CargoID cid;
+				FOR_EACH_SET_CARGO_ID(cid, refit_mask) {
+					if (st->goods[cid].cargo.Count() > amount) {
+						/* Try to find out if auto-refitting would succeed. In case the refit is allowed,
+						 * the returned refit capacity will be greater than zero. */
+						new_subtype = GetBestFittingSubType(v, v, cid);
+						DoCommand(v->tile, v->index, cid | 1U << 6 | new_subtype << 8 | 1U << 16, DC_QUERY_COST, GetCmdRefitVeh(v)); // Auto-refit and only this vehicle including artic parts.
+						if (_returned_refit_capacity > 0) {
+							amount = st->goods[cid].cargo.Count();
+							new_cid = cid;
+						}
+					}
+				}
+			}
+
+			/* Refit if given a valid cargo. */
+			if (new_cid < NUM_CARGO) {
+				CommandCost cost = DoCommand(v->tile, v->index, new_cid | 1U << 6 | new_subtype << 8 | 1U << 16, DC_EXEC, GetCmdRefitVeh(v)); // Auto-refit and only this vehicle including artic parts.
+				if (cost.Succeeded()) front->profit_this_year -= cost.GetCost() << 8;
+				ge = &st->goods[v->cargo_type];
+			}
+
+			cur_company.Restore();
+		}
 
 		/* update stats */
 		int t;
