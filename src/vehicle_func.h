@@ -21,6 +21,7 @@
 #include "newgrf_config.h"
 #include "track_type.h"
 #include "livery.h"
+#include "cargotype.h"
 
 #define is_custom_sprite(x) (x >= 0xFD)
 #define IS_CUSTOM_FIRSTHEAD_SPRITE(x) (x == 0xFD)
@@ -40,11 +41,13 @@ bool HasVehicleOnPosXY(int x, int y, void *data, VehicleFromPosProc *proc);
 void CallVehicleTicks();
 uint8 CalcPercentVehicleFilled(const Vehicle *v, StringID *colour);
 
+void VehicleLengthChanged(const Vehicle *u);
+
 byte VehicleRandomBits();
 void ResetVehiclePosHash();
 void ResetVehicleColourMap();
 
-byte GetBestFittingSubType(Vehicle *v_from, Vehicle *v_for);
+byte GetBestFittingSubType(Vehicle *v_from, Vehicle *v_for, CargoID dest_cargo_type = INVALID_CARGO);
 
 void ViewportAddVehicles(DrawPixelInfo *dpi);
 
@@ -108,8 +111,6 @@ const struct Livery *GetEngineLivery(EngineID engine_type, CompanyID company, En
 
 SpriteID GetEnginePalette(EngineID engine_type, CompanyID company);
 SpriteID GetVehiclePalette(const Vehicle *v);
-
-uint GetVehicleCapacity(const Vehicle *v, uint16 *mail_capacity = NULL);
 
 extern const uint32 _veh_build_proc_table[];
 extern const uint32 _veh_sell_proc_table[];

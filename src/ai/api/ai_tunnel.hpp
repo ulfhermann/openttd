@@ -19,9 +19,6 @@
  */
 class AITunnel : public AIObject {
 public:
-	/** Get the name of this class to identify it towards squirrel. */
-	static const char *GetClassName() { return "AITunnel"; }
-
 	/**
 	 * All tunnel related errors.
 	 */
@@ -65,7 +62,7 @@ public:
 	 */
 	static TileIndex GetOtherTunnelEnd(TileIndex tile);
 
-#ifndef DOXYGEN_SKIP
+#ifndef DOXYGEN_AI_DOCS
 	/**
 	 * Internal function to help BuildTunnel in case of road.
 	 */
@@ -75,7 +72,7 @@ public:
 	 * Internal function to help BuildTunnel in case of road.
 	 */
 	static bool _BuildTunnelRoad2();
-#endif /* DOXYGEN_SKIP */
+#endif /* DOXYGEN_AI_DOCS */
 
 	/**
 	 * Builds a tunnel starting at start. The direction of the tunnel depends

@@ -1179,6 +1179,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\network\network_content_gui.h"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\network\network_func.h"
 				>
 			</File>
@@ -1864,6 +1868,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\autoreplace_gui.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\bootstrap_gui.cpp"
 				>
 			</File>
 			<File

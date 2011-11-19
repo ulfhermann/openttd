@@ -24,9 +24,6 @@ class AIController {
 	friend class AIInstance;
 
 public:
-	/** Get the name of this class to identify it towards squirrel. */
-	static const char *GetClassName() { return "AIController"; }
-
 	/**
 	 * Initializer of the AIController.
 	 */
@@ -50,6 +47,16 @@ public:
 	 * @return returns the current tick.
 	 */
 	static uint GetTick();
+
+	/**
+	 * Get the number of operations the AI may still execute this tick.
+	 * @return The amount of operations left to execute.
+	 * @note This number can go negative when certain uninteruptable
+	 *   operations are executed. The amount of operations that you go
+	 *   over the limit will be deducted from the next tick you would
+	 *   be allowed to run.
+	 */
+	static int GetOpsTillSuspend();
 
 	/**
 	 * Get the value of one of your settings you set via info.nut.
