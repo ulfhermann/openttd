@@ -14,6 +14,7 @@
 
 #include "strings_type.h"
 #include "string_type.h"
+#include "gfx_type.h"
 
 class StringParameters {
 	StringParameters *parent; ///< If not NULL, this instance references data from this parent instance.
@@ -196,6 +197,47 @@ const char *GetCurrentLanguageIsoCode();
 
 int CDECL StringIDSorter(const StringID *a, const StringID *b);
 
-void CheckForMissingGlyphsInLoadedLanguagePack(bool base_font = true);
+/**
+ * A searcher for missing glyphs.
+ */
+class MissingGlyphSearcher {
+public:
+	/** Make sure everything gets destructed right. */
+	virtual ~MissingGlyphSearcher() {}
+
+	/**
+	 * Get the next string to search through.
+	 * @return The next string or NULL if there is none.
+	 */
+	virtual const char *NextString() = 0;
+
+	/**
+	 * Get the default (font) size of the string.
+	 * @return The font size.
+	 */
+	virtual FontSize DefaultSize() = 0;
+
+	/**
+	 * Reset the search, i.e. begin from the beginning again.
+	 */
+	virtual void Reset() = 0;
+
+	/**
+	 * Whether to search for a monospace font or not.
+	 * @return True if searching for monospace.
+	 */
+	virtual bool Monospace() = 0;
+
+	/**
+	 * Set the right font names.
+	 * @param settings  The settings to modify.
+	 * @param font_name The new font name.
+	 */
+	virtual void SetFontNames(struct FreeTypeSettings *settings, const char *font_name) = 0;
+
+	bool FindMissingGlyphs(const char **str);
+};
+
+void CheckForMissingGlyphs(bool base_font = true, MissingGlyphSearcher *search = NULL);
 
 #endif /* STRINGS_FUNC_H */
