@@ -311,6 +311,8 @@ static void ShutdownGame()
 
 	/* Close all and any open filehandles */
 	FioCloseAll();
+
+	UninitFreeType();
 }
 
 /**
@@ -340,7 +342,7 @@ static void LoadIntroGame(bool load_newgrfs = true)
 	_cursor.fix_at = false;
 
 	CheckForMissingSprites();
-	CheckForMissingGlyphsInLoadedLanguagePack();
+	CheckForMissingGlyphs();
 
 	/* Play main theme */
 	if (_music_driver->IsSongPlaying()) ResetMusic();
@@ -703,8 +705,8 @@ int ttd_main(int argc, char *argv[])
 	/* enumerate language files */
 	InitializeLanguagePacks();
 
-	/* Initialize FreeType */
-	InitFreeType();
+	/* Initialize the regular font for FreeType */
+	InitFreeType(false);
 
 	/* This must be done early, since functions use the SetWindowDirty* calls */
 	InitWindowSystem();
@@ -816,7 +818,7 @@ int ttd_main(int argc, char *argv[])
 
 	LoadIntroGame(false);
 
-	CheckForMissingGlyphsInLoadedLanguagePack();
+	CheckForMissingGlyphs();
 
 	ScanNewGRFFiles(scanner);
 
