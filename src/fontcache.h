@@ -23,31 +23,31 @@ void SetUnicodeGlyph(FontSize size, uint32 key, SpriteID sprite);
 /** Initialize the glyph map */
 void InitializeUnicodeGlyphMap();
 
-void ResetFontSizes();
-
 #ifdef WITH_FREETYPE
 
 struct FreeTypeSettings {
 	char small_font[MAX_PATH];
 	char medium_font[MAX_PATH];
 	char large_font[MAX_PATH];
+	char mono_font[MAX_PATH];
 	uint small_size;
 	uint medium_size;
 	uint large_size;
+	uint mono_size;
 	bool small_aa;
 	bool medium_aa;
 	bool large_aa;
+	bool mono_aa;
 };
 
 extern FreeTypeSettings _freetype;
 
-void InitFreeType();
+void InitFreeType(bool monospace);
 void UninitFreeType();
 const Sprite *GetGlyph(FontSize size, uint32 key);
 uint GetGlyphWidth(FontSize size, uint32 key);
 bool GetDrawGlyphShadow();
 
-typedef bool (SetFallbackFontCallback)(const char **);
 /**
  * We would like to have a fallback font as the current one
  * doesn't contain all characters we need.
@@ -58,13 +58,13 @@ typedef bool (SetFallbackFontCallback)(const char **);
  * @param callback The function to call to check for missing glyphs.
  * @return true if a font has been set, false otherwise.
  */
-bool SetFallbackFont(FreeTypeSettings *settings, const char *language_isocode, int winlangid, SetFallbackFontCallback *callback);
+bool SetFallbackFont(FreeTypeSettings *settings, const char *language_isocode, int winlangid, class MissingGlyphSearcher *callback);
 
 #else
 
 /* Stub for initializiation */
-static inline void InitFreeType() { ResetFontSizes(); }
-static inline void UninitFreeType() { ResetFontSizes(); }
+static inline void InitFreeType(bool monospace) { extern void ResetFontSizes(bool monospace); ResetFontSizes(monospace); }
+static inline void UninitFreeType() {}
 
 /** Get the Sprite for a glyph */
 static inline const Sprite *GetGlyph(FontSize size, uint32 key)
