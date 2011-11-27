@@ -355,7 +355,7 @@ void Town::UpdateVirtCoord()
 	Point pt = RemapCoords2(TileX(this->xy) * TILE_SIZE, TileY(this->xy) * TILE_SIZE);
 	SetDParam(0, this->index);
 	SetDParam(1, this->population);
-	this->sign.UpdatePosition(pt.x, pt.y - 24,
+	this->sign.UpdatePosition(pt.x, pt.y - 24 * ZOOM_LVL_BASE,
 		_settings_client.gui.population_in_label ? STR_VIEWPORT_TOWN_POP : STR_VIEWPORT_TOWN);
 
 	SetWindowDirty(WC_TOWN_VIEW, this->index);
@@ -485,36 +485,24 @@ static void TileLoop_Town(TileIndex tile)
 			uint moved = MoveGoodsToStation(cargo, amt, ST_TOWN, t->index, stations.GetStations());
 
 			const CargoSpec *cs = CargoSpec::Get(cargo);
-			switch (cs->town_effect) {
-				case TE_PASSENGERS:
-					t->pass.new_max += amt;
-					t->pass.new_act += moved;
-					break;
-
-				case TE_MAIL:
-					t->mail.new_max += amt;
-					t->mail.new_act += moved;
-					break;
-
-				default:
-					break;
-			}
+			t->supplied[cs->Index()].new_max += amt;
+			t->supplied[cs->Index()].new_act += moved;
 		}
 	} else {
 		if (GB(r, 0, 8) < hs->population) {
 			uint amt = GB(r, 0, 8) / 8 + 1;
 
 			if (EconomyIsInRecession()) amt = (amt + 1) >> 1;
-			t->pass.new_max += amt;
-			t->pass.new_act += MoveGoodsToStation(CT_PASSENGERS, amt, ST_TOWN, t->index, stations.GetStations());
+			t->supplied[CT_PASSENGERS].new_max += amt;
+			t->supplied[CT_PASSENGERS].new_act += MoveGoodsToStation(CT_PASSENGERS, amt, ST_TOWN, t->index, stations.GetStations());
 		}
 
 		if (GB(r, 8, 8) < hs->mail_generation) {
 			uint amt = GB(r, 8, 8) / 8 + 1;
 
 			if (EconomyIsInRecession()) amt = (amt + 1) >> 1;
-			t->mail.new_max += amt;
-			t->mail.new_act += MoveGoodsToStation(CT_MAIL, amt, ST_TOWN, t->index, stations.GetStations());
+			t->supplied[CT_MAIL].new_max += amt;
+			t->supplied[CT_MAIL].new_act += MoveGoodsToStation(CT_MAIL, amt, ST_TOWN, t->index, stations.GetStations());
 		}
 	}
 
@@ -1401,8 +1389,8 @@ void UpdateTownRadius(Town *t)
 
 void UpdateTownMaxPass(Town *t)
 {
-	t->pass.old_max = t->population >> 3;
-	t->mail.old_max = t->population >> 4;
+	t->supplied[CT_PASSENGERS].old_max = t->population >> 3;
+	t->supplied[CT_MAIL].old_max = t->population >> 4;
 }
 
 /**
@@ -1426,6 +1414,18 @@ static void DoCreateTown(Town *t, TileIndex tile, uint32 townnameparts, TownSize
 	t->population = 0;
 	t->grow_counter = 0;
 	t->growth_rate = 250;
+
+	/* Set the default cargo requirement for town growth */
+	switch (_settings_game.game_creation.landscape) {
+		case LT_ARCTIC:
+			if (FindFirstCargoWithTownEffect(TE_FOOD) != NULL) t->goal[TE_FOOD] = TOWN_GROWTH_WINTER;
+			break;
+
+		case LT_TROPIC:
+			if (FindFirstCargoWithTownEffect(TE_FOOD) != NULL) t->goal[TE_FOOD] = TOWN_GROWTH_DESERT;
+			if (FindFirstCargoWithTownEffect(TE_WATER) != NULL) t->goal[TE_WATER] = TOWN_GROWTH_DESERT;
+			break;
+	}
 
 	t->fund_buildings_months = 0;
 
@@ -2337,6 +2337,20 @@ CommandCost CmdRenameTown(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32
 }
 
 /**
+ * Determines the first cargo with a certain town effect
+ * @param effect Town effect of interest
+ * @return first active cargo slot with that effect
+ */
+const CargoSpec *FindFirstCargoWithTownEffect(TownEffect effect)
+{
+	const CargoSpec *cs;
+	FOR_ALL_CARGOSPECS(cs) {
+		if (cs->town_effect == effect) return cs;
+	}
+	return NULL;
+}
+
+/**
  * Expand a town (scenario editor only).
  * @param tile Unused.
  * @param flags Type of operation.
@@ -2564,6 +2578,9 @@ static CommandCost TownActionBuildStatue(Town *t, DoCommandFlag flags)
 
 static CommandCost TownActionFundBuildings(Town *t, DoCommandFlag flags)
 {
+	/* Check if it's allowed to buy the rights */
+	if (!_settings_game.economy.fund_buildings) return CMD_ERROR;
+
 	if (flags & DC_EXEC) {
 		/* Build next tick */
 		t->grow_counter = 1;
@@ -2571,6 +2588,8 @@ static CommandCost TownActionFundBuildings(Town *t, DoCommandFlag flags)
 		SetBit(t->flags, TOWN_IS_FUNDED);
 		/* And grow for 3 months */
 		t->fund_buildings_months = 3;
+
+		SetWindowDirty(WC_TOWN_VIEW, t->index);
 	}
 	return CommandCost();
 }
@@ -2664,6 +2683,9 @@ uint GetMaskOfTownActions(int *nump, CompanyID cid, const Town *t)
 			/* Is the company not able to buy exclusive rights ? */
 			if (cur == TACT_BUY_RIGHTS && !_settings_game.economy.exclusive_rights) continue;
 
+			/* Is the company not able to fund buildings ? */
+			if (cur == TACT_FUND_BUILDINGS && !_settings_game.economy.fund_buildings) continue;
+
 			/* Is the company not able to fund local road reconstruction? */
 			if (cur == TACT_ROAD_REBUILD && !_settings_game.economy.fund_roads) continue;
 
@@ -2711,7 +2733,7 @@ CommandCost CmdDoTownAction(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 	return cost;
 }
 
-static void UpdateTownGrowRate(Town *t)
+static void UpdateTownRating(Town *t)
 {
 	/* Increase company ratings if they're low */
 	const Company *c;
@@ -2721,13 +2743,10 @@ static void UpdateTownGrowRate(Town *t)
 		}
 	}
 
-	int n = 0;
-
 	const Station *st;
 	FOR_ALL_STATIONS(st) {
 		if (DistanceSquare(st->xy, t->xy) <= t->squared_town_zone_radius[0]) {
 			if (st->time_since_load <= 20 || st->time_since_unload <= 20) {
-				n++;
 				if (Company::IsValidID(st->owner)) {
 					int new_rating = t->ratings[st->owner] + RATING_STATION_UP_STEP;
 					t->ratings[st->owner] = min(new_rating, INT16_MAX); // do not let it overflow
@@ -2747,9 +2766,31 @@ static void UpdateTownGrowRate(Town *t)
 	}
 
 	SetWindowDirty(WC_TOWN_AUTHORITY, t->index);
+}
 
+static void UpdateTownGrowRate(Town *t)
+{
 	ClrBit(t->flags, TOWN_IS_FUNDED);
+	SetWindowDirty(WC_TOWN_VIEW, t->index);
+
 	if (_settings_game.economy.town_growth_rate == 0 && t->fund_buildings_months == 0) return;
+
+	if (t->fund_buildings_months == 0) {
+		/* Check if all goals are reached for this town to grow (given we are not funding it) */
+		for (int i = TE_BEGIN; i < TE_END; i++) {
+			switch (t->goal[i]) {
+				case TOWN_GROWTH_WINTER:
+					if (TileHeight(t->xy) >= GetSnowLine() && t->received[i].old_act == 0 && t->population > 90) return;
+					break;
+				case TOWN_GROWTH_DESERT:
+					if (GetTropicZone(t->xy) == TROPICZONE_DESERT && t->received[i].old_act == 0 && t->population > 60) return;
+					break;
+				default:
+					if (t->goal[i] > t->received[i].old_act) return;
+					break;
+			}
+		}
+	}
 
 	/**
 	 * Towns are processed every TOWN_GROWTH_TICKS ticks, and this is the
@@ -2760,6 +2801,17 @@ static void UpdateTownGrowRate(Town *t)
 		{ 320, 420, 300, 220, 160, 100 }  // Normal values
 	};
 
+	int n = 0;
+
+	const Station *st;
+	FOR_ALL_STATIONS(st) {
+		if (DistanceSquare(st->xy, t->xy) <= t->squared_town_zone_radius[0]) {
+			if (st->time_since_load <= 20 || st->time_since_unload <= 20) {
+				n++;
+			}
+		}
+	}
+
 	uint16 m;
 
 	if (t->fund_buildings_months != 0) {
@@ -2768,13 +2820,6 @@ static void UpdateTownGrowRate(Town *t)
 	} else {
 		m = _grow_count_values[1][min(n, 5)];
 		if (n == 0 && !Chance16(1, 12)) return;
-	}
-
-	if (_settings_game.game_creation.landscape == LT_ARCTIC) {
-		if (TileHeight(t->xy) >= GetSnowLine() && t->food.old_act == 0 && t->population > 90) return;
-
-	} else if (_settings_game.game_creation.landscape == LT_TROPIC) {
-		if (GetTropicZone(t->xy) == TROPICZONE_DESERT && (t->food.old_act == 0 || t->water.old_act == 0) && t->population > 60) return;
 	}
 
 	/* Use the normal growth rate values if new buildings have been funded in
@@ -2790,14 +2835,13 @@ static void UpdateTownGrowRate(Town *t)
 	}
 
 	SetBit(t->flags, TOWN_IS_FUNDED);
+	SetWindowDirty(WC_TOWN_VIEW, t->index);
 }
 
 static void UpdateTownAmounts(Town *t)
 {
-	t->pass.NewMonth();
-	t->mail.NewMonth();
-	t->food.NewMonth();
-	t->water.NewMonth();
+	for (CargoID i = 0; i < NUM_CARGO; i++) t->supplied[i].NewMonth();
+	for (int i = TE_BEGIN; i < TE_END; i++) t->received[i].NewMonth();
 
 	SetWindowDirty(WC_TOWN_VIEW, t->index);
 }
@@ -3020,8 +3064,9 @@ void TownsMonthlyLoop()
 			if (--t->exclusive_counter == 0) t->exclusivity = INVALID_COMPANY;
 		}
 
-		UpdateTownGrowRate(t);
 		UpdateTownAmounts(t);
+		UpdateTownRating(t);
+		UpdateTownGrowRate(t);
 		UpdateTownUnwanted(t);
 	}
 }

@@ -14,6 +14,7 @@
 #include "blitter/factory.hpp"
 #include "core/math_func.hpp"
 #include "strings_func.h"
+#include "zoom_type.h"
 
 #include "table/sprites.h"
 #include "table/control_codes.h"
@@ -1113,6 +1114,7 @@ const Sprite *GetGlyph(FontSize size, WChar key)
 
 	/* FreeType has rendered the glyph, now we allocate a sprite and copy the image into it */
 	sprite.AllocateData(width * height);
+	sprite.type = ST_FONT;
 	sprite.width = width;
 	sprite.height = height;
 	sprite.x_offs = slot->bitmap_left;

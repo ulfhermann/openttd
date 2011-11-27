@@ -1402,7 +1402,9 @@ static Vehicle *UpdateTrainPowerProc(Vehicle *v, void *data)
  * @param tile end tile of rail conversion drag
  * @param flags operation to perform
  * @param p1 start tile of drag
- * @param p2 new railtype to convert to
+ * @param p2 various bitstuffed elements:
+ * - p2 = (bit  0- 3) new railtype to convert to.
+ * - p2 = (bit  4)    build diagonally or not.
  * @param text unused
  * @return the cost of this operation or an error
  */
@@ -1418,7 +1420,8 @@ CommandCost CmdConvertRail(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 	CommandCost cost(EXPENSES_CONSTRUCTION);
 	CommandCost error = CommandCost(STR_ERROR_NO_SUITABLE_RAILROAD_TRACK); // by default, there is no track to convert.
 	TileArea ta(tile, p1);
-	TILE_AREA_LOOP(tile, ta) {
+	TileIterator *iter = HasBit(p2, 4) ? (TileIterator *)new DiagonalTileIterator(tile, p1) : new OrthogonalTileIterator(ta);
+	for (; (tile = *iter) != INVALID_TILE; ++(*iter)) {
 		TileType tt = GetTileType(tile);
 
 		/* Check if there is any track on tile */
@@ -1585,6 +1588,7 @@ CommandCost CmdConvertRail(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 		}
 	}
 
+	delete iter;
 	return (cost.GetCost() == 0) ? error : cost;
 }
 
@@ -2711,7 +2715,7 @@ static const int8 _deltacoord_leaveoffset[8] = {
 int TicksToLeaveDepot(const Train *v)
 {
 	DiagDirection dir = GetRailDepotDirection(v->tile);
-	int length = v->gcache.cached_veh_length;
+	int length = v->CalcNextVehicleOffset();
 
 	switch (dir) {
 		case DIAGDIR_NE: return  ((int)(v->x_pos & 0x0F) - ((_fractcoords_enter[dir] & 0x0F) - (length + 1)));
@@ -2738,9 +2742,8 @@ static VehicleEnterTileStatus VehicleEnter_Track(Vehicle *u, TileIndex tile, int
 	/* depot direction */
 	DiagDirection dir = GetRailDepotDirection(tile);
 
-	/* calculate the point where the following wagon should be activated
-	 * this depends on the length of the current vehicle */
-	int length = v->gcache.cached_veh_length;
+	/* Calculate the point where the following wagon should be activated. */
+	int length = v->CalcNextVehicleOffset();
 
 	byte fract_coord_leave =
 		((_fractcoords_enter[dir] & 0x0F) + // x

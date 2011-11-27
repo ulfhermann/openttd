@@ -36,13 +36,14 @@
 #include "company_base.h"
 #include "newgrf.h"
 #include "order_backup.h"
+#include "zoom_func.h"
 
 #include "table/strings.h"
 #include "table/train_cmd.h"
 
 static Track ChooseTrainTrack(Train *v, TileIndex tile, DiagDirection enterdir, TrackBits tracks, bool force_res, bool *got_reservation, bool mark_stuck);
-static bool TrainCheckIfLineEnds(Train *v);
-static void TrainController(Train *v, Vehicle *nomove);
+static bool TrainCheckIfLineEnds(Train *v, bool reverse = true);
+bool TrainController(Train *v, Vehicle *nomove, bool reverse = true); // Also used in vehicle_sl.cpp.
 static TileIndex TrainApproachingCrossingTile(const Train *v);
 static void CheckIfTrainNeedsService(Train *v);
 static void CheckNextTrainTile(Train *v);
@@ -95,7 +96,7 @@ void CheckTrainsLengths()
 			for (const Train *u = v, *w = v->Next(); w != NULL; u = w, w = w->Next()) {
 				if (u->track != TRACK_BIT_DEPOT) {
 					if ((w->track != TRACK_BIT_DEPOT &&
-							max(abs(u->x_pos - w->x_pos), abs(u->y_pos - w->y_pos)) != u->gcache.cached_veh_length) ||
+							max(abs(u->x_pos - w->x_pos), abs(u->y_pos - w->y_pos)) != u->CalcNextVehicleOffset()) ||
 							(w->track == TRACK_BIT_DEPOT && TicksToLeaveDepot(u) <= 0)) {
 						SetDParam(0, v->index);
 						SetDParam(1, v->owner);
@@ -305,11 +306,8 @@ int GetTrainStopLocation(StationID station_id, TileIndex tile, const Train *v, i
 	}
 
 	/* Subtract half the front vehicle length of the train so we get the real
-	 * stop location of the train.
-	 * Actually, the center of all vehicles is half a normal vehicle's length
-	 * from the front of the vehicle, so even in case the vehicle is 1/8th
-	 * long, the center is still at 1/2 of VEHICLE_LENGTH. Basically FS#3569. */
-	return stop - VEHICLE_LENGTH / 2;
+	 * stop location of the train. */
+	return stop - (v->gcache.cached_veh_length + 1) / 2;
 }
 
 
@@ -519,14 +517,14 @@ void DrawTrainEngine(int left, int right, int preferred_x, int y, EngineID engin
 		const Sprite *real_spritef = GetSprite(spritef, ST_NORMAL);
 		const Sprite *real_spriter = GetSprite(spriter, ST_NORMAL);
 
-		preferred_x = Clamp(preferred_x, left - real_spritef->x_offs + 14, right - real_spriter->width - real_spriter->x_offs - 15);
+		preferred_x = Clamp(preferred_x, left - UnScaleByZoom(real_spritef->x_offs, ZOOM_LVL_GUI) + 14, right - UnScaleByZoom(real_spriter->width, ZOOM_LVL_GUI) - UnScaleByZoom(real_spriter->x_offs, ZOOM_LVL_GUI) - 15);
 
 		DrawSprite(spritef, pal, preferred_x - 14, yf);
 		DrawSprite(spriter, pal, preferred_x + 15, yr);
 	} else {
 		SpriteID sprite = GetRailIcon(engine, false, y, image_type);
 		const Sprite *real_sprite = GetSprite(sprite, ST_NORMAL);
-		preferred_x = Clamp(preferred_x, left - real_sprite->x_offs, right - real_sprite->width - real_sprite->x_offs);
+		preferred_x = Clamp(preferred_x, left - UnScaleByZoom(real_sprite->x_offs, ZOOM_LVL_GUI), right - UnScaleByZoom(real_sprite->width, ZOOM_LVL_GUI) - UnScaleByZoom(real_sprite->x_offs, ZOOM_LVL_GUI));
 		DrawSprite(sprite, pal, preferred_x, y);
 	}
 }
@@ -1383,25 +1381,66 @@ CommandCost CmdSellRailWagon(DoCommandFlag flags, Vehicle *t, uint16 data, uint3
 
 void Train::UpdateDeltaXY(Direction direction)
 {
-#define MKIT(a, b, c, d) ((a & 0xFF) << 24) | ((b & 0xFF) << 16) | ((c & 0xFF) << 8) | ((d & 0xFF) << 0)
-	static const uint32 _delta_xy_table[8] = {
-		MKIT(3, 3, -1, -1),
-		MKIT(3, 7, -1, -3),
-		MKIT(3, 3, -1, -1),
-		MKIT(7, 3, -3, -1),
-		MKIT(3, 3, -1, -1),
-		MKIT(3, 7, -1, -3),
-		MKIT(3, 3, -1, -1),
-		MKIT(7, 3, -3, -1),
-	};
-#undef MKIT
+	/* Set common defaults. */
+	this->x_offs    = -1;
+	this->y_offs    = -1;
+	this->x_extent  =  3;
+	this->y_extent  =  3;
+	this->z_extent  =  6;
+	this->x_bb_offs =  0;
+	this->y_bb_offs =  0;
 
-	uint32 x = _delta_xy_table[direction];
-	this->x_offs        = GB(x,  0, 8);
-	this->y_offs        = GB(x,  8, 8);
-	this->x_extent      = GB(x, 16, 8);
-	this->y_extent      = GB(x, 24, 8);
-	this->z_extent      = 6;
+	if (!IsDiagonalDirection(direction)) {
+		static const int _sign_table[] =
+		{
+			// x, y
+			-1, -1, // DIR_N
+			-1,  1, // DIR_E
+			 1,  1, // DIR_S
+			 1, -1, // DIR_W
+		};
+
+		int half_shorten = (VEHICLE_LENGTH - this->gcache.cached_veh_length) / 2;
+
+		/* For all straight directions, move the bound box to the centre of the vehicle, but keep the size. */
+		this->x_offs -= half_shorten * _sign_table[direction];
+		this->y_offs -= half_shorten * _sign_table[direction + 1];
+		this->x_extent += this->x_bb_offs = half_shorten * _sign_table[direction];
+		this->y_extent += this->y_bb_offs = half_shorten * _sign_table[direction + 1];
+	} else {
+		switch (direction) {
+				/* Shorten southern corner of the bounding box according the vehicle length
+				 * and center the bounding box on the vehicle. */
+			case DIR_NE:
+				this->x_offs    = 1 - (this->gcache.cached_veh_length + 1) / 2;
+				this->x_extent  = this->gcache.cached_veh_length - 1;
+				this->x_bb_offs = -1;
+				break;
+
+			case DIR_NW:
+				this->y_offs    = 1 - (this->gcache.cached_veh_length + 1) / 2;
+				this->y_extent  = this->gcache.cached_veh_length - 1;
+				this->y_bb_offs = -1;
+				break;
+
+				/* Move northern corner of the bounding box down according to vehicle length
+				 * and center the bounding box on the vehicle. */
+			case DIR_SW:
+				this->x_offs    = 1 + (this->gcache.cached_veh_length + 1) / 2 - VEHICLE_LENGTH;
+				this->x_extent  = VEHICLE_LENGTH - 1;
+				this->x_bb_offs = VEHICLE_LENGTH - this->gcache.cached_veh_length - 1;
+				break;
+
+			case DIR_SE:
+				this->y_offs    = 1 + (this->gcache.cached_veh_length + 1) / 2 - VEHICLE_LENGTH;
+				this->y_extent  = VEHICLE_LENGTH - 1;
+				this->y_bb_offs = VEHICLE_LENGTH - this->gcache.cached_veh_length - 1;
+				break;
+
+			default:
+				NOT_REACHED();
+		}
+	}
 }
 
 /** Mark a train as stuck and stop it if it isn't stopped right now. */
@@ -1479,7 +1518,7 @@ static void UpdateStatusAfterSwap(Train *v)
 	v->UpdateViewport(true, true);
 }
 
-static void ReverseTrainSwapVeh(Train *v, int l, int r)
+void ReverseTrainSwapVeh(Train *v, int l, int r)
 {
 	Train *a, *b;
 
@@ -1627,7 +1666,7 @@ static void AdvanceWagonsBeforeSwap(Train *v)
 		last = last->Previous();
 		first = first->Next();
 
-		int differential = base->gcache.cached_veh_length - last->gcache.cached_veh_length;
+		int differential = base->CalcNextVehicleOffset() - last->CalcNextVehicleOffset();
 
 		/* do not update images now
 		 * negative differential will be handled in AdvanceWagonsAfterSwap() */
@@ -1687,7 +1726,7 @@ static void AdvanceWagonsAfterSwap(Train *v)
 		last = last->Previous();
 		first = first->Next();
 
-		int differential = last->gcache.cached_veh_length - base->gcache.cached_veh_length;
+		int differential = last->CalcNextVehicleOffset() - base->CalcNextVehicleOffset();
 
 		/* do not update images now */
 		for (int i = 0; i < differential; i++) TrainController(first, (nomove ? last->Next() : NULL));
@@ -1698,7 +1737,7 @@ static void AdvanceWagonsAfterSwap(Train *v)
 }
 
 
-static void ReverseTrainDirection(Train *v)
+void ReverseTrainDirection(Train *v)
 {
 	if (IsRailDepotTile(v->tile)) {
 		InvalidateWindowData(WC_VEHICLE_DEPOT, v->tile);
@@ -2841,7 +2880,8 @@ static Vehicle *FindTrainCollideEnum(Vehicle *v, void *data)
 	if (hash & ~15) return NULL;
 
 	/* Slower check using multiplication */
-	if (x_diff * x_diff + y_diff * y_diff > 25) return NULL;
+	int min_diff = (Train::From(v)->gcache.cached_veh_length + 1) / 2 + (tcc->v->gcache.cached_veh_length + 1) / 2 - 1;
+	if (x_diff * x_diff + y_diff * y_diff > min_diff * min_diff) return NULL;
 
 	/* Happens when there is a train under bridge next to bridge head */
 	if (abs(v->z_pos - tcc->v->z_pos) > 5) return NULL;
@@ -2907,7 +2947,14 @@ static Vehicle *CheckTrainAtSignal(Vehicle *v, void *data)
 	return t;
 }
 
-static void TrainController(Train *v, Vehicle *nomove)
+/**
+ * Move a vehicle chain one movement stop forwards.
+ * @param v First vehicle to move.
+ * @param nomove Stop moving this and all following vehicles.
+ * @param reverse Set to false to not execute the vehicle reversing. This does not change any other logic.
+ * @return True if the vehicle could be moved forward, false otherwise.
+ */
+bool TrainController(Train *v, Vehicle *nomove, bool reverse)
 {
 	Train *first = v->First();
 	Train *prev;
@@ -2931,7 +2978,7 @@ static void TrainController(Train *v, Vehicle *nomove)
 					/* Not inside depot */
 
 					/* Reverse when we are at the end of the track already, do not move to the new position */
-					if (v->IsFrontEngine() && !TrainCheckIfLineEnds(v)) return;
+					if (v->IsFrontEngine() && !TrainCheckIfLineEnds(v, reverse)) return false;
 
 					uint32 r = VehicleEnterTile(v, gp.new_tile, gp.x, gp.y);
 					if (HasBit(r, VETS_CANNOT_ENTER)) {
@@ -2998,13 +3045,13 @@ static void TrainController(Train *v, Vehicle *nomove)
 						Trackdir i = FindFirstTrackdir(trackdirbits);
 
 						/* Don't handle stuck trains here. */
-						if (HasBit(v->flags, VRF_TRAIN_STUCK)) return;
+						if (HasBit(v->flags, VRF_TRAIN_STUCK)) return false;
 
 						if (!HasSignalOnTrackdir(gp.new_tile, ReverseTrackdir(i))) {
 							v->cur_speed = 0;
 							v->subspeed = 0;
 							v->progress = 255 - 100;
-							if (!_settings_game.pf.reverse_at_signals || ++v->wait_counter < _settings_game.pf.wait_oneway_signal * 20) return;
+							if (!_settings_game.pf.reverse_at_signals || ++v->wait_counter < _settings_game.pf.wait_oneway_signal * 20) return false;
 						} else if (HasSignalOnTrackdir(gp.new_tile, i)) {
 							v->cur_speed = 0;
 							v->subspeed = 0;
@@ -3016,7 +3063,7 @@ static void TrainController(Train *v, Vehicle *nomove)
 								exitdir = ReverseDiagDir(exitdir);
 
 								/* check if a train is waiting on the other side */
-								if (!HasVehicleOnPos(o_tile, &exitdir, &CheckTrainAtSignal)) return;
+								if (!HasVehicleOnPos(o_tile, &exitdir, &CheckTrainAtSignal)) return false;
 							}
 						}
 
@@ -3027,7 +3074,7 @@ static void TrainController(Train *v, Vehicle *nomove)
 						if (!_settings_game.pf.reverse_at_signals && !HasOnewaySignalBlockingTrackdir(gp.new_tile, i) &&
 								UpdateSignalsOnSegment(v->tile, enterdir, v->owner) == SIGSEG_PBS) {
 							v->wait_counter = 0;
-							return;
+							return false;
 						}
 						goto reverse_train_direction;
 					} else {
@@ -3210,17 +3257,21 @@ static void TrainController(Train *v, Vehicle *nomove)
 
 	if (direction_changed) first->tcache.cached_max_curve_speed = first->GetCurveSpeedLimit();
 
-	return;
+	return true;
 
 invalid_rail:
 	/* We've reached end of line?? */
 	if (prev != NULL) error("Disconnecting train");
 
 reverse_train_direction:
-	v->wait_counter = 0;
-	v->cur_speed = 0;
-	v->subspeed = 0;
-	ReverseTrainDirection(v);
+	if (reverse) {
+		v->wait_counter = 0;
+		v->cur_speed = 0;
+		v->subspeed = 0;
+		ReverseTrainDirection(v);
+	}
+
+	return false;
 }
 
 /**
@@ -3390,9 +3441,10 @@ static const uint16 _breakdown_speeds[16] = {
  *
  * @param v front train engine
  * @param signal not line end, just a red signal
+ * @param reverse Set to false to not execute the vehicle reversing. This does not change any other logic.
  * @return true iff we did NOT have to reverse
  */
-static bool TrainApproachingLineEnd(Train *v, bool signal)
+static bool TrainApproachingLineEnd(Train *v, bool signal, bool reverse)
 {
 	/* Calc position within the current tile */
 	uint x = v->x_pos & 0xF;
@@ -3414,13 +3466,12 @@ static bool TrainApproachingLineEnd(Train *v, bool signal)
 	/* Do not reverse when approaching red signal. Make sure the vehicle's front
 	 * does not cross the tile boundary when we do reverse, but as the vehicle's
 	 * location is based on their center, use half a vehicle's length as offset.
-	 * Actually, the center of all vehicles is half a normal vehicle's length
-	 * from the front of the vehicle, so even in case the vehicle is 1/8th
-	 * long, the center is still at 1/2 of VEHICLE_LENGTH. Basically FS#3569. */
-	if (!signal && x + VEHICLE_LENGTH / 2 >= TILE_SIZE) {
+	 * Multiply the half-length by two for straight directions to compensate that
+	 * we only get odd x offsets there. */
+	if (!signal && x + (v->gcache.cached_veh_length + 1) / 2 * (IsDiagonalDirection(v->direction) ? 1 : 2) >= TILE_SIZE) {
 		/* we are too near the tile end, reverse now */
 		v->cur_speed = 0;
-		ReverseTrainDirection(v);
+		if (reverse) ReverseTrainDirection(v);
 		return false;
 	}
 
@@ -3492,9 +3543,10 @@ static TileIndex TrainApproachingCrossingTile(const Train *v)
  * Checks for line end. Also, bars crossing at next tile if needed
  *
  * @param v vehicle we are checking
+ * @param reverse Set to false to not execute the vehicle reversing. This does not change any other logic.
  * @return true iff we did NOT have to reverse
  */
-static bool TrainCheckIfLineEnds(Train *v)
+static bool TrainCheckIfLineEnds(Train *v, bool reverse)
 {
 	/* First, handle broken down train */
 
@@ -3532,11 +3584,11 @@ static bool TrainCheckIfLineEnds(Train *v)
 
 	/* no suitable trackbits at all || unusable rail (wrong type or owner) */
 	if (bits == TRACK_BIT_NONE || !CheckCompatibleRail(v, tile)) {
-		return TrainApproachingLineEnd(v, false);
+		return TrainApproachingLineEnd(v, false, reverse);
 	}
 
 	/* approaching red signal */
-	if ((trackdirbits & red_signals) != 0) return TrainApproachingLineEnd(v, true);
+	if ((trackdirbits & red_signals) != 0) return TrainApproachingLineEnd(v, true, reverse);
 
 	/* approaching a rail/road crossing? then make it red */
 	if (IsLevelCrossingTile(tile)) MaybeBarCrossingWithSound(tile);
