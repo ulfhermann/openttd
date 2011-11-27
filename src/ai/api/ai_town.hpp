@@ -12,6 +12,7 @@
 #ifndef AI_TOWN_HPP
 #define AI_TOWN_HPP
 
+#include "ai_cargo.hpp"
 #include "ai_company.hpp"
 
 /**
@@ -103,7 +104,6 @@ public:
 	/**
 	 * Gets the number of towns.
 	 * @return The number of towns.
-	 * @post Return value is always non-negative.
 	 */
 	static int32 GetTownCount();
 
@@ -127,7 +127,6 @@ public:
 	 * @param town_id The town to get the population of.
 	 * @pre IsValidTown(town_id).
 	 * @return The number of inhabitants.
-	 * @post Return value is always non-negative.
 	 */
 	static int32 GetPopulation(TownID town_id);
 
@@ -136,7 +135,6 @@ public:
 	 * @param town_id The town to get the number of houses of.
 	 * @pre IsValidTown(town_id).
 	 * @return The number of houses.
-	 * @post Return value is always non-negative.
 	 */
 	static int32 GetHouseCount(TownID town_id);
 
@@ -154,23 +152,19 @@ public:
 	 * @param cargo_id The index of the cargo.
 	 * @pre IsValidTown(town_id).
 	 * @pre AICargo::IsValidCargo(cargo_id).
-	 * @pre AICargo::GetTownEffect(cargo_id) == TE_PASSENGERS || AICargo::GetTownEffect(cargo_id) == TE_MAIL.
 	 * @return The last month's production of the given cargo for this town.
-	 * @post Return value is always non-negative.
 	 */
 	static int32 GetLastMonthProduction(TownID town_id, CargoID cargo_id);
 
 	/**
-	 * Get the total amount of cargo transported from a town last month.
-	 * @param town_id The index of the industry.
+	 * Get the total amount of cargo supplied from a town last month.
+	 * @param town_id The index of the town.
 	 * @param cargo_id The index of the cargo.
 	 * @pre IsValidTown(town_id).
 	 * @pre AICargo::IsValidCargo(cargo_id).
-	 * @pre AICargo::GetTownEffect(cargo_id) == TE_PASSENGERS || AICargo::GetTownEffect(cargo_id) == TE_MAIL.
-	 * @return The amount of given cargo transported from this town last month.
-	 * @post Return value is always non-negative.
+	 * @return The amount of cargo supplied for transport from this town last month.
 	 */
-	static int32 GetLastMonthTransported(TownID town_id, CargoID cargo_id);
+	static int32 GetLastMonthSupplied(TownID town_id, CargoID cargo_id);
 
 	/**
 	 * Get the percentage of transported production of the given cargo at a town.
@@ -178,11 +172,41 @@ public:
 	 * @param cargo_id The index of the cargo.
 	 * @pre IsValidTown(town_id).
 	 * @pre AICargo::IsValidCargo(cargo_id).
-	 * @pre AICargo::GetTownEffect(cargo_id) == TE_PASSENGERS || AICargo::GetTownEffect(cargo_id) == TE_MAIL.
 	 * @return The percentage of given cargo transported from this town last month.
-	 * @post Return value is always non-negative.
 	 */
 	static int32 GetLastMonthTransportedPercentage(TownID town_id, CargoID cargo_id);
+
+	/**
+	 * Get the total amount of cargo effects received by a town last month.
+	 * @param town_id The index of the town.
+	 * @param towneffect_id The index of the cargo.
+	 * @pre IsValidTown(town_id).
+	 * @pre AICargo::IsValidTownEffect(cargo_id).
+	 * @return The amount of cargo received by this town last month for this cargo effect.
+	 */
+	static int32 GetLastMonthReceived(TownID town_id, AICargo::TownEffect towneffect_id);
+
+	/**
+	 * Get the amount of cargo that needs to be delivered (per TownEffect) for a
+	 *  town to grow. All goals need to be reached before a town will grow.
+	 * @param town_id The index of the town.
+	 * @param towneffect_id The index of the towneffect.
+	 * @pre IsValidTown(town_id).
+	 * @pre AICargo::IsValidTownEffect(cargo_id).
+	 * @return The goal of the cargo.
+	 * @note Goals can change over time. For example with a changing snowline, or
+	 *  with a growing town.
+	 */
+	static uint32 GetCargoGoal(TownID town_id, AICargo::TownEffect towneffect_id);
+
+	/**
+	 * Get the amount of days between town growth.
+	 * @param town_id The index of the town.
+	 * @pre IsValidTown(town_id).
+	 * @return True if the action succeeded.
+	 * @note This function does not indicate when it will grow next. It only tells you the time between growths.
+	 */
+	static int32 GetGrowthRate(TownID town_id);
 
 	/**
 	 * Get the manhattan distance from the tile to the AITown::GetLocation()
