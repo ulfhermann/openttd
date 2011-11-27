@@ -18,6 +18,7 @@
 #include "../../strings_func.h"
 #include "../../company_func.h"
 #include "../../station_base.h"
+#include "../../landscape.h"
 #include "table/strings.h"
 
 /* static */ int32 AITown::GetTownCount()
@@ -70,25 +71,17 @@
 
 	const Town *t = ::Town::Get(town_id);
 
-	switch (AICargo::GetTownEffect(cargo_id)) {
-		case AICargo::TE_PASSENGERS: return t->pass.old_max;
-		case AICargo::TE_MAIL:       return t->mail.old_max;
-		default: return -1;
-	}
+	return t->supplied[cargo_id].old_max;
 }
 
-/* static */ int32 AITown::GetLastMonthTransported(TownID town_id, CargoID cargo_id)
+/* static */ int32 AITown::GetLastMonthSupplied(TownID town_id, CargoID cargo_id)
 {
 	if (!IsValidTown(town_id)) return -1;
 	if (!AICargo::IsValidCargo(cargo_id)) return -1;
 
 	const Town *t = ::Town::Get(town_id);
 
-	switch (AICargo::GetTownEffect(cargo_id)) {
-		case AICargo::TE_PASSENGERS: return t->pass.old_act;
-		case AICargo::TE_MAIL:       return t->mail.old_act;
-		default: return -1;
-	}
+	return t->supplied[cargo_id].old_act;
 }
 
 /* static */ int32 AITown::GetLastMonthTransportedPercentage(TownID town_id, CargoID cargo_id)
@@ -97,12 +90,46 @@
 	if (!AICargo::IsValidCargo(cargo_id)) return -1;
 
 	const Town *t = ::Town::Get(town_id);
+	return ::ToPercent8(t->GetPercentTransported(cargo_id));
+}
 
-	switch (AICargo::GetTownEffect(cargo_id)) {
-		case AICargo::TE_PASSENGERS: return ::ToPercent8(t->GetPercentPassTransported());
-		case AICargo::TE_MAIL:       return ::ToPercent8(t->GetPercentMailTransported());
-		default: return -1;
+/* static */ int32 AITown::GetLastMonthReceived(TownID town_id, AICargo::TownEffect towneffect_id)
+{
+	if (!IsValidTown(town_id)) return -1;
+	if (!AICargo::IsValidTownEffect(towneffect_id)) return -1;
+
+	const Town *t = ::Town::Get(town_id);
+
+	return t->received[towneffect_id].old_act;
+}
+
+/* static */ uint32 AITown::GetCargoGoal(TownID town_id, AICargo::TownEffect towneffect_id)
+{
+	if (!IsValidTown(town_id)) return -1;
+	if (!AICargo::IsValidTownEffect(towneffect_id)) return -1;
+
+	const Town *t = ::Town::Get(town_id);
+
+	switch (t->goal[towneffect_id]) {
+		case TOWN_GROWTH_WINTER:
+			if (TileHeight(t->xy) >= GetSnowLine() && t->population > 90) return 1;
+			return 0;
+
+		case TOWN_GROWTH_DESERT:
+			if (GetTropicZone(t->xy) == TROPICZONE_DESERT && t->population > 60) return 1;
+			return 0;
+
+		default: return t->goal[towneffect_id];
 	}
+}
+
+/* static */ int32 AITown::GetGrowthRate(TownID town_id)
+{
+	if (!IsValidTown(town_id)) return false;
+
+	const Town *t = ::Town::Get(town_id);
+
+	return (t->growth_rate * TOWN_GROWTH_TICKS + DAY_TICKS) / DAY_TICKS;
 }
 
 /* static */ int32 AITown::GetDistanceManhattanToTile(TownID town_id, TileIndex tile)
