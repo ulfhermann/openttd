@@ -640,6 +640,14 @@ class SmallMapWindow : public Window {
 	static const uint8 REFRESH_NEXT_TICK = 1;       ///< if refresh has this value the map is redrawn in the next tick
 	uint8 refresh; ///< refresh counter, zeroed every FORCE_REFRESH_PERIOD ticks
 
+	FORCEINLINE Point SmallmapRemapCoords(int x, int y) const
+	{
+		Point pt;
+		pt.x = (y - x) * 2;
+		pt.y = y + x;
+		return pt;
+	}
+
 	/**
 	 * Remap tile to location on this smallmap.
 	 * @param tile_x X coordinate of the tile.
