@@ -32,6 +32,7 @@
 #include "hotkeys.h"
 #include "engine_base.h"
 #include "vehicle_func.h"
+#include "zoom_func.h"
 
 #include "station_map.h"
 #include "tunnelbridge_map.h"
@@ -603,7 +604,7 @@ struct BuildRailToolbarWindow : Window {
 				break;
 
 			case RTW_CONVERT_RAIL:
-				HandlePlacePushButton(this, RTW_CONVERT_RAIL, GetRailTypeInfo(_cur_railtype)->cursor.convert, HT_RECT);
+				HandlePlacePushButton(this, RTW_CONVERT_RAIL, GetRailTypeInfo(_cur_railtype)->cursor.convert, HT_RECT | HT_DIAGONAL);
 				this->last_user_action = widget;
 				break;
 
@@ -714,7 +715,7 @@ struct BuildRailToolbarWindow : Window {
 					break;
 
 				case DDSP_CONVERT_RAIL:
-					DoCommandP(end_tile, start_tile, _cur_railtype, CMD_CONVERT_RAIL | CMD_MSG(STR_ERROR_CAN_T_CONVERT_RAIL), CcPlaySound10);
+					DoCommandP(end_tile, start_tile, _cur_railtype | (_ctrl_pressed ? 0x10 : 0), CMD_CONVERT_RAIL | CMD_MSG(STR_ERROR_CAN_T_CONVERT_RAIL), CcPlaySound10);
 					break;
 
 				case DDSP_REMOVE_STATION:
@@ -1539,8 +1540,8 @@ private:
 		 * for sprite drawing and add half of the sprite's width. For the y offset
 		 * we want the sprite to be aligned on the bottom, so again we undo the
 		 * offset for sprite drawing and assume it is the bottom of the sprite. */
-		int sprite_center_x_offset = sprite->x_offs + sprite->width / 2;
-		int sprite_bottom_y_offset = sprite->height + sprite->y_offs;
+		int sprite_center_x_offset = UnScaleByZoom(sprite->x_offs + sprite->width / 2, ZOOM_LVL_GUI);
+		int sprite_bottom_y_offset = UnScaleByZoom(sprite->height + sprite->y_offs, ZOOM_LVL_GUI);
 
 		/* Next we want to know where on the window to draw. Calculate the center
 		 * and the bottom of the area to draw. */
