@@ -1358,6 +1358,8 @@ static SettingEntry _settings_ui_display[] = {
 	SettingEntry("gui.show_track_reservation"),
 	SettingEntry("gui.expenses_layout"),
 	SettingEntry("gui.smallmap_land_colour"),
+	SettingEntry("gui.zoom_min"),
+	SettingEntry("gui.zoom_max"),
 };
 /** Display options sub-page */
 static SettingsPage _settings_ui_display_page = {_settings_ui_display, lengthof(_settings_ui_display)};
@@ -1457,6 +1459,7 @@ static SettingEntry _settings_economy_towns[] = {
 	SettingEntry("economy.bribe"),
 	SettingEntry("economy.exclusive_rights"),
 	SettingEntry("economy.fund_roads"),
+	SettingEntry("economy.fund_buildings"),
 	SettingEntry("economy.town_layout"),
 	SettingEntry("economy.allow_town_roads"),
 	SettingEntry("economy.allow_town_level_crossings"),
