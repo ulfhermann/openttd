@@ -736,15 +736,15 @@ static bool MakeZoomedInScreenshot()
 	Window *w = FindWindowById(WC_MAIN_WINDOW, 0);
 	ViewPort vp;
 
-	vp.zoom = ZOOM_LVL_WORLD_SCREENSHOT;
+	vp.zoom = _settings_client.gui.zoom_min;
 	vp.left = w->viewport->left;
 	vp.top = w->viewport->top;
 	vp.virtual_left = w->viewport->virtual_left;
 	vp.virtual_top = w->viewport->virtual_top;
 	vp.virtual_width = w->viewport->virtual_width;
-	vp.width = vp.virtual_width;
+	vp.width = UnScaleByZoom(vp.virtual_width, vp.zoom);
 	vp.virtual_height = w->viewport->virtual_height;
-	vp.height = vp.virtual_height;
+	vp.height = UnScaleByZoom(vp.virtual_height, vp.zoom);
 
 	const ScreenshotFormat *sf = _screenshot_formats + _cur_screenshot_format;
 	return sf->proc(MakeScreenshotName(SCREENSHOT_NAME, sf->extension), LargeWorldCallback, &vp, vp.width, vp.height,
@@ -765,8 +765,8 @@ static bool MakeWorldScreenshot()
 	vp.zoom = ZOOM_LVL_WORLD_SCREENSHOT;
 	vp.left = 0;
 	vp.top = 0;
-	vp.virtual_left = -(int)MapMaxX() * TILE_PIXELS;
-	vp.virtual_top = -extra_height_top;
+	vp.virtual_left = -(int)MapMaxX() * TILE_PIXELS * ZOOM_LVL_BASE;
+	vp.virtual_top = -extra_height_top * ZOOM_LVL_BASE;
 	vp.virtual_width = (MapMaxX() + MapMaxY()) * TILE_PIXELS;
 	vp.width = vp.virtual_width;
 	vp.virtual_height = ((MapMaxX() + MapMaxY()) * TILE_PIXELS >> 1) + extra_height_top - reclaim_height_bottom;
