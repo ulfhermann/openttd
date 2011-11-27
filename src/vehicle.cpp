@@ -56,7 +56,7 @@
 
 #include "table/strings.h"
 
-#define GEN_HASH(x, y) ((GB((y), 6, 6) << 6) + GB((x), 7, 6))
+#define GEN_HASH(x, y) ((GB((y), 6 + ZOOM_LVL_SHIFT, 6) << 6) + GB((x), 7 + ZOOM_LVL_SHIFT, 6))
 
 VehicleID _new_vehicle_id;
 uint16 _returned_refit_capacity;      ///< Stores the capacity after a refit operation.
@@ -963,7 +963,7 @@ static void DoDrawVehicle(const Vehicle *v)
 	}
 
 	AddSortableSpriteToDraw(image, pal, v->x_pos + v->x_offs, v->y_pos + v->y_offs,
-		v->x_extent, v->y_extent, v->z_extent, v->z_pos, shadowed);
+		v->x_extent, v->y_extent, v->z_extent, v->z_pos, shadowed, v->x_bb_offs, v->y_bb_offs);
 }
 
 /**
@@ -981,18 +981,18 @@ void ViewportAddVehicles(DrawPixelInfo *dpi)
 	/* The hash area to scan */
 	int xl, xu, yl, yu;
 
-	if (dpi->width + 70 < (1 << (7 + 6))) {
-		xl = GB(l - 70, 7, 6);
-		xu = GB(r,      7, 6);
+	if (dpi->width + (70 * ZOOM_LVL_BASE) < (1 << (7 + 6 + ZOOM_LVL_SHIFT))) {
+		xl = GB(l - (70 * ZOOM_LVL_BASE), 7 + ZOOM_LVL_SHIFT, 6);
+		xu = GB(r,                        7 + ZOOM_LVL_SHIFT, 6);
 	} else {
 		/* scan whole hash row */
 		xl = 0;
 		xu = 0x3F;
 	}
 
-	if (dpi->height + 70 < (1 << (6 + 6))) {
-		yl = GB(t - 70, 6, 6) << 6;
-		yu = GB(b,      6, 6) << 6;
+	if (dpi->height + (70 * ZOOM_LVL_BASE) < (1 << (6 + 6 + ZOOM_LVL_SHIFT))) {
+		yl = GB(t - (70 * ZOOM_LVL_BASE), 6 + ZOOM_LVL_SHIFT, 6) << 6;
+		yu = GB(b,                        6 + ZOOM_LVL_SHIFT, 6) << 6;
 	} else {
 		/* scan whole column */
 		yl = 0;
@@ -1408,15 +1408,15 @@ void VehicleMove(Vehicle *v, bool update_viewport)
 	Rect old_coord = v->coord;
 	v->coord.left   = pt.x;
 	v->coord.top    = pt.y;
-	v->coord.right  = pt.x + spr->width + 2;
-	v->coord.bottom = pt.y + spr->height + 2;
+	v->coord.right  = pt.x + spr->width + 2 * ZOOM_LVL_BASE;
+	v->coord.bottom = pt.y + spr->height + 2 * ZOOM_LVL_BASE;
 
 	if (update_viewport) {
 		MarkAllViewportsDirty(
 			min(old_coord.left,   v->coord.left),
 			min(old_coord.top,    v->coord.top),
-			max(old_coord.right,  v->coord.right) + 1,
-			max(old_coord.bottom, v->coord.bottom) + 1
+			max(old_coord.right,  v->coord.right) + 1 * ZOOM_LVL_BASE,
+			max(old_coord.bottom, v->coord.bottom) + 1 * ZOOM_LVL_BASE
 		);
 	}
 }
@@ -1431,7 +1431,7 @@ void VehicleMove(Vehicle *v, bool update_viewport)
  */
 void MarkSingleVehicleDirty(const Vehicle *v)
 {
-	MarkAllViewportsDirty(v->coord.left, v->coord.top, v->coord.right + 1, v->coord.bottom + 1);
+	MarkAllViewportsDirty(v->coord.left, v->coord.top, v->coord.right + 1 * ZOOM_LVL_BASE, v->coord.bottom + 1 * ZOOM_LVL_BASE);
 }
 
 /**
@@ -2374,6 +2374,11 @@ void Vehicle::ShowVisualEffect() const
 				!HasPowerOnRail(Train::From(v)->railtype, GetTileRailType(v->tile)))) {
 			continue;
 		}
+
+		/* The effect offset is relative to a point 4 units behind the vehicle's
+		 * front (which is the center of an 8/8 vehicle). Shorter vehicles need a
+		 * correction factor. */
+		if (v->type == VEH_TRAIN) effect_offset += (VEHICLE_LENGTH - Train::From(v)->gcache.cached_veh_length) / 2;
 
 		int x = _vehicle_smoke_pos[v->direction] * effect_offset;
 		int y = _vehicle_smoke_pos[(v->direction + 2) % 8] * effect_offset;
