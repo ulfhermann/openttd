@@ -1876,6 +1876,11 @@ STR_CONTENT_ERROR_COULD_NOT_DOWNLOAD_CONNECTION_LOST            :{WHITE}... conn
 STR_CONTENT_ERROR_COULD_NOT_DOWNLOAD_FILE_NOT_WRITABLE          :{WHITE}... no es pot escriure al fitxer
 STR_CONTENT_ERROR_COULD_NOT_EXTRACT                             :{WHITE}No s'han pogut descomprimir els arxius descarregats
 
+STR_MISSING_GRAPHICS_SET_CAPTION                                :{WHITE}Gràfics que falten
+STR_MISSING_GRAPHICS_SET_MESSAGE                                :{BLACK}OpenTTD necessita gràfics per funcionar però no se n'ha trobat cap. Vols permetre a OpenTTD descarregar i instal·lar aquests gràfics?
+STR_MISSING_GRAPHICS_YES_DOWNLOAD                               :{BLACK}Si, descarregar els gràfics
+STR_MISSING_GRAPHICS_NO_QUIT                                    :{BLACK}No, sortir d'OpenTTD
+
 # Transparency settings window
 STR_TRANSPARENCY_CAPTION                                        :{WHITE}Opcions de transparència
 STR_TRANSPARENT_SIGNS_TOOLTIP                                   :{BLACK}Commuta la transparència dels rètols d'estació. Ctrl+Clic per bloquejar
@@ -1921,6 +1926,11 @@ STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_BRIDGE                  :{BLACK}Construe
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TUNNEL                  :{BLACK}Construeix un túnel per a trens. Shift commuta construeix/mostra el cost estimat
 STR_RAIL_TOOLBAR_TOOLTIP_TOGGLE_BUILD_REMOVE_FOR                :{BLACK}Commuta construeix/treu per vies de tren, senyals, punts de control i estacions. Manté Ctrl per treure també les vies dels punts de control i de les estacions
 STR_RAIL_TOOLBAR_TOOLTIP_CONVERT_RAIL                           :{BLACK}Converteix/Millora el tipus de via. Shift commuta construeix/mostra el cost estimat
+
+STR_RAIL_NAME_RAILROAD                                          :Ferrocarril
+STR_RAIL_NAME_ELRAIL                                            :Ferrocarril electrificat
+STR_RAIL_NAME_MONORAIL                                          :Monorail
+STR_RAIL_NAME_MAGLEV                                            :Maglev
 
 # Rail depot construction window
 STR_BUILD_DEPOT_TRAIN_ORIENTATION_CAPTION                       :{WHITE}Orientació Cotxeres
@@ -2192,6 +2202,30 @@ STR_LAI_CLEAR_DESCRIPTION_FIELDS                                :Camps
 STR_LAI_CLEAR_DESCRIPTION_SNOW_COVERED_LAND                     :Terreny nevat
 STR_LAI_CLEAR_DESCRIPTION_DESERT                                :Desert
 
+STR_LAI_RAIL_DESCRIPTION_TRACK                                  :{STRING} via
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_SIGNALS              :{STRING} via amb senyals de bloc
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRESIGNALS                  :{STRING} via amb pre-senyals
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXITSIGNALS                 :{STRING} via amb senyals de sortida
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBOSIGNALS                :{STRING} via amb senyals combinades
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PBSSIGNALS                  :{STRING} via amb senyals de camí
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NOENTRYSIGNALS              :{STRING} via amb senyals de camí d'un sentit
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_PRESIGNALS           :{STRING}via amb senyals de bloc i pre-senyals
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_EXITSIGNALS          :{STRING} via amb senyals de bloc i de sortida
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_COMBOSIGNALS         :{STRING} via amb senyals de bloc i combinades
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_PBSSIGNALS           :{STRING} via amb senyals de bloc i de camí
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_NOENTRYSIGNALS       :{STRING} via amb senyals de bloc i de camí d'un sentit
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_EXITSIGNALS             :{STRING} via amb pre-senyals i senyals de sortida
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_COMBOSIGNALS            :{STRING} via amb pre-senyals i senyals combinades
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_PBSSIGNALS              :{STRING} via amb pre-senyals i senyals de camí
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PRE_NOENTRYSIGNALS          :{STRING} via amb pre-senyals i senyals de camí d'un sentit
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_COMBOSIGNALS           :{STRING} via amb senyals de sortida i combinades
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_PBSSIGNALS             :{STRING} via amb senyals de sortida i de camí
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_EXIT_NOENTRYSIGNALS         :{STRING} via amb senyals de sortida i de camí d'un sentit
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBO_PBSSIGNALS            :{STRING} via amb senyals combinades i de camí
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_COMBO_NOENTRYSIGNALS        :{STRING} via amb senyals combinades i de camí d'un sentit
+STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_PBS_NOENTRYSIGNALS          :{STRING} via amb senyals de camí i de camí d'un sentit
+STR_LAI_RAIL_DESCRIPTION_TRAIN_DEPOT                            :{STRING} cotxeres de tren
+
 STR_LAI_ROAD_DESCRIPTION_ROAD                                   :Carretera
 STR_LAI_ROAD_DESCRIPTION_ROAD_WITH_STREETLIGHTS                 :Carretera amb fanals
 STR_LAI_ROAD_DESCRIPTION_TREE_LINED_ROAD                        :Carretera de tres carrils
@@ -2374,7 +2408,12 @@ STR_NEWGRF_SETTINGS_MOVEUP                                      :{BLACK}Mou amun
 STR_NEWGRF_SETTINGS_MOVEUP_TOOLTIP                              :{BLACK}Mou amunt l'arxiu NewGRF seleccionat de la llista
 STR_NEWGRF_SETTINGS_MOVEDOWN                                    :{BLACK}Mou avall
 STR_NEWGRF_SETTINGS_MOVEDOWN_TOOLTIP                            :{BLACK}Mou avall l'arxiu NewGRF seleccionat de la llista
-STR_NEWGRF_SETTINGS_FILE_TOOLTIP                                :{BLACK}Una llista d'arxius NewGRF que han estat instal·lats. Clica un arxiu per canviar els seus paràmetres
+STR_NEWGRF_SETTINGS_FILE_TOOLTIP                                :{BLACK}Una llista d'arxius NewGRF que estan instal·lats.
+
+# Additional textfiles accompanying NewGRFs
+STR_NEWGRF_SETTINGS_VIEW_README                                 :{BLACK}Veure llegeixme
+STR_NEWGRF_SETTINGS_VIEW_CHANGELOG                              :{BLACK}Registra de canvis
+STR_NEWGRF_SETTINGS_VIEW_LICENSE                                :{BLACK}Llicència
 
 STR_NEWGRF_SETTINGS_SET_PARAMETERS                              :{BLACK}Estableix paràm.
 STR_NEWGRF_SETTINGS_TOGGLE_PALETTE                              :{BLACK}Commuta paleta
@@ -2397,7 +2436,6 @@ STR_NEWGRF_SETTINGS_NOT_FOUND                                   :{RED}No s'ha tr
 STR_NEWGRF_SETTINGS_DISABLED                                    :{RED}Desactivat
 STR_NEWGRF_SETTINGS_INCOMPATIBLE                                :{RED}Versió incompatible amb aquesta versió de OpenTTD
 
-
 # NewGRF parameters window
 STR_NEWGRF_PARAMETERS_CAPTION                                   :{WHITE}Canvia els paràmetres NewGRF
 STR_NEWGRF_PARAMETERS_CLOSE                                     :{BLACK}Tanca
@@ -2406,6 +2444,11 @@ STR_NEWGRF_PARAMETERS_RESET_TOOLTIP                             :{BLACK}Establei
 STR_NEWGRF_PARAMETERS_DEFAULT_NAME                              :Paràmetre {NUM}
 STR_NEWGRF_PARAMETERS_SETTING                                   :{STRING}: {ORANGE}{STRING}
 STR_NEWGRF_PARAMETERS_NUM_PARAM                                 :{LTBLUE}Nombre de paràmetres: {ORANGE}{NUM}
+
+# NewGRF textfile window
+STR_NEWGRF_README_CAPTION                                       :{WHITE}Llegeixme del NewGRF de {STRING}
+STR_NEWGRF_CHANGELOG_CAPTION                                    :{WHITE}Registre de canvis del NewGRF de {STRING}
+STR_NEWGRF_LICENSE_CAPTION                                      :{WHITE}Llicència del NewGRF de {STRING}
 
 # NewGRF inspect window
 STR_NEWGRF_INSPECT_CAPTION                                      :{WHITE}Inspecciona - {STRING}
@@ -2488,6 +2531,7 @@ STR_BROKEN_VEHICLE_LENGTH                                       :{WHITE}El tren 
 STR_NEWGRF_BUGGY                                                :{WHITE}El NewGRF '{0:STRING}' està donant informació incorrecta
 STR_NEWGRF_BUGGY_ARTICULATED_CARGO                              :{WHITE}La informació de càrrega/remodelació per '{1:ENGINE}' no encaixa amb la llista de compres després de la construcció. Això podria causar un mal funcionament de autorenova/-substitueix
 STR_NEWGRF_BUGGY_ENDLESS_PRODUCTION_CALLBACK                    :{WHITE}'{1:STRING}' ha provocat un bucle infinit en la crida de producció
+STR_NEWGRF_BUGGY_UNKNOWN_CALLBACK_RESULT                        :{WHITE}'Callback' 0x{HEX} ha retornat un resultat desconegut/invàlid 0x{HEX}
 
 # 'User removed essential NewGRFs'-placeholders for stuff without specs
 STR_NEWGRF_INVALID_CARGO                                        :<càrrega invàlida>
@@ -2530,9 +2574,8 @@ STR_TOWN_VIEW_POPULATION_HOUSES                                 :{BLACK}Poblaci�
 STR_TOWN_VIEW_PASSENGERS_LAST_MONTH_MAX                         :{BLACK}Passatgers el darrer mes: {ORANGE}{COMMA}{BLACK}  max: {ORANGE}{COMMA}
 STR_TOWN_VIEW_MAIL_LAST_MONTH_MAX                               :{BLACK}Correu el darrer mes: {ORANGE}{COMMA}{BLACK}  max: {ORANGE}{COMMA}
 STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH                              :{BLACK}Càrrega requerida per tal de que el poble creixi:
-STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{ORANGE}{STRING}{BLACK} requerides
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED_GENERAL             :{ORANGE}{STRING}{RED} requerides
 STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED_WINTER              :{ORANGE}{STRING}{BLACK} requerit a l'hivern
-STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH                   :{ORANGE}{CARGO_LONG}{BLACK} lliurades el darrer mes
 STR_TOWN_VIEW_NOISE_IN_TOWN                                     :{BLACK}Límit de soroll a la ciutat: {ORANGE}{COMMA}{BLACK}  max: {ORANGE}{COMMA}
 STR_TOWN_VIEW_CENTER_TOOLTIP                                    :{BLACK}Centra la vista principal a la població. Ctrl+Clic obre una nova vista al lloc de la població
 STR_TOWN_VIEW_LOCAL_AUTHORITY_BUTTON                            :{BLACK}Autoritat local
@@ -3163,6 +3206,10 @@ STR_ORDER_TOOLTIP_UNLOAD                                        :{BLACK}Canvia e
 
 STR_ORDER_REFIT                                                 :{BLACK}Remodela
 STR_ORDER_REFIT_TOOLTIP                                         :{BLACK}Selecciona quin tipus de càrrega vols remodelar en aquesta ordre. Control+Clic per eliminar l'ordre de remodelar
+STR_ORDER_REFIT_AUTO                                            :{BLACK}Auto-remodela
+STR_ORDER_REFIT_AUTO_TOOLTIP                                    :{BLACK}Selecciona quin tipus de càrrega s'ha d'auto-remodelar en aquesta ordre. Ctrl+Clic per treure l'instrucció remodela. Auto-remodela només serà aplicat si el vehicle ho permet
+STR_ORDER_DROP_REFIT_AUTO                                       :Càrrega fixa
+STR_ORDER_DROP_REFIT_AUTO_ANY                                   :Càrrega disponible
 
 STR_ORDER_SERVICE                                               :{BLACK}Servei
 STR_ORDER_DROP_GO_ALWAYS_DEPOT                                  :Ves sempre
@@ -3250,6 +3297,21 @@ STR_ORDER_NO_UNLOAD                                             :(No descarregui
 STR_ORDER_NO_UNLOAD_FULL_LOAD                                   :(No descarreguis i espera a carregar del tot)
 STR_ORDER_NO_UNLOAD_FULL_LOAD_ANY                               :(No descarreguis i espera carregar del tot qualsevol càrrega)
 STR_ORDER_NO_UNLOAD_NO_LOAD                                     :(No descarreguis i no carreguis)
+
+STR_ORDER_AUTO_REFIT                                            :(Auto-remodela a {STRING})
+STR_ORDER_FULL_LOAD_REFIT                                       :(Càrrega completa amb auto-remodela a {STRING})
+STR_ORDER_FULL_LOAD_ANY_REFIT                                   :(Càrrega completa de qualsevol càrrega amb auto-remodela a {STRING})
+STR_ORDER_UNLOAD_REFIT                                          :(Descarrega i pren la càrrega amb auto-remodela a {STRING})
+STR_ORDER_UNLOAD_FULL_LOAD_REFIT                                :(Descarrega i espera fins a càrrega completa amb auto-remodela a {STRING})
+STR_ORDER_UNLOAD_FULL_LOAD_ANY_REFIT                            :(Descarrega i espera fins a càrrega completa qualsevol amb auto-remodela a {STRING})
+STR_ORDER_TRANSFER_REFIT                                        :(Transfereix i pren la càrrega amb auto-remodela a {STRING})
+STR_ORDER_TRANSFER_FULL_LOAD_REFIT                              :(Transfereix i espera a càrrega completa amb auto-remodela a {STRING})
+STR_ORDER_TRANSFER_FULL_LOAD_ANY_REFIT                          :(Transfereix i espera a càrrega completa qualsevol amb auto-remodela a {STRING})
+STR_ORDER_NO_UNLOAD_REFIT                                       :(No descarreguis i pren càrrega amb auto-remodela a {STRING})
+STR_ORDER_NO_UNLOAD_FULL_LOAD_REFIT                             :(No descarreguis i espera càrrega completa amb auto-remodela a {STRING})
+STR_ORDER_NO_UNLOAD_FULL_LOAD_ANY_REFIT                         :(No descarreguis i espera càrrega completa qualsevol amb auto-remodela a {STRING})
+
+STR_ORDER_AUTO_REFIT_ANY                                        :càrrega disponible
 
 STR_ORDER_STOP_LOCATION_NEAR_END                                :[extrem més proper]
 STR_ORDER_STOP_LOCATION_MIDDLE                                  :[a la meitat]
@@ -3463,6 +3525,7 @@ STR_ERROR_NOT_ALLOWED_WHILE_PAUSED                              :{WHITE}No està
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS                 :{WHITE}Les autoritats locals de {TOWN} no permeten fer això
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_AIRPORT                       :{WHITE}{TOWN} l'autoritat local denega el permís de construir un altre aeroport en aquesta població
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_NOISE                         :{WHITE}L'autoritat local de {TOWN} rebutja donar el permís per a l'aeroport degut al soroll que causaria
+STR_ERROR_BRIBE_FAILED                                          :{WHITE}El teu intent de suborn ha estat descobert per un investigador regional
 
 # Levelling errors
 STR_ERROR_CAN_T_RAISE_LAND_HERE                                 :{WHITE}Aquí no es pot elevar el terreny...
