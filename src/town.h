@@ -18,6 +18,7 @@
 #include "town_map.h"
 #include "subsidy_type.h"
 #include "newgrf_storage.h"
+#include "cargotype.h"
 #include <list>
 
 template <typename T>
@@ -30,6 +31,9 @@ static const uint CUSTOM_TOWN_NUMBER_DIFFICULTY  = 4; ///< value for custom town
 static const uint CUSTOM_TOWN_MAX_NUMBER = 5000;  ///< this is the maximum number of towns a user can specify in customisation
 
 static const uint INVALID_TOWN = 0xFFFF;
+
+static const uint TOWN_GROWTH_WINTER = 0xFFFFFFFE; ///< The town only needs this cargo in the winter (any amount)
+static const uint TOWN_GROWTH_DESERT = 0xFFFFFFFF; ///< The town needs the cargo for growth when on desert (any amount)
 
 typedef Pool<Town, TownID, 64, 64000> TownPool;
 extern TownPool _town_pool;
@@ -66,21 +70,16 @@ struct Town : TownPool::PoolItem<&_town_pool> {
 	uint8 exclusive_counter;       ///< months till the exclusivity expires
 	int16 ratings[MAX_COMPANIES];  ///< ratings of each company for this town
 
-	TransportedCargoStat<uint32> pass;  ///< Passenger cargo statistics.
-	TransportedCargoStat<uint32> mail;  ///< Mail cargo statistics.
-	TransportedCargoStat<uint16> food;  ///< Food cargo statistics.
-	TransportedCargoStat<uint16> water; ///< Water cargo statistics.
+	TransportedCargoStat<uint32> supplied[NUM_CARGO]; ///< Cargo statistics about supplied cargo.
+	TransportedCargoStat<uint16> received[NUM_TE];    ///< Cargo statistics about received cargotypes.
+	uint32 goal[NUM_TE];                              ///< Amount of cargo required for the town to grow.
 
-	/** Percentage of passengers transported last month (0xFF=100%) */
-	inline byte GetPercentPassTransported() const { return this->pass.old_act * 256 / (this->pass.old_max + 1); }
-
-	/** Percentage of mail transported last month (0xFF=100%) */
-	inline byte GetPercentMailTransported() const { return this->mail.old_act * 256 / (this->mail.old_max + 1); }
+	inline byte GetPercentTransported(CargoID cid) const { return this->supplied[cid].old_act * 256 / (this->supplied[cid].old_max + 1); }
 
 	uint16 time_until_rebuild;     ///< time until we rebuild a house
 
 	uint16 grow_counter;           ///< counter to count when to grow
-	int16 growth_rate;             ///< town growth rate
+	uint16 growth_rate;            ///< town growth rate
 
 	byte fund_buildings_months;    ///< fund buildings program in action?
 	byte road_build_months;        ///< fund road reconstruction in action?
@@ -183,6 +182,7 @@ HouseZonesBits GetTownRadiusGroup(const Town *t, TileIndex tile);
 void SetTownRatingTestMode(bool mode);
 uint GetMaskOfTownActions(int *nump, CompanyID cid, const Town *t);
 bool GenerateTowns(TownLayout layout);
+const CargoSpec *FindFirstCargoWithTownEffect(TownEffect effect);
 
 
 /** Town actions of a company. */
@@ -194,14 +194,14 @@ enum TownActions {
 	TACT_ADVERTISE_LARGE  = 0x04, ///< Large advertising campaign.
 	TACT_ROAD_REBUILD     = 0x08, ///< Rebuild the roads.
 	TACT_BUILD_STATUE     = 0x10, ///< Build a statue.
-	TACT_FOUND_BUILDINGS  = 0x20, ///< Found new buildings.
+	TACT_FUND_BUILDINGS   = 0x20, ///< Fund new buildings.
 	TACT_BUY_RIGHTS       = 0x40, ///< Buy exclusive transport rights.
 	TACT_BRIBE            = 0x80, ///< Try to bribe the counsil.
 
 	TACT_COUNT            = 8,    ///< Number of available town actions.
 
 	TACT_ADVERTISE        = TACT_ADVERTISE_SMALL | TACT_ADVERTISE_MEDIUM | TACT_ADVERTISE_LARGE, ///< All possible advertising actions.
-	TACT_CONSTRUCTION     = TACT_ROAD_REBUILD | TACT_BUILD_STATUE | TACT_FOUND_BUILDINGS,        ///< All possible construction actions.
+	TACT_CONSTRUCTION     = TACT_ROAD_REBUILD | TACT_BUILD_STATUE | TACT_FUND_BUILDINGS,         ///< All possible construction actions.
 	TACT_FUNDS            = TACT_BUY_RIGHTS | TACT_BRIBE,                                        ///< All possible funding actions.
 	TACT_ALL              = TACT_ADVERTISE | TACT_CONSTRUCTION | TACT_FUNDS,                     ///< All possible actions.
 };

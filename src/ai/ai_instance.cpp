@@ -122,10 +122,7 @@ void AIInstance::Initialize(AIInfo *info)
 
 	this->controller = new AIController();
 
-	/* The import method is available at a very early stage */
-	this->engine->AddMethod("import", &AILibrary::Import, 4, ".ssi");
-
-	/* Register the AIController */
+	/* Register the AIController (including the "import" command) */
 	SQAIController_Register(this->engine);
 
 	/* Register the API functions and classes */
@@ -252,6 +249,7 @@ void AIInstance::RegisterAPI()
 	SQAITileList_IndustryProducing_Register(this->engine);
 	SQAITileList_StationType_Register(this->engine);
 	SQAITown_Register(this->engine);
+	SQAITownEffectList_Register(this->engine);
 	SQAITownList_Register(this->engine);
 	SQAITunnel_Register(this->engine);
 	SQAIVehicle_Register(this->engine);
