@@ -396,8 +396,8 @@ void Station::UpdateVirtCoord()
 {
 	Point pt = RemapCoords2(TileX(this->xy) * TILE_SIZE, TileY(this->xy) * TILE_SIZE);
 
-	pt.y -= 32;
-	if ((this->facilities & FACIL_AIRPORT) && this->airport.type == AT_OILRIG) pt.y -= 16;
+	pt.y -= 32 * ZOOM_LVL_BASE;
+	if ((this->facilities & FACIL_AIRPORT) && this->airport.type == AT_OILRIG) pt.y -= 16 * ZOOM_LVL_BASE;
 
 	SetDParam(0, this->index);
 	SetDParam(1, this->facilities);
@@ -3028,8 +3028,8 @@ void TriggerWatchedCargoCallbacks(Station *st)
  */
 static bool StationHandleBigTick(BaseStation *st)
 {
-	if (!st->IsInUse() && ++st->delete_ctr >= 8) {
-		delete st;
+	if (!st->IsInUse()) {
+		if (++st->delete_ctr >= 8) delete st;
 		return false;
 	}
 
