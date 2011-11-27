@@ -1459,6 +1459,7 @@ STR_CONFIG_SETTING_ROAD_VEHICLE_QUEUEING                        :{LTBLUE}Аўт�
 STR_CONFIG_SETTING_AUTOSCROLL                                   :{LTBLUE}Перамяшчаць агляд, калі курсор знаходзіцца на краі экрана: {ORANGE}{STRING}
 STR_CONFIG_SETTING_BRIBE                                        :{LTBLUE}Дазволіць падкупляць мясцовыя ўлады: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_EXCLUSIVE                              :{LTBLUE}Дазволіць купляць эксклюзыўныя трансп. правы: {ORANGE}{STRING}
+STR_CONFIG_SETTING_ALLOW_FUND_BUILDINGS                         :{LTBLUE}Дазволіць фінансаваньне будаўніцтва будынкаў: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_FUND_ROAD                              :{LTBLUE}Дазволіць фінансаваньне рэканструкцыі дарогаў: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_GIVE_MONEY                             :{LTBLUE}Дазволіць перадачу грошай іншым кампаніям: {ORANGE}{STRING}
 STR_CONFIG_SETTING_FREIGHT_TRAINS                               :{LTBLUE}Множнік вагі для сымуляцыі цяжкіх таварных цягнікоў: {ORANGE}{STRING}
@@ -1637,6 +1638,14 @@ STR_CONFIG_SETTING_SNAP_RADIUS                                  :{LTBLUE}Рад�
 STR_CONFIG_SETTING_SNAP_RADIUS_DISABLED                         :{LTBLUE}Радыюс прыліпаньня вокнаў: {ORANGE}адключана
 STR_CONFIG_SETTING_SOFT_LIMIT                                   :{LTBLUE}Макс. колькасьць адкрытых вокнаў (не «прылепленых»): {ORANGE}{STRING}
 STR_CONFIG_SETTING_SOFT_LIMIT_DISABLED                          :{LTBLUE}Макс. колькасьць адкрытых вокнаў (не «прылепленых»): {ORANGE}не абмежавана
+STR_CONFIG_SETTING_ZOOM_MIN                                     :{LTBLUE}Максымальны ўзровень набліжэньня: {ORANGE}{STRING}
+STR_CONFIG_SETTING_ZOOM_MAX                                     :{LTBLUE}Максымальны ўзровень падаленьня: {ORANGE}{STRING}
+STR_CONFIG_SETTING_ZOOM_LVL_MIN                                 :4x
+STR_CONFIG_SETTING_ZOOM_LVL_IN_2X                               :2x
+STR_CONFIG_SETTING_ZOOM_LVL_NORMAL                              :Нармальны
+STR_CONFIG_SETTING_ZOOM_LVL_OUT_2X                              :2x
+STR_CONFIG_SETTING_ZOOM_LVL_OUT_4X                              :4x
+STR_CONFIG_SETTING_ZOOM_LVL_OUT_8X                              :8x
 STR_CONFIG_SETTING_TOWN_GROWTH                                  :{LTBLUE}Хуткасьць росту гарадоў: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TOWN_GROWTH_NONE                             :няма
 STR_CONFIG_SETTING_TOWN_GROWTH_SLOW                             :павольная
@@ -2206,7 +2215,7 @@ STR_CONTENT_ERROR_COULD_NOT_CONNECT                             :{WHITE}Не ў�
 STR_CONTENT_ERROR_COULD_NOT_DOWNLOAD                            :{WHITE}Памылка запампоўваньня...
 STR_CONTENT_ERROR_COULD_NOT_DOWNLOAD_CONNECTION_LOST            :{WHITE}... злучэньне страчана
 STR_CONTENT_ERROR_COULD_NOT_DOWNLOAD_FILE_NOT_WRITABLE          :{WHITE}... немагчыма запісаць файл
-STR_CONTENT_ERROR_COULD_NOT_EXTRACT                             :{WHITE}Не ўдалося распакаваць запампованы файл
+STR_CONTENT_ERROR_COULD_NOT_EXTRACT                             :{WHITE}Не ўдалося распакаваць запампаваны файл
 
 STR_MISSING_GRAPHICS_SET_CAPTION                                :{WHITE}Адсутная графiка
 STR_MISSING_GRAPHICS_SET_MESSAGE                                :{BLACK}OpenTTD патрабуе графiкi для функцыянаваньня, але ня можа знайсьцi нiякай. Вы дазваляеце OpenTTD спампаваць ды ўсталяваць гэтую графiку?
@@ -2744,7 +2753,7 @@ STR_NEWGRF_SETTINGS_MOVEUP                                      :{BLACK}Увер
 STR_NEWGRF_SETTINGS_MOVEUP_TOOLTIP                              :{BLACK}Перамясьціць выбраны файл NewGRF вышэй
 STR_NEWGRF_SETTINGS_MOVEDOWN                                    :{BLACK}Унiз
 STR_NEWGRF_SETTINGS_MOVEDOWN_TOOLTIP                            :{BLACK}Перамясьціць выбраны файл NewGRF ніжэй
-STR_NEWGRF_SETTINGS_FILE_TOOLTIP                                :{BLACK}Сьпіс устаноўленых файлаў NewGRF. Выберыце файл для зьмяненьня парамэтраў
+STR_NEWGRF_SETTINGS_FILE_TOOLTIP                                :{BLACK}Сьпіс устаноўленых файлаў NewGRF.
 
 # Additional textfiles accompanying NewGRFs
 STR_NEWGRF_SETTINGS_VIEW_README                                 :{BLACK}Прагледзець iнструкцыю
@@ -2910,9 +2919,14 @@ STR_TOWN_VIEW_POPULATION_HOUSES                                 :{BLACK}Насе
 STR_TOWN_VIEW_PASSENGERS_LAST_MONTH_MAX                         :{BLACK}Пасажыраў за мінулы месяц: {ORANGE}{COMMA}{BLACK} Макс.: {ORANGE}{COMMA}
 STR_TOWN_VIEW_MAIL_LAST_MONTH_MAX                               :{BLACK}Пошты за мінулы месяц: {ORANGE}{COMMA}{BLACK}  Макс.: {ORANGE}{COMMA}
 STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH                              :{BLACK}Груз, неабходны для росту горада:
-STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{ORANGE}{STRING}{BLACK} патрабу{G 0 е e e ю}цца
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED_GENERAL             :{ORANGE}{STRING}{RED} патрабу{G 0 е e e ю}цца
 STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED_WINTER              :{ORANGE}{STRING}{BLACK} патрабу{G 0 е e e ю}цца ўзімку
-STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH                   :{ORANGE}{CARGO_LONG}{BLACK} дастаўлена ў мінулым месяцы
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_DELIVERED_GENERAL            :{ORANGE}{STRING}{GREEN} дастаўлена
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{ORANGE}{CARGO_TINY} / {CARGO_LONG}{RED} (недастаткова)
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_DELIVERED                    :{ORANGE}{CARGO_TINY} / {CARGO_LONG}{GREEN} (дастаткова)
+STR_TOWN_VIEW_TOWN_GROWS_EVERY                                  :{BLACK}Горад расце раз у {ORANGE}{COMMA}{BLACK} д{P зень нi зён}
+STR_TOWN_VIEW_TOWN_GROWS_EVERY_FUNDED                           :{BLACK}Горад расце раз у {ORANGE}{COMMA}{BLACK} д{P зень нi зён} (прафінансавана)
+STR_TOWN_VIEW_TOWN_GROW_STOPPED                                 :{BLACK}Горад {RED}не{BLACK} разьвіваецца
 STR_TOWN_VIEW_NOISE_IN_TOWN                                     :{BLACK}Узровень шуму ў горадзе: {ORANGE}{COMMA}{BLACK}  Макс: {ORANGE}{COMMA}
 STR_TOWN_VIEW_CENTER_TOOLTIP                                    :{BLACK}Паказаць горад у асноўным вакне. Ctrl+клік - паказаць у дадатковым вакне.
 STR_TOWN_VIEW_LOCAL_AUTHORITY_BUTTON                            :{BLACK}Мясцовыя ўлады
