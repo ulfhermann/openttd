@@ -17,6 +17,7 @@
 #include "linkgraph.h"
 #include "demands.h"
 #include "mcf.h"
+#include "flowmapper.h"
 #include <queue>
 
 /**
@@ -300,12 +301,79 @@ void LinkGraphComponent::Init(LinkGraphComponentID id)
 	this->settings = _settings_game.linkgraph;
 }
 
+
+/**
+ * Exports all entries in the FlowViaMap pointed to by "source_flows_it", erases the source
+ * flows and increments the iterator afterwards.
+ * @param it Iterator pointing to the flows to be exported into the main game state.
+ * @param dest Flow stats to which the flows shall be exported.
+ * @param cargo Cargo we're exporting flows for (used to check if the link stats for the new
+ *        flows still exist).
+ */
+void Node::ExportFlows(FlowMap::iterator &it, FlowStatMap &station_flows, CargoID cargo)
+{
+	FlowStat *dest = NULL;
+	StationID source = it->first;
+	FlowViaMap &source_flows = it->second;
+	if (!Station::IsValidID(source)) {
+		source_flows.clear();
+	} else {
+		Station *curr_station = Station::Get(this->station);
+		for (FlowViaMap::iterator update = source_flows.begin(); update != source_flows.end();) {
+			StationID next = update->first;
+			int planned = update->second;
+			assert(planned >= 0);
+
+			Station *via = Station::GetIfValid(next);
+			if (planned > 0 && via != NULL) {
+				if (next == this->station ||
+						curr_station->goods[cargo].link_stats.find(next) !=
+						curr_station->goods[cargo].link_stats.end()) {
+					if (dest == NULL) {
+						dest = &(station_flows.insert(std::make_pair(it->first, FlowStat(next, planned))).first->second);
+					} else {
+						dest->AddShare(next, planned);
+					}
+				}
+			}
+			source_flows.erase(update++);
+		}
+	}
+
+	assert(source_flows.empty());
+
+	this->flows.erase(it++);
+}
+
+/**
+ * Export all flows of this node to the main game state.
+ * @param cargo The cargo we're exporting flows for.
+ */
+void Node::ExportFlows(CargoID cargo)
+{
+	FlowStatMap &station_flows = Station::Get(this->station)->goods[cargo].flows;
+	station_flows.clear();
+
+	/* loop over flows in the node's map and insert them into the station */
+	for (FlowMap::iterator it(this->flows.begin()); it != this->flows.end();) {
+		this->ExportFlows(it, station_flows, cargo);
+	}
+	assert(this->flows.empty());
+}
+
 /**
  * Merge the current job's results into the main game state.
  */
 void LinkGraph::Join()
 {
 	this->LinkGraphJob::Join();
+
+	for (NodeID node_id = 0; node_id < this->GetSize(); ++node_id) {
+		Node &node = this->GetNode(node_id);
+		if (Station::IsValidID(node.station)) {
+			node.ExportFlows(this->cargo);
+		}
+	}
 
 	this->LinkGraphComponent::Clear();
 }
@@ -453,5 +521,7 @@ void InitializeLinkGraphs()
 	LinkGraphJob::ClearHandlers();
 	LinkGraphJob::AddHandler(new DemandHandler);
 	LinkGraphJob::AddHandler(new MCFHandler<MCF1stPass>);
+	LinkGraphJob::AddHandler(new FlowMapper);
 	LinkGraphJob::AddHandler(new MCFHandler<MCF2ndPass>);
+	LinkGraphJob::AddHandler(new FlowMapper);
 }

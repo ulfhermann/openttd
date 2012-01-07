@@ -50,6 +50,10 @@ public:
 	~Node() {this->Init();}
 
 	void Init(StationID st = INVALID_STATION, uint sup = 0, uint dem = 0);
+	void ExportFlows(CargoID cargo);
+
+private:
+	void ExportFlows(FlowMap::iterator &it, FlowStatMap &station_flows, CargoID cargo);
 };
 
 /**

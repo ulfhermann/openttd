@@ -49,6 +49,8 @@ void IncreaseStats(Station *st, const Vehicle *v, StationID next_station_id);
 
 void IncreaseStats(Station *st, CargoID cargo, StationID next_station_id, uint capacity, uint usage);
 
+void DeleteStaleFlows(StationID at, CargoID c_id, StationID to);
+
 /**
  * Calculates the maintenance cost of a number of station tiles.
  * @param num Number of station tiles.
