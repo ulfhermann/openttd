@@ -12,6 +12,7 @@
 #ifndef STATION_BASE_H
 #define STATION_BASE_H
 
+#include "core/random_func.hpp"
 #include "base_station_base.h"
 #include "newgrf_airport.h"
 #include "cargopacket.h"
@@ -159,7 +160,63 @@ public:
 	}
 };
 
+/**
+ * Flow statistics telling how much flow should be sent along a link. This is
+ * done by creating "flow shares" and using std::map's upper_bound() method to
+ * look them up with a random number. A flow share is the difference between a
+ * key in a map and the previous key. So one key in the map doesn't actually
+ * mean anything by itself.
+ */
+class FlowStat {
+public:
+	typedef std::map<uint32, StationID> SharesMap;
+
+	inline FlowStat() {NOT_REACHED();}
+
+	inline FlowStat(StationID st, uint flow)
+	{
+		assert(flow > 0);
+		this->shares[flow] = st;
+	}
+
+	/**
+	 * Add some flow.
+	 * @param st Remote station.
+	 * @param flow Amount of flow to be added.
+	 */
+	inline void AddShare(StationID st, uint flow)
+	{
+		assert(flow > 0);
+		this->shares[(--this->shares.end())->first + flow] = st;
+	}
+
+	uint GetShare(StationID st) const;
+
+	void EraseShare(StationID st);
+
+	inline const SharesMap *GetShares() const { return &this->shares; }
+
+	/**
+	 * Get a station a package can be routed to. This done by drawing a
+	 * random number between 0 and sum_shares and then looking that up in
+	 * the map with lower_bound. So each share gets selected with a
+	 * probability dependent on its flow.
+	 * @return A station ID from the shares map.
+	 */
+	inline StationID GetVia() const
+	{
+		assert(!this->shares.empty());
+		return this->shares.upper_bound(RandomRange((--this->shares.end())->first - 1))->second;
+	}
+
+	StationID GetVia(StationID excluded, StationID excluded2 = INVALID_STATION) const;
+
+private:
+	SharesMap shares;  ///< Shares of flow to be sent via specified station (or consumed locally).
+};
+
 typedef std::map<StationID, LinkStat> LinkStatMap;
+typedef std::map<StationID, FlowStat> FlowStatMap; ///< Flow descriptions by origin stations.
 
 uint GetMovingAverageLength(const Station *from, const Station *to);
 
@@ -253,6 +310,7 @@ struct GoodsEntry {
 
 	uint supply;            ///< Cargo supplied last month.
 	uint supply_new;        ///< Cargo supplied so far this month.
+	FlowStatMap flows;      ///< Planned flows through this station.
 	LinkStatMap link_stats; ///< Capacities and usage statistics for outgoing links.
 
 	LinkGraphComponentID last_component; ///< Component this station was last part of in this cargo's link graph.
@@ -263,6 +321,33 @@ struct GoodsEntry {
 	 * @return true if vehicle tried to load.
 	 */
 	bool HasVehicleEverTriedLoading() const { return this->last_speed != 0; }
+	uint GetSumFlowVia(StationID via) const;
+
+	/**
+	 * Get the best next hop for a cargo packet from station source, optionally
+	 * excluding a specific next station.
+	 * @param source Source of the packet.
+	 * @return The chosen next hop or INVALID_STATION if none was found.
+	 */
+	inline StationID GetVia(StationID source)
+	{
+		FlowStatMap::const_iterator flow_it(this->flows.find(source));
+		return flow_it != this->flows.end() ? flow_it->second.GetVia() : INVALID_STATION;
+	}
+
+	/**
+	 * Get the best next hop for a cargo packet from station source, optionally
+	 * excluding a specific next station.
+	 * @param source Source of the packet.
+	 * @param excluded If this station would be chosen choose the second best one instead.
+	 * @param excluded2 Second station to be excluded, if != INVALID_STATION.
+	 * @return The chosen next hop or INVALID_STATION if none was found.
+	 */
+	inline StationID GetVia(StationID source, StationID excluded, StationID excluded2 = INVALID_STATION) const
+	{
+		FlowStatMap::const_iterator flow_it(this->flows.find(source));
+		return flow_it != this->flows.end() ? flow_it->second.GetVia(excluded, excluded2) : INVALID_STATION;
+	}
 };
 
 /** All airport-related information. Only valid if tile != INVALID_TILE. */
