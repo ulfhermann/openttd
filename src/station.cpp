@@ -99,6 +99,7 @@ Station::~Station()
 			GoodsEntry &ge = st->goods[c];
 			ge.link_stats.erase(this->index);
 			DeleteStaleFlows(st->index, c, this->index);
+			ge.cargo.RerouteStalePackets(this->index);
 		}
 	}
 

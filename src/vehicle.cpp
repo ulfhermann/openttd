@@ -715,7 +715,7 @@ void Vehicle::PreDestructor()
 		st->loading_vehicles.remove(this);
 
 		HideFillingPercent(&this->fill_percent_te_id);
-		this->CancelReservation(st);
+		this->CancelReservation(INVALID_STATION, st);
 		delete this->cargo_payment;
 	}
 
@@ -1942,8 +1942,6 @@ void Vehicle::BeginLoading()
 		this->current_order.MakeLoading(false);
 	}
 
-	Station::Get(this->last_station_visited)->loading_vehicles.push_back(this);
-
 	if (this->last_loading_station != INVALID_STATION &&
 			this->last_loading_station != this->last_station_visited &&
 			((this->current_order.GetLoadType() & OLFB_NO_LOAD) == 0 ||
@@ -1967,13 +1965,15 @@ void Vehicle::BeginLoading()
  * Return all reserved cargo packets to the station.
  * @param st the station where the reserved packets should go.
  */
-void Vehicle::CancelReservation(Station *st)
+void Vehicle::CancelReservation(StationID next, Station *st)
 {
 	for (Vehicle *v = this; v != NULL; v = v->next) {
 		VehicleCargoList &cargo = v->cargo;
 		if (cargo.ReservedCount() > 0) {
 			DEBUG(misc, 1, "cancelling cargo reservation");
-			cargo.Unreserve(&st->goods[v->cargo_type].cargo);
+			GoodsEntry &ge = st->goods[v->cargo_type];
+			cargo.Unreserve(next, &ge.cargo);
+			SetBit(ge.acceptance_pickup, GoodsEntry::GES_PICKUP);
 		}
 	}
 }
@@ -2012,7 +2012,7 @@ void Vehicle::LeaveStation()
 
 	this->current_order.MakeLeaveStation();
 	Station *st = Station::Get(this->last_station_visited);
-	this->CancelReservation(st);
+	this->CancelReservation(INVALID_STATION, st);
 	st->loading_vehicles.remove(this);
 
 	HideFillingPercent(&this->fill_percent_te_id);
