@@ -219,6 +219,9 @@
     <ClCompile Include="..\src\linkgraph\linkgraph.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\linkgraph\mcf.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\map.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -625,6 +628,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\linkgraph\linkgraph_type.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\linkgraph\mcf.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\livery.h">

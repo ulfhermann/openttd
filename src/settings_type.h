@@ -435,6 +435,7 @@ struct LinkGraphSettings {
 	uint8 accuracy;                             ///< accuracy when calculating things on the link graph. low accuracy => low running time
 	uint8 demand_size;                          ///< influence of supply ("station size") on the demand function
 	uint8 demand_distance;                      ///< influence of distance between stations on the demand function
+	uint8 short_path_saturation;                ///< percentage up to which short paths are saturated before saturating most capacious paths
 
 	inline DistributionType GetDistributionType(CargoID cargo) const {
 		if (IsCargoInClass(cargo, CC_PASSENGERS)) {

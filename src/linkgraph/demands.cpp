@@ -46,6 +46,7 @@ inline void Scaler::SetDemands(LinkGraphComponent *graph, NodeID from_id, NodeID
 {
 	Edge &forward = graph->GetEdge(from_id, to_id);
 	forward.demand += demand_forw;
+	forward.unsatisfied_demand += demand_forw;
 	graph->GetNode(from_id).undelivered_supply -= demand_forw;
 }
 

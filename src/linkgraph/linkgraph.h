@@ -20,8 +20,15 @@
 #include "linkgraph_type.h"
 #include <list>
 #include <vector>
+#include <set>
 
 struct SaveLoad;
+class Path;
+
+typedef std::set<Path *> PathSet;
+typedef std::map<NodeID, Path *> PathViaMap;
+typedef std::map<StationID, int> FlowViaMap;
+typedef std::map<StationID, FlowViaMap> FlowMap;
 
 /**
  * Node of the link graph. contains all relevant information from the associated
@@ -34,18 +41,31 @@ public:
 	uint undelivered_supply; ///< Amount of supply that hasn't been distributed yet.
 	uint demand;             ///< Acceptance at the station.
 	StationID station;       ///< Station ID.
+	PathSet paths;           ///< Paths through this node.
+	FlowMap flows;           ///< Planned flows to other nodes.
+
+	/**
+	 * Clear a node on destruction to delete paths that might remain.
+	 */
+	~Node() {this->Init();}
 
 	void Init(StationID st = INVALID_STATION, uint sup = 0, uint dem = 0);
 };
 
 /**
- * An edge in the link graph. Corresponds to a link between two stations.
+ * An edge in the link graph. Corresponds to a link between two stations or at
+ * least the distance between them. Edges from one node to itself contain the
+ * ID of the opposite Node of the first active edge (i.e. not just distance) in
+ * the column as next_edge.
  */
 class Edge {
 public:
-	uint distance; ///< Length of the link.
-	uint capacity; ///< Capacity of the link.
-	uint demand;   ///< Transport demand between the nodes.
+	uint distance;           ///< Length of the link.
+	uint capacity;           ///< Capacity of the link.
+	uint demand;             ///< Transport demand between the nodes.
+	uint unsatisfied_demand; ///< Demand over this edge that hasn't been satisfied yet.
+	uint flow;               ///< Planned flow over this edge.
+	NodeID next_edge;        ///< Destination of next valid edge starting at the same source node.
 
 	void Init(uint distance = 0, uint capacity = 0);
 };
@@ -130,7 +150,14 @@ public:
 	}
 
 	/**
-	 * Mark this component as empty.
+	 * Get the first valid edge starting at the specified node.
+	 * @param from ID of the source node
+	 * @return ID of the destination node
+	 */
+	inline NodeID GetFirstEdge(NodeID from) {return edges[from][from].next_edge;}
+
+	/**
+	 * Set the number of nodes to 0 to mark this component as done.
 	 */
 	inline void Clear()
 	{
@@ -241,6 +268,74 @@ private:
 	friend const SaveLoad *GetLinkGraphDesc();
 
 	void CreateComponent(Station *first);
+};
+
+/**
+ * A leg of a path in the link graph. Paths can form trees by being "forked".
+ */
+class Path {
+public:
+	Path(NodeID n, bool source = false);
+
+	/** Get the node this leg passes. */
+	inline NodeID GetNode() const {return this->node;}
+
+	/** Get the overall origin of the path. */
+	inline NodeID GetOrigin() const {return this->origin;}
+
+	/** Get the parent leg of this one. */
+	inline Path *GetParent() {return this->parent;}
+
+	/** Get the overall capacity of the path. */
+	inline uint GetCapacity() const {return this->capacity;}
+
+	/** Get the free capacity of the path. */
+	inline int GetFreeCapacity() const {return this->free_capacity;}
+
+	/**
+	 * Get ratio of free * 16 (so that we get fewer 0) /
+	 * overall capacity + 1 (so that we don't divide by 0).
+	 */
+	inline int GetCapacityRatio() const {return (this->free_capacity << 4) / (this->capacity + 1);}
+
+	/** Get the overall distance of the path. */
+	inline uint GetDistance() const {return this->distance;}
+
+	/** Reduce the flow on this leg only by the specified amount. */
+	inline void ReduceFlow(uint f) {this->flow -= f;}
+
+	/** Increase the flow on this leg only by the specified amount. */
+	inline void AddFlow(uint f) {this->flow += f;}
+
+	/** Get the flow on this leg. */
+	inline uint GetFlow() const {return this->flow;}
+
+	/** Get the number of "forked off" child legs of this one. */
+	inline uint GetNumChildren() const {return this->num_children;}
+
+	/**
+	 * Detach this path from its parent.
+	 */
+	inline void Detach()
+	{
+		if (this->parent != NULL) {
+			this->parent->num_children--;
+			this->parent = NULL;
+		}
+	}
+
+	uint AddFlow(uint f, LinkGraphComponent *graph, bool only_positive);
+	void Fork(Path *base, uint cap, int free_cap, uint dist);
+
+protected:
+	uint distance;     ///< Sum(distance of all legs up to this one).
+	uint capacity;     ///< This capacity is min(capacity) fom all edges.
+	int free_capacity; ///< This capacity is min(edge.capacity - edge.flow) for the current run of Dijkstra.
+	uint flow;         ///< Flow the current run of the mcf solver assigns.
+	NodeID node;       ///< Link graph node this leg passes.
+	NodeID origin;     ///< Link graph node this path originates from.
+	uint num_children; ///< Number of child legs that have been forked from this path.
+	Path *parent;      ///< Parent leg of this one.
 };
 
 void InitializeLinkGraphs();
