@@ -1135,6 +1135,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\linkgraph_gui.h"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\linkgraph\demands.h"
 				>
 			</File>
@@ -1980,6 +1984,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\intro_gui.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\linkgraph_gui.cpp"
 				>
 			</File>
 			<File
