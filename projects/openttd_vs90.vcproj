@@ -596,6 +596,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\linkgraph\flowmapper.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\linkgraph\linkgraph.cpp"
 				>
 			</File>
@@ -1161,6 +1165,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\linkgraph\demands.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\linkgraph\flowmapper.h"
 				>
 			</File>
 			<File
