@@ -15,8 +15,9 @@
 #include "company_base.h"
 #include "company_gui.h"
 #include "date_func.h"
-#include "linkgraph_gui.h"
 #include "viewport_func.h"
+#include "linkgraph_gui.h"
+#include "smallmap_gui.h"
 #include "widgets/link_graph_legend_widget.h"
 
 #include "table/strings.h"
@@ -269,10 +270,7 @@ Point LinkGraphOverlay::GetStationMiddle(const Station *st) const {
 		return GetViewportStationMiddle(this->window->viewport, st);
 	} else {
 		/* assume this is a smallmap */
-		//return GetSmallmapStationMiddle(this->window, st);
-		Point dummy;
-		dummy.x = dummy.y = 0;
-		return dummy;
+		return static_cast<const SmallMapWindow *>(this->window)->GetStationMiddle(st);
 	}
 }
 
