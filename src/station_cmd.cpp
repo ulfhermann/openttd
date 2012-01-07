@@ -3322,6 +3322,90 @@ static void UpdateStationRating(Station *st)
 	}
 }
 
+/**
+ * Get the length of a moving average for a link between two stations.
+ * @param from Source station.
+ * @param to Destination station.
+ * @return Moving average length.
+ */
+uint GetMovingAverageLength(const Station *from, const Station *to)
+{
+	return LinkStat::MIN_DISTANCE + (DistanceManhattan(from->xy, to->xy) >> 2);
+}
+
+/**
+ * Run the moving average decrease function for all link stats.
+ */
+void Station::RunAverages()
+{
+	for (int goods_index = 0; goods_index < NUM_CARGO; ++goods_index) {
+		LinkStatMap &links = this->goods[goods_index].link_stats;
+		for (LinkStatMap::iterator i = links.begin(); i != links.end();) {
+			StationID id = i->first;
+			if (Station::IsValidID(id)) {
+				i->second.Decrease();
+				if (i->second.IsValid()) {
+					++i;
+				} else {
+					links.erase(i++);
+				}
+			} else {
+				links.erase(i++);
+			}
+		}
+	}
+}
+
+/**
+ * Increase capacity for a link stat given by station cargo and next hop.
+ * @param st Station to get the link stats from.
+ * @param cargo Cargo to increase stat for.
+ * @param next_station_id Station the consist will be travelling to next.
+ * @param capacity Capacity to add to link stat.
+ * @param usage Usage to add to link stat. If UINT_MAX refresh the link instead of increasing.
+ */
+void IncreaseStats(Station *st, CargoID cargo, StationID next_station_id, uint capacity, uint usage)
+{
+	LinkStatMap &stats = st->goods[cargo].link_stats;
+	LinkStatMap::iterator i = stats.find(next_station_id);
+	if (i == stats.end()) {
+		assert(st->index != next_station_id);
+		stats.insert(std::make_pair(next_station_id, LinkStat(
+				GetMovingAverageLength(st, Station::Get(next_station_id)),
+				capacity, usage == UINT_MAX ? 0 : usage)));
+	} else {
+		if (usage == UINT_MAX) {
+			i->second.Refresh(capacity);
+		} else {
+			assert(capacity >= usage);
+			i->second.Increase(capacity, usage);
+		}
+		assert(i->second.IsValid());
+	}
+}
+
+/**
+ * Increase capacity for all link stats associated with vehicles in the given consist.
+ * @param st Station to get the link stats from.
+ * @param front First vehicle in the consist.
+ * @param next_station_id Station the consist will be travelling to next.
+ */
+void IncreaseStats(Station *st, const Vehicle *front, StationID next_station_id)
+{
+	for (const Vehicle *v = front; v != NULL; v = v->Next()) {
+		if (v->refit_cap > 0) {
+			/* The cargo count can indeed be higher than the refit_cap if
+			 * wagons have been auto-replaced and subsequently auto-
+			 * refitted to a higher capacity. The cargo gets redistributed
+			 * among the wagons in that case.
+			 * As usage is not such an important figure anyway we just
+			 * ignore the additional cargo then.*/
+			IncreaseStats(st, v->cargo_type, next_station_id, v->refit_cap,
+				min(v->refit_cap, v->cargo.Count()));
+		}
+	}
+}
+
 /* called for every station each tick */
 static void StationHandleSmallTick(BaseStation *st)
 {
@@ -3337,6 +3421,15 @@ static void StationHandleSmallTick(BaseStation *st)
 void OnTick_Station()
 {
 	if (_game_mode == GM_EDITOR) return;
+
+	/* Everytime the tick counter overflows a some stations are skipped because
+	 * 65536 is not divisible by 74. We don't care as the averages aren't very
+	 * accurate anyway.
+	 */
+	for (uint id = _tick_counter % DAY_TICKS; id < Station::GetPoolSize(); id += DAY_TICKS) {
+		Station *item = Station::GetIfValid(id);
+		if (item != NULL) item->RunAverages();
+	}
 
 	BaseStation *st;
 	FOR_ALL_BASE_STATIONS(st) {
@@ -3364,6 +3457,8 @@ void StationMonthlyLoop()
 			GoodsEntry *ge = &st->goods[i];
 			SB(ge->acceptance_pickup, GoodsEntry::GES_LAST_MONTH, 1, GB(ge->acceptance_pickup, GoodsEntry::GES_CURRENT_MONTH, 1));
 			ClrBit(ge->acceptance_pickup, GoodsEntry::GES_CURRENT_MONTH);
+			ge->supply = ge->supply_new;
+			ge->supply_new = 0;
 		}
 	}
 }
@@ -3402,6 +3497,7 @@ static uint UpdateStationWaiting(Station *st, CargoID type, uint amount, SourceT
 	if (amount == 0) return 0;
 
 	ge.cargo.Append(new CargoPacket(st->index, st->xy, amount, source_type, source_id));
+	ge.supply_new += amount;
 
 	if (!HasBit(ge.acceptance_pickup, GoodsEntry::GES_PICKUP)) {
 		InvalidateWindowData(WC_STATION_LIST, st->index);
