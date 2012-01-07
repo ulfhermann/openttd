@@ -3323,6 +3323,26 @@ static void UpdateStationRating(Station *st)
 }
 
 /**
+ * Delete all flows at a station for specific cargo and destination.
+ * @param at Station to delete flows from.
+ * @param c_id Cargo for which flows shall be deleted.
+ * @param to Remote station of flows to be deleted.
+ */
+void DeleteStaleFlows(StationID at, CargoID c_id, StationID to)
+{
+	FlowStatMap &flows = Station::Get(at)->goods[c_id].flows;
+	for (FlowStatMap::iterator f_it = flows.begin(); f_it != flows.end();) {
+		FlowStat &s_flows = f_it->second;
+		s_flows.EraseShare(to);
+		if (s_flows.GetShares()->empty()) {
+			flows.erase(f_it++);
+		} else {
+			++f_it;
+		}
+	}
+}
+
+/**
  * Get the length of a moving average for a link between two stations.
  * @param from Source station.
  * @param to Destination station.
@@ -3347,11 +3367,16 @@ void Station::RunAverages()
 				if (i->second.IsValid()) {
 					++i;
 				} else {
+					DeleteStaleFlows(this->index, goods_index, id);
 					links.erase(i++);
 				}
 			} else {
 				links.erase(i++);
 			}
+		}
+
+		if (_settings_game.linkgraph.GetDistributionType(goods_index) == DT_MANUAL) {
+			this->goods[goods_index].flows.clear();
 		}
 	}
 }
@@ -3927,6 +3952,109 @@ static CommandCost TerraformTile_Station(TileIndex tile, DoCommandFlag flags, in
 	return DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
 }
 
+/**
+ * Get flow for a station.
+ * @param st Station to get flow for.
+ * @return Flow for st.
+ */
+uint FlowStat::GetShare(StationID st) const
+{
+	uint32 prev = 0;
+	for (SharesMap::const_iterator it = this->shares.begin(); it != this->shares.end(); ++it) {
+		if (it->second == st) {
+			return it->first - prev;
+		} else {
+			prev = it->first;
+		}
+	}
+	return 0;
+}
+
+/**
+ * Get a station a package can be routed to, but exclude the given one.
+ * @param excluded StationID not to be selected.
+ * @return A station ID from the shares map.
+ */
+StationID FlowStat::GetVia(StationID excluded, StationID excluded2) const
+{
+	assert(!this->shares.empty());
+	uint max = (--this->shares.end())->first - 1;
+	SharesMap::const_iterator it = this->shares.upper_bound(RandomRange(max));
+	assert(it != this->shares.end());
+	if (it->second != excluded && it->second != excluded2) return it->second;
+
+	/* We've hit one of the excluded stations.
+	 * Draw another share, from outside its range. */
+
+	uint end = it->first;
+	uint begin = (it == this->shares.begin() ? 0 : (--it)->first);
+	uint interval = end - begin;
+	if (interval > max) return INVALID_STATION; // Only one station in the map.
+	uint new_max = max - interval;
+	uint rand = RandomRange(new_max);
+	SharesMap::const_iterator it2 = (rand < begin) ? this->shares.upper_bound(rand) :
+			this->shares.upper_bound(rand + interval);
+	if (it2->second != excluded && it2->second != excluded2) return it2->second;
+
+	/* We've hit the second excluded station.
+	 * Same as before, only a bit more complicated. */
+
+	uint end2 = it2->first;
+	uint begin2 = (it2 == this->shares.begin() ? 0 : (--it2)->first);
+	uint interval2 = end2 - begin2;
+	if (interval2 > new_max) return INVALID_STATION; // Only the two excluded stations in the map.
+	new_max = new_max - interval;
+	if (begin > begin2) {
+		Swap(begin, begin2);
+		Swap(end, end2);
+	}
+	rand = RandomRange(new_max);
+	if (rand < begin) {
+		return this->shares.upper_bound(rand)->second;
+	} else if (rand < begin2 - interval) {
+		return this->shares.upper_bound(rand + interval)->second;
+	} else {
+		return this->shares.upper_bound(rand + interval + interval2)->second;
+	}
+
+}
+
+/**
+ * Erase shares for specified station.
+ * @param st Next Hop to be removed.
+ */
+void FlowStat::EraseShare(StationID st)
+{
+	uint32 removed_shares = 0;
+	uint32 last_share = 0;
+	SharesMap new_shares;
+	for (SharesMap::iterator it(this->shares.begin()); it != this->shares.end(); ++it) {
+		if (it->second == st) {
+			removed_shares += it->first - last_share;
+		} else {
+			new_shares[it->first - removed_shares] = it->second;
+		}
+		last_share = it->first;
+	}
+	this->shares.swap(new_shares);
+	for (SharesMap::iterator it(this->shares.begin()); it != this->shares.end(); ++it) {
+		assert(it->second != st);
+	}
+}
+
+/**
+ * Get the sum of flows via a specific station from this GoodsEntry.
+ * @param via Remote station to look for.
+ * @return a FlowStat with all flows for 'via' added up.
+ */
+uint GoodsEntry::GetSumFlowVia(StationID via) const
+{
+	uint ret = 0;
+	for (FlowStatMap::const_iterator i = this->flows.begin(); i != this->flows.end(); ++i) {
+		ret += i->second.GetShare(via);
+	}
+	return ret;
+}
 
 extern const TileTypeProcs _tile_type_station_procs = {
 	DrawTile_Station,           // draw_tile_proc
