@@ -87,6 +87,7 @@ static const SaveLoad _node_desc[] = {
 static const SaveLoad _edge_desc[] = {
 	 SLE_CONDVAR(Edge, distance,  SLE_UINT32, SL_COMPONENTS, SL_MAX_VERSION),
 	 SLE_CONDVAR(Edge, capacity,  SLE_UINT32, SL_COMPONENTS, SL_MAX_VERSION),
+	 SLE_CONDVAR(Edge, next_edge, SLE_UINT32,        SL_MCF, SL_MAX_VERSION),
 	 SLE_END()
 };
 

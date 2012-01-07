@@ -1561,6 +1561,7 @@ STR_CONFIG_SETTING_DISTRIBUTION_DEFAULT                         :Distribution mo
 STR_CONFIG_SETTING_LINKGRAPH_ACCURACY                           :Distribution accuracy: {STRING2}
 STR_CONFIG_SETTING_DEMAND_DISTANCE                              :Effect of distance on demands: {STRING2}
 STR_CONFIG_SETTING_DEMAND_SIZE                                  :Amount of returning cargo for symmetric mode: {STRING2}
+STR_CONFIG_SETTING_SHORT_PATH_SATURATION                        :Saturation of short paths before using capacious paths: {STRING2}
 
 STR_CONFIG_SETTING_GUI                                          :{ORANGE}Interface
 STR_CONFIG_SETTING_CONSTRUCTION                                 :{ORANGE}Construction
