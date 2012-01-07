@@ -3275,7 +3275,7 @@ static void UpdateStationRating(Station *st)
 					waiting_changed = true;
 				}
 
-				if (waiting_changed) ge->cargo.Truncate(waiting);
+				if (waiting_changed) ge->cargo.RandomTruncate(waiting);
 			}
 		}
 	}
@@ -3334,9 +3334,11 @@ void Station::RunAverages()
 					++i;
 				} else {
 					DeleteStaleFlows(this->index, goods_index, id);
+					this->goods[goods_index].cargo.RerouteStalePackets(id);
 					links.erase(i++);
 				}
 			} else {
+				this->goods[goods_index].cargo.RerouteStalePackets(id);
 				links.erase(i++);
 			}
 		}
@@ -3474,7 +3476,9 @@ static uint UpdateStationWaiting(Station *st, CargoID type, uint amount, SourceT
 	/* No new "real" cargo item yet. */
 	if (amount == 0) return 0;
 
-	ge.cargo.Append(new CargoPacket(st->index, st->xy, amount, source_type, source_id));
+	StationID next = ge.GetVia(st->index);
+
+	ge.cargo.Append(next, new CargoPacket(st->index, st->xy, amount, source_type, source_id));
 	ge.supply_new += amount;
 
 	if (!HasBit(ge.acceptance_pickup, GoodsEntry::GES_PICKUP)) {
