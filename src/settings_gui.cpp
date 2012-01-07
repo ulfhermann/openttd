@@ -1544,6 +1544,9 @@ static SettingEntry _settings_linkgraph[] = {
 	SettingEntry("linkgraph.distribution_mail"),
 	SettingEntry("linkgraph.distribution_armoured"),
 	SettingEntry("linkgraph.distribution_default"),
+	SettingEntry("linkgraph.accuracy"),
+	SettingEntry("linkgraph.demand_distance"),
+	SettingEntry("linkgraph.demand_size"),
 };
 /** Linkgraph sub-page */
 static SettingsPage _settings_linkgraph_page = {_settings_linkgraph, lengthof(_settings_linkgraph)};

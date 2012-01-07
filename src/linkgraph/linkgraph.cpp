@@ -15,6 +15,7 @@
 #include "../debug.h"
 #include "../moving_average.h"
 #include "linkgraph.h"
+#include "demands.h"
 #include <queue>
 
 /**
@@ -36,6 +37,7 @@ LinkGraphJob::HandlerList LinkGraphJob::_handlers;
 inline void Node::Init(StationID st, uint sup, uint dem)
 {
 	this->supply = sup;
+	this->undelivered_supply = sup;
 	this->demand = dem;
 	this->station = st;
 }
@@ -49,6 +51,7 @@ inline void Edge::Init(uint distance, uint capacity)
 {
 	this->distance = distance;
 	this->capacity = capacity;
+	this->demand = 0;
 }
 
 
@@ -367,4 +370,5 @@ void InitializeLinkGraphs()
 	for (CargoID c = 0; c < NUM_CARGO; ++c) _link_graphs[c].Init(c);
 
 	LinkGraphJob::ClearHandlers();
+	LinkGraphJob::AddHandler(new DemandHandler);
 }

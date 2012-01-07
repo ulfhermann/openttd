@@ -30,9 +30,10 @@ struct SaveLoad;
  */
 class Node {
 public:
-	uint supply;       ///< Supply at the station.
-	uint demand;       ///< Acceptance at the station.
-	StationID station; ///< Station ID.
+	uint supply;             ///< Supply at the station.
+	uint undelivered_supply; ///< Amount of supply that hasn't been distributed yet.
+	uint demand;             ///< Acceptance at the station.
+	StationID station;       ///< Station ID.
 
 	void Init(StationID st = INVALID_STATION, uint sup = 0, uint dem = 0);
 };
@@ -44,6 +45,7 @@ class Edge {
 public:
 	uint distance; ///< Length of the link.
 	uint capacity; ///< Capacity of the link.
+	uint demand;   ///< Transport demand between the nodes.
 
 	void Init(uint distance = 0, uint capacity = 0);
 };

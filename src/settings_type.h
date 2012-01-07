@@ -432,6 +432,9 @@ struct LinkGraphSettings {
 	DistributionTypeByte distribution_mail;     ///< distribution type for mail
 	DistributionTypeByte distribution_armoured; ///< distribution type for armoured cargo class
 	DistributionTypeByte distribution_default;  ///< distribution type for all other goods
+	uint8 accuracy;                             ///< accuracy when calculating things on the link graph. low accuracy => low running time
+	uint8 demand_size;                          ///< influence of supply ("station size") on the demand function
+	uint8 demand_distance;                      ///< influence of distance between stations on the demand function
 
 	inline DistributionType GetDistributionType(CargoID cargo) const {
 		if (IsCargoInClass(cargo, CC_PASSENGERS)) {
