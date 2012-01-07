@@ -13,6 +13,8 @@
 #include "../map_func.h"
 #include "../core/bitmath_func.hpp"
 #include "../debug.h"
+#include "../window_func.h"
+#include "../window_gui.h"
 #include "../moving_average.h"
 #include "linkgraph.h"
 #include "demands.h"
@@ -372,6 +374,7 @@ void LinkGraph::Join()
 		Node &node = this->GetNode(node_id);
 		if (Station::IsValidID(node.station)) {
 			node.ExportFlows(this->cargo);
+			InvalidateWindowData(WC_STATION_VIEW, node.station, this->GetCargo());
 		}
 	}
 
