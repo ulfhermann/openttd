@@ -12,6 +12,7 @@
 #include "stdafx.h"
 #include "moving_average.h"
 #include "date_func.h"
+#include "station_base.h"
 
 /**
  * Run moving average decrease function on all items from a pool which are due
@@ -26,3 +27,6 @@ template <class Titem> void RunAverages()
 		if (item != NULL) item->RunAverages();
 	}
 }
+
+template class MovingAverage<uint>;
+template void RunAverages<Station>();

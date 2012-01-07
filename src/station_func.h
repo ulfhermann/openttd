@@ -15,6 +15,7 @@
 #include "sprite.h"
 #include "rail_type.h"
 #include "road_type.h"
+#include "vehicle_type.h"
 #include "economy_func.h"
 
 void ModifyStationRatingAround(TileIndex tile, Owner owner, int amount, uint radius);
@@ -43,6 +44,10 @@ bool IsStationTileBlocked(TileIndex tile);
 bool IsStationTileElectrifiable(TileIndex tile);
 
 void UpdateAirportsNoise();
+
+void IncreaseStats(Station *st, const Vehicle *v, StationID next_station_id);
+
+void IncreaseStats(Station *st, CargoID cargo, StationID next_station_id, uint capacity, uint usage);
 
 /**
  * Calculates the maintenance cost of a number of station tiles.
