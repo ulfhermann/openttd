@@ -93,6 +93,7 @@ Station::~Station()
 		for (CargoID c = 0; c < NUM_CARGO; ++c) {
 			GoodsEntry &ge = st->goods[c];
 			ge.link_stats.erase(this->index);
+			DeleteStaleFlows(st->index, c, this->index);
 		}
 	}
 
