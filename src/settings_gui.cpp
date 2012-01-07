@@ -1538,6 +1538,16 @@ static SettingEntry _settings_economy[] = {
 /** Economy sub-page */
 static SettingsPage _settings_economy_page = {_settings_economy, lengthof(_settings_economy)};
 
+static SettingEntry _settings_linkgraph[] = {
+	SettingEntry("linkgraph.recalc_interval"),
+	SettingEntry("linkgraph.distribution_pax"),
+	SettingEntry("linkgraph.distribution_mail"),
+	SettingEntry("linkgraph.distribution_armoured"),
+	SettingEntry("linkgraph.distribution_default"),
+};
+/** Linkgraph sub-page */
+static SettingsPage _settings_linkgraph_page = {_settings_linkgraph, lengthof(_settings_linkgraph)};
+
 static SettingEntry _settings_ai_npc[] = {
 	SettingEntry("ai.ai_in_multiplayer"),
 	SettingEntry("ai.ai_disable_veh_train"),
@@ -1629,6 +1639,7 @@ static SettingEntry _settings_main[] = {
 	SettingEntry(&_settings_vehicles_page,     STR_CONFIG_SETTING_VEHICLES),
 	SettingEntry(&_settings_stations_page,     STR_CONFIG_SETTING_STATIONS),
 	SettingEntry(&_settings_economy_page,      STR_CONFIG_SETTING_ECONOMY),
+	SettingEntry(&_settings_linkgraph_page,    STR_CONFIG_SETTING_LINKGRAPH),
 	SettingEntry(&_settings_ai_page,           STR_CONFIG_SETTING_AI),
 };
 

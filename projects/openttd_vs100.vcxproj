@@ -328,6 +328,7 @@
     <ClCompile Include="..\src\ini.cpp" />
     <ClCompile Include="..\src\ini_load.cpp" />
     <ClCompile Include="..\src\landscape.cpp" />
+    <ClCompile Include="..\src\linkgraph\linkgraph.cpp" />
     <ClCompile Include="..\src\map.cpp" />
     <ClCompile Include="..\src\misc.cpp" />
     <ClCompile Include="..\src\mixer.cpp" />
@@ -461,6 +462,8 @@
     <ClInclude Include="..\src\landscape.h" />
     <ClInclude Include="..\src\landscape_type.h" />
     <ClInclude Include="..\src\language.h" />
+    <ClInclude Include="..\src\linkgraph\linkgraph.h" />
+    <ClInclude Include="..\src\linkgraph\linkgraph_type.h" />
     <ClInclude Include="..\src\livery.h" />
     <ClInclude Include="..\src\map_func.h" />
     <ClInclude Include="..\src\map_type.h" />
@@ -797,6 +800,7 @@
     <ClCompile Include="..\src\saveload\group_sl.cpp" />
     <ClCompile Include="..\src\saveload\industry_sl.cpp" />
     <ClCompile Include="..\src\saveload\labelmaps_sl.cpp" />
+    <ClCompile Include="..\src\saveload\linkgraph_sl.cpp" />
     <ClCompile Include="..\src\saveload\map_sl.cpp" />
     <ClCompile Include="..\src\saveload\misc_sl.cpp" />
     <ClCompile Include="..\src\saveload\newgrf_sl.cpp" />

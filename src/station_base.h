@@ -16,6 +16,7 @@
 #include "newgrf_airport.h"
 #include "cargopacket.h"
 #include "industry_type.h"
+#include "linkgraph/linkgraph_type.h"
 #include "newgrf_storage.h"
 #include "moving_average.h"
 #include <map>
@@ -173,7 +174,8 @@ struct GoodsEntry {
 		last_speed(0),
 		last_age(255),
 		supply(0),
-		supply_new(0)
+		supply_new(0),
+		last_component(INVALID_LINKGRAPH_COMPONENT)
 	{}
 
 	byte acceptance_pickup; ///< Status of this cargo, see #GoodsEntryStatus.
@@ -186,6 +188,7 @@ struct GoodsEntry {
 	uint supply;            ///< Cargo supplied last month.
 	uint supply_new;        ///< Cargo supplied so far this month.
 	LinkStatMap link_stats; ///< Capacities and usage statistics for outgoing links.
+	LinkGraphComponentID last_component; ///< Component this station was last part of in this cargo's link graph.
 };
 
 /** All airport-related information. Only valid if tile != INVALID_TILE. */

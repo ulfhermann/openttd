@@ -62,6 +62,8 @@
 
 
 
+#include "linkgraph/linkgraph.h"
+
 #include <stdarg.h>
 
 
@@ -289,6 +291,12 @@ static void ShutdownGame()
 
 	/* Uninitialize variables that are allocated dynamically */
 	GamelogReset();
+
+	/* Reinitialize the link graphs to forcibly stop the threads.
+	 * If a link graph thread is running while the link graph handlers are
+	 * deleted we get a crash.
+	 */
+	InitializeLinkGraphs();
 
 #ifdef ENABLE_NETWORK
 	free(_config_file);

@@ -284,6 +284,7 @@ const SaveLoad *GetGoodsDesc()
 		 SLE_CONDVAR(GoodsEntry, supply,              SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
 		 SLE_CONDVAR(GoodsEntry, supply_new,          SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
 		SLEG_CONDVAR(            _num_links,          SLE_UINT16,      SL_CAPACITIES, SL_MAX_VERSION),
+		 SLE_CONDVAR(GoodsEntry, last_component,      SLE_UINT16,      SL_COMPONENTS, SL_MAX_VERSION),
 		SLE_END()
 	};
 
