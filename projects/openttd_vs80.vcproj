@@ -591,6 +591,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\linkgraph\mcf.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\map.cpp"
 				>
 			</File>
@@ -1136,6 +1140,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\linkgraph\linkgraph_type.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\linkgraph\mcf.h"
 				>
 			</File>
 			<File

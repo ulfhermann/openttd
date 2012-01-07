@@ -16,6 +16,7 @@
 #include "../moving_average.h"
 #include "linkgraph.h"
 #include "demands.h"
+#include "mcf.h"
 #include <queue>
 
 /**
@@ -29,7 +30,7 @@ LinkGraph _link_graphs[NUM_CARGO];
 LinkGraphJob::HandlerList LinkGraphJob::_handlers;
 
 /**
- * Create a node.
+ * Create a node or clear it.
  * @param st ID of the associated station.
  * @param sup Supply of cargo at the station last month.
  * @param dem Acceptance for cargo at the station.
@@ -40,6 +41,12 @@ inline void Node::Init(StationID st, uint sup, uint dem)
 	this->undelivered_supply = sup;
 	this->demand = dem;
 	this->station = st;
+
+	for (PathSet::iterator i = this->paths.begin(); i != this->paths.end(); ++i) {
+		delete *i;
+	}
+	this->paths.clear();
+	this->flows.clear();
 }
 
 /**
@@ -52,6 +59,9 @@ inline void Edge::Init(uint distance, uint capacity)
 	this->distance = distance;
 	this->capacity = capacity;
 	this->demand = 0;
+	this->unsatisfied_demand = 0;
+	this->flow = 0;
+	this->next_edge = INVALID_NODE;
 }
 
 
@@ -214,13 +224,16 @@ NodeID LinkGraphComponent::AddNode(Station *st)
 			HasBit(good.acceptance_pickup, GoodsEntry::GES_ACCEPTANCE));
 
 	std::vector<Edge> &new_edges = this->edges[this->num_nodes];
+
+	/* reset the first edge starting at the new node */
+	new_edges[this->num_nodes].next_edge = INVALID_NODE;
+
 	for (NodeID i = 0; i < this->num_nodes; ++i) {
 		uint distance = DistanceManhattan(st->xy, Station::Get(this->nodes[i].station)->xy);
 		if (do_resize) this->edges[i].push_back(Edge());
 		new_edges[i].Init(distance);
 		this->edges[i][this->num_nodes].Init(distance);
 	}
-
 	return this->num_nodes++;
 }
 
@@ -233,7 +246,11 @@ NodeID LinkGraphComponent::AddNode(Station *st)
 inline void LinkGraphComponent::AddEdge(NodeID from, NodeID to, uint capacity)
 {
 	assert(from != to);
-	this->edges[from][to].capacity = capacity;
+	Edge &edge = this->edges[from][to];
+	Edge &first = this->edges[from][from];
+	edge.capacity = capacity;
+	edge.next_edge = first.next_edge;
+	first.next_edge = to;
 }
 
 /**
@@ -317,6 +334,70 @@ void LinkGraph::Join()
 }
 
 /**
+ * Add this path as a new child to the given base path, thus making this path
+ * a "fork" of the base path.
+ * @param base the path to fork from
+ * @param cap maximum capacity of the new path
+ * @param dist distance of the new leg
+ */
+void Path::Fork(Path *base, uint cap, int free_cap, uint dist)
+{
+	this->capacity = min(base->capacity, cap);
+	this->free_capacity = min(base->free_capacity, free_cap);
+	this->distance = base->distance + dist;
+	assert(this->distance > 0);
+	if (this->parent != base) {
+		this->Detach();
+		this->parent = base;
+		this->parent->num_children++;
+	}
+	this->origin = base->origin;
+}
+
+/**
+ * Push some flow along a path and register the path in the nodes it passes if
+ * successful.
+ * @param new_flow amount of flow to push
+ * @param graph the link graph component this node belongs to
+ * @param only_positive if true, don't push more flow than there is capacity
+ * @return the amount of flow actually pushed
+ */
+uint Path::AddFlow(uint new_flow, LinkGraphComponent *graph, bool only_positive)
+{
+	if (this->parent != NULL) {
+		Edge &edge = graph->GetEdge(this->parent->node, this->node);
+		if (only_positive) {
+			uint usable_cap = edge.capacity * graph->GetSettings().short_path_saturation / 100;
+			if (usable_cap > edge.flow) {
+				new_flow = min(new_flow, usable_cap - edge.flow);
+			} else {
+				return 0;
+			}
+		}
+		new_flow = this->parent->AddFlow(new_flow, graph, only_positive);
+		if (new_flow > 0) {
+			graph->GetNode(this->parent->node).paths.insert(this);
+		}
+		edge.flow += new_flow;
+	}
+	this->flow += new_flow;
+	return new_flow;
+}
+
+/**
+ * create a leg of a path in the link graph.
+ * @param n id of the link graph node this path passes
+ * @param source if true, this is the first leg of the path
+ */
+Path::Path(NodeID n, bool source) :
+	distance(source ? 0 : UINT_MAX),
+	capacity(0),
+	free_capacity(source ? INT_MAX : INT_MIN),
+	flow(0), node(n), origin(source ? n : INVALID_NODE),
+	num_children(0), parent(NULL)
+{}
+
+/**
  * Join the calling thread with this job's thread if threading is enabled.
  */
 inline void LinkGraphJob::Join()
@@ -371,4 +452,6 @@ void InitializeLinkGraphs()
 
 	LinkGraphJob::ClearHandlers();
 	LinkGraphJob::AddHandler(new DemandHandler);
+	LinkGraphJob::AddHandler(new MCFHandler<MCF1stPass>);
+	LinkGraphJob::AddHandler(new MCFHandler<MCF2ndPass>);
 }
