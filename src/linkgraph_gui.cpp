@@ -263,15 +263,15 @@ void LinkGraphOverlay::DrawStationDots(const DrawPixelInfo *dpi) const
  * @return Middle point of the station in the current window.
  */
 Point LinkGraphOverlay::GetStationMiddle(const Station *st) const {
-	//if (this->window->viewport != NULL) {
-	//	return GetViewportStationMiddle(this->window->viewport, st);
-	//} else {
+	if (this->window->viewport != NULL) {
+		return GetViewportStationMiddle(this->window->viewport, st);
+	} else {
 		/* assume this is a smallmap */
 		//return GetSmallmapStationMiddle(this->window, st);
 		Point dummy;
 		dummy.x = dummy.y = 0;
 		return dummy;
-	//}
+	}
 }
 
 /**
@@ -393,7 +393,7 @@ LinkGraphLegendWindow::LinkGraphLegendWindow(const WindowDesc *desc, int window_
 {
 	this->InitNested(desc, window_number);
 	this->InvalidateData(0);
-	//this->SetOverlay(FindWindowById(WC_MAIN_WINDOW, 0)->viewport->overlay);
+	this->SetOverlay(FindWindowById(WC_MAIN_WINDOW, 0)->viewport->overlay);
 }
 
 /**
