@@ -809,31 +809,42 @@ void StationCargoList::RerouteStalePackets(StationID to)
 
 /**
  * Truncate where each destination loses roughly the same percentage of its cargo.
- * This is done by randomizing the selection of packets to be removed.
- * @param max_remaining maximum amount of cargo to keep in the list.
+ * This is done by randomizing the selection of packets to be removed. Also count
+ * the cargo by origin station.
+ * @param max_remaining Maximum amount of cargo to keep in the station.
+ * @param cargo_per_source Container for counting the cargo by origin list.
  */
-void StationCargoList::RandomTruncate(uint max_remaining)
+void StationCargoList::CountAndTruncate(uint max_remaining, StationCargoAmountMap &cargo_per_source)
 {
 	uint prev_count = this->count;
+	uint loop = 0;
 	while (this->count > max_remaining) {
 		for (Iterator it(this->packets.begin()); it != this->packets.end();) {
+			CargoPacket *packet = *it;
+			if (loop == 0) cargo_per_source[packet->source] += packet->count;
+
 			if (RandomRange(prev_count) < max_remaining) {
 				++it;
 				continue;
 			}
-			CargoPacket *packet = *it;
+
 			uint diff = this->count - max_remaining;
 			if (packet->count > diff) {
 				packet->count -= diff;
 				this->count = max_remaining;
 				this->cargo_days_in_transit -= packet->days_in_transit * diff;
-				return;
+				if (loop > 0) {
+					return;
+				} else {
+					++it;
+				}
 			} else {
 				it = this->packets.erase(it);
 				this->RemoveFromCache(packet);
 				delete packet;
 			}
 		}
+		loop++;
 	}
 }
 
