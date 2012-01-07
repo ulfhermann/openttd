@@ -374,6 +374,7 @@ STR_FILE_MENU_EXIT                                              :Exit
 ############ range for map menu starts
 STR_MAP_MENU_MAP_OF_WORLD                                       :Map of world
 STR_MAP_MENU_EXTRA_VIEW_PORT                                    :Extra viewport
+STR_MAP_MENU_LINGRAPH_LEGEND                                    :Cargo Flow Legend
 STR_MAP_MENU_SIGN_LIST                                          :Sign list
 ############ range for town menu starts, yet the town directory is shown in the map menu in the scenario editor
 STR_TOWN_MENU_TOWN_DIRECTORY                                    :Town directory
@@ -2162,6 +2163,15 @@ STR_TRANSPARENT_STRUCTURES_TOOLTIP                              :{BLACK}Toggle t
 STR_TRANSPARENT_CATENARY_TOOLTIP                                :{BLACK}Toggle transparency for catenary. Ctrl+Click to lock
 STR_TRANSPARENT_LOADING_TOOLTIP                                 :{BLACK}Toggle transparency for loading indicators. Ctrl+Click to lock
 STR_TRANSPARENT_INVISIBLE_TOOLTIP                               :{BLACK}Set objects invisible instead of transparent
+
+# Linkgraph legend window
+STR_LINKGRAPH_LEGEND_CAPTION                                    :{BLACK}Cargo Flow Legend
+STR_LINKGRAPH_LEGEND_ALL                                        :{BLACK}All
+STR_LINKGRAPH_LEGEND_NONE                                       :{BLACK}None
+STR_LINKGRAPH_LEGEND_SELECT_COMPANIES                           :{BLACK}Select companies to be displayed
+STR_LINKGRAPH_LEGEND_UNUSED                                     :{TINY_FONT}{BLACK}unused
+STR_LINKGRAPH_LEGEND_SATURATED                                  :{TINY_FONT}{BLACK}saturated
+STR_LINKGRAPH_LEGEND_OVERLOADED                                 :{TINY_FONT}{BLACK}overloaded
 
 # Base for station construction window(s)
 STR_STATION_BUILD_COVERAGE_AREA_TITLE                           :{BLACK}Coverage area highlight
