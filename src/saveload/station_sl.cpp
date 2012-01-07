@@ -224,6 +224,7 @@ static const SaveLoad _old_station_desc[] = {
 };
 
 static uint16 _waiting_acceptance;
+static uint16 _num_links;
 static uint16 _cargo_source;
 static uint32 _cargo_source_xy;
 static uint16 _cargo_days;
@@ -235,6 +236,27 @@ static const SaveLoad _station_speclist_desc[] = {
 
 	SLE_END()
 };
+
+static StationID _station_id;
+
+/**
+ * Wrapper function to get the LinkStat's internal structure while
+ * some of the variables are private.
+ * @return Saveload description for LinkStat.
+ */
+const SaveLoad *GetLinkStatDesc()
+{
+	static const SaveLoad linkstat_desc[] = {
+		SLEG_VAR(          _station_id, SLE_UINT16),
+		 SLE_VAR(LinkStat, length,      SLE_UINT32),
+		 SLE_VAR(LinkStat, capacity,    SLE_UINT32),
+		 SLE_VAR(LinkStat, timeout,     SLE_UINT32),
+		 SLE_VAR(LinkStat, usage,       SLE_UINT32),
+		 SLE_END()
+	};
+
+	return linkstat_desc;
+}
 
 /**
  * Wrapper function to get the GoodsEntry's internal structure while
@@ -259,7 +281,9 @@ const SaveLoad *GetGoodsDesc()
 		SLEG_CONDVAR(            _cargo_feeder_share, SLE_INT64,                  65, 67),
 		 SLE_CONDVAR(GoodsEntry, amount_fract,        SLE_UINT8,                 150, SL_MAX_VERSION),
 		 SLE_CONDLST(GoodsEntry, cargo.packets,       REF_CARGO_PACKET,           68, SL_MAX_VERSION),
-
+		 SLE_CONDVAR(GoodsEntry, supply,              SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
+		 SLE_CONDVAR(GoodsEntry, supply_new,          SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
+		SLEG_CONDVAR(            _num_links,          SLE_UINT16,      SL_CAPACITIES, SL_MAX_VERSION),
 		SLE_END()
 	};
 
@@ -409,7 +433,13 @@ static void RealSave_STNN(BaseStation *bst)
 	if (!waypoint) {
 		Station *st = Station::From(bst);
 		for (CargoID i = 0; i < NUM_CARGO; i++) {
+			_num_links = (uint16)st->goods[i].link_stats.size();
 			SlObject(&st->goods[i], GetGoodsDesc());
+			for (LinkStatMap::const_iterator it(st->goods[i].link_stats.begin()); it != st->goods[i].link_stats.end(); ++it) {
+				_station_id = it->first;
+				LinkStat ls(it->second); // make a copy to avoid constness problems
+				SlObject(&ls, GetLinkStatDesc());
+			}
 		}
 	}
 
@@ -451,6 +481,12 @@ static void Load_STNN()
 
 			for (CargoID i = 0; i < NUM_CARGO; i++) {
 				SlObject(&st->goods[i], GetGoodsDesc());
+				LinkStat ls(1);
+				for (uint16 j = 0; j < _num_links; ++j) {
+					SlObject(&ls, GetLinkStatDesc());
+					assert(ls.IsValid());
+					st->goods[i].link_stats.insert(std::make_pair(_station_id, ls));
+				}
 			}
 		}
 

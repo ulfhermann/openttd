@@ -85,9 +85,6 @@ enum SLRefType {
 	REF_STORAGE       = 9, ///< Load/save a reference to a persistent storage.
 };
 
-/** Highest possible savegame version. */
-#define SL_MAX_VERSION 255
-
 /** Flags of a chunk. */
 enum ChunkType {
 	CH_RIFF         =  0,
@@ -545,5 +542,17 @@ bool SaveloadCrashWithMissingNewGRFs();
 
 extern char _savegame_format[8];
 extern bool _do_autosave;
+
+/**
+ * Save/load versions used for the various branches.
+ * SL_TRUNK is always the current trunk version.
+ */
+enum SaveLoadVersions {
+	SL_TRUNK = 174,
+	SL_CAPACITIES,
+
+	/** Highest possible savegame version. */
+	SL_MAX_VERSION = 255
+};
 
 #endif /* SAVELOAD_H */

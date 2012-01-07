@@ -17,11 +17,140 @@
 #include "cargopacket.h"
 #include "industry_type.h"
 #include "newgrf_storage.h"
+#include "moving_average.h"
+#include <map>
 
 typedef Pool<BaseStation, StationID, 32, 64000> StationPool;
 extern StationPool _station_pool;
 
 static const byte INITIAL_STATION_RATING = 175;
+
+/**
+ * Link statistics. They include figures for capacity and usage of a link. Both
+ * are moving averages which are increased for every vehicle arriving at the
+ * destination station and decreased in regular intervals. Additionally while a
+ * vehicle is loading at the source station part of the capacity is frozen and
+ * prevented from being decreased. This is done so that the link won't break
+ * down all the time when the typical "full load" order is used.
+ */
+class LinkStat : private MovingAverage<uint> {
+private:
+	/**
+	 * Capacity of the link.
+	 * This is a moving average. Use MovingAverage::Monthly() to get a meaningful value.
+	 */
+	uint capacity;
+
+	/**
+	 * Time until the link is removed. Decreases exponentially.
+	 */
+	uint timeout;
+
+	/**
+	 * Usage of the link.
+	 * This is a moving average. Use MovingAverage::Monthly() to get a meaningful value.
+	 */
+	uint usage;
+
+public:
+	/**
+	 * Minimum length of moving averages for capacity and usage.
+	 */
+	static const uint MIN_AVERAGE_LENGTH = 48;
+
+	friend const SaveLoad *GetLinkStatDesc();
+
+	/**
+	 * We don't allow creating a link stat without a timeout/length.
+	 */
+	LinkStat() : MovingAverage<uint>(0) {NOT_REACHED();}
+
+	/**
+	 * Create a link stat with at least a distance.
+	 * @param distance Length for the moving average and link timeout.
+	 * @param capacity Initial capacity of the link.
+	 * @param usage Initial usage of the link.
+	 */
+	inline LinkStat(uint distance, uint capacity = 1, uint usage = 0) :
+		MovingAverage<uint>(distance), capacity(capacity), timeout(distance), usage(usage)
+	{
+		assert(this->usage <= this->capacity);
+	}
+
+	/**
+	 * Reset everything to 0.
+	 */
+	inline void Clear()
+	{
+		this->capacity = 1;
+		this->usage = 0;
+		this->timeout = this->length;
+	}
+
+	/**
+	 * Apply the moving averages to usage and capacity.
+	 */
+	inline void Decrease()
+	{
+		this->MovingAverage<uint>::Decrease(this->usage);
+		this->timeout = this->timeout * MIN_AVERAGE_LENGTH / (MIN_AVERAGE_LENGTH + 1);
+		this->capacity = max(this->MovingAverage<uint>::Decrease(this->capacity), (uint)1);
+		assert(this->usage <= this->capacity);
+	}
+
+	/**
+	 * Get an estimate of the current the capacity by calculating the moving average.
+	 * @return Capacity.
+	 */
+	inline uint Capacity() const
+	{
+		return this->MovingAverage<uint>::Monthly(this->capacity);
+	}
+
+	/**
+	 * Get an estimage of the current usage by calculating the moving average.
+	 * @return Usage.
+	 */
+	inline uint Usage() const
+	{
+		return this->MovingAverage<uint>::Monthly(this->usage);
+	}
+
+	/**
+	 * Add some capacity and usage.
+	 * @param capacity Additional capacity.
+	 * @param usage Additional usage.
+	 */
+	inline void Increase(uint capacity, uint usage)
+	{
+		this->timeout = this->length;
+		this->capacity += capacity;
+		this->usage += usage;
+		assert(this->usage <= this->capacity);
+	}
+
+	/**
+	 * Reset the timeout and make sure there is at least a minimum capacity.
+	 */
+	inline void Refresh(uint min_capacity)
+	{
+		this->capacity = max(this->capacity, min_capacity);
+		this->timeout = this->length;
+	}
+
+	/**
+	 * Check if the timeout has hit.
+	 * @return If timeout is > 0.
+	 */
+	inline bool IsValid() const
+	{
+		return this->timeout > 0;
+	}
+};
+
+typedef std::map<StationID, LinkStat> LinkStatMap;
+
+uint GetMovingAverageLength(const Station *from, const Station *to);
 
 /**
  * Stores station stats for a single cargo.
@@ -42,7 +171,9 @@ struct GoodsEntry {
 		days_since_pickup(255),
 		rating(INITIAL_STATION_RATING),
 		last_speed(0),
-		last_age(255)
+		last_age(255),
+		supply(0),
+		supply_new(0)
 	{}
 
 	byte acceptance_pickup; ///< Status of this cargo, see #GoodsEntryStatus.
@@ -52,6 +183,9 @@ struct GoodsEntry {
 	byte last_age;          ///< Age in years of the last vehicle that picked up this cargo.
 	byte amount_fract;      ///< Fractional part of the amount in the cargo list
 	StationCargoList cargo; ///< The cargo packets of cargo waiting in this station
+	uint supply;            ///< Cargo supplied last month.
+	uint supply_new;        ///< Cargo supplied so far this month.
+	LinkStatMap link_stats; ///< Capacities and usage statistics for outgoing links.
 };
 
 /** All airport-related information. Only valid if tile != INVALID_TILE. */
@@ -257,6 +391,8 @@ public:
 	/* virtual */ uint32 GetNewGRFVariable(const ResolverObject *object, byte variable, byte parameter, bool *available) const;
 
 	/* virtual */ void GetTileArea(TileArea *ta, StationType type) const;
+
+	void RunAverages();
 };
 
 #define FOR_ALL_STATIONS(var) FOR_ALL_BASE_STATIONS_OF_TYPE(Station, var)

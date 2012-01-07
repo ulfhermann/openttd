@@ -657,6 +657,7 @@ CommandCost CmdBuildShip(TileIndex tile, DoCommandFlag flags, const Engine *e, u
 		v->cargo_cap = svi->capacity;
 
 		v->last_station_visited = INVALID_STATION;
+		v->last_loading_station = INVALID_STATION;
 		v->engine_type = e->index;
 
 		v->reliability = e->reliability;

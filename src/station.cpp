@@ -63,7 +63,8 @@ Station::Station(TileIndex tile) :
 }
 
 /**
- * Clean up a station by clearing vehicle orders and invalidating windows.
+ * Clean up a station by clearing vehicle orders, invalidating windows and
+ * removing link stats.
  * Aircraft-Hangar orders need special treatment here, as the hangars are
  * actually part of a station (tiletype is STATION), but the order type
  * is OT_GOTO_DEPOT.
@@ -87,11 +88,22 @@ Station::~Station()
 		if (a->targetairport == this->index) a->targetairport = INVALID_STATION;
 	}
 
+	Station *st;
+	FOR_ALL_STATIONS(st) {
+		for (CargoID c = 0; c < NUM_CARGO; ++c) {
+			GoodsEntry &ge = st->goods[c];
+			ge.link_stats.erase(this->index);
+		}
+	}
+
 	Vehicle *v;
 	FOR_ALL_VEHICLES(v) {
 		/* Forget about this station if this station is removed */
 		if (v->last_station_visited == this->index) {
 			v->last_station_visited = INVALID_STATION;
+		}
+		if (v->last_loading_station == this->index) {
+			v->last_loading_station = INVALID_STATION;
 		}
 	}
 
