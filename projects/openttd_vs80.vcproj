@@ -1135,6 +1135,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\moving_average.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\moving_average.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\network\network.h"
 				>
 			</File>

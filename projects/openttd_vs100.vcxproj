@@ -465,6 +465,8 @@
     <ClInclude Include="..\src\map_func.h" />
     <ClInclude Include="..\src\map_type.h" />
     <ClInclude Include="..\src\mixer.h" />
+    <ClInclude Include="..\src\moving_average.h" />
+    <ClCompile Include="..\src\moving_average.cpp" />
     <ClInclude Include="..\src\network\network.h" />
     <ClInclude Include="..\src\network\network_admin.h" />
     <ClInclude Include="..\src\network\network_base.h" />
