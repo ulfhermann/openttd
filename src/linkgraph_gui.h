@@ -15,6 +15,9 @@
 #include "company_func.h"
 #include "station_base.h"
 #include "widget_type.h"
+
+#include "table/strings.h"
+
 #include <map>
 #include <list>
 
@@ -87,6 +90,27 @@ protected:
 
 	static void AddStats(const LinkStat &orig_link, uint new_flow, LinkProperties &cargo);
 	static void DrawVertex(int x, int y, int size, int colour, int border_colour);
+};
+
+void ShowLinkGraphLegend();
+
+/**
+ * Menu window to select cargoes and companies to show in a link graph overlay.
+ */
+struct LinkGraphLegendWindow : Window {
+public:
+	LinkGraphLegendWindow(const WindowDesc *desc, int window_number);
+	void SetOverlay(LinkGraphOverlay *overlay);
+
+	virtual void DrawWidget(const Rect &r, int widget) const;
+	virtual void OnClick(Point pt, int widget, int click_count);
+	virtual void OnInvalidateData(int data = 0, bool gui_scope = true);
+
+private:
+	LinkGraphOverlay *overlay;
+
+	void UpdateOverlayCompanies();
+	void UpdateOverlayCargoes();
 };
 
 #endif /* LINKGRAPH_GUI_H_ */
