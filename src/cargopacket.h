@@ -441,6 +441,7 @@ public:
 };
 
 typedef MultiMap<StationID, CargoPacket *> StationCargoPacketMap;
+typedef std::map<StationID, uint> StationCargoAmountMap;
 
 /**
  * CargoList that is used for stations.
@@ -520,7 +521,7 @@ public:
 
 	uint Reserve(uint max_move, VehicleCargoList *dest, TileIndex load_place, StationID next);
 	uint Load(uint max_move, VehicleCargoList *dest, TileIndex load_place, StationID next);
-	uint Truncate(uint max_move = UINT_MAX);
+	uint Truncate(uint max_move = UINT_MAX, StationCargoAmountMap *cargo_per_source = NULL);
 	uint Reroute(uint max_move, StationCargoList *dest, StationID avoid, const GoodsEntry *ge);
 
 	/**
