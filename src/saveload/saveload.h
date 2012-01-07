@@ -556,6 +556,7 @@ enum SaveLoadVersions {
 	SL_FLOWMAP,
 	SL_RESERVATION,
 	SL_CARGOMAP,
+	SL_EXT_RATING,
 
 	/** Highest possible savegame version. */
 	SL_MAX_VERSION = 255
