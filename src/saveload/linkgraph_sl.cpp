@@ -11,6 +11,7 @@
 
 #include "../stdafx.h"
 #include "../linkgraph/linkgraph.h"
+#include "../linkgraph/demands.h"
 #include "../settings_internal.h"
 #include "saveload.h"
 #include <vector>
@@ -128,6 +129,10 @@ static void Load_LGRP()
 		SlObject(&graph, GetLinkGraphDesc());
 		graph.SetSize();
 		SaveLoad_LinkGraphComponent(graph);
+		for (uint i = 0; i < graph.GetSize(); ++i) {
+			Node &node = graph.GetNode(i);
+			node.undelivered_supply = node.supply;
+		}
 	}
 }
 
