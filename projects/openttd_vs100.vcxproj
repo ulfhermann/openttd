@@ -465,6 +465,7 @@
     <ClInclude Include="..\src\landscape.h" />
     <ClInclude Include="..\src\landscape_type.h" />
     <ClInclude Include="..\src\language.h" />
+    <ClInclude Include="..\src\linkgraph_gui.h" />
     <ClInclude Include="..\src\linkgraph\demands.h" />
     <ClInclude Include="..\src\linkgraph\flowmapper.h" />
     <ClInclude Include="..\src\linkgraph\linkgraph.h" />
@@ -675,6 +676,7 @@
     <ClCompile Include="..\src\highscore_gui.cpp" />
     <ClCompile Include="..\src\industry_gui.cpp" />
     <ClCompile Include="..\src\intro_gui.cpp" />
+    <ClCompile Include="..\src\linkgraph_gui.cpp" />
     <ClCompile Include="..\src\main_gui.cpp" />
     <ClCompile Include="..\src\misc_gui.cpp" />
     <ClCompile Include="..\src\music_gui.cpp" />

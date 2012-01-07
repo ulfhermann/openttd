@@ -198,6 +198,7 @@ ini_type.h
 landscape.h
 landscape_type.h
 language.h
+linkgraph_gui.h
 linkgraph/demands.h
 linkgraph/flowmapper.h
 linkgraph/linkgraph.h
@@ -427,6 +428,7 @@ group_gui.cpp
 highscore_gui.cpp
 industry_gui.cpp
 intro_gui.cpp
+linkgraph_gui.cpp
 main_gui.cpp
 misc_gui.cpp
 music_gui.cpp
