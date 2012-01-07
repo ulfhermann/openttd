@@ -225,6 +225,7 @@ static const SaveLoad _old_station_desc[] = {
 
 static uint16 _waiting_acceptance;
 static uint16 _num_links;
+static uint32 _num_flows;
 static uint16 _cargo_source;
 static uint32 _cargo_source_xy;
 static uint16 _cargo_days;
@@ -258,6 +259,20 @@ const SaveLoad *GetLinkStatDesc()
 	return linkstat_desc;
 }
 
+struct FlowSaveLoad {
+	FlowSaveLoad() : via(0), share(0) {}
+	StationID source;
+	StationID via;
+	uint32 share;
+};
+
+static const SaveLoad _flow_desc[] = {
+	SLE_CONDVAR(FlowSaveLoad, source,             SLE_UINT16,         SL_FLOWMAP, SL_MAX_VERSION),
+	SLE_CONDVAR(FlowSaveLoad, via,                SLE_UINT16,         SL_FLOWMAP, SL_MAX_VERSION),
+	SLE_CONDVAR(FlowSaveLoad, share,              SLE_UINT32,         SL_FLOWMAP, SL_MAX_VERSION),
+	SLE_END()
+};
+
 /**
  * Wrapper function to get the GoodsEntry's internal structure while
  * some of the variables itself are private.
@@ -284,6 +299,7 @@ const SaveLoad *GetGoodsDesc()
 		 SLE_CONDVAR(GoodsEntry, supply,              SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
 		 SLE_CONDVAR(GoodsEntry, supply_new,          SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
 		SLEG_CONDVAR(            _num_links,          SLE_UINT16,      SL_CAPACITIES, SL_MAX_VERSION),
+		SLEG_CONDVAR(            _num_flows,          SLE_UINT32,         SL_FLOWMAP, SL_MAX_VERSION),
 		 SLE_CONDVAR(GoodsEntry, last_component,      SLE_UINT16,      SL_COMPONENTS, SL_MAX_VERSION),
 		SLE_END()
 	};
@@ -435,11 +451,28 @@ static void RealSave_STNN(BaseStation *bst)
 		Station *st = Station::From(bst);
 		for (CargoID i = 0; i < NUM_CARGO; i++) {
 			_num_links = (uint16)st->goods[i].link_stats.size();
+			_num_flows = 0;
+			for (FlowStatMap::const_iterator it(st->goods[i].flows.begin()); it != st->goods[i].flows.end(); ++it) {
+				_num_flows += (uint32)it->second.GetShares()->size();
+			}
 			SlObject(&st->goods[i], GetGoodsDesc());
 			for (LinkStatMap::const_iterator it(st->goods[i].link_stats.begin()); it != st->goods[i].link_stats.end(); ++it) {
 				_station_id = it->first;
 				LinkStat ls(it->second); // make a copy to avoid constness problems
 				SlObject(&ls, GetLinkStatDesc());
+			}
+			for (FlowStatMap::const_iterator outer_it(st->goods[i].flows.begin()); outer_it != st->goods[i].flows.end(); ++outer_it) {
+				const FlowStat::SharesMap *shares = outer_it->second.GetShares();
+				uint32 sum_shares = 0;
+				FlowSaveLoad flow;
+				flow.source = outer_it->first;
+				for (FlowStat::SharesMap::const_iterator inner_it(shares->begin()); inner_it != shares->end(); ++inner_it) {
+					flow.via = inner_it->second;
+					flow.share = inner_it->first - sum_shares;
+					sum_shares = inner_it->first;
+					assert(flow.share > 0);
+					SlObject(&flow, _flow_desc);
+				}
 			}
 		}
 	}
@@ -487,6 +520,18 @@ static void Load_STNN()
 					SlObject(&ls, GetLinkStatDesc());
 					assert(ls.IsValid());
 					st->goods[i].link_stats.insert(std::make_pair(_station_id, ls));
+				}
+				FlowSaveLoad flow;
+				FlowStat *fs = NULL;
+				StationID prev_source = INVALID_STATION;
+				for (uint32 j = 0; j < _num_flows; ++j) {
+					SlObject(&flow, _flow_desc);
+					if (fs == NULL || prev_source != flow.source) {
+						fs = &(st->goods[i].flows.insert(std::make_pair(flow.source, FlowStat(flow.via, flow.share))).first->second);
+					} else {
+						fs->AddShare(flow.via, flow.share);
+					}
+					prev_source = flow.source;
 				}
 			}
 		}
