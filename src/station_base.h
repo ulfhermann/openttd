@@ -96,7 +96,7 @@ public:
 	{
 		this->MovingAverage<uint>::Decrease(this->usage);
 		this->timeout = this->timeout * MIN_AVERAGE_LENGTH / (MIN_AVERAGE_LENGTH + 1);
-		this->capacity = max(this->MovingAverage<uint>::Decrease(this->capacity), (uint)1);
+		this->capacity = max(this->MovingAverage<uint>::Decrease(this->capacity), 1U);
 		assert(this->usage <= this->capacity);
 	}
 
@@ -149,6 +149,26 @@ public:
 		return this->timeout > 0;
 	}
 };
+
+class StationIDPair {
+private:
+	StationID next;   ///< Remote end of link.
+	StationID second; ///< Station after the end of the link.
+
+public:
+	friend const SaveLoad *GetStationIDPairDesc();
+	StationIDPair(StationID next, StationID second = INVALID_STATION) : next(next), second(second) {}
+	StationID Next() const {return next;}
+	StationID Second() const {return second;}
+
+	bool operator<(const StationIDPair &other) const
+	{
+		return this->next < other.next ||
+			(this->next == other.next && this->second < other.second);
+	}
+};
+
+typedef std::map<StationIDPair, LinkStat> LinkStatMap;
 
 /**
  * Flow statistics telling how much flow should be sent along a link. This is
@@ -205,7 +225,6 @@ private:
 	SharesMap shares;  ///< Shares of flow to be sent via specified station (or consumed locally).
 };
 
-typedef std::map<StationID, LinkStat> LinkStatMap;
 typedef std::map<StationID, FlowStat> FlowStatMap; ///< Flow descriptions by origin stations.
 
 uint GetMovingAverageLength(const Station *from, const Station *to);

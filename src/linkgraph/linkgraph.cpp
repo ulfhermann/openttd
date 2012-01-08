@@ -89,7 +89,7 @@ void LinkGraph::CreateComponent(Station *first)
 
 		const LinkStatMap &links = source->goods[this->cargo].link_stats;
 		for (LinkStatMap::const_iterator i = links.begin(); i != links.end(); ++i) {
-			Station *target = Station::GetIfValid(i->first);
+			Station *target = Station::GetIfValid(i->first.Next());
 			if (target == NULL) continue;
 
 			std::map<Station *, NodeID>::iterator index_it = index.find(target);

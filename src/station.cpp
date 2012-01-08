@@ -97,7 +97,13 @@ Station::~Station()
 	FOR_ALL_STATIONS(st) {
 		for (CargoID c = 0; c < NUM_CARGO; ++c) {
 			GoodsEntry &ge = st->goods[c];
-			ge.link_stats.erase(this->index);
+			for (LinkStatMap::iterator i = ge.link_stats.begin(); i != ge.link_stats.end();) {
+				if (i->first.Next() == this->index || i->first.Second() == this->index) {
+					ge.link_stats.erase(i++);
+				} else {
+					++i;
+				}
+			}
 			DeleteStaleFlows(st->index, c, this->index);
 			ge.cargo.RerouteStalePackets(this->index);
 		}

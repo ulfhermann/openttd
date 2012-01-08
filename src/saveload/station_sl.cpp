@@ -238,7 +238,15 @@ static const SaveLoad _station_speclist_desc[] = {
 	SLE_END()
 };
 
-static StationID _station_id;
+const SaveLoad *GetStationIDPairDesc()
+{
+	static const SaveLoad station_id_pair_desc[] = {
+		SLE_VAR(StationIDPair, next,   SLE_UINT16),
+		SLE_VAR(StationIDPair, second, SLE_UINT16),
+		SLE_END()
+	};
+	return station_id_pair_desc;
+}
 
 /**
  * Wrapper function to get the LinkStat's internal structure while
@@ -248,12 +256,11 @@ static StationID _station_id;
 const SaveLoad *GetLinkStatDesc()
 {
 	static const SaveLoad linkstat_desc[] = {
-		SLEG_VAR(          _station_id, SLE_UINT16),
-		 SLE_VAR(LinkStat, length,      SLE_UINT32),
-		 SLE_VAR(LinkStat, capacity,    SLE_UINT32),
-		 SLE_VAR(LinkStat, timeout,     SLE_UINT32),
-		 SLE_VAR(LinkStat, usage,       SLE_UINT32),
-		 SLE_END()
+		SLE_VAR(LinkStat, length,   SLE_UINT32),
+		SLE_VAR(LinkStat, capacity, SLE_UINT32),
+		SLE_VAR(LinkStat, timeout,  SLE_UINT32),
+		SLE_VAR(LinkStat, usage,    SLE_UINT32),
+		SLE_END()
 	};
 
 	return linkstat_desc;
@@ -498,8 +505,9 @@ static void RealSave_STNN(BaseStation *bst)
 			}
 			SlObject(&st->goods[i], GetGoodsDesc());
 			for (LinkStatMap::const_iterator it(st->goods[i].link_stats.begin()); it != st->goods[i].link_stats.end(); ++it) {
-				_station_id = it->first;
+				StationIDPair pair(it->first);
 				LinkStat ls(it->second); // make a copy to avoid constness problems
+				SlObject(&pair, GetStationIDPairDesc());
 				SlObject(&ls, GetLinkStatDesc());
 			}
 			for (FlowStatMap::const_iterator outer_it(st->goods[i].flows.begin()); outer_it != st->goods[i].flows.end(); ++outer_it) {
@@ -560,10 +568,12 @@ static void Load_STNN()
 			for (CargoID i = 0; i < NUM_CARGO; i++) {
 				SlObject(&st->goods[i], GetGoodsDesc());
 				LinkStat ls(1);
+				StationIDPair pair(1);
 				for (uint16 j = 0; j < _num_links; ++j) {
+					SlObject(&pair, GetStationIDPairDesc());
 					SlObject(&ls, GetLinkStatDesc());
 					assert(ls.IsValid());
-					st->goods[i].link_stats.insert(std::make_pair(_station_id, ls));
+					st->goods[i].link_stats.insert(std::make_pair(pair, ls));
 				}
 				FlowSaveLoad flow;
 				FlowStat *fs = NULL;
