@@ -72,7 +72,7 @@ void LinkGraphOverlay::RebuildCache()
 			supply += sta->goods[c].supply;
 			const LinkStatMap &links = sta->goods[c].link_stats;
 			for (LinkStatMap::const_iterator i = links.begin(); i != links.end(); ++i) {
-				StationID to = i->first;
+				StationID to = i->first.Next();
 				if (seen_links.find(to) != seen_links.end()) continue;
 
 				if (!Station::IsValidID(to)) continue;

@@ -402,10 +402,11 @@ const Order *OrderList::GetBestLoadableNext(const Vehicle *v, const Order *o2, c
  * @param hops The number of orders we have already looked at.
  * @param is_loading If the vehicle is loading. This triggers a different
  * behaviour on conditional orders based on load percentage.
+ * @param skip_no_unload Skip order with "no unload" modifier.
  * @return Either an order or NULL if the vehicle won't stop anymore.
  * @see OrderList::GetBestLoadableNext
  */
-const Order *OrderList::GetNextStoppingOrder(const Vehicle *v, const Order *next, uint hops, bool is_loading) const
+const Order *OrderList::GetNextStoppingOrder(const Vehicle *v, const Order *next, uint hops, bool is_loading, bool skip_no_unload) const
 {
 	if (hops > this->GetNumOrders() || next == NULL) return NULL;
 
@@ -416,9 +417,9 @@ const Order *OrderList::GetNextStoppingOrder(const Vehicle *v, const Order *next
 			 */
 			const Order *skip_to = this->GetNextStoppingOrder(v,
 					this->GetOrderAt(next->GetConditionSkipToOrder()),
-					hops + 1);
+					hops + 1, skip_no_unload);
 			const Order *advance = this->GetNextStoppingOrder(v,
-					this->GetNext(next), hops + 1);
+					this->GetNext(next), hops + 1, skip_no_unload);
 			if (advance == NULL) {
 				return skip_to;
 			} else if (skip_to == NULL) {
@@ -433,10 +434,10 @@ const Order *OrderList::GetNextStoppingOrder(const Vehicle *v, const Order *next
 			VehicleOrderID skip_to = ProcessConditionalOrder(next, v);
 			if (skip_to != INVALID_VEH_ORDER_ID) {
 				return this->GetNextStoppingOrder(v,
-						this->GetOrderAt(skip_to), hops + 1);
+						this->GetOrderAt(skip_to), hops + 1, skip_no_unload);
 			} else {
 				return this->GetNextStoppingOrder(v,
-						this->GetNext(next), hops + 1);
+						this->GetNext(next), hops + 1, skip_no_unload);
 			}
 		}
 	}
@@ -446,8 +447,8 @@ const Order *OrderList::GetNextStoppingOrder(const Vehicle *v, const Order *next
 		if (next->IsRefit()) return next;
 	}
 
-	if (!next->CanLoadOrUnload()) {
-		return this->GetNextStoppingOrder(v, this->GetNext(next), hops + 1);
+	if (!next->CanLoadOrUnload() || (skip_no_unload && (next->GetUnloadType() & OUFB_NO_UNLOAD) != 0)) {
+		return this->GetNextStoppingOrder(v, this->GetNext(next), hops + 1, skip_no_unload);
 	}
 
 	return next;
@@ -460,9 +461,8 @@ const Order *OrderList::GetNextStoppingOrder(const Vehicle *v, const Order *next
  * @pre The vehicle is currently loading and v->last_station_visited is meaningful.
  * @note This function may draw a random number. Don't use it from the GUI.
  */
-StationID OrderList::GetNextStoppingStation(const Vehicle *v) const
+StationID OrderList::GetNextStoppingStation(const Vehicle *v, bool skip_no_unload) const
 {
-
 	const Order *next = this->GetOrderAt(v->cur_implicit_order_index);
 	if (next == NULL) {
 		next = this->GetFirstOrder();
@@ -473,7 +473,7 @@ StationID OrderList::GetNextStoppingStation(const Vehicle *v) const
 
 	uint hops = 0;
 	do {
-		next = this->GetNextStoppingOrder(v, next, ++hops, true);
+		next = this->GetNextStoppingOrder(v, next, ++hops, true, skip_no_unload);
 		/* Don't return a next stop if the vehicle has to unload everything. */
 		if (next == NULL || (next->GetDestination() == v->last_station_visited &&
 				(next->GetUnloadType() & (OUFB_TRANSFER | OUFB_UNLOAD)) == 0)) {

@@ -3335,8 +3335,9 @@ void Station::RunAverages()
 	for (int goods_index = 0; goods_index < NUM_CARGO; ++goods_index) {
 		LinkStatMap &links = this->goods[goods_index].link_stats;
 		for (LinkStatMap::iterator i = links.begin(); i != links.end();) {
-			StationID id = i->first;
-			if (Station::IsValidID(id)) {
+			StationID id = i->first.Next();
+			StationID second = i->first.Second();
+			if (Station::IsValidID(id) && (second == INVALID_STATION || second == NEW_STATION || Station::IsValidID(second))) {
 				i->second.Decrease();
 				if (i->second.IsValid()) {
 					++i;
@@ -3362,19 +3363,19 @@ void Station::RunAverages()
  * @param st Station to get the link stats from.
  * @param cargo Cargo to increase stat for.
  * @param next_station_id Station the consist will be travelling to next.
+ * @param force_to Next station the cargo will travel to after next_station_id.
  * @param capacity Capacity to add to link stat.
  * @param usage Usage to add to link stat. If UINT_MAX refresh the link instead of increasing.
  */
-void IncreaseStats(Station *st, CargoID cargo, StationID next_station_id, uint capacity, uint usage)
+void IncreaseStats(Station *st, CargoID cargo, StationID next_station_id, StationID force_to, uint capacity = 0, uint usage = 0)
 {
-	LinkStatMap &stats = st->goods[cargo].link_stats;
-	LinkStatMap::iterator i = stats.find(next_station_id);
-	if (i == stats.end()) {
+	StationIDPair key(next_station_id, force_to);
+	LinkStatMap::iterator i = st->goods[cargo].link_stats.find(key);
+	if (i == st->goods[cargo].link_stats.end()) {
 		assert(st->index != next_station_id);
-		stats.insert(std::make_pair(next_station_id, LinkStat(
-				GetMovingAverageLength(st,
-				Station::Get(next_station_id)), capacity,
-				usage == UINT_MAX ? 0 : usage)));
+		st->goods[cargo].link_stats.insert(std::make_pair(key, LinkStat(
+				GetMovingAverageLength(st, Station::Get(next_station_id)),
+				capacity, usage == UINT_MAX ? 0 : usage)));
 	} else {
 		if (usage == UINT_MAX) {
 			i->second.Refresh(capacity);
@@ -3392,11 +3393,11 @@ void IncreaseStats(Station *st, CargoID cargo, StationID next_station_id, uint c
  * @param front First vehicle in the consist.
  * @param next_station_id Station the consist will be travelling to next.
  */
-void IncreaseStats(Station *st, const Vehicle *front, StationID next_station_id)
+void IncreaseStats(Station *st, const Vehicle *front, StationID next_station_id, StationID force_to)
 {
 	for (const Vehicle *v = front; v != NULL; v = v->Next()) {
 		if (v->refit_cap > 0) {
-			IncreaseStats(st, v->cargo_type, next_station_id, v->refit_cap, v->cargo.Count());
+			IncreaseStats(st, v->cargo_type, next_station_id, force_to, v->refit_cap, v->cargo.Count());
 		}
 	}
 }

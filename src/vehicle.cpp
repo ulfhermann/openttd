@@ -1942,11 +1942,21 @@ void Vehicle::BeginLoading()
 		this->current_order.MakeLoading(false);
 	}
 
+	OrderUnloadFlags unload = this->current_order.GetUnloadType();
 	if (this->last_loading_station != INVALID_STATION &&
 			this->last_loading_station != this->last_station_visited &&
 			((this->current_order.GetLoadType() & OLFB_NO_LOAD) == 0 ||
-			(this->current_order.GetUnloadType() & OUFB_NO_UNLOAD) == 0)) {
-		IncreaseStats(Station::Get(this->last_loading_station), this, this->last_station_visited);
+			(unload & OUFB_NO_UNLOAD) == 0)) {
+		StationID next = INVALID_STATION;
+		if ((unload & OUFB_NO_UNLOAD) != 0) {
+			next = this->GetNextStoppingStation(true);
+		} else if ((unload & OUFB_UNLOAD) != 0) {
+			next = this->last_station_visited;
+		} else if ((unload & OUFB_TRANSFER) != 0) {
+			next = NEW_STATION;
+		}
+		IncreaseStats(Station::Get(this->last_loading_station), this,
+			this->last_station_visited, next);
 	}
 
 	PrepareUnload(this);
@@ -2109,7 +2119,22 @@ void Vehicle::RefreshNextHopsStats()
 			if (st != NULL && next_station != INVALID_STATION && next_station != st->index) {
 				for (const SmallPair<CargoID, uint> *i = capacities.Begin(); i != capacities.End(); ++i) {
 					/* Refresh the link and give it a minimum capacity. */
-					if (i->second > 0) IncreaseStats(st, i->first, next_station, i->second, UINT_MAX);
+					if (i->second > 0) {
+						StationID second_station = INVALID_STATION;
+						OrderUnloadFlags unload = next->GetUnloadType();
+						if ((unload & OUFB_NO_UNLOAD) != 0) {
+							const Order *second = this->orders.list->GetNextStoppingOrder(this,
+								this->orders.list->GetNext(next), ++hops, true);
+							if (second != NULL) second_station = second->GetDestination();
+							if (second_station == next_station) second_station = INVALID_STATION;
+						} else if ((unload & OUFB_UNLOAD) != 0) {
+							second_station = next_station;
+						} else if ((unload & OUFB_TRANSFER) != 0) {
+							second_station = NEW_STATION;
+						}
+						IncreaseStats(st, i->first, next_station,
+							second_station, i->second, UINT_MAX);
+					}
 				}
 			}
 			cur = next;
