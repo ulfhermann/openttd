@@ -590,6 +590,8 @@ public:
 		return (this->orders.list == NULL) ? INVALID_STATION : this->orders.list->GetNextStoppingStation(this, skip_no_unload);
 	}
 
+	StationID GetForceTo(OrderUnloadFlags unload, StationID next = INVALID_STATION, StationID second = INVALID_STATION) const;
+
 	void RefreshNextHopsStats();
 
 	/**

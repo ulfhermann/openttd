@@ -44,6 +44,8 @@ inline void Node::Init(StationID st, uint sup, uint dem)
 	this->undelivered_supply = sup;
 	this->demand = dem;
 	this->station = st;
+	this->import_node = INVALID_NODE;
+	this->export_node = INVALID_NODE;
 
 	for (PathSet::iterator i = this->paths.begin(); i != this->paths.end(); ++i) {
 		delete *i;
@@ -85,22 +87,46 @@ void LinkGraph::CreateComponent(Station *first)
 	/* find all stations belonging to the current component */
 	while (!search_queue.empty()) {
 		Station *source = search_queue.front();
+		NodeID source_node = index[source];
+		NodeID source_export_node = this->GetNode(source_node).export_node;
+		if (source_export_node != INVALID_STATION) source_node = source_export_node;
 		search_queue.pop();
 
 		const LinkStatMap &links = source->goods[this->cargo].link_stats;
-		for (LinkStatMap::const_iterator i = links.begin(); i != links.end(); ++i) {
-			Station *target = Station::GetIfValid(i->first.Next());
-			if (target == NULL) continue;
 
+		for (LinkStatMap::const_iterator i = links.begin(); i != links.end(); ++i) {
+			StationID next = i->first.Next();
+			StationID second = i->first.Second();
+			Station *target = Station::GetIfValid(next);
+			if (target == NULL) continue;
 			std::map<Station *, NodeID>::iterator index_it = index.find(target);
+			NodeID node;
 			if (index_it == index.end()) {
 				search_queue.push(target);
-				NodeID node = this->AddNode(target);
+				node = this->AddNode(target);
 				index[target] = node;
-
-				this->AddEdge(index[source], node, i->second.Capacity());
 			} else {
-				this->AddEdge(index[source], index_it->second, i->second.Capacity());
+				node = index_it->second;
+			}
+
+			if (second == INVALID_STATION) {
+				/* no special unload or transfer order */
+				this->AddEdge(source_node, node, i->second.Capacity());
+			} else if (second == NEW_STATION) {
+				/* this is a transfer */
+				NodeID export_node = (this->GetNode(node).export_node == INVALID_STATION ?
+					this->SplitExport(node) : this->GetNode(node).export_node);
+				this->AddEdge(source_node, export_node, i->second.Capacity());
+			} else if (second == next) {
+				/* this is an unload */
+				NodeID import_node = (this->GetNode(node).import_node == INVALID_STATION ?
+					this->SplitImport(node) : this->GetNode(node).import_node);
+				this->AddEdge(source_node, import_node, i->second.Capacity());
+			} else {
+				if (!Station::IsValidID(second)) continue;
+				/* this is a no unload */
+				NodeID passby_node = this->SplitPassby(node, second, i->second.Capacity());
+				this->AddEdge(source_node, passby_node, i->second.Capacity());
 			}
 		}
 	}
@@ -204,6 +230,47 @@ void OnTick_LinkGraph()
 }
 
 /**
+ * Insert a node without adjusting edges or incrementing the num_nodes.
+ * @param station Station ID to be set in the new node.
+ * @param supply Supply value for new node.
+ * @param demand Demand value for new node.
+ * @return True if new memory had to be allocated, false if the node and edges
+ *	vectors were already large enough.
+ */
+bool LinkGraphComponent::InsertNode(StationID station, uint supply, uint demand)
+{
+	bool do_resize = (this->nodes.size() == this->num_nodes);
+
+	if (do_resize) {
+		this->nodes.push_back(Node());
+		this->edges.push_back(std::vector<Edge>(this->num_nodes + 1));
+	}
+
+	this->nodes[this->num_nodes].Init(station, supply, demand);
+	return do_resize;
+}
+
+/**
+ * Clone a node (set the same station, supply, base and edge distances in a new
+ * node).
+ * @param node Node to be Cloned
+ * @return ID of clone.
+ */
+NodeID LinkGraphComponent::CloneNode(NodeID node)
+{
+	Node &base = this->GetNode(node);
+	bool do_resize = this->InsertNode(base.station, base.supply, base.demand);
+	std::vector<Edge> &new_edges = this->edges[this->num_nodes];
+	for (NodeID i = 0; i < this->num_nodes; ++i) {
+		uint distance = this->edges[i][node].distance;
+		if (do_resize) this->edges[i].push_back(Edge());
+		new_edges[i].Init(distance);
+		this->edges[i][this->num_nodes].Init(distance);
+	}
+	return this->num_nodes++;
+}
+
+/**
  * Add a node to the component and create empty edges associated with it. Set
  * the station's last_component to this component. Calculate the distances to all
  * other nodes. The distances to _all_ nodes are important as the demand
@@ -215,17 +282,7 @@ NodeID LinkGraphComponent::AddNode(Station *st)
 {
 	GoodsEntry &good = st->goods[this->cargo];
 	good.last_component = this->index;
-
-	bool do_resize = (this->nodes.size() == this->num_nodes);
-
-	if (do_resize) {
-		this->nodes.push_back(Node());
-		this->edges.push_back(std::vector<Edge>(this->num_nodes + 1));
-	}
-
-	this->nodes[this->num_nodes].Init(st->index, good.supply,
-			HasBit(good.acceptance_pickup, GoodsEntry::GES_ACCEPTANCE));
-
+	bool do_resize = this->InsertNode(st->index, good.supply, HasBit(good.acceptance_pickup, GoodsEntry::GES_ACCEPTANCE));
 	std::vector<Edge> &new_edges = this->edges[this->num_nodes];
 
 	/* reset the first edge starting at the new node */
@@ -238,6 +295,58 @@ NodeID LinkGraphComponent::AddNode(Station *st)
 		this->edges[i][this->num_nodes].Init(distance);
 	}
 	return this->num_nodes++;
+}
+
+/**
+ * Split out an import node for "unload all" orders from another node.
+ * @param node The node to be split.
+ * @return A clone of the node. The new node's ID is recorded in import_node of
+ *	the original one.
+ */
+NodeID LinkGraphComponent::SplitImport(NodeID node)
+{
+	NodeID import_node = this->CloneNode(node);
+	this->GetNode(node).import_node = import_node;
+	return import_node;
+}
+
+/**
+ * Split out an export node for "transfer" orders from another node.
+ * @param node The node to be split.
+ * @return A clone of the node. The new node's ID is recorded in export_node of
+ *	the original one.
+ */
+NodeID LinkGraphComponent::SplitExport(NodeID node)
+{
+	NodeID export_node = this->CloneNode(node);
+	this->GetNode(node).export_node = export_node;
+	return export_node;
+}
+
+/**
+ * Split out a passby node for "no unload" orders from another node. The
+ * destination station ID and capacity for the passby are temporarily saved as
+ * "station" and "supply" fields in the passby node. It is expected that the
+ * node is revisited later when all nodes have been created and the missing
+ * links can be filled and the capacities adjusted.
+ * @param node The node to be split.
+ * @param second End of the passby.
+ * @param capacity Capacity of the passby.
+ * @return A clone of the node with some special properties.
+ */
+NodeID LinkGraphComponent::SplitPassby(NodeID node, StationID second, uint capacity)
+{
+	NodeID passby = this->CloneNode(node);
+	Node &passby_node = this->GetNode(passby);
+	/* We don't know if the second station is already in the link graph. So
+	 * we have to postpone the "wiring" until all nodes are created. Until
+	 * then we misuse some other fields to carry the necessary information.
+	 */
+	passby_node.export_node = node; // export == import marks passby in later cleanup
+	passby_node.import_node = node;
+	passby_node.supply = capacity;
+	passby_node.station = second;
+	return passby;
 }
 
 /**
