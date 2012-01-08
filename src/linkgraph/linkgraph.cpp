@@ -17,6 +17,7 @@
 #include "../window_gui.h"
 #include "../moving_average.h"
 #include "linkgraph.h"
+#include "normalize.h"
 #include "demands.h"
 #include "mcf.h"
 #include "flowmapper.h"
@@ -355,7 +356,7 @@ NodeID LinkGraphComponent::SplitPassby(NodeID node, StationID second, uint capac
  * @param to Destination node of the link.
  * @param capacity Capacity of the link.
  */
-inline void LinkGraphComponent::AddEdge(NodeID from, NodeID to, uint capacity)
+void LinkGraphComponent::AddEdge(NodeID from, NodeID to, uint capacity)
 {
 	assert(from != to);
 	Edge &edge = this->edges[from][to];
@@ -631,6 +632,7 @@ void InitializeLinkGraphs()
 	for (CargoID c = 0; c < NUM_CARGO; ++c) _link_graphs[c].Init(c);
 
 	LinkGraphJob::ClearHandlers();
+	LinkGraphJob::AddHandler(new NormalizeHandler());
 	LinkGraphJob::AddHandler(new DemandHandler);
 	LinkGraphJob::AddHandler(new MCFHandler<MCF1stPass>);
 	LinkGraphJob::AddHandler(new FlowMapper);
