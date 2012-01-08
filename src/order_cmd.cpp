@@ -401,7 +401,7 @@ const Order *OrderList::GetBestLoadableNext(const Vehicle *v, const Order *o2, c
  * @param next The order to start looking at.
  * @param hops The number of orders we have already looked at.
  * @param is_loading If the vehicle is loading. This triggers a different
- * behaviour on conditional orders based on load percentage.
+ *        behaviour on conditional orders based on load percentage.
  * @param skip_no_unload Skip order with "no unload" modifier.
  * @return Either an order or NULL if the vehicle won't stop anymore.
  * @see OrderList::GetBestLoadableNext

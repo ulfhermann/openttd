@@ -17,6 +17,7 @@
 #include "../thread/thread.h"
 #include "../settings_type.h"
 #include "../date_func.h"
+#include "../core/smallmap_type.hpp"
 #include "linkgraph_type.h"
 #include <list>
 #include <vector>
@@ -29,6 +30,16 @@ typedef std::set<Path *> PathSet;
 typedef std::map<NodeID, Path *> PathViaMap;
 typedef std::map<StationID, int> FlowViaMap;
 typedef std::map<StationID, FlowViaMap> FlowMap;
+
+class NodeIDPair : public SmallPair<NodeID, NodeID> {
+public:
+	NodeIDPair(NodeID first, NodeID second) : SmallPair<NodeID, NodeID>(first, second) {}
+
+	inline bool operator==(const NodeIDPair &other) const
+	{
+		return this->first == other.first && this->second == other.second;
+	}
+};
 
 /**
  * Node of the link graph. contains all relevant information from the associated
@@ -43,6 +54,8 @@ public:
 	StationID station;       ///< Station ID.
 	PathSet paths;           ///< Paths through this node.
 	FlowMap flows;           ///< Planned flows to other nodes.
+	NodeID import_node;      ///< Extra node for "unload all" orders.
+	NodeID export_node;      ///< Extra node for "transfer" orders.
 
 	/**
 	 * Clear a node on destruction to delete paths that might remain.
@@ -85,6 +98,8 @@ private:
 	typedef std::vector<Node> NodeVector;
 	typedef std::vector<std::vector<Edge> > EdgeMatrix;
 
+	bool InsertNode(StationID station, uint supply, uint demand);
+
 public:
 	LinkGraphComponent();
 
@@ -123,6 +138,10 @@ public:
 	void SetSize();
 
 	NodeID AddNode(Station *st);
+	NodeID CloneNode(NodeID node);
+	NodeID SplitImport(NodeID node);
+	NodeID SplitExport(NodeID node);
+	NodeID SplitPassby(NodeID node, StationID second, uint capacity);
 
 	void AddEdge(NodeID from, NodeID to, uint capacity);
 
