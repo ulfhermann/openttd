@@ -599,6 +599,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\linkgraph\normalize.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\map.cpp"
 				>
 			</File>
@@ -1156,6 +1160,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\linkgraph\mcf.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\linkgraph\normalize.h"
 				>
 			</File>
 			<File
