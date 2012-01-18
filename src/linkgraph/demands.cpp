@@ -44,7 +44,11 @@ void SymmetricScaler::SetDemands(LinkGraphComponent *graph, NodeID from_id, Node
  */
 inline void Scaler::SetDemands(LinkGraphComponent *graph, NodeID from_id, NodeID to_id, uint demand_forw)
 {
-	Edge &forward = graph->GetEdge(from_id, to_id);
+	NodeID export_id = graph->GetNode(from_id).export_node;
+	if (export_id == INVALID_NODE) export_id = from_id;
+	NodeID import_id = graph->GetNode(to_id).import_node;
+	if (import_id == INVALID_NODE) import_id = to_id;
+	Edge &forward = graph->GetEdge(export_id, import_id);
 	forward.demand += demand_forw;
 	forward.unsatisfied_demand += demand_forw;
 	graph->GetNode(from_id).undelivered_supply -= demand_forw;
