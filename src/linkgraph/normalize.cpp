@@ -24,6 +24,7 @@ Normalizer::Normalizer(LinkGraphComponent *graph)
 				node.undelivered_supply = 0;
 				node.demand = 0;
 				import_node.export_node = node.export_node;
+				import_node.import_node = node.import_node;
 			} else {
 				/* Passby node: Base node is given as import/export.
 				 * 1. Make an additional edge of capacity
@@ -73,7 +74,6 @@ Normalizer::Normalizer(LinkGraphComponent *graph)
 				node.supply = 0;
 				node.undelivered_supply = 0;
 				node.demand = 0;
-				node.station = base_node.station;
 				graph->AddEdge(export_id, node_id, UINT_MAX);
 			}
 		}
@@ -99,6 +99,15 @@ Normalizer::Normalizer(LinkGraphComponent *graph)
 			export_node.supply = 0;
 			export_node.undelivered_supply = 0;
 			export_node.import_node = node.import_node;
+			export_node.export_node = node.export_node;
+		}
+	}
+
+	/* set passby nodes' stations to the same as base nodes' stations */
+	for (NodeID node_id = 0; node_id < graph->GetSize(); ++node_id) {
+		Node &node = graph->GetNode(node_id);
+		if (node.import_node == node.export_node && node.import_node != INVALID_NODE) {
+			node.station = graph->GetNode(node.import_node).station;
 		}
 	}
 }
