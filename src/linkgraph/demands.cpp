@@ -44,10 +44,32 @@ void SymmetricScaler::SetDemands(LinkGraphComponent *graph, NodeID from_id, Node
  */
 inline void Scaler::SetDemands(LinkGraphComponent *graph, NodeID from_id, NodeID to_id, uint demand_forw)
 {
-	NodeID export_id = graph->GetNode(from_id).export_node;
-	if (export_id == INVALID_NODE) export_id = from_id;
-	NodeID import_id = graph->GetNode(to_id).import_node;
-	if (import_id == INVALID_NODE) import_id = to_id;
+	NodeID export_id = from_id;
+	NodeID import_id = to_id;
+	Node *from_node = &graph->GetNode(from_id);
+	Node *to_node = &graph->GetNode(to_id);
+
+	if (from_node->export_node != INVALID_NODE) {
+		export_id = from_node->export_node;
+		if (from_node->import_node == from_node->export_node) {
+			/* passby */
+			from_node = &graph->GetNode(from_node->export_node);
+			if (from_node->export_node != INVALID_NODE) {
+				export_id = from_node->export_node;
+			}
+		}
+	}
+	if (to_node->import_node != INVALID_NODE) {
+		import_id = to_node->import_node;
+		if (to_node->import_node == to_node->export_node) {
+			/* passby */
+			to_node = &graph->GetNode(to_node->import_node);
+			if (to_node->import_node != INVALID_NODE) {
+				import_id = to_node->import_node;
+			}
+		}
+	}
+
 	Edge &forward = graph->GetEdge(export_id, import_id);
 	forward.demand += demand_forw;
 	forward.unsatisfied_demand += demand_forw;
