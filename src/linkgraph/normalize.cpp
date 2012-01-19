@@ -18,8 +18,10 @@ Normalizer::Normalizer(LinkGraphComponent *graph)
 				graph->AddEdge(node_id, node.import_node, UINT_MAX);
 				Node &import_node = graph->GetNode(node.import_node);
 				import_node.supply = node.supply;
+				import_node.undelivered_supply = node.undelivered_supply;
 				import_node.demand = node.demand;
 				node.supply = 0;
+				node.undelivered_supply = 0;
 				node.demand = 0;
 				import_node.export_node = node.export_node;
 			} else {
@@ -39,38 +41,37 @@ Normalizer::Normalizer(LinkGraphComponent *graph)
 				 */
 				Node &base_node = graph->GetNode(node.export_node);
 				NodeID export_id = base_node.export_node == INVALID_NODE ?
-					node.export_node : base_node.export_node;
+						node.export_node : base_node.export_node;
 				NodeID remote_id = INVALID_NODE;
 				for (NodeID other_id = 0; other_id != graph->GetSize(); ++other_id) {
 					Node &other = graph->GetNode(other_id);
 					if (other.station == node.station) {
-						/* Found remote end; Need to check if we're
-						 * passing by there, too.
-						 * TODO: strategy won't work: If there are several
-						 * parallel passby paths, they mustn't cross. However,
-						 * we don't have that information here so we tolerate
-						 * crossing "parallel" passby paths.
-						 */
-						remote_id = other_id;
-					} else if (remote_id != INVALID_NODE && other.export_node == other.import_node &&
-						other.export_node == remote_id) {
-						Edge &passby_edge = graph->GetEdge(export_id, other_id);
-						if (passby_edge.capacity > 0) {
-							uint reroute = min(node.supply, passby_edge.capacity);
-							node.supply -= reroute;
-							graph->GetEdge(node_id, other_id).capacity += reroute;
-							passby_edge.capacity -= reroute;
-							if (node.supply == 0) break;
+						if (other.import_node == INVALID_STATION || other.export_node != other.import_node) {
+							/* final end of passby chain; only use if no further passby is found */
+							remote_id = other.import_node == INVALID_STATION ? other_id : other.import_node;
+						} else {
+							/* further passby node of same chain */
+							Edge &passby_edge = graph->GetEdge(export_id, other_id);
+							if (passby_edge.capacity > 0) {
+								/* next node in passby chain */
+								uint reroute = min(node.supply, passby_edge.capacity);
+								node.supply -= reroute; // supply being misused as capacity
+								graph->GetEdge(node_id, other_id).capacity += reroute;
+								passby_edge.capacity -= reroute;
+								if (node.supply == 0) break; // no more capacity to be distributed
+							}
 						}
 					}
 				}
 				if (remote_id != INVALID_NODE && node.supply > 0) {
+					/* handle end of passby chain */
 					Edge &export_edge = graph->GetEdge(export_id, remote_id);
 					uint reroute = min(node.supply, export_edge.capacity);
 					export_edge.capacity -= reroute;
 					graph->GetEdge(node_id, remote_id).capacity += reroute;
 				}
 				node.supply = 0;
+				node.undelivered_supply = 0;
 				node.demand = 0;
 				node.station = base_node.station;
 				graph->AddEdge(export_id, node_id, UINT_MAX);
@@ -96,6 +97,7 @@ Normalizer::Normalizer(LinkGraphComponent *graph)
 			Node &export_node = graph->GetNode(node.export_node);
 			export_node.demand = 0;
 			export_node.supply = 0;
+			export_node.undelivered_supply = 0;
 			export_node.import_node = node.import_node;
 		}
 	}
