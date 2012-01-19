@@ -1844,28 +1844,6 @@ void Vehicle::DeleteUnreachedImplicitOrders()
 }
 
 /**
- *
- * @param unload
- * @param next
- * @param second
- * @return
- */
-StationID Vehicle::GetForceTo(OrderUnloadFlags unload, StationID next, StationID second) const
-{
-	if (unload == OUF_UNLOAD_IF_POSSIBLE) {
-		return INVALID_STATION;
-	} else if ((unload & OUFB_NO_UNLOAD) != 0) {
-		return second == INVALID_STATION ? this->GetNextStoppingStation() : second;
-	} else if ((unload & OUFB_UNLOAD) != 0) {
-		return next == INVALID_STATION ? this->last_station_visited : next;
-	} else if ((unload & OUFB_TRANSFER) != 0) {
-		return NEW_STATION;
-	} else {
-		NOT_REACHED();
-	}
-}
-
-/**
  * Prepare everything to begin the loading when arriving at a station.
  * @pre IsTileType(this->tile, MP_STATION) || this->type == VEH_SHIP.
  */
@@ -2089,14 +2067,10 @@ void Vehicle::RefreshNextHopsStats()
 			this->GetOrder(this->cur_implicit_order_index), hops);
 	const Order *cur = first;
 	const Order *next = first;
-	const Order *second = this->orders.list->GetNextStoppingOrder(this,
-				this->orders.list->GetNext(first), ++hops);
 	while (next != NULL && cur->CanLeaveWithCargo(true)) {
-		next = second;
+		next = this->orders.list->GetNextStoppingOrder(this,
+				this->orders.list->GetNext(next), ++hops);
 		if (next == NULL) break;
-
-		second = this->orders.list->GetNextStoppingOrder(this,
-				this->orders.list->GetNext(second), ++hops);
 
 		if (next->IsType(OT_GOTO_DEPOT)) {
 			/* handle refit by dropping some vehicles. */
@@ -2141,9 +2115,8 @@ void Vehicle::RefreshNextHopsStats()
 			}
 		} else {
 			StationID next_station = next->GetDestination();
-			StationID second_station = second->GetDestination();
 			Station *st = Station::GetIfValid(cur->GetDestination());
-			if (st != NULL && next_station != INVALID_STATION && second_station != INVALID_STATION && next_station != st->index) {
+			if (st != NULL && next_station != INVALID_STATION && next_station != st->index) {
 				for (const SmallPair<CargoID, uint> *i = capacities.Begin(); i != capacities.End(); ++i) {
 					/* Refresh the link and give it a minimum capacity. */
 					if (i->second > 0) {
@@ -2151,7 +2124,7 @@ void Vehicle::RefreshNextHopsStats()
 						OrderUnloadFlags unload = next->GetUnloadType();
 						if ((unload & OUFB_NO_UNLOAD) != 0) {
 							const Order *second = this->orders.list->GetNextStoppingOrder(this,
-								this->orders.list->GetNext(next), ++hops, true);
+								this->orders.list->GetNext(next), ++hops, false, true);
 							if (second != NULL) second_station = second->GetDestination();
 							if (second_station == next_station) second_station = INVALID_STATION;
 						} else if ((unload & OUFB_UNLOAD) != 0) {
@@ -2159,8 +2132,7 @@ void Vehicle::RefreshNextHopsStats()
 						} else if ((unload & OUFB_TRANSFER) != 0) {
 							second_station = NEW_STATION;
 						}
-						IncreaseStats(st, i->first, next_station,
-							second_station, i->second, UINT_MAX);
+						IncreaseStats(st, i->first, next_station, second_station, i->second, UINT_MAX);
 					}
 				}
 			}
