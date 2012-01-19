@@ -28,6 +28,19 @@ void FlowMapper::Run(LinkGraphComponent *component)
 			if (flow == 0) continue;
 			Node &node = component->GetNode(path->GetNode());
 			StationID via = node.station;
+			if (prev != via) {
+				if (node.import_node == path->GetNode()) {
+					/* forced import: drop */
+					continue;
+				} else if (node.import_node == node.export_node && node.import_node != INVALID_NODE) {
+					/* forced passby: drop */
+					continue;
+				}
+			} else {
+				/* internal routing: drop */
+				continue;
+			}
+			// TODO: What happens if we still have multiple nodes with flows for the same station?
 			assert(prev != via);
 			StationID origin = component->GetNode(path->GetOrigin()).station;
 			assert(via != origin);
