@@ -28,26 +28,22 @@ void FlowMapper::Run(LinkGraphComponent *component)
 			if (flow == 0) continue;
 			Node &node = component->GetNode(path->GetNode());
 			StationID via = node.station;
-			/* forced import or import from base node or passby: drop */
-			if (node.import_node == path->GetNode() || (prev != via &&
-					node.import_node == node.export_node &&
-					node.import_node != INVALID_NODE)) {
-				continue;
-			}
 			StationID origin = component->GetNode(path->GetOrigin()).station;
 			assert(via != origin);
 			/* mark all of the flow for local consumption at "first" */
 			node.flows[origin][via] += flow;
 			/* pass some of the flow marked for local consumption at "prev" on
-			 * to this node, except if it's internal routing; then just delete
-			 * the local consumption.
+			 * to this node, except if it's internal routing or passby; then
+			 * just delete the local consumption.
 			 */
-			if (prev != via) prev_node.flows[origin][via] += flow;
+			if (prev != via &&
+					(node_import_node == INVALID_NODE ||
+					node.import_node != node.export_node)) {
+				prev_node.flows[origin][via] += flow;
+			}
 			/* find simple circular flows ... */
 			assert(node.flows[origin][prev] == 0);
-			if (prev != origin) {
-				prev_node.flows[origin][prev] -= flow;
-			}
+			if (prev != origin) prev_node.flows[origin][prev] -= flow;
 		}
 	}
 	for (NodeID node_id = 0; node_id < component->GetSize(); ++node_id) {
