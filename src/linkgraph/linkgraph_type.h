@@ -17,6 +17,7 @@ static const LinkGraphComponentID INVALID_LINKGRAPH_COMPONENT = UINT16_MAX;
 
 typedef uint NodeID;
 static const NodeID INVALID_NODE = UINT_MAX;
+static const NodeID IS_PASSBY_NODE = UINT_MAX - 1;
 
 enum DistributionType {
 	DT_BEGIN = 0,
