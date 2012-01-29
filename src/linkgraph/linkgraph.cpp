@@ -343,10 +343,9 @@ NodeID LinkGraphComponent::SplitPassby(NodeID node, StationID second, uint capac
 	 * we have to postpone the "wiring" until all nodes are created. Until
 	 * then we misuse some other fields to carry the necessary information.
 	 */
-	passby_node.export_node = node; // export == import marks passby in later cleanup
-	passby_node.import_node = node;
+	passby_node.passby_flag = IS_PASSBY_NODE;
+	passby_node.passby_via = second;
 	passby_node.supply = capacity;
-	passby_node.station = second;
 	return passby;
 }
 

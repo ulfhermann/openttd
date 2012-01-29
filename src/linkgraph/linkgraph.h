@@ -54,8 +54,14 @@ public:
 	StationID station;       ///< Station ID.
 	PathSet paths;           ///< Paths through this node.
 	FlowMap flows;           ///< Planned flows to other nodes.
-	NodeID import_node;      ///< Extra node for "unload all" orders.
-	NodeID export_node;      ///< Extra node for "transfer" orders.
+	union {
+		NodeID import_node;      ///< Extra node for "unload all" orders.
+		NodeID passby_via;       ///< ID of next node in passby chain.
+	}
+	union {
+		NodeID export_node;      ///< Extra node for "transfer" orders.
+		NodeID passby_flag;	 ///< Node::IS_PASSBY if it's a passby node.
+	}
 
 	/**
 	 * Clear a node on destruction to delete paths that might remain.
