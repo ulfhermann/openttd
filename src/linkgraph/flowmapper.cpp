@@ -36,10 +36,14 @@ void FlowMapper::Run(LinkGraphComponent *component)
 			 * to this node, except if it's internal routing or passby; then
 			 * just delete the local consumption.
 			 */
-			if (prev != via &&
-					(node_import_node == INVALID_NODE ||
-					node.import_node != node.export_node)) {
-				prev_node.flows[origin][via] += flow;
+			if (prev != via) {
+				if (node.passby_flag != IS_PASSBY_NODE) {
+					prev_node.flows[origin][via] += flow;
+				}
+			} else if (node.passby_flag == IS_PASSBY_NODE) {
+				/* flow entering passby chain: has to be mapped */
+				via = component->GetNode(node.passby_via).station;
+				node.flows[origin][via] += flow;
 			}
 			/* find simple circular flows ... */
 			assert(node.flows[origin][prev] == 0);
