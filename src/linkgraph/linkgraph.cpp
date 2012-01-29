@@ -345,6 +345,7 @@ NodeID LinkGraphComponent::SplitPassby(NodeID node, StationID second, uint capac
 	 */
 	passby_node.passby_flag = IS_PASSBY_NODE;
 	passby_node.passby_via = second;
+	passby_node.passby_base = node;
 	passby_node.supply = capacity;
 	return passby;
 }
@@ -459,11 +460,12 @@ void Node::ExportFlows(FlowMap::iterator &it, FlowStatMap &station_flows, CargoI
 /**
  * Export all flows of this node to the main game state.
  * @param cargo The cargo we're exporting flows for.
+ * @param clear If the station flows should be cleared before exporting.
  */
-void Node::ExportFlows(CargoID cargo)
+void Node::ExportFlows(CargoID cargo, bool clear)
 {
 	FlowStatMap &station_flows = Station::Get(this->station)->goods[cargo].flows;
-	station_flows.clear();
+	if (clear) station_flows.clear();
 
 	/* loop over flows in the node's map and insert them into the station */
 	for (FlowMap::iterator it(this->flows.begin()); it != this->flows.end();) {
@@ -481,8 +483,12 @@ void LinkGraph::Join()
 
 	for (NodeID node_id = 0; node_id < this->GetSize(); ++node_id) {
 		Node &node = this->GetNode(node_id);
-		if (Station::IsValidID(node.station)) {
-			node.ExportFlows(this->cargo);
+		if (node.passby_flag != IS_PASSBY_NODE && Station::IsValidID(node.station)) {
+			/* export, but clear station_flows only for base node (which is always first) */
+			node.ExportFlows(this->cargo,
+					node.passby_flag != IS_PASSBY_NODE &&
+					node.import_node != node_id &&
+					node.export_node != node_id);
 			InvalidateWindowData(WC_STATION_VIEW, node.station, this->GetCargo());
 		}
 	}

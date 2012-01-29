@@ -3,12 +3,13 @@
 #include "../stdafx.h"
 #include "normalize.h"
 
+// TODO: this is not thread save. We're modifying the input!
 Normalizer::Normalizer(LinkGraphComponent *graph)
 {
 	for (NodeID node_id = 0; node_id < graph->GetSize(); ++node_id) {
 		Node &node = graph->GetNode(node_id);
 		if (node.import_node != INVALID_NODE) {
-			if (node.passby != IS_PASSBY_NODE) {
+			if (node.passby_flag != IS_PASSBY_NODE) {
 				/* Regular import node:
 				 * 1. Make an additional edge from base node to
 				 * import node.
@@ -40,9 +41,9 @@ Normalizer::Normalizer(LinkGraphComponent *graph)
 				 * Keep import and export as they are to mark
 				 * the node as passby for the flowmapper.
 				 */
-				Node &base_node = graph->GetNode(node.export_node);
+				Node &base_node = graph->GetNode(node.passby_base);
 				NodeID export_id = base_node.export_node == INVALID_NODE ?
-						base_node : base_node.export_node;
+						node.passby_base : base_node.export_node;
 				NodeID remote_id = INVALID_NODE;
 				for (NodeID other_id = 0; other_id != graph->GetSize(); ++other_id) {
 					Node &other = graph->GetNode(other_id);
@@ -53,9 +54,9 @@ Normalizer::Normalizer(LinkGraphComponent *graph)
 						} else {
 							remote_id = other_id;
 							/* further passby node of same chain */
-							if (passby_edge.capacity == 0) continue;
 						}
 						Edge &passby_edge = graph->GetEdge(export_id, remote_id);
+						if (passby_edge.capacity == 0) continue;
 						/* next node in passby chain */
 						uint reroute = min(node.supply, passby_edge.capacity);
 						node.supply -= reroute; // supply being misused as capacity
