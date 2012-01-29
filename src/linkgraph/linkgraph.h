@@ -51,17 +51,21 @@ public:
 	uint supply;             ///< Supply at the station.
 	uint undelivered_supply; ///< Amount of supply that hasn't been distributed yet.
 	uint demand;             ///< Acceptance at the station.
-	StationID station;       ///< Station ID.
+	union {
+		StationID station;       ///< Station ID.
+		NodeID passby_base;      ///< Base node of passby.
+	};
 	PathSet paths;           ///< Paths through this node.
 	FlowMap flows;           ///< Planned flows to other nodes.
 	union {
 		NodeID import_node;      ///< Extra node for "unload all" orders.
+		// TODO: unfortunately a passby path may split, giving us multiple vias here.
 		NodeID passby_via;       ///< ID of next node in passby chain.
-	}
+	};
 	union {
 		NodeID export_node;      ///< Extra node for "transfer" orders.
-		NodeID passby_flag;	 ///< Node::IS_PASSBY if it's a passby node.
-	}
+		NodeID passby_flag;	 ///< IS_PASSBY_NODE if it's a passby node.
+	};
 
 	/**
 	 * Clear a node on destruction to delete paths that might remain.
@@ -69,7 +73,7 @@ public:
 	~Node() {this->Init();}
 
 	void Init(StationID st = INVALID_STATION, uint sup = 0, uint dem = 0);
-	void ExportFlows(CargoID cargo);
+	void ExportFlows(CargoID cargo, bool clear);
 
 private:
 	void ExportFlows(FlowMap::iterator &it, FlowStatMap &station_flows, CargoID cargo);
