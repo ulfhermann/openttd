@@ -42,7 +42,7 @@ void FlowMapper::Run(LinkGraphComponent *component)
 				}
 			} else if (node.passby_flag == IS_PASSBY_NODE) {
 				/* flow entering passby chain: has to be mapped */
-				via = component->GetNode(node.passby_via).station;
+				via = component->GetNode(node.passby_to).station;
 				prev_node.flows[origin][via] += flow;
 			}
 			/* find simple circular flows ... */

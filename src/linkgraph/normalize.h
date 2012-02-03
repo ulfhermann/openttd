@@ -14,7 +14,7 @@ public:
 	Normalizer(LinkGraphComponent *graph);
 
 private:
-	void Normalize(LinkGraphComponent *graph);
+	void ReroutePassby(LinkGraphComponent *graph, NodeID node_id, NodeID export_id, NodeID other_id);
 };
 
 /**

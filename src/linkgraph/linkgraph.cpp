@@ -344,7 +344,7 @@ NodeID LinkGraphComponent::SplitPassby(NodeID node, StationID second, uint capac
 	 * then we misuse some other fields to carry the necessary information.
 	 */
 	passby_node.passby_flag = IS_PASSBY_NODE;
-	passby_node.passby_via = second;
+	passby_node.passby_to = second;
 	passby_node.passby_base = node;
 	passby_node.supply = capacity;
 	return passby;
