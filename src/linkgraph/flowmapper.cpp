@@ -37,6 +37,9 @@ void FlowMapper::Run(LinkGraphComponent *component)
 			 * just delete the local consumption.
 			 */
 			if (prev != via) {
+				/* find simple circular flows ... */
+				assert(node.flows[origin][prev] == 0);
+
 				if (node.passby_flag != IS_PASSBY_NODE) {
 					prev_node.flows[origin][via] += flow;
 				}
@@ -45,8 +48,6 @@ void FlowMapper::Run(LinkGraphComponent *component)
 				via = component->GetNode(node.passby_to).station;
 				prev_node.flows[origin][via] += flow;
 			}
-			/* find simple circular flows ... */
-			assert(node.flows[origin][prev] == 0);
 			if (prev != origin) prev_node.flows[origin][prev] -= flow;
 		}
 	}

@@ -90,7 +90,7 @@ void LinkGraph::CreateComponent(Station *first)
 		Station *source = search_queue.front();
 		NodeID source_node = index[source];
 		NodeID source_export_node = this->GetNode(source_node).export_node;
-		if (source_export_node != INVALID_STATION) source_node = source_export_node;
+		if (source_export_node != INVALID_NODE) source_node = source_export_node;
 		search_queue.pop();
 
 		const LinkStatMap &links = source->goods[this->cargo].link_stats;
@@ -115,12 +115,12 @@ void LinkGraph::CreateComponent(Station *first)
 				this->AddEdge(source_node, node, i->second.Capacity());
 			} else if (second == NEW_STATION) {
 				/* this is a transfer */
-				NodeID export_node = (this->GetNode(node).export_node == INVALID_STATION ?
+				NodeID export_node = (this->GetNode(node).export_node == INVALID_NODE ?
 					this->SplitExport(node) : this->GetNode(node).export_node);
 				this->AddEdge(source_node, export_node, i->second.Capacity());
 			} else if (second == next) {
 				/* this is an unload */
-				NodeID import_node = (this->GetNode(node).import_node == INVALID_STATION ?
+				NodeID import_node = (this->GetNode(node).import_node == INVALID_NODE ?
 					this->SplitImport(node) : this->GetNode(node).import_node);
 				this->AddEdge(source_node, import_node, i->second.Capacity());
 			} else {
