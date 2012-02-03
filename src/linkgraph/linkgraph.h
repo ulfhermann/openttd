@@ -59,8 +59,7 @@ public:
 	FlowMap flows;           ///< Planned flows to other nodes.
 	union {
 		NodeID import_node;      ///< Extra node for "unload all" orders.
-		// TODO: unfortunately a passby path may split, giving us multiple vias here.
-		NodeID passby_via;       ///< ID of next node in passby chain.
+		NodeID passby_to;        ///< ID of end node in passby chain.
 	};
 	union {
 		NodeID export_node;      ///< Extra node for "transfer" orders.

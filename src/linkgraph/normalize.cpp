@@ -3,6 +3,18 @@
 #include "../stdafx.h"
 #include "normalize.h"
 
+void Normalizer::ReroutePassby(LinkGraphComponent *graph, NodeID node_id, NodeID export_id, NodeID other_id)
+{
+	Node &node = graph->GetNode(node_id);
+	Edge &passby_edge = graph->GetEdge(export_id, other_id);
+	if (passby_edge.capacity == 0) return;
+	/* next node in passby chain */
+	uint reroute = min(node.supply, passby_edge.capacity);
+	node.supply -= reroute; // supply being misused as capacity
+	graph->GetEdge(node_id, other_id).capacity += reroute;
+	passby_edge.capacity -= reroute;
+}
+
 // TODO: this is not thread save. We're modifying the input!
 Normalizer::Normalizer(LinkGraphComponent *graph)
 {
@@ -44,27 +56,20 @@ Normalizer::Normalizer(LinkGraphComponent *graph)
 				Node &base_node = graph->GetNode(node.passby_base);
 				NodeID export_id = base_node.export_node == INVALID_NODE ?
 						node.passby_base : base_node.export_node;
-				NodeID remote_id = INVALID_NODE;
 				for (NodeID other_id = 0; other_id != graph->GetSize(); ++other_id) {
 					Node &other = graph->GetNode(other_id);
-					if (other_id == node.passby_via) {
-						if (other.passby_flag != IS_PASSBY_NODE) {
-							/* final end of passby chain */
-							remote_id = other.import_node == INVALID_STATION ? other_id : other.import_node;
-						} else {
-							remote_id = other_id;
-							/* further passby node of same chain */
-						}
-						Edge &passby_edge = graph->GetEdge(export_id, remote_id);
-						if (passby_edge.capacity == 0) continue;
-						/* next node in passby chain */
-						uint reroute = min(node.supply, passby_edge.capacity);
-						node.supply -= reroute; // supply being misused as capacity
-						graph->GetEdge(node_id, remote_id).capacity += reroute;
-						passby_edge.capacity -= reroute;
-						node.passby_via = remote_id;
+					if (other.station == node.passby_to) {
+						/* final end of passby chain */
+						node.passby_to = other.import_node == INVALID_STATION ? other_id :
+								other.import_node;
+					} else if (other.passby_flag == IS_PASSBY_NODE && other.passby_to == node.passby_to) {
+						this->ReroutePassby(graph, node_id, export_id, other_id);
 						if (node.supply == 0) break; // no more capacity to be distributed
 					}
+				}
+				assert(node.passby_to < graph->GetSize());
+				if (node.supply > 0) {
+					this->ReroutePassby(graph, node_id, export_id, node.passby_to);
 				}
 				node.supply = 0;
 				node.undelivered_supply = 0;
