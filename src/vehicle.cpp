@@ -1949,7 +1949,7 @@ void Vehicle::BeginLoading()
 			(unload & OUFB_NO_UNLOAD) == 0)) {
 		StationID next = INVALID_STATION;
 		if ((unload & OUFB_NO_UNLOAD) != 0) {
-			next = this->GetNextStoppingStation(true);
+			next = this->GetNextStoppingStation();
 		} else if ((unload & OUFB_UNLOAD) != 0) {
 			next = this->last_station_visited;
 		} else if ((unload & OUFB_TRANSFER) != 0) {

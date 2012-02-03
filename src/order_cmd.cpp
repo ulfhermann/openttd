@@ -461,7 +461,7 @@ const Order *OrderList::GetNextStoppingOrder(const Vehicle *v, const Order *next
  * @pre The vehicle is currently loading and v->last_station_visited is meaningful.
  * @note This function may draw a random number. Don't use it from the GUI.
  */
-StationID OrderList::GetNextStoppingStation(const Vehicle *v, bool skip_no_unload) const
+StationID OrderList::GetNextStoppingStation(const Vehicle *v) const
 {
 	const Order *next = this->GetOrderAt(v->cur_implicit_order_index);
 	if (next == NULL) {
@@ -473,7 +473,7 @@ StationID OrderList::GetNextStoppingStation(const Vehicle *v, bool skip_no_unloa
 
 	uint hops = 0;
 	do {
-		next = this->GetNextStoppingOrder(v, next, ++hops, true, skip_no_unload);
+		next = this->GetNextStoppingOrder(v, next, ++hops, true, true);
 		/* Don't return a next stop if the vehicle has to unload everything. */
 		if (next == NULL || (next->GetDestination() == v->last_station_visited &&
 				(next->GetUnloadType() & (OUFB_TRANSFER | OUFB_UNLOAD)) == 0)) {
