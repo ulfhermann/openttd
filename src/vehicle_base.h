@@ -582,12 +582,11 @@ public:
 
 	/**
 	 * Get the next station the vehicle will stop at.
-	 * @param skip_no_unload Skip "no unload" orders.
 	 * @return ID of the next station the vehicle will stop at or INVALID_STATION.
 	 */
-	inline StationID GetNextStoppingStation(bool skip_no_unload = false) const
+	inline StationID GetNextStoppingStation() const
 	{
-		return (this->orders.list == NULL) ? INVALID_STATION : this->orders.list->GetNextStoppingStation(this, skip_no_unload);
+		return (this->orders.list == NULL) ? INVALID_STATION : this->orders.list->GetNextStoppingStation(this);
 	}
 
 	void RefreshNextHopsStats();
