@@ -262,9 +262,19 @@ public:
 
 	void Join();
 
+	/**
+	 * Create a thread-safe working copy and return it.
+	 * @return Copy of this job's component.
+	 */
+	LinkGraphComponent *CreateWorkingCopy()
+	{
+		return &(this->working_copy = *this);
+	}
+
 private:
 	static HandlerList _handlers;   ///< Handlers the job is executing.
 	ThreadObject *thread;           ///< Thread the job is running in or NULL if it's running in the main thread.
+	LinkGraphComponent working_copy;///< Copy of the component to run the handlers on (to not modify input).
 
 	/**
 	 * Private Copy-Constructor: there cannot be two identical LinkGraphJobs.
@@ -291,8 +301,6 @@ public:
 	void Init(CargoID cargo);
 
 	void NextComponent();
-
-	void Join();
 
 private:
 	StationID current_station_id; ///< ID of the last station examined while creating components.
