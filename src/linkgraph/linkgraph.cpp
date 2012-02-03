@@ -475,36 +475,14 @@ void Node::ExportFlows(CargoID cargo, bool clear)
 }
 
 /**
- * Merge the current job's results into the main game state.
- */
-void LinkGraph::Join()
-{
-	this->LinkGraphJob::Join();
-
-	for (NodeID node_id = 0; node_id < this->GetSize(); ++node_id) {
-		Node &node = this->GetNode(node_id);
-		if (node.passby_flag != IS_PASSBY_NODE && Station::IsValidID(node.station)) {
-			/* export, but clear station_flows only for base node (which is always first) */
-			node.ExportFlows(this->cargo,
-					node.passby_flag != IS_PASSBY_NODE &&
-					node.import_node != node_id &&
-					node.export_node != node_id);
-			InvalidateWindowData(WC_STATION_VIEW, node.station, this->GetCargo());
-		}
-	}
-
-	this->LinkGraphComponent::Clear();
-}
-
-/**
  * Run all handlers for the given Job.
  * @param j Pointer to a link graph job.
  */
 /* static */ void LinkGraphJob::RunLinkGraphJob(void *j)
 {
-	LinkGraphJob *job = (LinkGraphJob *)j;
+	LinkGraphComponent *work = ((LinkGraphJob *)j)->CreateWorkingCopy();
 	for (HandlerList::iterator i = LinkGraphJob::_handlers.begin(); i != LinkGraphJob::_handlers.end(); ++i) {
-		(*i)->Run(job);
+		(*i)->Run(work);
 	}
 }
 
@@ -585,13 +563,30 @@ Path::Path(NodeID n, bool source) :
 
 /**
  * Join the calling thread with this job's thread if threading is enabled.
+ * Merge the current job's results into the main game state.
  */
-inline void LinkGraphJob::Join()
+void LinkGraphJob::Join()
 {
-	if (this->thread == NULL) return;
-	this->thread->Join();
-	delete this->thread;
-	this->thread = NULL;
+	if (this->thread != NULL) {
+		this->thread->Join();
+		delete this->thread;
+		this->thread = NULL;
+	}
+
+	for (NodeID node_id = 0; node_id < this->working_copy.GetSize(); ++node_id) {
+		Node &node = this->working_copy.GetNode(node_id);
+		if (node.passby_flag != IS_PASSBY_NODE && Station::IsValidID(node.station)) {
+			/* export, but clear station_flows only for base node (which is always first) */
+			node.ExportFlows(this->working_copy.GetCargo(),
+					node.passby_flag != IS_PASSBY_NODE &&
+					node.import_node != node_id &&
+					node.export_node != node_id);
+			InvalidateWindowData(WC_STATION_VIEW, node.station, this->working_copy.GetCargo());
+		}
+	}
+
+	this->LinkGraphComponent::Clear();
+	this->working_copy.Clear();
 }
 
 /**
