@@ -88,6 +88,7 @@ void MultiCommodityFlow::Dijkstra(NodeID source_node, PathVector &paths,
 	AnnoSet annos;
 	paths.resize(size, NULL);
 	for (NodeID node = 0; node < size; ++node) {
+		if (graph->GetNode(node).station == source_station) continue;
 		Tannotation *anno = new Tannotation(node, node == source_node);
 		annos.insert(anno);
 		paths[node] = anno;
@@ -101,8 +102,23 @@ void MultiCommodityFlow::Dijkstra(NodeID source_node, PathVector &paths,
 		while (to != INVALID_NODE) {
 			Edge &edge = this->graph->GetEdge(from, to);
 			assert(edge.distance < UINT_MAX);
-			if (create_new_paths || this->graph->GetNode(from)
-					.flows[source_station][this->graph->GetNode(to).station] > 0) {
+			Node &cur_node = this->graph->GetNode(from);
+
+			/* passby flows are attached to base node */
+			Node &next_node = this->graph->GetNode(
+					this->graph->GetNode(to).passby_flag != IS_PASSBY_NODE ?
+					to : this->graph->GetNode(to).passby_to);
+
+			/* Always tolerate internal routing in the same station and
+			 * routing over passby nodes. If current node is passby then
+			 * the cargo has no choice but to travel to the final end of
+			 * the passby chain. If some other cargo has been routed over
+			 * the passby node before it obviously also went there - but
+			 * no flow was mapped.
+			 */
+			if (create_new_paths || next_node.station == source_station ||
+					cur_node.passby_to == IS_PASSBY_NODE ||
+					cur_node.flows[source_station][next_node.station] > 0) {
 				uint capacity = edge.capacity;
 				if (create_new_paths) {
 					capacity *= this->graph->GetSettings().short_path_saturation;
@@ -112,7 +128,7 @@ void MultiCommodityFlow::Dijkstra(NodeID source_node, PathVector &paths,
 				/* punish in-between stops a little */
 				uint distance = edge.distance + 1;
 				Tannotation *dest = static_cast<Tannotation *>(paths[to]);
-				if (dest->IsBetter(source, capacity, capacity - edge.flow, distance)) {
+				if (dest != NULL && dest->IsBetter(source, capacity, capacity - edge.flow, distance)) {
 					annos.erase(dest);
 					dest->Fork(source, capacity, capacity - edge.flow, distance);
 					annos.insert(dest);
