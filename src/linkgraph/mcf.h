@@ -69,6 +69,13 @@ protected:
 
 	void CleanupPaths(NodeID source, PathVector &paths);
 
+	inline bool IsValidSource(NodeID source)
+	{
+		Node &node = this->graph->GetNode(source);
+		return (node.passby_flag != IS_PASSBY_NODE && node.import_node != source &&
+				(node.export_node == INVALID_NODE || node.export_node == source));
+	}
+
 	LinkGraphComponent *graph; ///< Component we're working with.
 };
 
