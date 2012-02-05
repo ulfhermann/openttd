@@ -88,7 +88,7 @@ void MultiCommodityFlow::Dijkstra(NodeID source_node, PathVector &paths,
 	AnnoSet annos;
 	paths.resize(size, NULL);
 	for (NodeID node = 0; node < size; ++node) {
-		if (graph->GetNode(node).station == source_station) continue;
+		if (node != source_node && graph->GetNode(node).station == source_station) continue;
 		Tannotation *anno = new Tannotation(node, node == source_node);
 		annos.insert(anno);
 		paths[node] = anno;
@@ -326,6 +326,7 @@ MCF1stPass::MCF1stPass(LinkGraphComponent *graph) : MultiCommodityFlow(graph)
 
 		for (NodeID source = 0; source < size; ++source) {
 			/* first saturate the shortest paths */
+			if (!this->IsValidSource(source)) continue;
 			this->Dijkstra<DistanceAnnotation>(source, paths, true);
 
 			for (NodeID dest = 0; dest < size; ++dest) {
@@ -369,6 +370,7 @@ MCF2ndPass::MCF2ndPass(LinkGraphComponent *graph) : MultiCommodityFlow(graph)
 	while (demand_left) {
 		demand_left = false;
 		for (NodeID source = 0; source < size; ++source) {
+			if (!this->IsValidSource(source)) continue;
 			this->Dijkstra<CapacityAnnotation>(source, paths, false);
 			for (NodeID dest = 0; dest < size; ++dest) {
 				Edge &edge = this->graph->GetEdge(source, dest);

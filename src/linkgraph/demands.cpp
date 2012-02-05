@@ -49,7 +49,6 @@ inline void Scaler::SetDemands(LinkGraphComponent *graph, NodeID from_id, NodeID
 	Node *from_node = &graph->GetNode(from_id);
 	Node *to_node = &graph->GetNode(to_id);
 
-	// TODO: this doesn't work. MCF will create circle paths from export node to import node.
 	if (from_node->export_node != INVALID_NODE) {
 		export_id = from_node->export_node;
 		assert(from_node->passby_flag != IS_PASSBY_NODE);
