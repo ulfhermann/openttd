@@ -39,6 +39,11 @@ Normalizer::Normalizer(LinkGraphComponent *graph)
 					node.passby_base : base_node.export_node;
 			for (NodeID other_id = 0; other_id != graph->GetSize(); ++other_id) {
 				Node &other = graph->GetNode(other_id);
+				// TODO: this is broken:
+				// 1. After setting passby_to to something else I cannot identify other nodes by equality of passby_to
+				// 2. If the passby chain branches we get some random behaviour
+				// 3. If there are parallel non-passby edges to somewhere in the passby chain those might get changed into passby edges
+				// => We have to find the exact topology of passby chains already when creating the graph
 				if (other.station == node.passby_to) {
 					/* final end of passby chain */
 					node.passby_to = other.import_node == INVALID_NODE ? other_id :
