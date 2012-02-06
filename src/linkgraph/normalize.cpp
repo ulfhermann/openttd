@@ -15,7 +15,6 @@ void Normalizer::ReroutePassby(LinkGraphComponent *graph, NodeID node_id, NodeID
 	passby_edge.capacity -= reroute;
 }
 
-// TODO: this is not thread save. We're modifying the input!
 Normalizer::Normalizer(LinkGraphComponent *graph)
 {
 	for (NodeID node_id = 0; node_id < graph->GetSize(); ++node_id) {
@@ -42,7 +41,7 @@ Normalizer::Normalizer(LinkGraphComponent *graph)
 				Node &other = graph->GetNode(other_id);
 				if (other.station == node.passby_to) {
 					/* final end of passby chain */
-					node.passby_to = other.import_node == INVALID_STATION ? other_id :
+					node.passby_to = other.import_node == INVALID_NODE ? other_id :
 							other.import_node;
 				} else if (other.passby_flag == IS_PASSBY_NODE && other.passby_to == node.passby_to) {
 					this->ReroutePassby(graph, node_id, export_id, other_id);

@@ -117,7 +117,7 @@ void MultiCommodityFlow::Dijkstra(NodeID source_node, PathVector &paths,
 			 * no flow was mapped.
 			 */
 			if (create_new_paths || next_node.station == source_station ||
-					cur_node.passby_to == IS_PASSBY_NODE ||
+					cur_node.passby_flag == IS_PASSBY_NODE ||
 					cur_node.flows[source_station][next_node.station] > 0) {
 				uint capacity = edge.capacity;
 				if (create_new_paths) {
