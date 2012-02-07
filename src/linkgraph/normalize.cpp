@@ -2,7 +2,16 @@
 
 #include "../stdafx.h"
 #include "normalize.h"
+#include <list>
 
+/**
+ * Reroute flow from a link between a base or export node and some other node
+ * to the corresponding link between a passby node and the other node.
+ * @param graph Component the nodes belong to.
+ * @param node_id ID of passby node.
+ * @param export_id ID of base or export node.
+ * @param other_id ID of remote node.
+ */
 void Normalizer::ReroutePassby(LinkGraphComponent *graph, NodeID node_id, NodeID export_id, NodeID other_id)
 {
 	Node &node = graph->GetNode(node_id);
@@ -17,6 +26,8 @@ void Normalizer::ReroutePassby(LinkGraphComponent *graph, NodeID node_id, NodeID
 
 Normalizer::Normalizer(LinkGraphComponent *graph)
 {
+	typedef std::list<std::pair<NodeID, NodeID> > PassbyList;
+	PassbyList passby_ends;
 	for (NodeID node_id = 0; node_id < graph->GetSize(); ++node_id) {
 		Node &node = graph->GetNode(node_id);
 		if (node.passby_flag == IS_PASSBY_NODE) {
@@ -39,23 +50,19 @@ Normalizer::Normalizer(LinkGraphComponent *graph)
 					node.passby_base : base_node.export_node;
 			for (NodeID other_id = 0; other_id != graph->GetSize(); ++other_id) {
 				Node &other = graph->GetNode(other_id);
-				// TODO: this is broken:
-				// 1. After setting passby_to to something else I cannot identify other nodes by equality of passby_to
-				// 2. If the passby chain branches we get some random behaviour
-				// 3. If there are parallel non-passby edges to somewhere in the passby chain those might get changed into passby edges
-				// => We have to find the exact topology of passby chains already when creating the graph
+				// TODO: If the passby chain branches we might get some random behaviour
 				if (other.station == node.passby_to) {
 					/* final end of passby chain */
-					node.passby_to = other.import_node == INVALID_NODE ? other_id :
-							other.import_node;
-				} else if (other.passby_flag == IS_PASSBY_NODE && other.passby_to == node.passby_to) {
+					passby_ends.push_back(std::make_pair(node_id, other.import_node == INVALID_NODE ?
+							other_id : other.import_node));
+				} else if (node.supply > 0 && other.passby_flag == IS_PASSBY_NODE &&
+						other.passby_to == node.passby_to) {
 					this->ReroutePassby(graph, node_id, export_id, other_id);
-					if (node.supply == 0) break; // no more capacity to be distributed
 				}
 			}
-			assert(node.passby_to < graph->GetSize());
+			assert(passby_ends.back().first == node_id && passby_ends.back().second < graph->GetSize());
 			if (node.supply > 0) {
-				this->ReroutePassby(graph, node_id, export_id, node.passby_to);
+				this->ReroutePassby(graph, node_id, export_id, passby_ends.back().second);
 			}
 			node.supply = 0;
 			node.undelivered_supply = 0;
@@ -107,5 +114,10 @@ Normalizer::Normalizer(LinkGraphComponent *graph)
 				export_node.export_node = node.export_node;
 			}
 		}
+	}
+
+	/* Set the passby_to fields to the node IDs. Before they were station IDs. */
+	for (PassbyList::iterator i(passby_ends.begin()); i != passby_ends.end(); ++i) {
+		graph->GetNode(i->first).passby_to = i->second;
 	}
 }
