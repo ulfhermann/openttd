@@ -2124,7 +2124,7 @@ void Vehicle::RefreshNextHopsStats()
 						OrderUnloadFlags unload = next->GetUnloadType();
 						if ((unload & OUFB_NO_UNLOAD) != 0) {
 							const Order *second = this->orders.list->GetNextStoppingOrder(this,
-								this->orders.list->GetNext(next), ++hops, false, true);
+								this->orders.list->GetNext(next), 0, false, true);
 							if (second != NULL) second_station = second->GetDestination();
 							if (second_station == next_station) second_station = INVALID_STATION;
 						} else if ((unload & OUFB_UNLOAD) != 0) {
