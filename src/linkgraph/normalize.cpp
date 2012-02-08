@@ -51,7 +51,7 @@ Normalizer::Normalizer(LinkGraphComponent *graph)
 			for (NodeID other_id = 0; other_id != graph->GetSize(); ++other_id) {
 				Node &other = graph->GetNode(other_id);
 				// TODO: If the passby chain branches we might get some random behaviour
-				if (other.station == node.passby_to) {
+				if (other.passby_flag != IS_PASSBY_NODE && other.station == node.passby_to) {
 					/* final end of passby chain */
 					passby_ends.push_back(std::make_pair(node_id, other.import_node == INVALID_NODE ?
 							other_id : other.import_node));
