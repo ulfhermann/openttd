@@ -75,9 +75,12 @@ const SaveLoad *GetLinkGraphDesc()
  * SaveLoad desc for a link graph node.
  */
 static const SaveLoad _node_desc[] = {
-	 SLE_CONDVAR(Node, supply,    SLE_UINT32, SL_COMPONENTS, SL_MAX_VERSION),
-	 SLE_CONDVAR(Node, demand,    SLE_UINT32, SL_COMPONENTS, SL_MAX_VERSION),
-	 SLE_CONDVAR(Node, station,   SLE_UINT16, SL_COMPONENTS, SL_MAX_VERSION),
+	 SLE_CONDVAR(Node, supply,      SLE_UINT32, SL_COMPONENTS, SL_MAX_VERSION),
+	 SLE_CONDVAR(Node, demand,      SLE_UINT32, SL_COMPONENTS, SL_MAX_VERSION),
+	 SLE_CONDVAR(Node, base_node,   SLE_UINT32, SL_FORCED,     SL_MAX_VERSION),
+	 SLE_CONDVAR(Node, import_node, SLE_UINT32, SL_FORCED,     SL_MAX_VERSION),
+	 SLE_CONDVAR(Node, export_node, SLE_UINT32, SL_FORCED,     SL_MAX_VERSION),
+	 SLE_CONDVAR(Node, station,     SLE_UINT16, SL_COMPONENTS, SL_MAX_VERSION),
 	 SLE_END()
 };
 
