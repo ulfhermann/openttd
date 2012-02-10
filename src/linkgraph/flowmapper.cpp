@@ -55,6 +55,7 @@ void FlowMapper::Run(LinkGraphComponent *component)
 				prev_node.flows[origin][via] += flow;
 			}
 			if (prev != origin) prev_node.flows[origin][prev] -= flow;
+			assert(prev_node.flows[origin][prev] >= 0);
 		}
 	}
 	for (NodeID node_id = 0; node_id < component->GetSize(); ++node_id) {

@@ -18,8 +18,8 @@ void Normalizer::ReroutePassby(LinkGraphComponent *graph, NodeID node_id, NodeID
 	Edge &passby_edge = graph->GetEdge(export_id, other_id);
 	if (passby_edge.capacity == 0) return;
 	/* next node in passby chain */
-	uint reroute = min(node.supply, passby_edge.capacity);
-	node.supply -= reroute; // supply being misused as capacity
+	uint reroute = min(node.passby_capacity, passby_edge.capacity);
+	node.passby_capacity -= reroute;
 	graph->GetEdge(node_id, other_id).capacity += reroute;
 	passby_edge.capacity -= reroute;
 }
@@ -33,21 +33,17 @@ Normalizer::Normalizer(LinkGraphComponent *graph)
 		if (node.passby_flag == IS_PASSBY_NODE) {
 			/* Passby node:
 			 * 1. Make an additional edge of capacity
-			 * "supply" from passby_node to node for Station
+			 * passby_capacity from passby_node to node for Station
 			 * "station".
 			 * 2. Reduce capacity of edge from either base
-			 * node or export node to "station" by "supply".
+			 * node or export node to "station" by passby_capacity.
 			 * 3. Make an additional edge from either export
 			 * or base node to passby node.
-			 * 4. Set supply, demand to 0, station to the
-			 * same as base node.
-			 *
-			 * Keep import and export as they are to mark
-			 * the node as passby for the flowmapper.
+			 * 4. Set supply, demand to 0.
 			 */
-			Node &base_node = graph->GetNode(node.passby_base);
+			Node &base_node = graph->GetNode(node.base_node);
 			NodeID export_id = base_node.export_node == INVALID_NODE ?
-					node.passby_base : base_node.export_node;
+					node.base_node : base_node.export_node;
 			for (NodeID other_id = 0; other_id != graph->GetSize(); ++other_id) {
 				Node &other = graph->GetNode(other_id);
 				// TODO: If the passby chain branches we might get some random behaviour
@@ -55,19 +51,18 @@ Normalizer::Normalizer(LinkGraphComponent *graph)
 					/* final end of passby chain */
 					passby_ends.push_back(std::make_pair(node_id, other.import_node == INVALID_NODE ?
 							other_id : other.import_node));
-				} else if (node.supply > 0 && other.passby_flag == IS_PASSBY_NODE &&
+				} else if (node.passby_capacity > 0 && other.passby_flag == IS_PASSBY_NODE &&
 						other.passby_to == node.passby_to) {
 					this->ReroutePassby(graph, node_id, export_id, other_id);
 				}
 			}
 			assert(passby_ends.back().first == node_id && passby_ends.back().second < graph->GetSize());
-			if (node.supply > 0) {
+			if (node.passby_capacity > 0) {
 				this->ReroutePassby(graph, node_id, export_id, passby_ends.back().second);
 			}
 			node.supply = 0;
 			node.undelivered_supply = 0;
 			node.demand = 0;
-			node.station = base_node.station;
 			graph->AddEdge(export_id, node_id, UINT_MAX);
 		} else {
 			if (node.import_node != INVALID_NODE && node.import_node != node_id) {
