@@ -48,15 +48,16 @@ public:
  */
 class Node {
 public:
-	uint supply;             ///< Supply at the station.
+	union {
+		uint supply;             ///< Supply at the station.
+		uint passby_capacity;    ///< Capacity of the passby.
+	};
 	uint undelivered_supply; ///< Amount of supply that hasn't been distributed yet.
 	uint demand;             ///< Acceptance at the station.
-	union {
-		StationID station;       ///< Station ID.
-		NodeID passby_base;      ///< Base node of passby.
-	};
+	StationID station;       ///< Station ID.
 	PathSet paths;           ///< Paths through this node.
 	FlowMap flows;           ///< Planned flows to other nodes.
+	NodeID base_node;        ///< Base node of import/export/passby.
 	union {
 		NodeID import_node;      ///< Extra node for "unload all" orders.
 		NodeID passby_to;        ///< ID of end node in passby chain.

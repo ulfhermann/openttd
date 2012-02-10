@@ -268,7 +268,8 @@ NodeID LinkGraphComponent::CloneNode(NodeID node)
 		new_edges[i].Init(distance);
 		this->edges[i][this->num_nodes].Init(distance);
 	}
-	return this->num_nodes++;
+	this->GetNode(++this->num_nodes).base_node = node;
+	return this->num_nodes;
 }
 
 /**
@@ -339,14 +340,9 @@ NodeID LinkGraphComponent::SplitPassby(NodeID node, StationID second, uint capac
 {
 	NodeID passby = this->CloneNode(node);
 	Node &passby_node = this->GetNode(passby);
-	/* We don't know if the second station is already in the link graph. So
-	 * we have to postpone the "wiring" until all nodes are created. Until
-	 * then we misuse some other fields to carry the necessary information.
-	 */
 	passby_node.passby_flag = IS_PASSBY_NODE;
 	passby_node.passby_to = second;
-	passby_node.passby_base = node;
-	passby_node.supply = capacity;
+	passby_node.passby_capacity = capacity;
 	return passby;
 }
 
