@@ -21,9 +21,6 @@ void FlowMapper::Run(LinkGraphComponent *component)
 	for (NodeID node_id = 0; node_id < component->GetSize(); ++node_id) {
 		Node &prev_node = component->GetNode(node_id);
 
-		/* all passby flows are mapped from the base node */
-		if (prev_node.passby_flag == IS_PASSBY_NODE) continue;
-
 		StationID prev = prev_node.station;
 		PathSet &paths = prev_node.paths;
 		for (PathSet::iterator i = paths.begin(); i != paths.end(); ++i) {
@@ -38,24 +35,26 @@ void FlowMapper::Run(LinkGraphComponent *component)
 			/* mark all of the flow for local consumption at "first" */
 			node.flows[origin][via] += flow;
 
-			/* pass some of the flow marked for local consumption at "prev" on
-			 * to this node, except if it's internal routing or passby; then
-			 * just delete the local consumption.
-			 */
-			if (prev != via) {
-				/* find simple circular flows ... */
-				assert(node.flows[origin][prev] == 0);
+			/* all passby flows are mapped from the base node */
+			if (prev_node.passby_flag != IS_PASSBY_NODE) {
+				/* pass some of the flow marked for local consumption at "prev" on
+				 * to this node, except if it's internal routing or passby; then
+				 * just delete the local consumption.
+				 */
+				if (prev != via) {
+					/* find simple circular flows ... */
+					assert(node.flows[origin][prev] == 0);
 
-				if (node.passby_flag != IS_PASSBY_NODE) {
+					if (node.passby_flag != IS_PASSBY_NODE) {
+						prev_node.flows[origin][via] += flow;
+					}
+				} else if (node.passby_flag == IS_PASSBY_NODE) {
+					/* flow entering passby chain: has to be mapped */
+					via = component->GetNode(node.passby_to).station;
 					prev_node.flows[origin][via] += flow;
 				}
-			} else if (node.passby_flag == IS_PASSBY_NODE) {
-				/* flow entering passby chain: has to be mapped */
-				via = component->GetNode(node.passby_to).station;
-				prev_node.flows[origin][via] += flow;
 			}
 			if (prev != origin) prev_node.flows[origin][prev] -= flow;
-			assert(prev_node.flows[origin][prev] >= 0);
 		}
 	}
 	for (NodeID node_id = 0; node_id < component->GetSize(); ++node_id) {

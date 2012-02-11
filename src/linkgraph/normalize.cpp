@@ -16,11 +16,13 @@ void Normalizer::ReroutePassby(LinkGraphComponent *graph, NodeID node_id, NodeID
 {
 	Node &node = graph->GetNode(node_id);
 	Edge &passby_edge = graph->GetEdge(export_id, other_id);
+	assert(node.base_node != other_id);
+	assert(graph->GetNode(export_id).passby_flag != IS_PASSBY_NODE);
 	if (passby_edge.capacity == 0) return;
 	/* next node in passby chain */
 	uint reroute = min(node.passby_capacity, passby_edge.capacity);
 	node.passby_capacity -= reroute;
-	graph->GetEdge(node_id, other_id).capacity += reroute;
+	graph->AddEdge(node_id, other_id, reroute);
 	passby_edge.capacity -= reroute;
 }
 
