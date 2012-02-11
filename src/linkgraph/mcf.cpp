@@ -102,6 +102,11 @@ void MultiCommodityFlow::Dijkstra(NodeID source_node, PathVector &paths,
 		while (to != INVALID_NODE) {
 			Edge &edge = this->graph->GetEdge(from, to);
 			assert(edge.distance < UINT_MAX);
+			if (edge.capacity == 0) {
+				/* edge has been removed by normalizer */
+				to = edge.next_edge;
+				continue;
+			}
 			Node &cur_node = this->graph->GetNode(from);
 
 			/* passby flows are attached to base node */

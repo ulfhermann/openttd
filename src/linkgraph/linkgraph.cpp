@@ -47,6 +47,7 @@ inline void Node::Init(StationID st, uint sup, uint dem)
 	this->station = st;
 	this->import_node = INVALID_NODE;
 	this->export_node = INVALID_NODE;
+	this->base_node = INVALID_NODE;
 
 	for (PathSet::iterator i = this->paths.begin(); i != this->paths.end(); ++i) {
 		delete *i;
@@ -262,14 +263,18 @@ NodeID LinkGraphComponent::CloneNode(NodeID node)
 	Node &base = this->GetNode(node);
 	bool do_resize = this->InsertNode(base.station, base.supply, base.demand);
 	std::vector<Edge> &new_edges = this->edges[this->num_nodes];
+
+	/* reset the first edge starting at the new node */
+	new_edges[this->num_nodes].next_edge = INVALID_NODE;
+
 	for (NodeID i = 0; i < this->num_nodes; ++i) {
 		uint distance = this->edges[i][node].distance;
 		if (do_resize) this->edges[i].push_back(Edge());
 		new_edges[i].Init(distance);
 		this->edges[i][this->num_nodes].Init(distance);
 	}
-	this->GetNode(++this->num_nodes).base_node = node;
-	return this->num_nodes;
+	this->GetNode(this->num_nodes).base_node = node;
+	return this->num_nodes++;
 }
 
 /**
@@ -355,8 +360,11 @@ NodeID LinkGraphComponent::SplitPassby(NodeID node, StationID second, uint capac
 void LinkGraphComponent::AddEdge(NodeID from, NodeID to, uint capacity)
 {
 	assert(from != to);
+	assert(capacity > 0);
+	assert(this->nodes[from].base_node != to);
 	Edge &edge = this->edges[from][to];
 	Edge &first = this->edges[from][from];
+	assert(first.next_edge != to);
 	edge.capacity = capacity;
 	edge.next_edge = first.next_edge;
 	first.next_edge = to;
