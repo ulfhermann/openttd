@@ -42,9 +42,6 @@ void FlowMapper::Run(LinkGraphComponent *component)
 				 * just delete the local consumption.
 				 */
 				if (prev != via) {
-					/* find simple circular flows ... */
-					assert(node.flows[origin][prev] == 0);
-
 					if (node.passby_flag != IS_PASSBY_NODE) {
 						prev_node.flows[origin][via] += flow;
 					}
