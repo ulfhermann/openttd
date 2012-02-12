@@ -95,12 +95,12 @@ Normalizer::Normalizer(LinkGraphComponent *graph)
 				 * 3. Clear demand and supply of export node.
 				 * 4. Update import_node field of export_node.
 				 */
-				for (NodeID other_id = 0; other_id != graph->GetSize(); ++other_id) {
+				for (NodeID other_id = graph->GetFirstEdge(node_id);
+						other_id != INVALID_NODE;
+						other_id = graph->GetEdge(node_id, other_id).next_edge) {
 					Edge &edge = graph->GetEdge(node_id, other_id);
-					if (edge.capacity > 0) {
-						graph->GetEdge(node.export_node, other_id).capacity = edge.capacity;
-						edge.capacity = 0;
-					}
+					graph->AddEdge(node.export_node, other_id, edge.capacity);
+					edge.capacity = 0;
 				}
 				graph->AddEdge(node_id, node.export_node, UINT_MAX);
 				Node &export_node = graph->GetNode(node.export_node);
