@@ -35,6 +35,7 @@
 #include "table/strings.h"
 
 #include <vector>
+#include <queue>
 
 /**
  * Calculates and draws the accepted or supplied cargo around the selected tile(s)
@@ -1293,7 +1294,17 @@ struct StationViewWindow : public Window {
 	 */
 	void EstimateDestinations(CargoID cargo, StationID source, StationID next, uint count, CargoDataEntry *dest)
 	{
-		if (Station::IsValidID(next) && Station::IsValidID(source)) {
+		typedef std::queue<std::pair<StationID, uint> > NextCountQueue;
+		NextCountQueue queue;
+		queue.push(std::make_pair(next, count));
+		while(!queue.empty()) {
+			next = queue.front().first;
+			count = queue.front().second;
+			queue.pop();
+			if (!Station::IsValidID(next) || !Station::IsValidID(source)) {
+				dest->InsertOrRetrieve(INVALID_STATION)->Update(count);
+				continue;
+			}
 			CargoDataEntry tmp;
 			const FlowStatMap &flowmap = Station::Get(next)->goods[cargo].flows;
 			FlowStatMap::const_iterator map_it = flowmap.find(source);
@@ -1309,32 +1320,38 @@ struct StationViewWindow : public Window {
 			if (tmp.GetCount() == 0) {
 				dest->InsertOrRetrieve(INVALID_STATION)->Update(count);
 			} else {
-				uint sum_estimated = 0;
-				while (sum_estimated < count) {
-					for (CargoDataSet::iterator i = tmp.Begin(); i != tmp.End() && sum_estimated < count; ++i) {
-						CargoDataEntry *child = *i;
-						uint estimate = DivideApprox(child->GetCount() * count, tmp.GetCount());
-						if (estimate == 0) estimate = 1;
+				for (CargoDataSet::iterator i = tmp.Begin(); i != tmp.End(); ++i) {
+					CargoDataEntry *child = *i;
+					uint estimate = (child->GetCount() * count) / tmp.GetCount();
 
-						sum_estimated += estimate;
-						if (sum_estimated > count) {
-							estimate -= sum_estimated - count;
-							sum_estimated = count;
+					if (child->GetStation() == next) {
+						/* round consumed amounts up */
+						if ((child->GetCount() * count) % tmp.GetCount() > 0) {
+							++estimate;
 						}
-
-						if (estimate > 0) {
-							if (child->GetStation() == next) {
-								dest->InsertOrRetrieve(next)->Update(estimate);
-							} else {
-								EstimateDestinations(cargo, source, child->GetStation(), estimate, dest);
-							}
-						}
+						if (estimate > 0) dest->InsertOrRetrieve(next)->Update(estimate);
+					} else if (estimate > 0) {
+						/* round other amounts down */
+						queue.push(std::make_pair(child->GetStation(), estimate));
 					}
-
 				}
 			}
-		} else {
-			dest->InsertOrRetrieve(INVALID_STATION)->Update(count);
+		}
+		int remainder = count - dest->GetCount();
+		int children = dest->GetNumChildren();
+		for (CargoDataSet::iterator i = dest->Begin(); remainder != 0 && i != dest->End(); ++i) {
+			int share = remainder / children;
+			if (share == 0) share = remainder > 0 ? 1 : -1;
+			CargoDataEntry *child = (*i);
+			--children;
+			if (child->GetCount() + share > 0) {
+				child->Update(share);
+				remainder -= share;
+			} else {
+				int update = child->GetCount() + (-remainder <= children ? 1 : 0);
+				child->Update(-update);
+				remainder += update;
+			}
 		}
 	}
 
