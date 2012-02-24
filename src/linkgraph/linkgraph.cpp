@@ -582,9 +582,7 @@ void LinkGraphJob::Join()
 		if (node.passby_flag != IS_PASSBY_NODE && Station::IsValidID(node.station)) {
 			/* export, but clear station_flows only for base node (which is always first) */
 			node.ExportFlows(this->working_copy.GetCargo(),
-					node.passby_flag != IS_PASSBY_NODE &&
-					node.import_node != node_id &&
-					node.export_node != node_id);
+					node.import_node != node_id && node.export_node != node_id);
 			InvalidateWindowData(WC_STATION_VIEW, node.station, this->working_copy.GetCargo());
 		}
 	}
