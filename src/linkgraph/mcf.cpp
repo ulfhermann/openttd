@@ -87,11 +87,15 @@ void MultiCommodityFlow::Dijkstra(NodeID source_node, PathVector &paths,
 	StationID source_station = this->graph->GetNode(source_node).station;
 	AnnoSet annos;
 	paths.resize(size, NULL);
-	for (NodeID node = 0; node < size; ++node) {
-		if (node != source_node && graph->GetNode(node).station == source_station) continue;
-		Tannotation *anno = new Tannotation(node, node == source_node);
+	for (NodeID node_id = 0; node_id < size; ++node_id) {
+		Node &node = graph->GetNode(node_id);
+		if (node_id != source_node && (node.import_node == node_id ||
+				(node.import_node == INVALID_NODE && node.base_node == node_id))) {
+			continue;
+		}
+		Tannotation *anno = new Tannotation(node_id, node_id == source_node);
 		annos.insert(anno);
-		paths[node] = anno;
+		paths[node_id] = anno;
 	}
 	while (!annos.empty()) {
 		typename AnnoSet::iterator i = annos.begin();
