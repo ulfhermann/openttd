@@ -1296,6 +1296,7 @@ struct StationViewWindow : public Window {
 	{
 		typedef std::queue<std::pair<StationID, uint> > NextCountQueue;
 		NextCountQueue queue;
+		uint orig_count = count;
 		queue.push(std::make_pair(next, count));
 		while(!queue.empty()) {
 			next = queue.front().first;
@@ -1337,7 +1338,7 @@ struct StationViewWindow : public Window {
 				}
 			}
 		}
-		int remainder = count - dest->GetCount();
+		int remainder = orig_count - dest->GetCount();
 		int children = dest->GetNumChildren();
 		for (CargoDataSet::iterator i = dest->Begin(); remainder != 0 && i != dest->End(); ++i) {
 			int share = remainder / children;
