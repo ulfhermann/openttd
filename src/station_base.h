@@ -202,7 +202,7 @@ public:
 
 	uint GetShare(StationID st) const;
 
-	void EraseShare(StationID st);
+	uint EraseShare(StationID st);
 
 	inline const SharesMap *GetShares() const {return &this->shares;}
 

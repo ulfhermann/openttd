@@ -446,7 +446,14 @@ void Node::ExportFlows(FlowMap::iterator &it, FlowStatMap &station_flows, CargoI
 						curr_station->goods[cargo].link_stats.find(next) !=
 						curr_station->goods[cargo].link_stats.end()) {
 					if (dest == NULL) {
-						dest = &(station_flows.insert(std::make_pair(source, FlowStat(next, planned))).first->second);
+						FlowStatMap::iterator dest_it = station_flows.find(it->first);
+						if (dest_it == station_flows.end()) {
+							dest = &(station_flows.insert(std::make_pair(source, FlowStat(next, planned))).first->second);
+						} else {
+							dest = &(dest_it->second);
+							planned += dest->EraseShare(next);
+							dest->AddShare(next, planned);
+						}
 					} else {
 						dest->AddShare(next, planned);
 					}
@@ -512,7 +519,7 @@ void Path::Fork(Path *base, uint cap, int free_cap, uint dist)
 {
 	this->capacity = min(base->capacity, cap);
 	this->free_capacity = min(base->free_capacity, free_cap);
-	this->distance = dist + (base->distance == UINT_MAX ? 0 : base->distance);
+	this->distance = (base->distance != UINT_MAX ? base->distance : 0) + dist;
 	assert(this->distance > 0);
 	if (this->parent != base) {
 		this->Detach();
