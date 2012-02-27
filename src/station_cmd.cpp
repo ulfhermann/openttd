@@ -3972,8 +3972,9 @@ StationID FlowStat::GetVia(StationID excluded) const
 /**
  * Erase shares for specified station.
  * @param st Next Hop to be removed.
+ * @return Amount of erased share.
  */
-void FlowStat::EraseShare(StationID st)
+uint FlowStat::EraseShare(StationID st)
 {
 	uint32 removed_shares = 0;
 	uint32 last_share = 0;
@@ -3990,6 +3991,7 @@ void FlowStat::EraseShare(StationID st)
 	for (SharesMap::iterator it(this->shares.begin()); it != this->shares.end(); ++it) {
 		assert(it->second != st);
 	}
+	return removed_shares;
 }
 
 /**
