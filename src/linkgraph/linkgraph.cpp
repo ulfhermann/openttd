@@ -422,7 +422,7 @@ void LinkGraphComponent::Init(LinkGraphComponentID id)
  * Exports all entries in the FlowViaMap pointed to by "source_flows_it", erases the source
  * flows and increments the iterator afterwards.
  * @param it Iterator pointing to the flows to be exported into the main game state.
- * @param dest Flow stats to which the flows shall be exported.
+ * @param station_flows Flow stats to which the flows shall be exported.
  * @param cargo Cargo we're exporting flows for (used to check if the link stats for the new
  *        flows still exist).
  */
@@ -446,7 +446,7 @@ void Node::ExportFlows(FlowMap::iterator &it, FlowStatMap &station_flows, CargoI
 						curr_station->goods[cargo].link_stats.find(next) !=
 						curr_station->goods[cargo].link_stats.end()) {
 					if (dest == NULL) {
-						dest = &(station_flows.insert(std::make_pair(it->first, FlowStat(next, planned))).first->second);
+						dest = &(station_flows.insert(std::make_pair(source, FlowStat(next, planned))).first->second);
 					} else {
 						dest->AddShare(next, planned);
 					}
