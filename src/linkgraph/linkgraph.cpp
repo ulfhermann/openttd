@@ -439,27 +439,29 @@ void Node::ExportFlows(FlowMap::iterator &it, FlowStatMap &station_flows, CargoI
 			StationID next = update->first;
 			int planned = update->second;
 			assert(planned >= 0);
+			source_flows.erase(update++);
 
 			Station *via = Station::GetIfValid(next);
 			if (planned > 0 && via != NULL) {
-				if (next == this->station ||
-						curr_station->goods[cargo].link_stats.find(next) !=
-						curr_station->goods[cargo].link_stats.end()) {
-					if (dest == NULL) {
-						FlowStatMap::iterator dest_it = station_flows.find(it->first);
-						if (dest_it == station_flows.end()) {
-							dest = &(station_flows.insert(std::make_pair(source, FlowStat(next, planned))).first->second);
-						} else {
-							dest = &(dest_it->second);
-							planned += dest->EraseShare(next);
-							dest->AddShare(next, planned);
-						}
-					} else {
-						dest->AddShare(next, planned);
+				if (next != this->station) {
+					LinkStatMap::const_iterator l(curr_station->goods[cargo].link_stats.lower_bound(StationIDPair(next, 0)));
+					if (l == curr_station->goods[cargo].link_stats.end() || l->first.Next() != next) {
+						continue;
 					}
 				}
+				if (dest == NULL) {
+					FlowStatMap::iterator dest_it = station_flows.find(it->first);
+					if (dest_it == station_flows.end()) {
+						dest = &(station_flows.insert(std::make_pair(source, FlowStat(next, planned))).first->second);
+					} else {
+						dest = &(dest_it->second);
+						planned += dest->EraseShare(next);
+						dest->AddShare(next, planned);
+					}
+				} else {
+					dest->AddShare(next, planned);
+				}
 			}
-			source_flows.erase(update++);
 		}
 	}
 
