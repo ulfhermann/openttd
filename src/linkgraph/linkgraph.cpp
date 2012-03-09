@@ -512,7 +512,7 @@ void Path::Fork(Path *base, uint cap, int free_cap, uint dist)
 {
 	this->capacity = min(base->capacity, cap);
 	this->free_capacity = min(base->free_capacity, free_cap);
-	this->distance = base->distance + dist;
+	this->distance = dist + (base->distance == UINT_MAX ? 0 : base->distance);
 	assert(this->distance > 0);
 	if (this->parent != base) {
 		this->Detach();
