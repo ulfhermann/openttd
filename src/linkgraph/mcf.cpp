@@ -340,23 +340,22 @@ MCF1stPass::MCF1stPass(LinkGraphComponent *graph) : MultiCommodityFlow(graph)
 
 			for (NodeID dest = 0; dest < size; ++dest) {
 				Edge &edge = this->graph->GetEdge(source, dest);
-				if (edge.unsatisfied_demand > 0) {
-					Path *path = paths[dest];
-					assert(path != NULL);
-					/* generally only allow paths that don't exceed the
-					 * available capacity. But if no demand has been assigned
-					 * yet, make an exception and allow any valid path *once*.
+				Path *path = paths[dest];
+				if (edge.unsatisfied_demand == 0 || path == NULL) continue;
+
+				/* generally only allow paths that don't exceed the
+				 * available capacity. But if no demand has been assigned
+				 * yet, make an exception and allow any valid path *once*.
+				 */
+				if (path->GetFreeCapacity() > 0 && this->PushFlow(edge, path,
+						accuracy, true) > 0) {
+					/* if a path has been found there is a chance we can
+					 * find more
 					 */
-					if (path->GetFreeCapacity() > 0 && this->PushFlow(edge, path,
-							accuracy, true) > 0) {
-						/* if a path has been found there is a chance we can
-						 * find more
-						 */
-						more_loops = (edge.unsatisfied_demand > 0);
-					} else if (edge.unsatisfied_demand == edge.demand &&
-							path->GetFreeCapacity() > INT_MIN) {
-						this->PushFlow(edge, path, accuracy, false);
-					}
+					more_loops = (edge.unsatisfied_demand > 0);
+				} else if (edge.unsatisfied_demand == edge.demand &&
+						path->GetFreeCapacity() > INT_MIN) {
+					this->PushFlow(edge, path, accuracy, false);
 				}
 			}
 			this->CleanupPaths(source, paths);
@@ -384,7 +383,7 @@ MCF2ndPass::MCF2ndPass(LinkGraphComponent *graph) : MultiCommodityFlow(graph)
 			for (NodeID dest = 0; dest < size; ++dest) {
 				Edge &edge = this->graph->GetEdge(source, dest);
 				Path *path = paths[dest];
-				if (edge.unsatisfied_demand > 0 && path->GetFreeCapacity() > INT_MIN) {
+				if (path != NULL && edge.unsatisfied_demand > 0 && path->GetFreeCapacity() > INT_MIN) {
 					this->PushFlow(edge, path, accuracy, false);
 					if (edge.unsatisfied_demand > 0) demand_left = true;
 				}
