@@ -89,7 +89,8 @@ void MultiCommodityFlow::Dijkstra(NodeID source_node, PathVector &paths,
 	paths.resize(size, NULL);
 	for (NodeID node_id = 0; node_id < size; ++node_id) {
 		Node &node = graph->GetNode(node_id);
-		if (node_id != source_node && (node.import_node == node_id ||
+		if (node_id != source_node && node.station == source_station &&
+				(node.import_node == node_id ||
 				(node.import_node == INVALID_NODE && node.base_node == node_id))) {
 			continue;
 		}
