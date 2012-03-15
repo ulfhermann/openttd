@@ -52,6 +52,8 @@ inline void Scaler::SetDemands(LinkGraphComponent *graph, NodeID from_id, NodeID
 	if (from_node->export_node != INVALID_NODE) {
 		export_id = from_node->export_node;
 		assert(from_node->passby_flag != IS_PASSBY_NODE);
+	} else if (from_node->import_node == from_id) {
+		export_id = from_node->base_node;
 	}
 	if (to_node->import_node != INVALID_NODE) {
 		import_id = to_node->import_node;
