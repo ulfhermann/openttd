@@ -182,6 +182,13 @@ enum CloneOptions {
 	CO_UNSHARE = 2
 };
 
+enum NextOrderFlags {
+	NOF_DEFAULT        = 0,
+	NOF_SKIP_NO_UNLOAD = 1 << 0,
+	NOF_SKIP_NO_LOAD   = 1 << 1,
+	NOF_IS_LOADING     = 1 << 2
+};
+
 struct Order;
 struct OrderList;
 

@@ -2124,13 +2124,18 @@ void Vehicle::RefreshNextHopsStats()
 						OrderUnloadFlags unload = next->GetUnloadType();
 						if ((unload & OUFB_NO_UNLOAD) != 0) {
 							const Order *second = this->orders.list->GetNextStoppingOrder(this,
-								this->orders.list->GetNext(next), 0, false, true);
+									this->orders.list->GetNext(next), 0, false, true);
 							if (second != NULL) second_station = second->GetDestination();
 							if (second_station == next_station) second_station = INVALID_STATION;
 						} else if ((unload & OUFB_UNLOAD) != 0) {
 							second_station = next_station;
 						} else if ((unload & OUFB_TRANSFER) != 0) {
 							second_station = NEW_STATION;
+						} else if ((next->GetLoadType() & OLFB_NO_LOAD) != 0) {
+							const Order *second = this->orders.list->GetNextStoppingOrder(this,
+									this->orders.list->GetNext(next), 0, false, true);
+							if (second != NULL) second_station = second->GetDestination();
+							if (second_station == next_station) second_station = INVALID_STATION;
 						}
 						IncreaseStats(st, i->first, next_station, second_station, i->second, UINT_MAX);
 					}

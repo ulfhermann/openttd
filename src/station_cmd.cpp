@@ -3367,9 +3367,9 @@ void Station::RunAverages()
  * @param capacity Capacity to add to link stat.
  * @param usage Usage to add to link stat. If UINT_MAX refresh the link instead of increasing.
  */
-void IncreaseStats(Station *st, CargoID cargo, StationID next_station_id, StationID force_to, uint capacity = 0, uint usage = 0)
+void IncreaseStats(Station *st, CargoID cargo, StationID next_station_id, StationID force_to, LinkType link_type, uint capacity = 0, uint usage = 0)
 {
-	StationIDPair key(next_station_id, force_to);
+	StationIDPair key(next_station_id, force_to, link_type);
 	LinkStatMap::iterator i = st->goods[cargo].link_stats.find(key);
 	if (i == st->goods[cargo].link_stats.end()) {
 		assert(st->index != next_station_id);
@@ -3393,11 +3393,11 @@ void IncreaseStats(Station *st, CargoID cargo, StationID next_station_id, Statio
  * @param front First vehicle in the consist.
  * @param next_station_id Station the consist will be travelling to next.
  */
-void IncreaseStats(Station *st, const Vehicle *front, StationID next_station_id, StationID force_to)
+void IncreaseStats(Station *st, const Vehicle *front, StationID next_station_id, StationID force_to, LinkType link_type)
 {
 	for (const Vehicle *v = front; v != NULL; v = v->Next()) {
 		if (v->refit_cap > 0) {
-			IncreaseStats(st, v->cargo_type, next_station_id, force_to, v->refit_cap, v->cargo.Count());
+			IncreaseStats(st, v->cargo_type, next_station_id, force_to, link_type, v->refit_cap, v->cargo.Count());
 		}
 	}
 }

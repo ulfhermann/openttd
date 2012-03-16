@@ -406,12 +406,12 @@ const Order *OrderList::GetBestLoadableNext(const Vehicle *v, const Order *o2, c
  * @return Either an order or NULL if the vehicle won't stop anymore.
  * @see OrderList::GetBestLoadableNext
  */
-const Order *OrderList::GetNextStoppingOrder(const Vehicle *v, const Order *next, uint hops, bool is_loading, bool skip_no_unload) const
+const Order *OrderList::GetNextStoppingOrder(const Vehicle *v, const Order *next, uint hops, uint8 next_order_flags) const
 {
 	if (hops > this->GetNumOrders() || next == NULL) return NULL;
 
 	if (next->IsType(OT_CONDITIONAL)) {
-		if (is_loading && next->GetConditionVariable() == OCV_LOAD_PERCENTAGE) {
+		if ((next_order_flags & NOF_IS_LOADING) != 0 && next->GetConditionVariable() == OCV_LOAD_PERCENTAGE) {
 			/* If the condition is based on load percentage we can't
 			 * tell what it will do. So we choose randomly.
 			 */
@@ -473,7 +473,7 @@ StationID OrderList::GetNextStoppingStation(const Vehicle *v) const
 
 	uint hops = 0;
 	do {
-		next = this->GetNextStoppingOrder(v, next, ++hops, true, true);
+		next = this->GetNextStoppingOrder(v, next, ++hops, NOF_SKIP_NO_UNLOAD | NOF_IS_LOADING);
 		/* Don't return a next stop if the vehicle has to unload everything. */
 		if (next == NULL || (next->GetDestination() == v->last_station_visited &&
 				(next->GetUnloadType() & (OUFB_TRANSFER | OUFB_UNLOAD)) == 0)) {

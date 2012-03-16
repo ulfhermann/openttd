@@ -243,6 +243,7 @@ const SaveLoad *GetStationIDPairDesc()
 	static const SaveLoad station_id_pair_desc[] = {
 		SLE_VAR(StationIDPair, next,   SLE_UINT16),
 		SLE_VAR(StationIDPair, second, SLE_UINT16),
+		SLE_VAR(StationIDPair, type,   SLE_UINT32),
 		SLE_END()
 	};
 	return station_id_pair_desc;
