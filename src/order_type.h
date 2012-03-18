@@ -183,10 +183,10 @@ enum CloneOptions {
 };
 
 enum NextOrderFlags {
-	NOF_DEFAULT        = 0,
-	NOF_SKIP_NO_UNLOAD = 1 << 0,
-	NOF_SKIP_NO_LOAD   = 1 << 1,
-	NOF_IS_LOADING     = 1 << 2
+	NOF_DEFAULT        = 0,      // No special directives.
+	NOF_SKIP_NO_UNLOAD = 1 << 0, // Skip "no unload" orders.
+	NOF_SKIP_NO_LOAD   = 1 << 1, // Skip "no load" orders.
+	NOF_BEST_LOAD      = 1 << 2  // When analyzing "load percentage" condition, return the option with most loadable cargo.
 };
 
 struct Order;

@@ -402,7 +402,7 @@ const Order *OrderList::GetBestLoadableNext(const Vehicle *v, const Order *o2, c
  * @param hops The number of orders we have already looked at.
  * @param is_loading If the vehicle is loading. This triggers a different
  *        behaviour on conditional orders based on load percentage.
- * @param skip_no_unload Skip order with "no unload" modifier.
+ * @param next_order_flags Flags on which orders to ignore and how to treat conditionals based on load percentage.
  * @return Either an order or NULL if the vehicle won't stop anymore.
  * @see OrderList::GetBestLoadableNext
  */
@@ -411,15 +411,16 @@ const Order *OrderList::GetNextStoppingOrder(const Vehicle *v, const Order *next
 	if (hops > this->GetNumOrders() || next == NULL) return NULL;
 
 	if (next->IsType(OT_CONDITIONAL)) {
-		if ((next_order_flags & NOF_IS_LOADING) != 0 && next->GetConditionVariable() == OCV_LOAD_PERCENTAGE) {
+		if ((next_order_flags & NOF_BEST_LOAD) != 0 && next->GetConditionVariable() == OCV_LOAD_PERCENTAGE) {
 			/* If the condition is based on load percentage we can't
-			 * tell what it will do. So we choose randomly.
+			 * tell what it will do. So we choose greedily, the option
+			 * for which we can load most cargo.
 			 */
 			const Order *skip_to = this->GetNextStoppingOrder(v,
 					this->GetOrderAt(next->GetConditionSkipToOrder()),
-					hops + 1, skip_no_unload);
+					hops + 1, next_order_flags);
 			const Order *advance = this->GetNextStoppingOrder(v,
-					this->GetNext(next), hops + 1, skip_no_unload);
+					this->GetNext(next), hops + 1, next_order_flags);
 			if (advance == NULL) {
 				return skip_to;
 			} else if (skip_to == NULL) {
@@ -434,10 +435,10 @@ const Order *OrderList::GetNextStoppingOrder(const Vehicle *v, const Order *next
 			VehicleOrderID skip_to = ProcessConditionalOrder(next, v);
 			if (skip_to != INVALID_VEH_ORDER_ID) {
 				return this->GetNextStoppingOrder(v,
-						this->GetOrderAt(skip_to), hops + 1, skip_no_unload);
+						this->GetOrderAt(skip_to), hops + 1, next_order_flags);
 			} else {
 				return this->GetNextStoppingOrder(v,
-						this->GetNext(next), hops + 1, skip_no_unload);
+						this->GetNext(next), hops + 1, next_order_flags);
 			}
 		}
 	}
@@ -447,8 +448,8 @@ const Order *OrderList::GetNextStoppingOrder(const Vehicle *v, const Order *next
 		if (next->IsRefit()) return next;
 	}
 
-	if (!next->CanLoadOrUnload() || (skip_no_unload && (next->GetUnloadType() & OUFB_NO_UNLOAD) != 0)) {
-		return this->GetNextStoppingOrder(v, this->GetNext(next), hops + 1, skip_no_unload);
+	if (!next->CanLoadOrUnload() || ((next_order_flags & NOF_SKIP_NO_UNLOAD) != 0 && (next->GetUnloadType() & OUFB_NO_UNLOAD) != 0)) {
+		return this->GetNextStoppingOrder(v, this->GetNext(next), hops + 1, next_order_flags);
 	}
 
 	return next;
@@ -473,7 +474,7 @@ StationID OrderList::GetNextStoppingStation(const Vehicle *v) const
 
 	uint hops = 0;
 	do {
-		next = this->GetNextStoppingOrder(v, next, ++hops, NOF_SKIP_NO_UNLOAD | NOF_IS_LOADING);
+		next = this->GetNextStoppingOrder(v, next, ++hops, NOF_SKIP_NO_UNLOAD | NOF_BEST_LOAD);
 		/* Don't return a next stop if the vehicle has to unload everything. */
 		if (next == NULL || (next->GetDestination() == v->last_station_visited &&
 				(next->GetUnloadType() & (OUFB_TRANSFER | OUFB_UNLOAD)) == 0)) {

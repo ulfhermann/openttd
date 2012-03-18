@@ -150,27 +150,19 @@ public:
 	}
 };
 
-enum LinkType {
-	LT_DEFAULT,
-	LT_UNLOAD,
-	LT_TRANSFER,
-	LT_NO_UNLOAD,
-	LT_NO_LOAD
-};
-
 class StationIDPair {
 private:
 	StationID next;   ///< Remote end of link.
 	StationID second; ///< End of the passby chain for no (un)load.
-	LinkType type;    ///< Type of the link.
+	LinkStatType type;    ///< Type of the link.
 
 public:
 	friend const SaveLoad *GetStationIDPairDesc();
-	StationIDPair(StationID next, StationID second = INVALID_STATION, LinkType type = LT_DEFAULT) :
+	StationIDPair(StationID next, StationID second = INVALID_STATION, LinkStatType type = LST_DEFAULT) :
 			next(next), second(second), type(type) {}
 	StationID Next() const {return this->next;}
 	StationID Second() const {return this->second;}
-	LinkType Type() const {return this->type;}
+	LinkStatType Type() const {return this->type;}
 
 	bool operator<(const StationIDPair &other) const
 	{

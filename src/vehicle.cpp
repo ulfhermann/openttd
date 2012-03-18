@@ -2120,24 +2120,28 @@ void Vehicle::RefreshNextHopsStats()
 				for (const SmallPair<CargoID, uint> *i = capacities.Begin(); i != capacities.End(); ++i) {
 					/* Refresh the link and give it a minimum capacity. */
 					if (i->second > 0) {
+						LinkStatType link_type = LST_DEFAULT;
 						StationID second_station = INVALID_STATION;
 						OrderUnloadFlags unload = next->GetUnloadType();
 						if ((unload & OUFB_NO_UNLOAD) != 0) {
 							const Order *second = this->orders.list->GetNextStoppingOrder(this,
-									this->orders.list->GetNext(next), 0, false, true);
+									this->orders.list->GetNext(next), 0, NOF_SKIP_NO_UNLOAD);
 							if (second != NULL) second_station = second->GetDestination();
 							if (second_station == next_station) second_station = INVALID_STATION;
+							link_type = LST_NO_UNLOAD;
 						} else if ((unload & OUFB_UNLOAD) != 0) {
 							second_station = next_station;
+							link_type = LST_UNLOAD;
 						} else if ((unload & OUFB_TRANSFER) != 0) {
-							second_station = NEW_STATION;
+							link_type = LST_TRANSFER;
 						} else if ((next->GetLoadType() & OLFB_NO_LOAD) != 0) {
 							const Order *second = this->orders.list->GetNextStoppingOrder(this,
-									this->orders.list->GetNext(next), 0, false, true);
+									this->orders.list->GetNext(next), 0, NOF_SKIP_NO_LOAD);
 							if (second != NULL) second_station = second->GetDestination();
 							if (second_station == next_station) second_station = INVALID_STATION;
+							link_type = LST_NO_LOAD;
 						}
-						IncreaseStats(st, i->first, next_station, second_station, i->second, UINT_MAX);
+						IncreaseStats(st, i->first, next_station, second_station, link_type, i->second, UINT_MAX);
 					}
 				}
 			}

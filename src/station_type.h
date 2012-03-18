@@ -86,6 +86,14 @@ enum CatchmentArea {
 	MAX_CATCHMENT      = 10, ///< Maximum catchment for airports with "modified catchment" enabled
 };
 
+enum LinkStatType {
+	LST_DEFAULT,
+	LST_UNLOAD,
+	LST_TRANSFER,
+	LST_NO_UNLOAD,
+	LST_NO_LOAD
+};
+
 static const uint MAX_LENGTH_STATION_NAME_CHARS = 32; ///< The maximum length of a station name in characters including '\0'
 
 /** List of station IDs */

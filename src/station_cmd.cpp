@@ -3364,10 +3364,11 @@ void Station::RunAverages()
  * @param cargo Cargo to increase stat for.
  * @param next_station_id Station the consist will be travelling to next.
  * @param force_to Next station the cargo will travel to after next_station_id.
+ * @param link_type Type of link.
  * @param capacity Capacity to add to link stat.
  * @param usage Usage to add to link stat. If UINT_MAX refresh the link instead of increasing.
  */
-void IncreaseStats(Station *st, CargoID cargo, StationID next_station_id, StationID force_to, LinkType link_type, uint capacity = 0, uint usage = 0)
+void IncreaseStats(Station *st, CargoID cargo, StationID next_station_id, StationID force_to, LinkStatType link_type, uint capacity = 0, uint usage = 0)
 {
 	StationIDPair key(next_station_id, force_to, link_type);
 	LinkStatMap::iterator i = st->goods[cargo].link_stats.find(key);
@@ -3392,8 +3393,10 @@ void IncreaseStats(Station *st, CargoID cargo, StationID next_station_id, Statio
  * @param st Station to get the link stats from.
  * @param front First vehicle in the consist.
  * @param next_station_id Station the consist will be travelling to next.
+ * @param force_to End of passby chain.
+ * @param link_type Type of link.
  */
-void IncreaseStats(Station *st, const Vehicle *front, StationID next_station_id, StationID force_to, LinkType link_type)
+void IncreaseStats(Station *st, const Vehicle *front, StationID next_station_id, StationID force_to, LinkStatType link_type)
 {
 	for (const Vehicle *v = front; v != NULL; v = v->Next()) {
 		if (v->refit_cap > 0) {

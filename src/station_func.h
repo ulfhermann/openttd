@@ -45,9 +45,9 @@ bool IsStationTileElectrifiable(TileIndex tile);
 
 void UpdateAirportsNoise();
 
-void IncreaseStats(Station *st, const Vehicle *v, StationID next_station_id, StationID force_to = INVALID_STATION);
+void IncreaseStats(Station *st, const Vehicle *v, StationID next_station_id, StationID force_to = INVALID_STATION, LinkStatType link_type = LST_DEFAULT);
 
-void IncreaseStats(Station *st, CargoID cargo, StationID next_station_id, StationID force_to, uint capacity, uint usage);
+void IncreaseStats(Station *st, CargoID cargo, StationID next_station_id, StationID force_to, LinkStatType link_type, uint capacity, uint usage);
 
 void DeleteStaleFlows(StationID at, CargoID c_id, StationID to);
 
