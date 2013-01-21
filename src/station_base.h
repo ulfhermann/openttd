@@ -329,7 +329,7 @@ struct GoodsEntry {
 	 * @param source Source of the packet.
 	 * @return The chosen next hop or INVALID_STATION if none was found.
 	 */
-	inline StationID GetVia(StationID source)
+	inline StationID GetVia(StationID source) const
 	{
 		FlowStatMap::const_iterator flow_it(this->flows.find(source));
 		return flow_it != this->flows.end() ? flow_it->second.GetVia() : INVALID_STATION;
