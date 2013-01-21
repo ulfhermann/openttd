@@ -91,9 +91,10 @@ Station::~Station()
 	Station *st;
 	FOR_ALL_STATIONS(st) {
 		for (CargoID c = 0; c < NUM_CARGO; ++c) {
-			GoodsEntry &ge = st->goods[c];
-			ge.link_stats.erase(this->index);
+			GoodsEntry *ge = &st->goods[c];
+			ge->link_stats.erase(this->index);
 			DeleteStaleFlows(st->index, c, this->index);
+			ge->cargo.Reroute(UINT_MAX, &ge->cargo, this->index, ge);
 		}
 	}
 

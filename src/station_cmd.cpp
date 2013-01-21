@@ -3359,8 +3359,8 @@ uint GetMovingAverageLength(const Station *from, const Station *to)
 void Station::RunAverages()
 {
 	for (int goods_index = 0; goods_index < NUM_CARGO; ++goods_index) {
-		LinkStatMap &links = this->goods[goods_index].link_stats;
-		for (LinkStatMap::iterator i = links.begin(); i != links.end();) {
+		GoodsEntry *ge = &this->goods[goods_index];
+		for (LinkStatMap::iterator i = ge->link_stats.begin(); i != ge->link_stats.end();) {
 			StationID id = i->first;
 			if (Station::IsValidID(id)) {
 				i->second.Decrease();
@@ -3368,15 +3368,17 @@ void Station::RunAverages()
 					++i;
 				} else {
 					DeleteStaleFlows(this->index, goods_index, id);
-					links.erase(i++);
+					ge->cargo.Reroute(UINT_MAX, &ge->cargo, id, ge);
+					ge->link_stats.erase(i++);
 				}
 			} else {
-				links.erase(i++);
+				ge->cargo.Reroute(UINT_MAX, &ge->cargo, id, ge);
+				ge->link_stats.erase(i++);
 			}
 		}
 
 		if (_settings_game.linkgraph.GetDistributionType(goods_index) == DT_MANUAL) {
-			this->goods[goods_index].flows.clear();
+			ge->flows.clear();
 		}
 	}
 }
@@ -3521,7 +3523,9 @@ static uint UpdateStationWaiting(Station *st, CargoID type, uint amount, SourceT
 	/* No new "real" cargo item yet. */
 	if (amount == 0) return 0;
 
-	ge.cargo.Append(new CargoPacket(st->index, st->xy, amount, source_type, source_id));
+	StationID next = ge.GetVia(st->index);
+
+	ge.cargo.Append(new CargoPacket(st->index, st->xy, amount, source_type, source_id), next);
 	ge.supply_new += amount;
 
 	if (!HasBit(ge.acceptance_pickup, GoodsEntry::GES_PICKUP)) {
