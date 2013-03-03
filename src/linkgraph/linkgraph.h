@@ -22,10 +22,15 @@
 #include "../date_func.h"
 #include "linkgraph_type.h"
 #include <list>
+#include <set>
 
 struct SaveLoad;
 class LinkGraph;
 class LinkGraphJob;
+class Path;
+
+typedef std::set<Path *> PathSet;
+typedef std::map<NodeID, Path *> PathViaMap;
 
 class GraphItem {
 protected:
@@ -46,6 +51,11 @@ public:
 	uint demand;             ///< Acceptance at the station.
 	StationID station;       ///< Station ID.
 	Date last_update;        ///< When the supply was last updated.
+
+	/**
+	 * Clear a node on destruction to delete paths that might remain.
+	 */
+	~Node() { this->Init(); }
 
 	void Init(StationID st = INVALID_STATION, uint demand = 0);
 
@@ -253,12 +263,16 @@ extern LinkGraphJobPool _link_graph_job_pool;
 
 class EdgeAnnotation {
 public:
-	uint demand;      ///< Transport demand between the nodes.
+	uint demand;             ///< Transport demand between the nodes.
+	uint unsatisfied_demand; ///< Demand over this edge that hasn't been satisfied yet.
+	uint flow;               ///< Planned flow over this edge.
 };
 
 class NodeAnnotation {
 public:
 	uint undelivered_supply; ///< Amount of supply that hasn't been distributed yet.
+	PathSet paths;           ///< Paths through this node.
+	FlowStatMap flows;       ///< Planned flows to other nodes.
 };
 
 class LinkGraphJob : public LinkGraphJobPool::PoolItem<&_link_graph_job_pool>{
@@ -353,7 +367,7 @@ private:
 	friend const SaveLoad *GetLinkGraphScheduleDesc();
 
 protected:
-	ComponentHandler *handlers[2]; ///< Handlers to be run for each job.
+	ComponentHandler *handlers[4]; ///< Handlers to be run for each job.
 	GraphList schedule;            ///< Queue for new jobs.
 	JobList running;               ///< Currently running jobs.
 
@@ -373,6 +387,89 @@ public:
 	}
 	void Unqueue(LinkGraph *lg) { this->schedule.remove(lg); }
 	void SpawnAll();
+};
+
+/**
+ * A leg of a path in the link graph. Paths can form trees by being "forked".
+ */
+class Path {
+public:
+	Path(NodeID n, bool source = false);
+
+	/** Get the node this leg passes. */
+	inline NodeID GetNode() const { return this->node; }
+
+	/** Get the overall origin of the path. */
+	inline NodeID GetOrigin() const { return this->origin; }
+
+	/** Get the parent leg of this one. */
+	inline Path *GetParent() { return this->parent; }
+
+	/** Get the overall capacity of the path. */
+	inline uint GetCapacity() const { return this->capacity; }
+
+	/** Get the free capacity of the path. */
+	inline int GetFreeCapacity() const { return this->free_capacity; }
+
+	/**
+	 * Get ratio of free * 16 (so that we get fewer 0) /
+	 * total capacity + 1 (so that we don't divide by 0).
+	 * @param free Free capacity.
+	 * @param total Total capacity.
+	 * @return free * 16 / (total + 1).
+	 */
+	inline static int GetCapacityRatio(int free, int total)
+	{
+		return (free << 4) / (total + 1);
+	}
+
+	/**
+	 * Get capacity ratio of this path.
+	 * @return free capacity * 16 / (total capacity + 1).
+	 */
+	inline int GetCapacityRatio() const
+	{
+		return Path::GetCapacityRatio(this->free_capacity, this->capacity);
+	}
+
+	/** Get the overall distance of the path. */
+	inline uint GetDistance() const { return this->distance; }
+
+	/** Reduce the flow on this leg only by the specified amount. */
+	inline void ReduceFlow(uint f) { this->flow -= f; }
+
+	/** Increase the flow on this leg only by the specified amount. */
+	inline void AddFlow(uint f) { this->flow += f; }
+
+	/** Get the flow on this leg. */
+	inline uint GetFlow() const { return this->flow; }
+
+	/** Get the number of "forked off" child legs of this one. */
+	inline uint GetNumChildren() const { return this->num_children; }
+
+	/**
+	 * Detach this path from its parent.
+	 */
+	inline void Detach()
+	{
+		if (this->parent != NULL) {
+			this->parent->num_children--;
+			this->parent = NULL;
+		}
+	}
+
+	uint AddFlow(uint f, LinkGraphJob *job, uint max_saturation);
+	void Fork(Path *base, uint cap, int free_cap, uint dist);
+
+protected:
+	uint distance;     ///< Sum(distance of all legs up to this one).
+	uint capacity;     ///< This capacity is min(capacity) fom all edges.
+	int free_capacity; ///< This capacity is min(edge.capacity - edge.flow) for the current run of Dijkstra.
+	uint flow;         ///< Flow the current run of the mcf solver assigns.
+	NodeID node;       ///< Link graph node this leg passes.
+	NodeID origin;     ///< Link graph node this path originates from.
+	uint num_children; ///< Number of child legs that have been forked from this path.
+	Path *parent;      ///< Parent leg of this one.
 };
 
 #endif /* LINKGRAPH_H */

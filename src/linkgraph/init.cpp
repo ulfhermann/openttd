@@ -14,9 +14,15 @@ void InitHandler::Run(LinkGraphJob *job)
 	job->Nodes().Resize(size);
 	job->Edges().Resize(size, size);
 	for (uint i = 0; i < size; ++i) {
-		job->GetNode(i).undelivered_supply = lg.GetNode(i).supply;
+		NodeAnnotation &node = job->GetNode(i);
+		node.undelivered_supply = lg.GetNode(i).supply;
+		new (&node.flows) FlowStatMap;
+		new (&node.paths) PathSet;
 		for (uint j = 0; j < size; ++j) {
-			job->GetEdge(i, j).demand = 0;
+			EdgeAnnotation &edge = job->GetEdge(i, j);
+			edge.demand = 0;
+			edge.flow = 0;
+			edge.unsatisfied_demand = 0;
 		}
 	}
 

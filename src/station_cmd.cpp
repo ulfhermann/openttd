@@ -3377,15 +3377,7 @@ void IncreaseStats(Station *st, CargoID cargo, StationID next_station_id, uint c
 		}
 	}
 	if (lg) {
-		Edge &edge = lg->GetEdge(ge1.node, ge2.node);
-		if (usage == UINT_MAX) {
-			edge.capacity = max(edge.capacity, capacity);
-		} else {
-			assert(capacity >= usage);
-			edge.capacity += capacity;
-			edge.usage += usage;
-		}
-		edge.last_update = _date;
+		lg->UpdateEdge(ge1.node, ge2.node, capacity, usage);
 	}
 }
 

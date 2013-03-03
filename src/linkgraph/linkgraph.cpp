@@ -18,6 +18,7 @@
 #include "linkgraph.h"
 #include "init.h"
 #include "demands.h"
+#include "mcf.h"
 
 /* Initialize the link-graph-pool */
 LinkGraphPool _link_graph_pool("LinkGraph");
@@ -392,6 +393,8 @@ LinkGraphSchedule::LinkGraphSchedule()
 {
 	this->handlers[0] = new InitHandler;
 	this->handlers[1] = new DemandHandler;
+	this->handlers[2] = new MCFHandler<MCF1stPass>;
+	this->handlers[3] = new MCFHandler<MCF2ndPass>;
 }
 
 /**
@@ -438,4 +441,70 @@ void OnTick_LinkGraph()
 		}
 	}
 }
+
+/**
+ * Add this path as a new child to the given base path, thus making this path
+ * a "fork" of the base path.
+ * @param base Path to fork from.
+ * @param cap Maximum capacity of the new leg.
+ * @param free_cap Remaining free capacity of the new leg.
+ * @param dist Distance of the new leg.
+ */
+void Path::Fork(Path *base, uint cap, int free_cap, uint dist)
+{
+	this->capacity = min(base->capacity, cap);
+	this->free_capacity = min(base->free_capacity, free_cap);
+	this->distance = base->distance + dist;
+	assert(this->distance > 0);
+	if (this->parent != base) {
+		this->Detach();
+		this->parent = base;
+		this->parent->num_children++;
+	}
+	this->origin = base->origin;
+}
+
+/**
+ * Push some flow along a path and register the path in the nodes it passes if
+ * successful.
+ * @param new_flow Amount of flow to push.
+ * @param job Link graph job this node belongs to.
+ * @param max_saturation Maximum saturation of edges.
+ * @return Amount of flow actually pushed.
+ */
+uint Path::AddFlow(uint new_flow, LinkGraphJob *job, uint max_saturation)
+{
+	if (this->parent != NULL) {
+		EdgeAnnotation &edge = job->GetEdge(this->parent->node, this->node);
+		if (max_saturation != UINT_MAX) {
+			uint usable_cap = job->Graph().GetEdge(this->parent->node, this->node).capacity *
+					max_saturation / 100;
+			if (usable_cap > edge.flow) {
+				new_flow = min(new_flow, usable_cap - edge.flow);
+			} else {
+				return 0;
+			}
+		}
+		new_flow = this->parent->AddFlow(new_flow, job, max_saturation);
+		if (new_flow > 0) {
+			job->GetNode(this->parent->node).paths.insert(this);
+		}
+		edge.flow += new_flow;
+	}
+	this->flow += new_flow;
+	return new_flow;
+}
+
+/**
+ * Create a leg of a path in the link graph.
+ * @param n Id of the link graph node this path passes.
+ * @param source If true, this is the first leg of the path.
+ */
+Path::Path(NodeID n, bool source) :
+	distance(source ? 0 : UINT_MAX),
+	capacity(0),
+	free_capacity(source ? INT_MAX : INT_MIN),
+	flow(0), node(n), origin(source ? n : INVALID_NODE),
+	num_children(0), parent(NULL)
+{}
 
