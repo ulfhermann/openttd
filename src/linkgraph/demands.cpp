@@ -46,6 +46,7 @@ inline void Scaler::SetDemands(LinkGraphJob *job, NodeID from_id, NodeID to_id, 
 {
 	EdgeAnnotation &forward = job->GetEdge(from_id, to_id);
 	forward.demand += demand_forw;
+	forward.unsatisfied_demand += demand_forw;
 	job->GetNode(from_id).undelivered_supply -= demand_forw;
 }
 

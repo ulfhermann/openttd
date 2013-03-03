@@ -334,6 +334,7 @@
     <ClCompile Include="..\src\linkgraph\demands.cpp" />
     <ClCompile Include="..\src\linkgraph\init.cpp" />
     <ClCompile Include="..\src\linkgraph\linkgraph.cpp" />
+    <ClCompile Include="..\src\linkgraph\mcf.cpp" />
     <ClCompile Include="..\src\map.cpp" />
     <ClCompile Include="..\src\misc.cpp" />
     <ClCompile Include="..\src\mixer.cpp" />
@@ -476,6 +477,7 @@
     <ClInclude Include="..\src\linkgraph\init.h" />
     <ClInclude Include="..\src\linkgraph\linkgraph.h" />
     <ClInclude Include="..\src\linkgraph\linkgraph_type.h" />
+    <ClInclude Include="..\src\linkgraph\mcf.h" />
     <ClInclude Include="..\src\livery.h" />
     <ClInclude Include="..\src\map_func.h" />
     <ClInclude Include="..\src\map_type.h" />
