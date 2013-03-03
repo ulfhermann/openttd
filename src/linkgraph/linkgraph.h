@@ -252,11 +252,13 @@ typedef Pool<LinkGraphJob, LinkGraphJobID, 32, 0xFFFFFF> LinkGraphJobPool;
 extern LinkGraphJobPool _link_graph_job_pool;
 
 class EdgeAnnotation {
-	/* nothing, yet */
+public:
+	uint demand;      ///< Transport demand between the nodes.
 };
 
 class NodeAnnotation {
-	/* nothing, yet */
+public:
+	uint undelivered_supply; ///< Amount of supply that hasn't been distributed yet.
 };
 
 class LinkGraphJob : public LinkGraphJobPool::PoolItem<&_link_graph_job_pool>{
@@ -317,6 +319,27 @@ public:
 	{
 		return this->nodes;
 	}
+
+	/**
+	 * Get a reference to an edge annotation.
+	 * @param from Origin node.
+	 * @param to Destination node.
+	 * @return Edge annotation between from and to.
+	 */
+	inline EdgeAnnotation &GetEdge(NodeID from, NodeID to)
+	{
+		return this->edges[from][to];
+	}
+
+	/**
+	 * Get a reference to a node annotation with the specified id.
+	 * @param num ID of the node.
+	 * @return the Requested node annotation.
+	 */
+	inline NodeAnnotation &GetNode(NodeID num)
+	{
+		return this->nodes[num];
+	}
 };
 
 #define FOR_ALL_LINK_GRAPH_JOBS(var) FOR_ALL_ITEMS_FROM(LinkGraphJob, link_graph_job_index, var, 0)
@@ -330,7 +353,7 @@ private:
 	friend const SaveLoad *GetLinkGraphScheduleDesc();
 
 protected:
-	ComponentHandler *handlers[0]; ///< Handlers to be run for each job.
+	ComponentHandler *handlers[2]; ///< Handlers to be run for each job.
 	GraphList schedule;            ///< Queue for new jobs.
 	JobList running;               ///< Currently running jobs.
 
