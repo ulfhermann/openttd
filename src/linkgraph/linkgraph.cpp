@@ -16,6 +16,8 @@
 #include "../map_func.h"
 #include "../debug.h"
 #include "linkgraph.h"
+#include "init.h"
+#include "demands.h"
 
 /* Initialize the link-graph-pool */
 LinkGraphPool _link_graph_pool("LinkGraph");
@@ -388,6 +390,8 @@ void LinkGraphSchedule::SpawnAll()
  */
 LinkGraphSchedule::LinkGraphSchedule()
 {
+	this->handlers[0] = new InitHandler;
+	this->handlers[1] = new DemandHandler;
 }
 
 /**
