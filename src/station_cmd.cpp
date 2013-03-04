@@ -3348,6 +3348,39 @@ void DeleteStaleFlows(StationID at, CargoID c_id, StationID to)
 }
 
 /**
+ * Check all next hops of cargo packets in this station for existance of a
+ * a valid link they may use to travel on. Reroute any cargo not having a valid
+ * link and remove timed out links found like this from the linkgraph. We're
+ * not all links here as that is expensive and useless. A link no one is using
+ * doesn't hurt either.
+ * @param from Station to check.
+ */
+void DeleteStaleLinks(Station *from)
+{
+	for (CargoID c = 0; c < NUM_CARGO; ++c) {
+		GoodsEntry &ge = from->goods[c];
+		LinkGraph *lg = LinkGraph::GetIfValid(ge.link_graph);
+		if (lg == NULL) continue;
+		for (StationCargoPacketMap::Map::const_iterator it(ge.cargo.Packets()->begin());
+				it != ge.cargo.Packets()->end(); ++it) {
+			Station *to = Station::GetIfValid(it->first);
+			if (to == NULL) continue;
+			if (to->goods[c].link_graph != ge.link_graph) {
+				ge.cargo.Reroute(UINT_MAX, &ge.cargo, from->index, to->index, &ge);
+			} else {
+				Edge &edge = lg->GetEdge(ge.node, to->goods[c].node);
+				if (edge.last_update == INVALID_DATE ||
+						(uint)(_date - edge.last_update) > Edge::MIN_DISTANCE +
+						(DistanceManhattan(from->xy, to->xy) >> 2)) {
+					lg->RemoveEdge(ge.node, to->goods[c].node);
+					ge.cargo.Reroute(UINT_MAX, &ge.cargo, from->index, to->index, &ge);
+				}
+			}
+		}
+	}
+}
+
+/**
  * Increase capacity for a link stat given by station cargo and next hop.
  * @param st Station to get the link stats from.
  * @param cargo Cargo to increase stat for.
@@ -3442,6 +3475,11 @@ void OnTick_Station()
 	BaseStation *st;
 	FOR_ALL_BASE_STATIONS(st) {
 		StationHandleSmallTick(st);
+
+		/* Clean up the link graph about once a week. */
+		if (Station::IsExpected(st) && (_tick_counter + st->index) % STATION_LINKGRAPH_TICKS == 0) {
+			DeleteStaleLinks(Station::From(st));
+		};
 
 		/* Run STATION_ACCEPTANCE_TICKS = 250 tick interval trigger for station animation.
 		 * Station index is included so that triggers are not all done

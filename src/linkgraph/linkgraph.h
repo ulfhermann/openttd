@@ -73,6 +73,8 @@ public:
  */
 class Edge : public GraphItem {
 public:
+	static const uint MIN_DISTANCE = 48; ///< minimum effective distance for timeout calculation.
+
 	uint distance;           ///< Length of the link.
 	uint capacity;           ///< Capacity of the link.
 	uint usage;              ///< Usage of the link.
