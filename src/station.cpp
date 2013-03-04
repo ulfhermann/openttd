@@ -98,6 +98,10 @@ Station::~Station()
 				delete lg;
 			}
 		}
+		Station *st;
+		FOR_ALL_STATIONS(st) {
+			DeleteStaleFlows(st->index, c, this->index);
+		}
 	}
 
 	Vehicle *v;

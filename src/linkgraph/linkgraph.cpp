@@ -19,6 +19,7 @@
 #include "init.h"
 #include "demands.h"
 #include "mcf.h"
+#include "flowmapper.h"
 
 /* Initialize the link-graph-pool */
 LinkGraphPool _link_graph_pool("LinkGraph");
@@ -277,6 +278,30 @@ LinkGraphJob::LinkGraphJob(const LinkGraph &orig) :
 LinkGraphJob::~LinkGraphJob()
 {
 	assert(this->thread == NULL);
+	uint size = this->link_graph.GetSize();
+	for (NodeID node_id = 0; node_id < size; ++node_id) {
+		StationID &station = this->link_graph.GetNode(node_id).station;
+		if (!Station::IsValidID(station)) {
+			/* Station got removed during the link graph run. We have to remove all
+			 * flows pointing to it now. This is costly but it should be rare. */
+			for (NodeID from_id = 0; from_id < size; ++from_id) {
+				if (this->link_graph.GetEdge(from_id, node_id).capacity > 0) {
+					FlowStatMap &flows = this->nodes[from_id].flows;
+					for (FlowStatMap::iterator it(flows.begin()); it != flows.end(); ++it) {
+						it->second.ChangeShare(station, INT_MIN);
+					}
+				}
+			}
+			station = INVALID_STATION;
+		}
+	}
+	for (NodeID node_id = 0; node_id < size; ++node_id) {
+		StationID station = this->link_graph.GetNode(node_id).station;
+		if (station != INVALID_STATION) {
+			Station::Get(station)->goods[this->link_graph.GetCargo()].flows.
+					swap(this->GetNode(node_id).flows);
+		}
+	}
 }
 
 /**
@@ -394,7 +419,9 @@ LinkGraphSchedule::LinkGraphSchedule()
 	this->handlers[0] = new InitHandler;
 	this->handlers[1] = new DemandHandler;
 	this->handlers[2] = new MCFHandler<MCF1stPass>;
-	this->handlers[3] = new MCFHandler<MCF2ndPass>;
+	this->handlers[3] = new FlowMapper;
+	this->handlers[4] = new MCFHandler<MCF2ndPass>;
+	this->handlers[5] = new FlowMapper;
 }
 
 /**
