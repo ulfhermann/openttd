@@ -15,6 +15,8 @@
 #include "../core/random_func.hpp"
 #include "../map_func.h"
 #include "../debug.h"
+#include "../window_func.h"
+#include "../window_gui.h"
 #include "linkgraph.h"
 #include "init.h"
 #include "demands.h"
@@ -298,6 +300,7 @@ LinkGraphJob::~LinkGraphJob()
 	for (NodeID node_id = 0; node_id < size; ++node_id) {
 		StationID station = this->link_graph.GetNode(node_id).station;
 		if (station != INVALID_STATION) {
+			InvalidateWindowData(WC_STATION_VIEW, station, this->link_graph.GetCargo());
 			Station::Get(station)->goods[this->link_graph.GetCargo()].flows.
 					swap(this->GetNode(node_id).flows);
 		}
