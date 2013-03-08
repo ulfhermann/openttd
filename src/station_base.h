@@ -138,7 +138,8 @@ struct GoodsEntry {
 		last_speed(0),
 		last_age(255),
 		link_graph(INVALID_LINK_GRAPH),
-		node(INVALID_NODE)
+		node(INVALID_NODE),
+		max_waiting_cargo(0)
 	{}
 
 	byte acceptance_pickup; ///< Status of this cargo, see #GoodsEntryStatus.
@@ -175,6 +176,7 @@ struct GoodsEntry {
 	LinkGraphID link_graph; ///< Link graph this station belongs to.
 	NodeID node;
 	FlowStatMap flows;      ///< Planned flows through this station.
+	uint max_waiting_cargo; ///< Max cargo from this station waiting at any station.
 
 	/**
 	 * Reports whether a vehicle has ever tried to load the cargo at this station.
