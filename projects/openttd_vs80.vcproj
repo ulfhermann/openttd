@@ -2279,6 +2279,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\widgets\link_graph_legend_widget.h"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\widgets\main_widget.h"
 				>
 			</File>
