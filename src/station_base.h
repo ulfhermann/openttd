@@ -180,6 +180,7 @@ struct GoodsEntry {
 
 	LinkGraphID link_graph; ///< Link graph this station belongs to.
 	NodeID node;            ///< ID of node in link graph referring to this goods entry.
+	FlowStatMap flows;      ///< Planned flows through this station.
 
 	/**
 	 * Reports whether a vehicle has ever tried to load the cargo at this station.
