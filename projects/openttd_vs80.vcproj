@@ -603,6 +603,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\linkgraph\linkgraphschedule.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\map.cpp"
 				>
 			</File>
@@ -1159,6 +1163,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\linkgraph\init.h"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\linkgraph\linkgraph.h"
 				>
 			</File>
@@ -1176,6 +1184,14 @@
 			</File>
 			<File
 				RelativePath=".\..\src\linkgraph\linkgraphjob.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\linkgraph\linkgraphjob_base.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\linkgraph\linkgraphschedule.h"
 				>
 			</File>
 			<File
