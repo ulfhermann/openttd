@@ -1151,6 +1151,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\linkgraph\linkgraph_type.h"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\livery.h"
 				>
 			</File>
