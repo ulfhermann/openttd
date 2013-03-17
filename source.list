@@ -202,6 +202,7 @@ ini_type.h
 landscape.h
 landscape_type.h
 language.h
+linkgraph/linkgraph_type.h
 livery.h
 map_func.h
 map_type.h
