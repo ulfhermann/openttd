@@ -554,6 +554,7 @@ enum SaveLoadVersions {
 	SL_LINKGRAPH,
 	SL_LINKGRAPH_JOB,
 	SL_CAPACITIES,
+	SL_FLOWS,
 
 	/** Highest possible savegame version. */
 	SL_MAX_VERSION = 255
