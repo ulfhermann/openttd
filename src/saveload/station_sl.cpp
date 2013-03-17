@@ -282,6 +282,7 @@ const SaveLoad *GetGoodsDesc()
 		 SLE_CONDVAR(GoodsEntry, link_graph,           SLE_UINT16,           SL_FLOWS, SL_MAX_VERSION),
 		 SLE_CONDVAR(GoodsEntry, node,                 SLE_UINT16,           SL_FLOWS, SL_MAX_VERSION),
 		SLEG_CONDVAR(            _num_flows,           SLE_UINT32,           SL_FLOWS, SL_MAX_VERSION),
+		 SLE_CONDVAR(GoodsEntry, max_waiting_cargo,    SLE_UINT32,      SL_EXT_RATING, SL_MAX_VERSION),
 		SLE_END()
 	};
 
