@@ -3394,6 +3394,7 @@ void IncreaseStats(Station *st, CargoID cargo, StationID next_station_id, uint c
 		if (ge2.link_graph == INVALID_LINK_GRAPH) {
 			if (LinkGraph::CanAllocateItem()) {
 				lg = new LinkGraph(cargo);
+				LinkGraphSchedule::Instance()->Queue(lg);
 				ge2.link_graph = lg->index;
 				ge2.node = lg->AddNode(st2);
 			} else {
@@ -3415,9 +3416,11 @@ void IncreaseStats(Station *st, CargoID cargo, StationID next_station_id, uint c
 		if (ge1.link_graph != ge2.link_graph) {
 			LinkGraph *lg2 = LinkGraph::Get(ge2.link_graph);
 			if (lg->Size() < lg2->Size()) {
+				LinkGraphSchedule::Instance()->Unqueue(lg);
 				lg2->Merge(lg); // Updates GoodsEntries of lg
 				lg = lg2;
 			} else {
+				LinkGraphSchedule::Instance()->Unqueue(lg2);
 				lg->Merge(lg2); // Updates GoodsEntries of lg2
 			}
 		}
@@ -3538,6 +3541,7 @@ static uint UpdateStationWaiting(Station *st, CargoID type, uint amount, SourceT
 	if (ge.link_graph == INVALID_LINK_GRAPH) {
 		if (LinkGraph::CanAllocateItem()) {
 			lg = new LinkGraph(type);
+			LinkGraphSchedule::Instance()->Queue(lg);
 			ge.link_graph = lg->index;
 			ge.node = lg->AddNode(st);
 		} else {
