@@ -2591,6 +2591,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\saveload\linkgraph_sl.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\saveload\map_sl.cpp"
 				>
 			</File>

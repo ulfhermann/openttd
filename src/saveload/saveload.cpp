@@ -35,6 +35,7 @@
 #include "../date_func.h"
 #include "../autoreplace_base.h"
 #include "../roadstop_base.h"
+#include "../linkgraph/linkgraphjob.h"
 #include "../statusbar_gui.h"
 #include "../fileio_func.h"
 #include "../gamelog.h"
@@ -246,7 +247,7 @@
  *  180   24998
  *  181   25012
  */
-extern const uint16 SAVEGAME_VERSION = SL_LINKGRAPH; ///< Current savegame version of OpenTTD.
+extern const uint16 SAVEGAME_VERSION = SL_LINKGRAPH_JOB; ///< Current savegame version of OpenTTD.
 
 SavegameType _savegame_type; ///< type of savegame we are loading
 
@@ -425,6 +426,7 @@ extern const ChunkHandler _group_chunk_handlers[];
 extern const ChunkHandler _cargopacket_chunk_handlers[];
 extern const ChunkHandler _autoreplace_chunk_handlers[];
 extern const ChunkHandler _labelmaps_chunk_handlers[];
+extern const ChunkHandler _linkgraph_chunk_handlers[];
 extern const ChunkHandler _airport_chunk_handlers[];
 extern const ChunkHandler _object_chunk_handlers[];
 extern const ChunkHandler _persistent_storage_chunk_handlers[];
@@ -459,6 +461,7 @@ static const ChunkHandler * const _chunk_handlers[] = {
 	_cargopacket_chunk_handlers,
 	_autoreplace_chunk_handlers,
 	_labelmaps_chunk_handlers,
+	_linkgraph_chunk_handlers,
 	_airport_chunk_handlers,
 	_object_chunk_handlers,
 	_persistent_storage_chunk_handlers,
@@ -1212,10 +1215,12 @@ static size_t ReferenceToInt(const void *obj, SLRefType rt)
 		case REF_TOWN:      return ((const     Town*)obj)->index + 1;
 		case REF_ORDER:     return ((const    Order*)obj)->index + 1;
 		case REF_ROADSTOPS: return ((const RoadStop*)obj)->index + 1;
-		case REF_ENGINE_RENEWS: return ((const       EngineRenew*)obj)->index + 1;
-		case REF_CARGO_PACKET:  return ((const       CargoPacket*)obj)->index + 1;
-		case REF_ORDERLIST:     return ((const         OrderList*)obj)->index + 1;
-		case REF_STORAGE:       return ((const PersistentStorage*)obj)->index + 1;
+		case REF_ENGINE_RENEWS:  return ((const       EngineRenew*)obj)->index + 1;
+		case REF_CARGO_PACKET:   return ((const       CargoPacket*)obj)->index + 1;
+		case REF_ORDERLIST:      return ((const         OrderList*)obj)->index + 1;
+		case REF_STORAGE:        return ((const PersistentStorage*)obj)->index + 1;
+		case REF_LINK_GRAPH:     return ((const         LinkGraph*)obj)->index + 1;
+		case REF_LINK_GRAPH_JOB: return ((const      LinkGraphJob*)obj)->index + 1;
 		default: NOT_REACHED();
 	}
 }
@@ -1288,6 +1293,14 @@ static void *IntToReference(size_t index, SLRefType rt)
 		case REF_STORAGE:
 			if (PersistentStorage::IsValidID(index)) return PersistentStorage::Get(index);
 			SlErrorCorrupt("Referencing invalid PersistentStorage");
+
+		case REF_LINK_GRAPH:
+			if (LinkGraph::IsValidID(index)) return LinkGraph::Get(index);
+			SlErrorCorrupt("Referencing invalid LinkGraph");
+
+		case REF_LINK_GRAPH_JOB:
+			if (LinkGraphJob::IsValidID(index)) return LinkGraphJob::Get(index);
+			SlErrorCorrupt("Referencing invalid LinkGraphJob");
 
 		default: NOT_REACHED();
 	}

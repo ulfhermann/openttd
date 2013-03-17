@@ -2782,6 +2782,8 @@ bool AfterLoadGame()
 	InitializeWindowsAndCaches();
 	/* Restore the signals */
 	ResetSignalHandlers();
+
+	AfterLoadLinkGraphs();
 	return true;
 }
 
