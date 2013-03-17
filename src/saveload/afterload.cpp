@@ -2791,6 +2791,7 @@ bool AfterLoadGame()
 	/* Restore the signals */
 	ResetSignalHandlers();
 
+	AfterLoadLinkGraphs();
 	return true;
 }
 
