@@ -3361,6 +3361,7 @@ void DeleteStaleLinks(Station *from)
 			if ((uint)(_date - edge.LastUpdate()) > LinkGraph::MIN_TIMEOUT_DISTANCE +
 					(DistanceManhattan(from->xy, to->xy) >> 2)) {
 				node.RemoveEdge(to->goods[c].node);
+				ge.cargo.Reroute(UINT_MAX, &ge.cargo, from->index, to->index, &ge);
 			}
 		}
 		assert(_date >= lg->LastCompression());
