@@ -553,6 +553,7 @@ enum SaveLoadVersions {
 	SL_TRUNK = 182,
 	SL_LINKGRAPH,
 	SL_FLOWS,
+	SL_CARGOMAP,
 
 	/** Highest possible savegame version. */
 	SL_MAX_VERSION = 255
