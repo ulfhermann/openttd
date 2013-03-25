@@ -56,7 +56,7 @@ void CcBuildCanal(const CommandCost &result, TileIndex tile, uint32 p1, uint32 p
  * @param [out] tile_to The tile till where to show a selection for the aqueduct.
  * @return The other end of the aqueduct, or otherwise a tile in line with the aqueduct to cause the right error message.
  */
-static TileIndex GetOtherAqueductEnd(TileIndex tile_from, TileIndex *tile_to = NULL)
+TileIndex GetOtherAqueductEnd(TileIndex tile_from, TileIndex *tile_to = NULL)
 {
 	int z;
 	DiagDirection dir = GetInclinedSlopeDirection(GetTileSlope(tile_from, &z));
