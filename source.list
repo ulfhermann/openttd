@@ -203,6 +203,7 @@ ini_type.h
 landscape.h
 landscape_type.h
 language.h
+linkgraph_gui.h
 linkgraph/linkgraph.h
 linkgraph/linkgraph_base.h
 linkgraph/linkgraph_type.h
@@ -431,6 +432,7 @@ group_gui.cpp
 highscore_gui.cpp
 industry_gui.cpp
 intro_gui.cpp
+linkgraph_gui.cpp
 main_gui.cpp
 misc_gui.cpp
 music_gui.cpp
