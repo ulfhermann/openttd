@@ -204,6 +204,7 @@ landscape.h
 landscape_type.h
 language.h
 linkgraph/linkgraph.h
+linkgraph/linkgraph_base.h
 linkgraph/linkgraph_type.h
 livery.h
 map_func.h
