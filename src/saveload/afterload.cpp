@@ -2790,6 +2790,7 @@ bool AfterLoadGame()
 	InitializeWindowsAndCaches();
 	/* Restore the signals */
 	ResetSignalHandlers();
+
 	return true;
 }
 
