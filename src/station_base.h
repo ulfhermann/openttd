@@ -78,6 +78,7 @@ public:
 	}
 
 	StationID GetVia(StationID excluded, StationID excluded2 = INVALID_STATION) const;
+	void Cleanup(NodeID self, LinkGraphID link_graph);
 
 private:
 	SharesMap shares;  ///< Shares of flow to be sent via specified station (or consumed locally).
@@ -90,6 +91,7 @@ public:
 	void PassOnFlow(StationID origin, StationID via, uint amount);
 	void DeleteFlows(StationID via);
 	void FinalizeLocalConsumption(StationID self);
+	void Cleanup(StationID self, LinkGraphID link_graph);
 };
 
 /**
