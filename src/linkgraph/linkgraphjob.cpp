@@ -40,35 +40,49 @@ LinkGraphJob::LinkGraphJob(const LinkGraph &orig) :
 LinkGraphJob::~LinkGraphJob()
 {
 	assert(this->thread == NULL);
+
+	/* Link graph has been merged into another one. */
+	if (!LinkGraph::IsValidID(this->link_graph.index)) return;
+
 	uint size = this->Size();
 	for (NodeID node_id = 0; node_id < size; ++node_id) {
 		StationID station = (*this)[node_id].Station();
-		if (!Station::IsValidID(station)) {
-			/* Station got removed during the link graph run. We have to remove all
-			 * flows pointing to it now. This is costly but it should be rare. */
-			for (NodeID from_id = 0; from_id < size; ++from_id) {
-				if ((*this)[from_id][node_id].Capacity() > 0) {
-					FlowStatMap &flows = this->nodes[from_id].flows;
-					for (FlowStatMap::iterator it(flows.begin()); it != flows.end();) {
-						it->second.ChangeShare(station, INT_MIN);
-						if (it->second.GetShares()->empty()) {
-							flows.erase(it++);
-						} else {
-							++it;
-						}
+		if (Station::IsValidID(station)) continue;
+
+		/* Station got removed during the link graph run. We have to remove all
+		 * flows pointing to it now. This is costly but it should be rare. */
+		for (NodeID from_id = 0; from_id < size; ++from_id) {
+			if ((*this)[from_id][node_id].Capacity() > 0) {
+				FlowStatMap &flows = this->nodes[from_id].flows;
+				for (FlowStatMap::iterator it(flows.begin()); it != flows.end();) {
+					it->second.ChangeShare(station, INT_MIN);
+					if (it->second.GetShares()->empty()) {
+						flows.erase(it++);
+					} else {
+						++it;
 					}
 				}
 			}
-			station = INVALID_STATION;
 		}
 	}
+
 	for (NodeID node_id = 0; node_id < size; ++node_id) {
-		StationID station = (*this)[node_id].Station();
-		if (Station::IsValidID(station)) {
-			InvalidateWindowData(WC_STATION_VIEW, station, this->Cargo());
-			Station::Get(station)->goods[this->Cargo()].flows.
-					swap(this->nodes[node_id].flows);
-		}
+
+		/* The station can have been deleted. */
+		Station *st = Station::GetIfValid((*this)[node_id].Station());
+		if (st == NULL) continue;
+
+		/* Link graph merging and station deletion may change around IDs. Make
+		 * sure that everything is still consistent or ignore it otherwise. */
+		GoodsEntry &ge = st->goods[this->Cargo()];
+		if (ge.link_graph != this->link_graph.index || ge.node != node_id) continue;
+
+		/* Remove flows for links that have been deleted in the mean time. */
+		FlowStatMap &flows = this->nodes[node_id].flows;
+		flows.Cleanup(node_id, this->link_graph.index);
+
+		ge.flows.swap(flows);
+		InvalidateWindowData(WC_STATION_VIEW, st->index, this->Cargo());
 	}
 }
 
