@@ -3398,6 +3398,7 @@ void DeleteStaleLinks(Station *from)
 			if ((uint)(_date - edge.LastUpdate()) > LinkGraph::MIN_TIMEOUT_DISTANCE +
 					(DistanceManhattan(from->xy, to->xy) >> 2)) {
 				node.RemoveEdge(to->goods[c].node);
+				ge.flows.DeleteFlows(to->index);
 				ge.cargo.Reroute(UINT_MAX, &ge.cargo, to->index, from->index, &ge);
 			}
 		}
@@ -4118,6 +4119,24 @@ void FlowStat::ChangeShare(StationID st, int flow)
 }
 
 /**
+ * Remove flows for which there are no edges anymore.
+ * @param self Own node ID in link graph.
+ * @param link_graph Link graph to be checked against.
+ */
+void FlowStat::Cleanup(NodeID self, LinkGraphID link_graph)
+{
+	const LinkGraph *lg = LinkGraph::Get(link_graph);
+	for (SharesMap::iterator it(this->shares.begin()); it != this->shares.end();) {
+		const GoodsEntry &ge = Station::Get(it->second)->goods[lg->Cargo()];
+		if (ge.link_graph != link_graph || (*lg)[self][ge.node].LastUpdate() == INVALID_DATE) {
+			this->shares.erase(it++);
+		} else {
+			++it;
+		}
+	}
+}
+
+/**
  * Add some flow from "origin", going via "via".
  * @param origin Origin of the flow.
  * @param via Next hop.
@@ -4171,6 +4190,23 @@ void FlowStatMap::FinalizeLocalConsumption(StationID self)
 		/* If the local share is used up there must be a share for some
 		 * remote station. */
 		assert(!fs.GetShares()->empty());
+	}
+}
+
+/**
+ * Remove flows for which there are no edges anymore.
+ * @param self Own node ID.
+ * @param link_graph Link graph to be checked against.
+ */
+void FlowStatMap::Cleanup(NodeID self, LinkGraphID link_graph)
+{
+	for (FlowStatMap::iterator i = this->begin(); i != this->end(); ++i) {
+		i->second.Cleanup(self, link_graph);
+		if (i->second.GetShares()->empty()) {
+			this->erase(i++);
+		} else {
+			++i;
+		}
 	}
 }
 
