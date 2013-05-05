@@ -4122,7 +4122,8 @@ void FlowStat::Cleanup(NodeID self, LinkGraphID link_graph)
 	const LinkGraph *lg = LinkGraph::Get(link_graph);
 	for (SharesMap::iterator it(this->shares.begin()); it != this->shares.end();) {
 		const GoodsEntry &ge = Station::Get(it->second)->goods[lg->Cargo()];
-		if (ge.link_graph != link_graph || (*lg)[self][ge.node].LastUpdate() == INVALID_DATE) {
+		if (ge.link_graph != link_graph ||
+				(ge.node != self && (*lg)[self][ge.node].LastUpdate() == INVALID_DATE)) {
 			this->shares.erase(it++);
 		} else {
 			++it;
@@ -4194,7 +4195,7 @@ void FlowStatMap::FinalizeLocalConsumption(StationID self)
  */
 void FlowStatMap::Cleanup(NodeID self, LinkGraphID link_graph)
 {
-	for (FlowStatMap::iterator i = this->begin(); i != this->end(); ++i) {
+	for (FlowStatMap::iterator i = this->begin(); i != this->end();) {
 		i->second.Cleanup(self, link_graph);
 		if (i->second.GetShares()->empty()) {
 			this->erase(i++);
