@@ -3,6 +3,7 @@
 #include "../stdafx.h"
 #include "../core/math_func.hpp"
 #include "mcf.h"
+#include <set>
 
 typedef std::map<NodeID, Path *> PathViaMap;
 
@@ -376,9 +377,9 @@ bool MCF1stPass::EliminateCycles(PathVector &path, NodeID origin_id, NodeID next
 	if (at_next_pos == NULL) {
 		/* Summarize paths; add up the paths with the same source and next hop
 		 * in one path each. */
-		PathSet &paths = this->job[next_id].Paths();
+		PathList &paths = this->job[next_id].Paths();
 		PathViaMap next_hops;
-		for (PathSet::iterator i = paths.begin(); i != paths.end(); ++i) {
+		for (PathList::iterator i = paths.begin(); i != paths.end(); ++i) {
 			Path *new_child = *i;
 			if (new_child->GetOrigin() == origin_id) {
 				PathViaMap::iterator via_it = next_hops.find(new_child->GetNode());

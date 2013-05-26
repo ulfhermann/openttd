@@ -14,11 +14,11 @@
 
 #include "../thread/thread.h"
 #include "linkgraph.h"
-#include <set>
+#include <list>
 
 class LinkGraphJob;
 class Path;
-typedef std::set<Path *> PathSet;
+typedef std::list<Path *> PathList;
 
 /** Type of the pool for link graph jobs. */
 typedef Pool<LinkGraphJob, LinkGraphJobID, 32, 0xFFFFFF> LinkGraphJobPool;
@@ -45,7 +45,7 @@ private:
 	 */
 	struct NodeAnnotation {
 		uint undelivered_supply; ///< Amount of supply that hasn't been distributed yet.
-		PathSet paths;           ///< Paths through this node.
+		PathList paths;           ///< Paths through this node.
 		FlowStatMap flows;       ///< Planned flows to other nodes.
 		void Init(uint supply);
 	};
@@ -237,13 +237,13 @@ public:
 		 * Get the paths this node is part of.
 		 * @return Paths.
 		 */
-		PathSet &Paths() { return this->node_anno.paths; }
+		PathList &Paths() { return this->node_anno.paths; }
 
 		/**
 		 * Get a constant version of the paths this node is part of.
 		 * @return Paths.
 		 */
-		const PathSet &Paths() const { return this->node_anno.paths; }
+		const PathList &Paths() const { return this->node_anno.paths; }
 
 		/**
 		 * Deliver some supply, adding demand to the respective edge.

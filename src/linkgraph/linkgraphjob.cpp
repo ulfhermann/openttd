@@ -124,7 +124,7 @@ void LinkGraphJob::NodeAnnotation::Init(uint supply)
 {
 	this->undelivered_supply = supply;
 	new (&this->flows) FlowStatMap;
-	new (&this->paths) PathSet;
+	new (&this->paths) PathList;
 }
 
 /**
@@ -170,8 +170,8 @@ uint Path::AddFlow(uint new_flow, LinkGraphJob &job, uint max_saturation)
 			}
 		}
 		new_flow = this->parent->AddFlow(new_flow, job, max_saturation);
-		if (new_flow > 0) {
-			job[this->parent->node].Paths().insert(this);
+		if (this->flow == 0 && new_flow > 0) {
+			job[this->parent->node].Paths().push_back(this);
 		}
 		edge.AddFlow(new_flow);
 	}

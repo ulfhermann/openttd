@@ -24,8 +24,8 @@ void FlowMapper::Run(LinkGraphJob &job) const
 	for (NodeID node_id = 0; node_id < job.Size(); ++node_id) {
 		Node prev_node = job[node_id];
 		StationID prev = prev_node.Station();
-		PathSet &paths = prev_node.Paths();
-		for (PathSet::iterator i = paths.begin(); i != paths.end(); ++i) {
+		PathList &paths = prev_node.Paths();
+		for (PathList::iterator i = paths.begin(); i != paths.end(); ++i) {
 			Path *path = *i;
 			uint flow = path->GetFlow();
 			if (flow == 0) continue;
@@ -53,8 +53,8 @@ void FlowMapper::Run(LinkGraphJob &job) const
 		Node node = job[node_id];
 		node.Flows().FinalizeLocalConsumption(node.Station());
 		/* Clear paths. */
-		PathSet &paths = node.Paths();
-		for (PathSet::iterator i = paths.begin(); i != paths.end(); ++i) {
+		PathList &paths = node.Paths();
+		for (PathList::iterator i = paths.begin(); i != paths.end(); ++i) {
 			delete *i;
 		}
 		paths.clear();
