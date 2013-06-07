@@ -2058,6 +2058,7 @@ void Vehicle::LeaveStation()
 			/* Refresh next hop stats to make sure we've done that at least once
 			 * during the stop and that refit_cap == cargo_cap for each vehicle in
 			 * the consist. */
+			this->ResetRefitCaps();
 			this->RefreshNextHopsStats();
 
 			/* if the vehicle could load here or could stop with cargo loaded set the last loading station */
@@ -2088,17 +2089,34 @@ void Vehicle::LeaveStation()
 }
 
 /**
+ * Reset all refit_cap in the consist to cargo_cap.
+ */
+void Vehicle::ResetRefitCaps()
+{
+	for (Vehicle *v = this; v != NULL; v = v->Next()) v->refit_cap = v->cargo_cap;
+}
+
+struct RefitDesc {
+	CargoID cargo;
+	uint16 cap;
+	uint16 remaining;
+	RefitDesc(CargoID cargo, uint16 cap, uint16 remaining) :
+			cargo(cargo), cap(cap), remaining(remaining) {}
+};
+
+typedef std::list<RefitDesc> RefitList;
+
+/**
  * Predict a vehicle's course from its current state and refresh all links it
- * will visit. As a side effect reset the refit_cap of all vehicles in the
- * consist to the cargo_cap. This method is expected to be called when loading
- * at a station so it's safe to do so.
+ * will visit.
  */
 void Vehicle::RefreshNextHopsStats()
 {
 	/* Assemble list of capacities and set last loading stations to 0. */
 	SmallMap<CargoID, uint, 1> capacities;
+	RefitList refit_caps;
 	for (Vehicle *v = this; v != NULL; v = v->Next()) {
-		v->refit_cap = v->cargo_cap;
+		refit_caps.push_back(RefitDesc(v->cargo_type, v->cargo_cap, v->refit_cap));
 		if (v->refit_cap == 0) continue;
 
 		SmallPair<CargoID, uint> *i = capacities.Find(v->cargo_type);
@@ -2130,7 +2148,10 @@ void Vehicle::RefreshNextHopsStats()
 
 	const Order *cur = first;
 	const Order *next = first;
-	while (next != NULL && cur->CanLeaveWithCargo(true)) {
+	bool has_cargo = this->last_loading_station != INVALID_STATION;
+	bool was_refit = false;
+
+	while (next != NULL) {
 		next = this->orders.list->GetNextStoppingOrder(this,
 				this->orders.list->GetNext(next), ++hops);
 		if (next == NULL) break;
@@ -2140,9 +2161,10 @@ void Vehicle::RefreshNextHopsStats()
 		 * deadlocks due to vehicles waiting for cargo that isn't being routed,
 		 * yet. That situation will not occur if the vehicle is actually
 		 * carrying a different cargo in the end. */
-		if (next->IsAutoRefit() && next->GetRefitCargo() != CT_AUTO_REFIT) {
-			/* Handle refit by dropping some vehicles. */
+		if (next->IsRefit() && !next->IsAutoRefit()) {
+			was_refit = true;
 			CargoID new_cid = next->GetRefitCargo();
+			RefitList::iterator refit_it = refit_caps.begin();
 			for (Vehicle *v = this; v != NULL; v = v->Next()) {
 				const Engine *e = Engine::Get(v->engine_type);
 				if (!HasBit(e->info.refit_mask, new_cid)) continue;
@@ -2161,41 +2183,56 @@ void Vehicle::RefreshNextHopsStats()
 				v->cargo_subtype = temp_subtype;
 
 				/* Skip on next refit. */
-				if (new_cid != v->cargo_type && v->refit_cap > 0) {
-					capacities[v->cargo_type] -= v->refit_cap;
-					v->refit_cap = 0;
-				} else if (amount < v->refit_cap) {
-					capacities[v->cargo_type] -= v->refit_cap - amount;
-					v->refit_cap = amount;
+				if (new_cid != refit_it->cargo && refit_it->remaining > 0) {
+					capacities[v->cargo_type] -= refit_it->remaining;
+					refit_it->remaining = 0;
+				} else if (amount < refit_it->remaining) {
+					capacities[v->cargo_type] -= refit_it->remaining - amount;
+					refit_it->remaining = amount;
 				}
+				refit_it->cap = amount;
+				refit_it->cargo = new_cid;
+
+				++refit_it;
 
 				/* Special case for aircraft with mail. */
 				if (v->type == VEH_AIRCRAFT) {
-					Vehicle *u = v->Next();
-					if (mail_capacity < u->refit_cap) {
-						capacities[u->cargo_type] -= u->refit_cap - mail_capacity;
-						u->refit_cap = mail_capacity;
+					if (mail_capacity < refit_it->remaining) {
+						capacities[refit_it->cargo] -= refit_it->remaining - mail_capacity;
+						refit_it->remaining = mail_capacity;
 					}
+					refit_it->cap = mail_capacity;
 					break; // aircraft have only one vehicle
 				}
 			}
 		}
 
 		if (next->IsType(OT_GOTO_STATION) || next->IsType(OT_IMPLICIT)) {
-			StationID next_station = next->GetDestination();
-			Station *st = Station::GetIfValid(cur->GetDestination());
-			if (st != NULL && next_station != INVALID_STATION && next_station != st->index) {
-				for (const SmallPair<CargoID, uint> *i = capacities.Begin(); i != capacities.End(); ++i) {
-					/* Refresh the link and give it a minimum capacity. */
-					if (i->second > 0) IncreaseStats(st, i->first, next_station, i->second, UINT_MAX);
+			has_cargo = cur->CanLeaveWithCargo(has_cargo);
+			if (has_cargo) {
+				StationID next_station = next->GetDestination();
+				Station *st = Station::GetIfValid(cur->GetDestination());
+				if (st != NULL && next_station != INVALID_STATION && next_station != st->index) {
+					for (const SmallPair<CargoID, uint> *i = capacities.Begin(); i != capacities.End(); ++i) {
+						/* Refresh the link and give it a minimum capacity. */
+						if (i->second > 0) IncreaseStats(st, i->first, next_station, i->second, UINT_MAX);
+					}
 				}
 			}
 			cur = next;
 			if (cur == first) break;
+
+			if (was_refit) {
+				/* Restore remaining capacities as vehicle might have been able to load now. */
+				for (RefitList::iterator it(refit_caps.begin()); it != refit_caps.end(); ++it) {
+					if (it->remaining == it->cap) continue;
+					capacities[it->cargo] += it->cap - it->remaining;
+					it->remaining = it->cap;
+				}
+				was_refit = false;
+			}
 		}
 	}
-
-	for (Vehicle *v = this; v != NULL; v = v->Next()) v->refit_cap = v->cargo_cap;
 }
 
 /**
