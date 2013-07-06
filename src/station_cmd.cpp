@@ -3419,11 +3419,36 @@ void DeleteStaleLinks(Station *from)
 			assert(to->goods[c].node == it->first);
 			++it; // Do that before removing the edge. Anything else may crash.
 			assert(_date >= edge.LastUpdate());
-			uint timeout = LinkGraph::MIN_TIMEOUT_DISTANCE + (DistanceManhattan(from->xy, to->xy) >> 2);
+			uint timeout = LinkGraph::MIN_TIMEOUT_DISTANCE +
+					(DistanceManhattan(from->xy, to->xy) >> 3);
 			if ((uint)(_date - edge.LastUpdate()) > timeout) {
-				node.RemoveEdge(to->goods[c].node);
-				ge.flows.DeleteFlows(to->index);
-				RerouteCargo(from, c, to->index, from->index);
+				/* Have all vehicles refresh their next hops before deciding to
+				 * remove the node. */
+				OrderList *l;
+				FOR_ALL_ORDER_LISTS(l) {
+					bool found_from = false;
+					bool found_to = false;
+					for (Order *order = l->GetFirstOrder(); order != NULL; order = order->next) {
+						if (!order->IsType(OT_GOTO_STATION) && !order->IsType(OT_IMPLICIT)) continue;
+						if (order->GetDestination() == from->index) {
+							found_from = true;
+							if (found_to) break;
+						} else if (order->GetDestination() == to->index) {
+							found_to = true;
+							if (found_from) break;
+						}
+					}
+					if (!found_to || !found_from) continue;
+					for (Vehicle *v = l->GetFirstSharedVehicle(); v != NULL; v = v->NextShared()) {
+						v->RefreshNextHopsStats();
+					}
+				}
+				if ((uint)(_date - edge.LastUpdate()) > timeout) {
+					/* If it's still considered dead remove it. */
+					node.RemoveEdge(to->goods[c].node);
+					ge.flows.DeleteFlows(to->index);
+					RerouteCargo(from, c, to->index, from->index);
+				}
 			} else if (edge.LastUnrestrictedUpdate() != INVALID_DATE &&
 					(uint)(_date - edge.LastUnrestrictedUpdate()) > timeout) {
 				edge.Restrict();
