@@ -57,8 +57,8 @@ public:
 
 	static LinkGraphSchedule *Instance();
 	static void Run(void *j);
-	static void Clear();
 
+	void Clear();
 	void SpawnNext();
 	void JoinNext();
 	void SpawnAll();

@@ -300,7 +300,7 @@ static void ShutdownGame()
 	free(_config_file);
 #endif
 
-	LinkGraphSchedule::Clear();
+	LinkGraphSchedule::Instance()->Clear();
 	PoolBase::Clean(PT_ALL);
 
 	/* No NewGRFs were loaded when it was still bootstrapping. */

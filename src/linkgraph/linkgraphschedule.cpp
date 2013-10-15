@@ -115,7 +115,7 @@ void LinkGraphSchedule::SpawnAll()
 /**
  * Clear all link graphs and jobs from the schedule.
  */
-/* static */ void LinkGraphSchedule::Clear()
+void LinkGraphSchedule::Clear()
 {
 	LinkGraphSchedule *inst = LinkGraphSchedule::Instance();
 	for (JobList::iterator i(inst->running.begin()); i != inst->running.end(); ++i) {

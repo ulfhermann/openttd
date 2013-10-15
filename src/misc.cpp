@@ -69,7 +69,7 @@ void InitializeGame(uint size_x, uint size_y, bool reset_date, bool reset_settin
 		InitializeOldNames();
 	}
 
-	LinkGraphSchedule::Clear();
+	LinkGraphSchedule::Instance()->Clear();
 	PoolBase::Clean(PT_NORMAL);
 
 	ResetPersistentNewGRFData();
