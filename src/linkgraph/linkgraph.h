@@ -39,6 +39,10 @@ extern LinkGraphPool _link_graph_pool;
  */
 class LinkGraph : public LinkGraphPool::PoolItem<&_link_graph_pool> {
 public:
+	enum UpdateMode {
+		REFRESH_RESTRICTED = UINT_MAX - 1, ///< Refresh restricted link.
+		REFRESH_UNRESTRICTED = UINT_MAX    ///< Refresh unrestricted link.
+	};
 
 	/**
 	 * Node of the link graph. contains all relevant information from the associated
@@ -60,11 +64,12 @@ public:
 	 * the column as next_edge.
 	 */
 	struct BaseEdge {
-		uint distance;    ///< Length of the link.
-		uint capacity;    ///< Capacity of the link.
-		uint usage;       ///< Usage of the link.
-		Date last_update; ///< When the link was last updated.
-		NodeID next_edge; ///< Destination of next valid edge starting at the same source node.
+		uint distance;                 ///< Length of the link.
+		uint capacity;                 ///< Capacity of the link.
+		uint usage;                    ///< Usage of the link.
+		Date last_unrestricted_update; ///< When the unrestricted part of the link was last updated.
+		Date last_restricted_update;   ///< When the restricted part of the link was last updated.
+		NodeID next_edge;              ///< Destination of next valid edge starting at the same source node.
 		void Init(uint distance = 0);
 	};
 
@@ -104,10 +109,22 @@ public:
 		uint Distance() const { return this->edge.distance; }
 
 		/**
-		 * Get edge's last update.
+		 * Get the date of the last update to the edge's unrestricted capacity.
 		 * @return Last update.
 		 */
-		Date LastUpdate() const { return this->edge.last_update; }
+		Date LastUnrestrictedUpdate() const { return this->edge.last_unrestricted_update; }
+
+		/**
+		 * Get the date of the last update to the edge's restricted capacity.
+		 * @return Last update.
+		 */
+		Date LastRestrictedUpdate() const { return this->edge.last_restricted_update; }
+
+		/**
+		 * Get the date of the last update to any part of the edge's capacity.
+		 * @return Last update.
+		 */
+		Date LastUpdate() const { return max(this->edge.last_unrestricted_update, this->edge.last_restricted_update); }
 	};
 
 	/**
@@ -285,6 +302,8 @@ public:
 		 */
 		Edge(BaseEdge &edge) : EdgeWrapper<BaseEdge>(edge) {}
 		void Update(uint capacity, uint usage);
+		void Restrict() { this->edge.last_unrestricted_update = INVALID_DATE; }
+		void Release() { this->edge.last_restricted_update = INVALID_DATE; }
 	};
 
 	/**
