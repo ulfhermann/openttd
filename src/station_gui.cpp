@@ -52,28 +52,41 @@
 int DrawStationCoverageAreaText(int left, int right, int top, StationCoverageType sct, int rad, bool supplies)
 {
 	TileIndex tile = TileVirtXY(_thd.pos.x, _thd.pos.y);
+	if (_thd.drawstyle != HT_RECT || tile >= MapSize()) return top;
+
 	uint32 cargo_mask = 0;
-	if (_thd.drawstyle == HT_RECT && tile < MapSize()) {
-		CargoArray cargoes;
-		if (supplies) {
-			cargoes = GetProductionAroundTiles(tile, _thd.size.x / TILE_SIZE, _thd.size.y / TILE_SIZE, rad);
-		} else {
-			cargoes = GetAcceptanceAroundTiles(tile, _thd.size.x / TILE_SIZE, _thd.size.y / TILE_SIZE, rad);
+	CargoArray cargoes;
+	if (supplies) {
+		cargoes = GetProductionAroundTiles(tile, _thd.size.x / TILE_SIZE, _thd.size.y / TILE_SIZE, rad);
+	} else {
+		cargoes = GetAcceptanceAroundTiles(tile, _thd.size.x / TILE_SIZE, _thd.size.y / TILE_SIZE, rad);
+	}
+	top = DrawStringMultiLine(left, right, top, INT32_MAX, supplies ? STR_STATION_BUILD_SUPPLIES_HEADER : STR_STATION_BUILD_ACCEPTS_HEADER);
+
+	/* Convert cargo counts to a set of cargo bits, and draw the result. */
+	for (CargoID i = 0; i < NUM_CARGO; i++) {
+		if (!CargoSpec::Get(i)->IsValid()) continue;
+		switch (sct) {
+			case SCT_PASSENGERS_ONLY: if (!IsCargoInClass(i, CC_PASSENGERS)) continue; break;
+			case SCT_NON_PASSENGERS_ONLY: if (IsCargoInClass(i, CC_PASSENGERS)) continue; break;
+			case SCT_ALL: break;
+			default: NOT_REACHED();
 		}
 
-		/* Convert cargo counts to a set of cargo bits, and draw the result. */
-		for (CargoID i = 0; i < NUM_CARGO; i++) {
-			switch (sct) {
-				case SCT_PASSENGERS_ONLY: if (!IsCargoInClass(i, CC_PASSENGERS)) continue; break;
-				case SCT_NON_PASSENGERS_ONLY: if (IsCargoInClass(i, CC_PASSENGERS)) continue; break;
-				case SCT_ALL: break;
-				default: NOT_REACHED();
-			}
-			if (cargoes[i] >= (supplies ? 1U : 8U)) SetBit(cargo_mask, i);
+		if (supplies) {
+			if (cargoes[i] > 0) SetBit(cargo_mask, i);
+		} else if (cargoes[i] >= 8U) {
+			SetDParam(0, i);
+			SetDParam(1, cargoes[i] / 8);
+			top = DrawStringMultiLine(left, right, top, INT32_MAX, STR_STATION_BUILD_ACCEPTS_CARGO);
+			SetBit(cargo_mask, i);
 		}
 	}
+	if (!supplies) {
+		return (cargo_mask == 0) ? DrawStringMultiLine(left, right, top, INT32_MAX, STR_JUST_NOTHING, TC_GOLD) : top;
+	}
 	SetDParam(0, cargo_mask);
-	return DrawStringMultiLine(left, right, top, INT32_MAX, supplies ? STR_STATION_BUILD_SUPPLIES_CARGO : STR_STATION_BUILD_ACCEPTS_CARGO);
+	return DrawStringMultiLine(left, right, top, INT32_MAX, STR_STATION_BUILD_SUPPLIES_CARGO);
 }
 
 /**
