@@ -26,11 +26,13 @@ enum DistributionType {
 	DT_MIN = 0,
 	DT_MANUAL = 0,           ///< Manual distribution. No link graph calculations are run.
 	DT_ASYMMETRIC = 1,       ///< Asymmetric distribution. Usually cargo will only travel in one direction.
-	DT_MAX_NONSYMMETRIC = 1, ///< Maximum non-symmetric distribution.
-	DT_SYMMETRIC = 2,        ///< Symmetric distribution. The same amount of cargo travels in each direction between each pair of nodes.
-	DT_MAX = 2,
-	DT_NUM = 3,
-	DT_END = 3
+	DT_DEST_ASYMMETRIC = 2,  ///< Asymmetric distribution with predetermined destinations.
+	DT_MAX_NONSYMMETRIC = 2, ///< Maximum non-symmetric distribution.
+	DT_SYMMETRIC = 3,        ///< Symmetric distribution. The same amount of cargo travels in each direction between each pair of nodes.
+	DT_DEST_SYMMETRIC = 4,   ///< Symmetric distribution with predetermined destinations.
+	DT_MAX = 4,
+	DT_NUM = 5,
+	DT_END = 5
 };
 
 /* It needs to be 8bits, because we save and load it as such

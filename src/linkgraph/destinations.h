@@ -18,48 +18,64 @@
 #include "../town.h"
 #include <map>
 
+static const uint BIG_TOWN_POP_PAX     = 2000;
+static const uint BIG_TOWN_POP_OTHER   = 500;
+static const uint BASE_TOWN_LINKS_SYMM = 1;
+static const uint BASE_TOWN_LINKS      = 0;
+static const uint CITY_TOWN_LINKS      = 8;
+static const uint SCALE_TOWN           = 100;
+static const uint SCALE_TOWN_BIG       = 180;
+static const uint SCALE_TOWN_PAX       = 200;
+static const uint SCALE_TOWN_BIG_PAX   = 1000;
+static const uint BASE_IND_LINKS       = 2;
+static const uint BASE_IND_LINKS_TOWN  = 4;
+static const uint BASE_IND_LINKS_SYMM  = 1;
+static const uint CARGO_SCALE_IND      = 250;
+static const uint CARGO_SCALE_IND_TOWN = 200;
+
+
 struct CargoSourceSink {
-    CargoSourceSink(SourceType type, SourceID id) : type(type), id(id) {}
-    SourceType type;
-    SourceID id;
+	CargoSourceSink(SourceType type, SourceID id) : type(type), id(id) {}
+	SourceType type;
+	SourceID id;
 };
 
 bool operator<(const CargoSourceSink &i1, const CargoSourceSink &i2)
 {
-    return i1.type < i2.type || (i1.type == i2.type && i1.id < i2.id);
+	return i1.type < i2.type || (i1.type == i2.type && i1.id < i2.id);
 }
 
-struct DestinationList : public SmallVector<CargoSourceSink> {
-    DestinationList() : num_links_expected(0) {}
-    uint16 num_links_expected;
+struct DestinationList : public SmallVector<CargoSourceSink, 2> {
+	DestinationList() : num_links_expected(0) {}
+	uint16 num_links_expected;
 };
 
-typedef SmallVector<CargoSourceSink> OriginList;
+typedef SmallVector<CargoSourceSink, 2> OriginList;
 
 class CargoDestinations {
 public:
-    CargoDestinations() : last_update(INVALID_DATE), last_removal(INVALID_DATE) {}
+	CargoDestinations() : last_update(INVALID_DATE), last_removal(INVALID_DATE) {}
 
-    void AddSource(SourceType type, SourceID id);
-    void RemoveSource(SourceType type, SourceID id);
+	void AddSource(SourceType type, SourceID id);
+	void RemoveSource(SourceType type, SourceID id);
 
-    void AddSink(SourceType type, SourceID id);
-    void RemoveSink(SourceType type, SourceID id);
+	void AddSink(SourceType type, SourceID id);
+	void RemoveSink(SourceType type, SourceID id);
 
-    void UpdateNumLinksExpected(CargoID cargo, Town *town);
-    void UpdateNumLinksExpected(CargoID cargo, Industry *industry);
+	void UpdateNumLinksExpected(CargoID cargo, Town *town);
+	void UpdateNumLinksExpected(CargoID cargo, Industry *industry);
 
-    const DestinationList &GetDestinations(SourceType type, SourceID id) const;
-    const OriginList &GetOrigins(SourceType type, SourceID id) const;
+	const DestinationList &GetDestinations(SourceType type, SourceID id) const;
+	const OriginList &GetOrigins(SourceType type, SourceID id) const;
 
-    void UpdateDestinations();
-    void Merge(const CargoDestinations &other);
+	void UpdateDestinations();
+	void Merge(const CargoDestinations &other);
 
 protected:
-    std::map<CargoSourceSink, DestinationList> destinations;
-    std::map<CargoSourceSink, OriginList> origins;
-    Date last_removal;
-    Date last_update;
+	std::map<CargoSourceSink, DestinationList> destinations;
+	std::map<CargoSourceSink, OriginList> origins;
+	Date last_update;
+	Date last_removal;
 };
 
 
