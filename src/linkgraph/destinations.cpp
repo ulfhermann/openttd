@@ -37,7 +37,7 @@ void CargoDestinations::RemoveSink(SourceType type, SourceID id)
 	this->last_update = this->last_removal = _date;
 }
 
-void CargoDestinations::UpdateNumLinksExpected(CargoID cargo, Town *t)
+void CargoDestinations::UpdateDestinations(CargoID cargo, Town *t)
 {
 	bool is_pax = IsCargoInClass(cargo, CC_PASSENGERS);
 	bool is_symmetric = _settings_game.linkgraph.GetDistributionType(cargo) == DT_DEST_SYMMETRIC;
@@ -52,15 +52,43 @@ void CargoDestinations::UpdateNumLinksExpected(CargoID cargo, Town *t)
 	 * This improves the link distribution at the beginning of a game when
 	 * the towns are still small. */
 	if (t->larger_town) num_links = max<uint>(num_links, CITY_TOWN_LINKS + is_symmetric ? BASE_TOWN_LINKS_SYMM : BASE_TOWN_LINKS);
+	num_links++;
 
-	/* Account for the two special links. */
-	num_links += 2;
+	DestinationList &town_destinations = this->destinations[CargoSourceSink(ST_TOWN, t->index)];
+	if (town_destinations.Length() == 0) {
+		CargoSourceSink *anywhere = town_destinations.Append();
+		anywhere->type = ST_ANY;
+		anywhere->id = INVALID_SOURCE;
+	}
 
-	this->destinations[CargoSourceSink(ST_TOWN, t->index)].num_links_expected = ClampToU16(num_links);
+	if (HasBit(t->cargo_accepted, cargo)) {
+		num_links++;
+		CargoSourceSink *self = NULL;
+		if (town_destinations.Length() < 1) {
+			self = town_destinations.Append();
+		} else if (town_destinations[1].type != ST_TOWN || town_destinations[1].id != t->index) {
+			*town_destinations.Append() = town_destinations[1];
+			self = town_destinations[1];
+		}
+		if (self) {
+			self->type = ST_TOWN;
+			swlf->id = t->index;
+		}
+	}
+
+	town_destinations.num_links_expected = ClampToU16(num_links);
+	while (town_destinations.Length() > town_destinations.num_links_expected) {
+		// select random
+	}
+
+	// TODO: also update origins and make sure there is at least one origin per destination
+
+
+
 	this->last_update = _date;
 }
 
-void CargoDestinations::UpdateNumLinksExpected(CargoID cargo, Industry *ind)
+void CargoDestinations::UpdateDestinations(CargoID cargo, Industry *ind)
 {
 	int i = ind->produced_cargo[0] == cargo ? 0 : 1;
 	bool is_town_cargo = CargoSpec::Get(cargo)->town_effect != TE_NONE;
@@ -90,10 +118,3 @@ const OriginList &CargoDestinations::GetOrigins(SourceType type, SourceID id) co
 	return this->origins.find(CargoSourceSink(type, id))->second;
 }
 
-void CargoDestinations::UpdateDestinations()
-{
-}
-
-void CargoDestinations::Merge(const CargoDestinations &other)
-{
-}

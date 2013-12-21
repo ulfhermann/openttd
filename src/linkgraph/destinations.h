@@ -62,14 +62,11 @@ public:
 	void AddSink(SourceType type, SourceID id);
 	void RemoveSink(SourceType type, SourceID id);
 
-	void UpdateNumLinksExpected(CargoID cargo, Town *town);
-	void UpdateNumLinksExpected(CargoID cargo, Industry *industry);
-
 	const DestinationList &GetDestinations(SourceType type, SourceID id) const;
 	const OriginList &GetOrigins(SourceType type, SourceID id) const;
 
-	void UpdateDestinations();
-	void Merge(const CargoDestinations &other);
+	void UpdateDestinations(CargoID cargo, Town *town);
+	void UpdateDestinations(CargoID cargo, Industry *industry);
 
 protected:
 	std::map<CargoSourceSink, DestinationList> destinations;

@@ -140,6 +140,7 @@ enum SourceType {
 	ST_INDUSTRY,     ///< Source/destination is an industry
 	ST_TOWN,         ///< Source/destination is a town
 	ST_HEADQUARTERS, ///< Source/destination are company headquarters
+	ST_ANY           ///< Any kind of source/destination
 };
 typedef SimpleTinyEnumT<SourceType, byte> SourceTypeByte; ///< The SourceType packed into a byte for savegame purposes.
 
