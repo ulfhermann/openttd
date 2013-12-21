@@ -12,29 +12,26 @@
 #include "../stdafx.h"
 #include "destinations.h"
 #include "../date_func.h"
+#include "../core/random_func.hpp"
 
 void CargoDestinations::AddSource(SourceType type, SourceID id)
 {
 	this->destinations[CargoSourceSink(type, id)] = DestinationList();
-	this->last_update = _date;
 }
 
 void CargoDestinations::RemoveSource(SourceType type, SourceID id)
 {
 	this->destinations.erase(CargoSourceSink(type, id));
-	this->last_update = this->last_removal = _date;
 }
 
 void CargoDestinations::AddSink(SourceType type, SourceID id)
 {
 	this->origins[CargoSourceSink(type, id)] = OriginList();
-	this->last_update = _date;
 }
 
 void CargoDestinations::RemoveSink(SourceType type, SourceID id)
 {
 	this->origins.erase(CargoSourceSink(type, id));
-	this->last_update = this->last_removal = _date;
 }
 
 void CargoDestinations::UpdateDestinations(CargoID cargo, Town *t)
@@ -54,58 +51,74 @@ void CargoDestinations::UpdateDestinations(CargoID cargo, Town *t)
 	if (t->larger_town) num_links = max<uint>(num_links, CITY_TOWN_LINKS + is_symmetric ? BASE_TOWN_LINKS_SYMM : BASE_TOWN_LINKS);
 	num_links++;
 
-	DestinationList &town_destinations = this->destinations[CargoSourceSink(ST_TOWN, t->index)];
-	if (town_destinations.Length() == 0) {
-		CargoSourceSink *anywhere = town_destinations.Append();
-		anywhere->type = ST_ANY;
-		anywhere->id = INVALID_SOURCE;
-	}
+    CargoSourceSink self(ST_TOWN, t->index);
+    DestinationList &own_destinations = this->destinations[self];
+    this->AddAnywhere(own_destinations);
 
-	if (HasBit(t->cargo_accepted, cargo)) {
+    if (HasBit(t->cargo_accepted_total, cargo)) {
 		num_links++;
-		CargoSourceSink *self = NULL;
-		if (town_destinations.Length() < 1) {
-			self = town_destinations.Append();
-		} else if (town_destinations[1].type != ST_TOWN || town_destinations[1].id != t->index) {
-			*town_destinations.Append() = town_destinations[1];
-			self = town_destinations[1];
-		}
-		if (self) {
-			self->type = ST_TOWN;
-			swlf->id = t->index;
-		}
+        if (own_destinations.Length() < 2) {
+            *own_destinations.Append() = self;
+            this->origins[self].Include(self);
+        } else if (own_destinations[1] != self) {
+            *own_destinations.Append() = own_destinations[1];
+            own_destinations[1] = self;
+            this->origins[self].Include(self);
+        }
 	}
 
-	town_destinations.num_links_expected = ClampToU16(num_links);
-	while (town_destinations.Length() > town_destinations.num_links_expected) {
-		// select random
-	}
-
-	// TODO: also update origins and make sure there is at least one origin per destination
-
-
-
-	this->last_update = _date;
+    own_destinations.num_links_expected = ClampToU16(num_links);
+    this->AddMissingDestinations(own_destinations, self);
 }
 
 void CargoDestinations::UpdateDestinations(CargoID cargo, Industry *ind)
 {
-	int i = ind->produced_cargo[0] == cargo ? 0 : 1;
-	bool is_town_cargo = CargoSpec::Get(cargo)->town_effect != TE_NONE;
+    int i = ind->produced_cargo[0] == cargo ? 0 : 1;
+    bool is_town_cargo = CargoSpec::Get(cargo)->town_effect != TE_NONE;
 
-	uint num_links;
-	/* Use different base values for symmetric cargos, cargos
-	* with a town effect and all other cargos. */
-	num_links = _settings_game.linkgraph.GetDistributionType(cargo) == DT_DEST_SYMMETRIC ? BASE_IND_LINKS_SYMM :
-			(is_town_cargo ? BASE_IND_LINKS_TOWN : BASE_IND_LINKS);
-	/* Add links based on last industry production. */
-	num_links += ind->last_month_production[i] / is_town_cargo ? CARGO_SCALE_IND_TOWN : CARGO_SCALE_IND;
+    uint num_links;
+    /* Use different base values for symmetric cargos, cargos
+    * with a town effect and all other cargos. */
+    num_links = _settings_game.linkgraph.GetDistributionType(cargo) == DT_DEST_SYMMETRIC ? BASE_IND_LINKS_SYMM :
+            (is_town_cargo ? BASE_IND_LINKS_TOWN : BASE_IND_LINKS);
+    /* Add links based on last industry production. */
+    num_links += ind->last_month_production[i] / is_town_cargo ? CARGO_SCALE_IND_TOWN : CARGO_SCALE_IND;
 
-	/* Account for the one special link. */
-	num_links++;
+    /* Account for the one special link. */
+    num_links++;
+    CargoSourceSink self(ST_INDUSTRY, ind->index);
+    DestinationList &own_destinations = this->destinations[self];
+    this->AddAnywhere(own_destinations);
+    this->destinations[self].num_links_expected = ClampToU16(num_links);
+    this->AddMissingDestinations(own_destinations, self);
+}
 
-	this->destinations[CargoSourceSink(ST_INDUSTRY, ind->index)].num_links_expected = ClampToU16(num_links);
-	this->last_update = _date;
+void CargoDestinations::AddMissingDestinations(DestinationList &own_destinations, const CargoSourceSink &self)
+{
+    if (this->origins.empty()) return;
+    const CargoSourceSink &last = (--this->origins.end())->first;
+    while (own_destinations.Length() < own_destinations.num_links_expected) {
+        std::map<CargoSourceSink, OriginList>::iterator chosen = this->origins.upper_bound(
+                    CargoSourceSink(static_cast<SourceType>(RandomRange(ST_ANY)), RandomRange(last.id)));
+        uint num_candidates = this->origins.size();
+        while (chosen->second.Contains(self) && --num_candidates > 0) {
+            if (++chosen == this->origins.end()) chosen = this->origins.begin();
+        }
+        if (num_candidates == 0) break;
+        *chosen->second.Append() = self;
+        *own_destinations.Append() = chosen->first;
+    }
+}
+
+void CargoDestinations::AddAnywhere(DestinationList &own_destinations)
+{
+    CargoSourceSink anywhere(ST_ANY, INVALID_SOURCE);
+    if (own_destinations.Length() == 0) {
+        *own_destinations.Append() = anywhere;
+    } else if (own_destinations[0] != anywhere) {
+        *own_destinations.Append() = own_destinations[0];
+        own_destinations[0] = anywhere;
+    }
 }
 
 const DestinationList &CargoDestinations::GetDestinations(SourceType type, SourceID id) const

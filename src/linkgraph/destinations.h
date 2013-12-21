@@ -42,8 +42,14 @@ struct CargoSourceSink {
 
 bool operator<(const CargoSourceSink &i1, const CargoSourceSink &i2)
 {
-	return i1.type < i2.type || (i1.type == i2.type && i1.id < i2.id);
+    return i1.id < i2.id || (i1.id == i2.id && i1.type < i2.type);
 }
+
+bool operator!=(const CargoSourceSink &i1, const CargoSourceSink &i2)
+{
+    return i1.id != i2.id || i1.type != i2.type;
+}
+
 
 struct DestinationList : public SmallVector<CargoSourceSink, 2> {
 	DestinationList() : num_links_expected(0) {}
@@ -54,7 +60,6 @@ typedef SmallVector<CargoSourceSink, 2> OriginList;
 
 class CargoDestinations {
 public:
-	CargoDestinations() : last_update(INVALID_DATE), last_removal(INVALID_DATE) {}
 
 	void AddSource(SourceType type, SourceID id);
 	void RemoveSource(SourceType type, SourceID id);
@@ -69,10 +74,10 @@ public:
 	void UpdateDestinations(CargoID cargo, Industry *industry);
 
 protected:
+    void AddMissingDestinations(DestinationList &own_destinations, const CargoSourceSink &self);
+    void AddAnywhere(DestinationList &own_destinations);
 	std::map<CargoSourceSink, DestinationList> destinations;
-	std::map<CargoSourceSink, OriginList> origins;
-	Date last_update;
-	Date last_removal;
+    std::map<CargoSourceSink, OriginList> origins;
 };
 
 
