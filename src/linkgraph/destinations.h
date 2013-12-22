@@ -33,6 +33,7 @@ static const uint BASE_IND_LINKS_SYMM  = 1;
 static const uint CARGO_SCALE_IND      = 250;
 static const uint CARGO_SCALE_IND_TOWN = 200;
 static const uint HQ_LINKS             = 3;
+static const uint FILTER_LENGTH        = 8;
 
 
 struct CargoSourceSink {
@@ -43,17 +44,17 @@ struct CargoSourceSink {
 
 bool operator<(const CargoSourceSink &i1, const CargoSourceSink &i2)
 {
-    return i1.id < i2.id || (i1.id == i2.id && i1.type < i2.type);
+	return i1.id < i2.id || (i1.id == i2.id && i1.type < i2.type);
 }
 
 bool operator!=(const CargoSourceSink &i1, const CargoSourceSink &i2)
 {
-    return i1.id != i2.id || i1.type != i2.type;
+	return i1.id != i2.id || i1.type != i2.type;
 }
 
 bool operator==(const CargoSourceSink &i1, const CargoSourceSink &i2)
 {
-    return i1.id == i2.id && i1.type == i2.type;
+	return i1.id == i2.id && i1.type == i2.type;
 }
 
 struct DestinationList : public SmallVector<CargoSourceSink, 2> {
@@ -66,33 +67,78 @@ typedef SmallVector<CargoSourceSink, 2> OriginList;
 class CargoDestinations {
 public:
 
-    static void Initialize();
-    CargoDestinations() : cargo(INVALID_CARGO) {}
+	static void Initialize();
+	CargoDestinations() : cargo(INVALID_CARGO) {}
 
-    void RemoveSource(SourceType type, SourceID id);
-    void RemoveSink(SourceType type, SourceID id);
+	void RemoveSource(SourceType type, SourceID id);
+	void RemoveSink(SourceType type, SourceID id);
 
 	const DestinationList &GetDestinations(SourceType type, SourceID id) const;
 	const OriginList &GetOrigins(SourceType type, SourceID id) const;
 
-    void UpdateDestinations(Town *town);
-    void UpdateDestinations(Industry *industry);
-    void UpdateDestinations(Company *company);
+	void UpdateDestinations(Town *town);
+	void UpdateDestinations(Industry *industry);
+	void UpdateDestinations(Company *company);
 
-    void UpdateOrigins(Town *town);
-    void UpdateOrigins(Industry *industry);
-    void UpdateOrigins(Company *company);
+	void UpdateOrigins(Town *town);
+	void UpdateOrigins(Industry *industry);
+	void UpdateOrigins(Company *company);
 
-    bool IsSymmetric() { return _settings_game.linkgraph.GetDistributionType(cargo) == DT_DEST_SYMMETRIC; }
-    CargoID GetCargo() { return this->cargo; }
+	bool IsSymmetric() { return _settings_game.linkgraph.GetDistributionType(cargo) == DT_DEST_SYMMETRIC; }
+	CargoID GetCargo() { return this->cargo; }
+
+	inline void AddOriginStation(StationID station, SourceID source)
+	{
+		this->AddStation(station, source, this->origin_stations);
+	}
+
+	inline void AddDestinationStation(StationID station, SourceID sink)
+	{
+		this->AddStation(station, sink, this->destination_stations);
+	}
+
+	inline bool IsOriginStation(StationID station, SourceID source) const
+	{
+		return this->IsAssociated(station, source, this->origin_stations);
+	}
+
+	inline bool IsDestinationStation(StationID station, SourceID source) const
+	{
+		return this->IsAssociated(station, source, this->destination_stations);
+	}
 
 protected:
-    CargoID cargo;
-    void AddMissingDestinations(DestinationList &own_destinations, const CargoSourceSink &self);
-    void AddMissingOrigin(OriginList &own_origins, const CargoSourceSink &self);
-    void AddAnywhere(DestinationList &own_destinations);
+	CargoID cargo;
+	void AddMissingDestinations(DestinationList &own_destinations, const CargoSourceSink &self);
+	void AddMissingOrigin(OriginList &own_origins, const CargoSourceSink &self);
+	void AddAnywhere(DestinationList &own_destinations);
+
+	inline uint GetIndex(StationID station, SourceID source_sink) const
+	{
+		/* Switch station's bits around so that we get a good hash also for small IDs. */
+		return (source_sink ^
+				(station << (FILTER_LENGTH / 2)) ^
+				((station >> (FILTER_LENGTH / 2)) & ((1 << (FILTER_LENGTH / 2)) - 1))) &
+				((1 << FILTER_LENGTH) - 1);
+	}
+
+	inline bool IsAssociated(StationID station, SourceID source_sink, const int32 *filter) const
+	{
+		uint index = this->GetIndex(station, source_sink);
+		return HasBit(filter[index >> 5], index & 0x1F);
+	}
+
+	inline void AddStation(StationID station, SourceID source_sink, int32 *filter)
+	{
+		uint index = this->GetIndex(station, source_sink);
+		SetBit(filter[index >> 5], index & 0x1F);
+	}
+
 	std::map<CargoSourceSink, DestinationList> destinations;
     std::map<CargoSourceSink, OriginList> origins;
+
+	int32 origin_stations[(1 << FILTER_LENGTH) / 32];
+	int32 destination_stations[(1 << FILTER_LENGTH) / 32];
 };
 
 
