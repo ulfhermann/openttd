@@ -32,6 +32,7 @@ static const uint BASE_IND_LINKS_TOWN  = 4;
 static const uint BASE_IND_LINKS_SYMM  = 1;
 static const uint CARGO_SCALE_IND      = 250;
 static const uint CARGO_SCALE_IND_TOWN = 200;
+static const uint HQ_LINKS             = 3;
 
 
 struct CargoSourceSink {
@@ -50,6 +51,10 @@ bool operator!=(const CargoSourceSink &i1, const CargoSourceSink &i2)
     return i1.id != i2.id || i1.type != i2.type;
 }
 
+bool operator==(const CargoSourceSink &i1, const CargoSourceSink &i2)
+{
+    return i1.id == i2.id && i1.type == i2.type;
+}
 
 struct DestinationList : public SmallVector<CargoSourceSink, 2> {
 	DestinationList() : num_links_expected(0) {}
@@ -61,26 +66,36 @@ typedef SmallVector<CargoSourceSink, 2> OriginList;
 class CargoDestinations {
 public:
 
-	void AddSource(SourceType type, SourceID id);
-	void RemoveSource(SourceType type, SourceID id);
+    static void Initialize();
+    CargoDestinations() : cargo(INVALID_CARGO) {}
 
-	void AddSink(SourceType type, SourceID id);
-	void RemoveSink(SourceType type, SourceID id);
+    void RemoveSource(SourceType type, SourceID id);
+    void RemoveSink(SourceType type, SourceID id);
 
 	const DestinationList &GetDestinations(SourceType type, SourceID id) const;
 	const OriginList &GetOrigins(SourceType type, SourceID id) const;
 
-	void UpdateDestinations(CargoID cargo, Town *town);
-	void UpdateDestinations(CargoID cargo, Industry *industry);
+    void UpdateDestinations(Town *town);
+    void UpdateDestinations(Industry *industry);
+    void UpdateDestinations(Company *company);
+
+    void UpdateOrigins(Town *town);
+    void UpdateOrigins(Industry *industry);
+    void UpdateOrigins(Company *company);
+
+    bool IsSymmetric() { return _settings_game.linkgraph.GetDistributionType(cargo) == DT_DEST_SYMMETRIC; }
+    CargoID GetCargo() { return this->cargo; }
 
 protected:
+    CargoID cargo;
     void AddMissingDestinations(DestinationList &own_destinations, const CargoSourceSink &self);
+    void AddMissingOrigin(OriginList &own_origins, const CargoSourceSink &self);
     void AddAnywhere(DestinationList &own_destinations);
 	std::map<CargoSourceSink, DestinationList> destinations;
     std::map<CargoSourceSink, OriginList> origins;
 };
 
 
-CargoDestinations _cargo_destinations[NUM_CARGO];
+extern CargoDestinations _cargo_destinations[NUM_CARGO];
 
 #endif // DESTINATIONS_H
