@@ -138,6 +138,7 @@ bmp.h
 bridge.h
 cargo_type.h
 cargoaction.h
+cargodest_gui.h
 cargomonitor.h
 cargopacket.h
 cargotype.h
@@ -442,6 +443,7 @@ autoreplace_gui.cpp
 bootstrap_gui.cpp
 bridge_gui.cpp
 build_vehicle_gui.cpp
+cargodest_gui.cpp
 cheat_gui.cpp
 company_gui.cpp
 console_gui.cpp

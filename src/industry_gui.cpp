@@ -36,6 +36,7 @@
 #include "core/backup_type.hpp"
 #include "genworld.h"
 #include "smallmap_gui.h"
+#include "cargodest_gui.h"
 #include "widgets/dropdown_type.h"
 #include "widgets/industry_widget.h"
 
@@ -666,8 +667,12 @@ class IndustryViewWindow : public Window
 	int production_offset_y;  ///< The offset of the production texts/buttons
 	int info_height;          ///< Height needed for the #WID_IV_INFO panel
 
+	CargoDestinationList dest_list; ///< Sorted list of demand destinations.
+	int dest_list_top;        ///< Top coordinate of the destination list.
+
 public:
-	IndustryViewWindow(WindowDesc *desc, WindowNumber window_number) : Window(desc)
+	IndustryViewWindow(WindowDesc *desc, WindowNumber window_number) :
+			Window(desc), dest_list(CargoSourceSink(ST_INDUSTRY, window_number))
 	{
 		this->flags |= WF_DISABLE_VP_SCROLL;
 		this->editbox_line = IL_NONE;
@@ -810,6 +815,10 @@ public:
 				}
 			}
 		}
+
+		this->dest_list_top = y;
+		y = this->dest_list.DrawList(left, right, y);
+
 		return y + WD_FRAMERECT_BOTTOM;
 	}
 
@@ -829,6 +838,13 @@ public:
 			case WID_IV_INFO: {
 				Industry *i = Industry::Get(this->window_number);
 				InfoLine line = IL_NONE;
+				NWidgetBase *nwi = this->GetWidget<NWidgetBase>(widget);
+
+				/* Test for click on destination list. */
+				if (pt.y > this->dest_list_top) {
+					this->dest_list.OnClick(pt.y - this->dest_list_top);
+					return;
+				}
 
 				switch (this->editable) {
 					case EA_NONE: break;
@@ -853,7 +869,6 @@ public:
 				}
 				if (line == IL_NONE) return;
 
-				NWidgetBase *nwi = this->GetWidget<NWidgetBase>(widget);
 				int left = nwi->pos_x + WD_FRAMETEXT_LEFT;
 				int right = nwi->pos_x + nwi->current_x - 1 - WD_FRAMERECT_RIGHT;
 				if (IsInsideMM(pt.x, left, left + SETTING_BUTTON_WIDTH)) {
@@ -980,6 +995,13 @@ public:
 			this->editable = ind->UsesSmoothEconomy() ? EA_RATE : EA_MULTIPLIER;
 		} else {
 			this->editable = EA_NONE;
+		}
+
+		/* Rebuild destination list if data is not zero, otherwise just resort. */
+		if (data != 0) {
+			this->dest_list.InvalidateData();
+		} else {
+			this->dest_list.Resort();
 		}
 	}
 
