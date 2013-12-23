@@ -34,6 +34,7 @@
 #include "date_func.h"
 #include "newgrf_debug.h"
 #include "vehicle_func.h"
+#include "linkgraph/destinations.h"
 
 #include "table/strings.h"
 #include "table/object_land.h"
@@ -327,6 +328,10 @@ CommandCost CmdBuildObject(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 			if (flags & DC_EXEC) {
 				hq_score = UpdateCompanyRatingAndValue(c, false);
 				c->location_of_HQ = tile;
+				_cargo_destinations[CT_PASSENGERS].UpdateDestinations(c);
+				_cargo_destinations[CT_PASSENGERS].UpdateOrigins(c);
+				_cargo_destinations[CT_MAIL].UpdateDestinations(c);
+				_cargo_destinations[CT_MAIL].UpdateOrigins(c);
 				SetWindowDirty(WC_COMPANY, c->index);
 			}
 			break;
@@ -510,6 +515,10 @@ static CommandCost ClearTile_Object(TileIndex tile, DoCommandFlag flags)
 				c->location_of_HQ = INVALID_TILE; // reset HQ position
 				SetWindowDirty(WC_COMPANY, c->index);
 				CargoPacket::InvalidateAllFrom(ST_HEADQUARTERS, c->index);
+				_cargo_destinations[CT_PASSENGERS].RemoveSink(ST_HEADQUARTERS, c->index);
+				_cargo_destinations[CT_PASSENGERS].RemoveSource(ST_HEADQUARTERS, c->index);
+				_cargo_destinations[CT_MAIL].RemoveSink(ST_HEADQUARTERS, c->index);
+				_cargo_destinations[CT_MAIL].RemoveSource(ST_HEADQUARTERS, c->index);
 			}
 
 			/* cost of relocating company is 1% of company value */
