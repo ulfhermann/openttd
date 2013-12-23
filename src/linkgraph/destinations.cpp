@@ -105,7 +105,7 @@ void CargoDestinations::UpdateDestinations(const Industry *ind)
     * with a town effect and all other cargos. */
     num_links = this->IsSymmetric() ? BASE_IND_LINKS_SYMM : (is_town_cargo ? BASE_IND_LINKS_TOWN : BASE_IND_LINKS);
     /* Add links based on last industry production. */
-    num_links += ind->last_month_production[i] / is_town_cargo ? CARGO_SCALE_IND_TOWN : CARGO_SCALE_IND;
+	num_links += ind->last_month_production[i] / (is_town_cargo ? CARGO_SCALE_IND_TOWN : CARGO_SCALE_IND);
 
 	CargoSourceSink self(ST_INDUSTRY, ind->index);
     DestinationList &own_destinations = this->destinations[self];
