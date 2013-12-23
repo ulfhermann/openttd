@@ -46,6 +46,7 @@
 #include "object_base.h"
 #include "ai/ai.hpp"
 #include "game/game.hpp"
+#include "linkgraph/destinations.h"
 
 #include "table/strings.h"
 #include "table/town_land.h"
@@ -102,6 +103,15 @@ Town::~Town()
 	DeleteSubsidyWith(ST_TOWN, this->index);
 	DeleteNewGRFInspectWindow(GSF_FAKE_TOWNS, this->index);
 	CargoPacket::InvalidateAllFrom(ST_TOWN, this->index);
+
+	CargoID c;
+	FOR_EACH_SET_BIT(c, this->cargo_accepted_total) {
+		_cargo_destinations[c].RemoveSink(ST_TOWN, this->index);
+	}
+	FOR_EACH_SET_BIT(c, this->cargo_produced) {
+		_cargo_destinations[c].RemoveSource(ST_TOWN, this->index);
+	}
+
 	MarkWholeScreenDirty();
 }
 
@@ -679,12 +689,26 @@ static void ChangeTileOwner_Town(TileIndex tile, Owner old_owner, Owner new_owne
  */
 void UpdateTownCargoTotal(Town *t)
 {
+	uint32 accepted_old = t->cargo_accepted_total;
 	t->cargo_accepted_total = 0;
 
 	const TileArea &area = t->cargo_accepted.GetArea();
 	TILE_AREA_LOOP(tile, area) {
 		if (TileX(tile) % AcceptanceMatrix::GRID == 0 && TileY(tile) % AcceptanceMatrix::GRID == 0) {
 			t->cargo_accepted_total |= t->cargo_accepted[tile];
+		}
+	}
+	if (accepted_old != t->cargo_accepted_total) {
+		CargoID c;
+		FOR_EACH_SET_BIT(c, accepted_old) {
+			if (!HasBit(t->cargo_accepted_total, c)) {
+				_cargo_destinations[c].RemoveSink(ST_TOWN, t->index);
+			}
+		}
+		FOR_EACH_SET_BIT(c, t->cargo_accepted_total) {
+			if (!HasBit(accepted_old, c)) {
+				_cargo_destinations[c].UpdateOrigins(t);
+			}
 		}
 	}
 }
@@ -1471,8 +1495,16 @@ void UpdateTownRadius(Town *t)
 
 void UpdateTownMaxPass(Town *t)
 {
+	uint32 old_max = t->supplied[CT_PASSENGERS].old_max;
 	t->supplied[CT_PASSENGERS].old_max = t->cache.population >> 3;
+	if (old_max != t->supplied[CT_PASSENGERS].old_max) {
+		_cargo_destinations[CT_PASSENGERS].UpdateDestinations(t);
+	}
+	old_max = t->supplied[CT_MAIL].old_max;
 	t->supplied[CT_MAIL].old_max = t->cache.population >> 4;
+	if (old_max != t->supplied[CT_MAIL].old_max) {
+		_cargo_destinations[CT_MAIL].UpdateDestinations(t);
+	}
 }
 
 /**
@@ -3101,7 +3133,11 @@ static void UpdateTownGrowRate(Town *t)
 
 static void UpdateTownAmounts(Town *t)
 {
-	for (CargoID i = 0; i < NUM_CARGO; i++) t->supplied[i].NewMonth();
+	for (CargoID i = 0; i < NUM_CARGO; i++) {
+		bool update = (t->supplied[i].new_max != t->supplied[i].old_max);
+		t->supplied[i].NewMonth();
+		if (update) _cargo_destinations[i].UpdateDestinations(t);
+	}
 	for (int i = TE_BEGIN; i < TE_END; i++) t->received[i].NewMonth();
 	if (t->fund_buildings_months != 0) t->fund_buildings_months--;
 

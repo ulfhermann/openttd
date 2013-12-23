@@ -40,6 +40,7 @@
 #include "core/backup_type.hpp"
 #include "object_base.h"
 #include "game/game.hpp"
+#include "linkgraph/destinations.h"
 
 #include "table/strings.h"
 #include "table/industry_land.h"
@@ -179,6 +180,16 @@ Industry::~Industry()
 
 	DeleteSubsidyWith(ST_INDUSTRY, this->index);
 	CargoPacket::InvalidateAllFrom(ST_INDUSTRY, this->index);
+	for (uint i = 0; i < lengthof(this->accepts_cargo); ++i) {
+		if (this->accepts_cargo[i] != CT_INVALID) {
+			_cargo_destinations[this->accepts_cargo[i]].RemoveSink(ST_INDUSTRY, this->index);
+		}
+	}
+	for (uint i = 0; i < lengthof(this->produced_cargo); ++i) {
+		if (this->produced_cargo[i] != CT_INVALID) {
+			_cargo_destinations[this->produced_cargo[i]].RemoveSource(ST_INDUSTRY, this->index);
+		}
+	}
 }
 
 /**
@@ -1752,6 +1763,13 @@ static void DoCreateNewIndustry(Industry *i, TileIndex tile, IndustryType type, 
 	InvalidateWindowData(WC_INDUSTRY_DIRECTORY, 0, 0);
 
 	Station::RecomputeIndustriesNearForAll();
+
+	for (uint j = 0; j < lengthof(i->accepts_cargo); ++j) {
+		if (i->accepts_cargo[j] != CT_INVALID) _cargo_destinations[i->accepts_cargo[j]].UpdateOrigins(i);
+	}
+	for (uint j = 0; j < lengthof(i->produced_cargo); ++j) {
+		if (i->produced_cargo[j] != CT_INVALID) _cargo_destinations[i->produced_cargo[j]].UpdateDestinations(i);
+	}
 }
 
 /**
@@ -2143,8 +2161,10 @@ static void UpdateIndustryStatistics(Industry *i)
 			}
 			i->last_month_pct_transported[j] = pct;
 
+			bool update = i->last_month_production[j] != i->this_month_production[j];
 			i->last_month_production[j] = i->this_month_production[j];
 			i->this_month_production[j] = 0;
+			if (update) _cargo_destinations[i->produced_cargo[j]].UpdateDestinations(i);
 
 			i->last_month_transported[j] = i->this_month_transported[j];
 			i->this_month_transported[j] = 0;

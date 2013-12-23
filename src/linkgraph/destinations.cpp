@@ -53,7 +53,7 @@ void CargoDestinations::RemoveSink(SourceType type, SourceID id)
     }
 }
 
-void CargoDestinations::UpdateDestinations(Town *t)
+void CargoDestinations::UpdateDestinations(const Town *t)
 {
     bool is_pax = IsCargoInClass(this->cargo, CC_PASSENGERS);
     uint max_amt = t->supplied[this->cargo].old_max;
@@ -88,14 +88,14 @@ void CargoDestinations::UpdateDestinations(Town *t)
     this->AddMissingDestinations(own_destinations, self);
 }
 
-void CargoDestinations::UpdateOrigins(Town *t)
+void CargoDestinations::UpdateOrigins(const Town *t)
 {
     CargoSourceSink self(ST_TOWN, t->index);
     OriginList &own_origins = this->origins[self];
     if (own_origins.Length() == 1) this->AddMissingOrigin(own_origins, self);
 }
 
-void CargoDestinations::UpdateDestinations(Industry *ind)
+void CargoDestinations::UpdateDestinations(const Industry *ind)
 {
     int i = ind->produced_cargo[0] == this->cargo ? 0 : 1;
     bool is_town_cargo = CargoSpec::Get(this->cargo)->town_effect != TE_NONE;
@@ -113,14 +113,14 @@ void CargoDestinations::UpdateDestinations(Industry *ind)
     this->AddMissingDestinations(own_destinations, self);
 }
 
-void CargoDestinations::UpdateOrigins(Industry *ind)
+void CargoDestinations::UpdateOrigins(const Industry *ind)
 {
     CargoSourceSink self(ST_INDUSTRY, ind->index);
     OriginList &own_origins = this->origins[self];
     if (own_origins.Length() == 0) this->AddMissingOrigin(own_origins, self);
 }
 
-void CargoDestinations::UpdateDestinations(Company *company)
+void CargoDestinations::UpdateDestinations(const Company *company)
 {
     CargoSourceSink self(ST_HEADQUARTERS, company->index);
     DestinationList &own_destinations = this->destinations[self];
@@ -129,7 +129,7 @@ void CargoDestinations::UpdateDestinations(Company *company)
     this->AddMissingDestinations(own_destinations, self);
 }
 
-void CargoDestinations::UpdateOrigins(Company *company)
+void CargoDestinations::UpdateOrigins(const Company *company)
 {
     CargoSourceSink self(ST_HEADQUARTERS, company->index);
     OriginList &own_origins = this->origins[self];

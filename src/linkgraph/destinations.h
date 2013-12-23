@@ -42,17 +42,17 @@ struct CargoSourceSink {
 	SourceID id;
 };
 
-bool operator<(const CargoSourceSink &i1, const CargoSourceSink &i2)
+inline bool operator<(const CargoSourceSink &i1, const CargoSourceSink &i2)
 {
 	return i1.id < i2.id || (i1.id == i2.id && i1.type < i2.type);
 }
 
-bool operator!=(const CargoSourceSink &i1, const CargoSourceSink &i2)
+inline bool operator!=(const CargoSourceSink &i1, const CargoSourceSink &i2)
 {
 	return i1.id != i2.id || i1.type != i2.type;
 }
 
-bool operator==(const CargoSourceSink &i1, const CargoSourceSink &i2)
+inline bool operator==(const CargoSourceSink &i1, const CargoSourceSink &i2)
 {
 	return i1.id == i2.id && i1.type == i2.type;
 }
@@ -79,13 +79,13 @@ public:
 	const DestinationList &GetDestinations(SourceType type, SourceID id) const;
 	const OriginList &GetOrigins(SourceType type, SourceID id) const;
 
-	void UpdateDestinations(Town *town);
-	void UpdateDestinations(Industry *industry);
-	void UpdateDestinations(Company *company);
+	void UpdateDestinations(const Town *town);
+	void UpdateDestinations(const Industry *industry);
+	void UpdateDestinations(const Company *company);
 
-	void UpdateOrigins(Town *town);
-	void UpdateOrigins(Industry *industry);
-	void UpdateOrigins(Company *company);
+	void UpdateOrigins(const Town *town);
+	void UpdateOrigins(const Industry *industry);
+	void UpdateOrigins(const Company *company);
 
 	bool IsSymmetric() { return _settings_game.linkgraph.GetDistributionType(cargo) == DT_DEST_SYMMETRIC; }
 	CargoID GetCargo() { return this->cargo; }
