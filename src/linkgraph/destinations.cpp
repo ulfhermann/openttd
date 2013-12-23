@@ -16,6 +16,7 @@
 #include "../company_base.h"
 
 CargoDestinations _cargo_destinations[NUM_CARGO];
+const CargoSourceSink CargoDestinations::_invalid_source_sink(ST_ANY, INVALID_SOURCE);
 
 void CargoDestinations::Initialize()
 {
@@ -66,12 +67,10 @@ void CargoDestinations::UpdateDestinations(Town *t)
 	 * This improves the link distribution at the beginning of a game when
 	 * the towns are still small. */
     if (t->larger_town) num_links = max<uint>(num_links, CITY_TOWN_LINKS + this->IsSymmetric() ? BASE_TOWN_LINKS_SYMM : BASE_TOWN_LINKS);
-	num_links++;
 
     CargoSourceSink self(ST_TOWN, t->index);
     DestinationList &own_destinations = this->destinations[self];
     OriginList &own_origins = this->origins[self];
-    this->AddAnywhere(own_destinations);
 
     if (HasBit(t->cargo_accepted_total, this->cargo)) {
 		num_links++;
@@ -108,11 +107,8 @@ void CargoDestinations::UpdateDestinations(Industry *ind)
     /* Add links based on last industry production. */
     num_links += ind->last_month_production[i] / is_town_cargo ? CARGO_SCALE_IND_TOWN : CARGO_SCALE_IND;
 
-    /* Account for the one special link. */
-    num_links++;
-    CargoSourceSink self(ST_INDUSTRY, ind->index);
+	CargoSourceSink self(ST_INDUSTRY, ind->index);
     DestinationList &own_destinations = this->destinations[self];
-    this->AddAnywhere(own_destinations);
     this->destinations[self].num_links_expected = ClampToU16(num_links);
     this->AddMissingDestinations(own_destinations, self);
 }
@@ -129,9 +125,7 @@ void CargoDestinations::UpdateDestinations(Company *company)
     CargoSourceSink self(ST_HEADQUARTERS, company->index);
     DestinationList &own_destinations = this->destinations[self];
 
-    this->AddAnywhere(own_destinations);
-
-    own_destinations.num_links_expected = ClampToU16(HQ_LINKS + 1);
+	own_destinations.num_links_expected = ClampToU16(HQ_LINKS);
     this->AddMissingDestinations(own_destinations, self);
 }
 
@@ -147,62 +141,46 @@ void CargoDestinations::AddMissingDestinations(DestinationList &own_destinations
     if (this->origins.empty()) return;
     const CargoSourceSink &last = (--this->origins.end())->first;
     while (own_destinations.Length() < own_destinations.num_links_expected) {
-        std::map<CargoSourceSink, OriginList>::iterator chosen = this->origins.upper_bound(
-                    CargoSourceSink(static_cast<SourceType>(RandomRange(ST_ANY)), RandomRange(last.id)));
-        uint num_candidates = this->origins.size();
-        while (chosen->second.Contains(self) && --num_candidates > 0) {
-            if (++chosen == this->origins.end()) chosen = this->origins.begin();
-        }
-        if (num_candidates == 0) break;
-        *chosen->second.Append() = self;
-        *own_destinations.Append() = chosen->first;
-        if (this->IsSymmetric()) {
-            std::map<CargoSourceSink, DestinationList>::iterator reverse_dest(this->destinations.find(chosen->first));
-            if (reverse_dest != this->destinations.end()) {
-                std::map<CargoSourceSink, OriginList>::iterator reverse_orig(this->origins.find(self));
-                if (reverse_orig != this->origins.end()) {
-                    *reverse_dest->second.Append() = self;
-                    *reverse_orig->second.Append() = chosen->first;
-                }
-            }
-        }
-    }
-}
-
-void CargoDestinations::AddAnywhere(DestinationList &own_destinations)
-{
-    CargoSourceSink anywhere(ST_ANY, INVALID_SOURCE);
-    if (own_destinations.Length() == 0) {
-        *own_destinations.Append() = anywhere;
-    } else if (own_destinations[0] != anywhere) {
-        *own_destinations.Append() = own_destinations[0];
-        own_destinations[0] = anywhere;
+		CargoSourceSink chosen = this->AddLink(own_destinations, this->origins, self, last);
+		if (chosen == CargoDestinations::_invalid_source_sink) break;
+		this->AddSymmetric(chosen, self);
     }
 }
 
 void CargoDestinations::AddMissingOrigin(OriginList &own_origins, const CargoSourceSink &self)
 {
     if (this->destinations.empty()) return;
-    const CargoSourceSink &last = (--this->destinations.end())->first;
-    std::map<CargoSourceSink, DestinationList>::iterator chosen = this->destinations.upper_bound(
-                CargoSourceSink(static_cast<SourceType>(RandomRange(ST_ANY)), RandomRange(last.id)));
-    uint num_candidates = this->destinations.size();
-    while (chosen->first == self && --num_candidates > 0) {
-        if (++chosen == this->destinations.end()) chosen = this->destinations.begin();
-    }
-    if (num_candidates == 0) return;
-    *chosen->second.Append() = self;
-    *own_origins.Append() = chosen->first;
-    if (this->IsSymmetric()) {
-        std::map<CargoSourceSink, DestinationList>::iterator reverse_dest(this->destinations.find(self));
-        if (reverse_dest != this->destinations.end()) {
-            std::map<CargoSourceSink, OriginList>::iterator reverse_orig(this->origins.find(chosen->first));
-            if (reverse_orig != this->origins.end()) {
-                *reverse_dest->second.Append() = chosen->first;
-                *reverse_orig->second.Append() = self;
-            }
-        }
-    }
+	CargoSourceSink chosen = this->AddLink(own_origins, this->destinations,
+			self, (--this->destinations.end())->first);
+	if (chosen != CargoDestinations::_invalid_source_sink) {
+		this->AddSymmetric(self, chosen);
+	}
+}
+
+template<class Tmap, class Tlist>
+CargoSourceSink CargoDestinations::AddLink(Tlist &own, Tmap &other, const CargoSourceSink &self, const CargoSourceSink &last)
+{
+	typename Tmap::iterator chosen = other.upper_bound(
+				CargoSourceSink(static_cast<SourceType>(RandomRange(ST_ANY)), RandomRange(last.id)));
+	uint num_candidates = other.size();
+	while (chosen->first == self && --num_candidates > 0) {
+		if (++chosen == other.end()) chosen = other.begin();
+	}
+	if (num_candidates == 0) return CargoDestinations::_invalid_source_sink;
+	*chosen->second.Append() = self;
+	*own.Append() = chosen->first;
+	return chosen->first;
+}
+
+void CargoDestinations::AddSymmetric(const CargoSourceSink &orig, const CargoSourceSink &dest)
+{
+	if (!this->IsSymmetric()) return;
+	std::map<CargoSourceSink, DestinationList>::iterator reverse_dest(this->destinations.find(orig));
+	if (reverse_dest == this->destinations.end()) return;
+	std::map<CargoSourceSink, OriginList>::iterator reverse_orig(this->origins.find(dest));
+	if (reverse_orig == this->origins.end()) return;
+	*reverse_dest->second.Append() = dest;
+	*reverse_orig->second.Append() = orig;
 }
 
 const DestinationList &CargoDestinations::GetDestinations(SourceType type, SourceID id) const

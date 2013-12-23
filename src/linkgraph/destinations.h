@@ -68,7 +68,10 @@ class CargoDestinations {
 public:
 
 	static void Initialize();
-	CargoDestinations() : cargo(INVALID_CARGO) {}
+	CargoDestinations() : cargo(INVALID_CARGO) {
+		MemSetT(this->origin_stations, 0, FILTER_LENGTH);
+		MemSetT(this->destination_stations, 0, FILTER_LENGTH);
+	}
 
 	void RemoveSource(SourceType type, SourceID id);
 	void RemoveSink(SourceType type, SourceID id);
@@ -109,9 +112,14 @@ public:
 
 protected:
 	CargoID cargo;
+
+	const static CargoSourceSink _invalid_source_sink;
+
 	void AddMissingDestinations(DestinationList &own_destinations, const CargoSourceSink &self);
 	void AddMissingOrigin(OriginList &own_origins, const CargoSourceSink &self);
-	void AddAnywhere(DestinationList &own_destinations);
+	template<class Tmap, class Tlist>
+	CargoSourceSink AddLink(Tlist &own, Tmap &other, const CargoSourceSink &self, const CargoSourceSink &last);
+	void AddSymmetric(const CargoSourceSink &orig, const CargoSourceSink &dest);
 
 	inline uint GetIndex(StationID station, SourceID source_sink) const
 	{
