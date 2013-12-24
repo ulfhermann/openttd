@@ -115,6 +115,7 @@ protected:
 	template<class Tmap, class Tlist>
 	CargoSourceSink AddLink(Tlist &own, Tmap &other, const CargoSourceSink &self, const CargoSourceSink &last);
 	void AddSymmetric(const CargoSourceSink &orig, const CargoSourceSink &dest);
+	void UpdateWindow(const CargoSourceSink &source_sink);
 
 	inline uint GetIndex(StationID station, SourceID source_sink) const
 	{

@@ -14,6 +14,7 @@
 #include "../date_func.h"
 #include "../core/random_func.hpp"
 #include "../company_base.h"
+#include "../window_func.h"
 
 CargoDestinations _cargo_destinations[NUM_CARGO];
 const CargoSourceSink CargoDestinations::_invalid_source_sink(ST_ANY, INVALID_SOURCE);
@@ -96,7 +97,7 @@ void CargoDestinations::UpdateOrigins(const Town *t)
 {
     CargoSourceSink self(ST_TOWN, t->index);
     OriginList &own_origins = this->origins[self];
-    if (own_origins.Length() == 1) this->AddMissingOrigin(own_origins, self);
+	if (own_origins.Length() <= 1) this->AddMissingOrigin(own_origins, self);
 }
 
 void CargoDestinations::UpdateDestinations(const Industry *ind)
@@ -149,6 +150,7 @@ void CargoDestinations::AddMissingDestinations(DestinationList &own_destinations
 		if (chosen == CargoDestinations::_invalid_source_sink) break;
 		this->AddSymmetric(chosen, self);
     }
+	this->UpdateWindow(self);
 }
 
 void CargoDestinations::AddMissingOrigin(OriginList &own_origins, const CargoSourceSink &self)
@@ -158,6 +160,7 @@ void CargoDestinations::AddMissingOrigin(OriginList &own_origins, const CargoSou
 			self, (--this->destinations.end())->first);
 	if (chosen != CargoDestinations::_invalid_source_sink) {
 		this->AddSymmetric(self, chosen);
+		this->UpdateWindow(chosen);
 	}
 }
 
@@ -185,6 +188,16 @@ void CargoDestinations::AddSymmetric(const CargoSourceSink &orig, const CargoSou
 	if (reverse_orig == this->origins.end()) return;
 	reverse_dest->second.Include(dest);
 	reverse_orig->second.Include(orig);
+	this->UpdateWindow(orig);
+}
+
+void CargoDestinations::UpdateWindow(const CargoSourceSink &source_sink)
+{
+	switch(source_sink.type) {
+	case ST_TOWN: InvalidateWindowData(WC_TOWN_VIEW, source_sink.id, 1); break;
+	case ST_INDUSTRY: InvalidateWindowData(WC_INDUSTRY_VIEW, source_sink.id, 1); break;
+	default: break;
+	}
 }
 
 const DestinationList &CargoDestinations::GetDestinations(SourceType type, SourceID id) const
