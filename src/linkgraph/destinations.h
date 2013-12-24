@@ -20,8 +20,7 @@
 
 static const uint BIG_TOWN_POP_PAX     = 2000;
 static const uint BIG_TOWN_POP_OTHER   = 500;
-static const uint BASE_TOWN_LINKS_SYMM = 1;
-static const uint BASE_TOWN_LINKS      = 0;
+static const uint BASE_TOWN_LINKS      = 3;
 static const uint CITY_TOWN_LINKS      = 8;
 static const uint SCALE_TOWN           = 100;
 static const uint SCALE_TOWN_BIG       = 180;

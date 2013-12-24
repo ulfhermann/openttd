@@ -63,14 +63,14 @@ void CargoDestinations::UpdateDestinations(const Town *t)
     uint max_amt = t->supplied[this->cargo].old_max;
 	uint big_amt = is_pax ? BIG_TOWN_POP_PAX : BIG_TOWN_POP_OTHER;
 
-    uint num_links = this->IsSymmetric() ? BASE_TOWN_LINKS_SYMM : BASE_TOWN_LINKS;
+	uint num_links = BASE_TOWN_LINKS;
 	/* Add links based on the available cargo amount. */
 	num_links += min(max_amt, big_amt) / (is_pax ? SCALE_TOWN_PAX : SCALE_TOWN);
 	if (max_amt > big_amt) num_links += (max_amt - big_amt) / (is_pax ? SCALE_TOWN_BIG_PAX : SCALE_TOWN_BIG);
-	/* Ensure a city has at least city_town_links more than the base value.
+	/* Ensure a city has at least CITY_TOWN_LINKS more than the base value.
 	 * This improves the link distribution at the beginning of a game when
 	 * the towns are still small. */
-    if (t->larger_town) num_links = max<uint>(num_links, CITY_TOWN_LINKS + this->IsSymmetric() ? BASE_TOWN_LINKS_SYMM : BASE_TOWN_LINKS);
+	if (t->larger_town) num_links = max<uint>(num_links, CITY_TOWN_LINKS + BASE_TOWN_LINKS);
 
     CargoSourceSink self(ST_TOWN, t->index);
     DestinationList &own_destinations = this->destinations[self];
