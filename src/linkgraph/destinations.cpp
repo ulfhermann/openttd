@@ -22,6 +22,10 @@ void CargoDestinations::Initialize()
 {
     for (CargoID c = 0; c != NUM_CARGO; ++c) {
         _cargo_destinations[c].cargo = c;
+		_cargo_destinations[c].origins.clear();
+		_cargo_destinations[c].destinations.clear();
+		MemSetT(_cargo_destinations[c].origin_stations, 0, FILTER_LENGTH);
+		MemSetT(_cargo_destinations[c].destination_stations, 0, FILTER_LENGTH);
     }
 }
 
@@ -74,12 +78,12 @@ void CargoDestinations::UpdateDestinations(const Town *t)
 
     if (HasBit(t->cargo_accepted_total, this->cargo)) {
 		num_links++;
-        if (own_destinations.Length() < 2) {
+		if (own_destinations.Length() == 0) {
             *own_destinations.Append() = self;
             own_origins.Include(self);
-        } else if (own_destinations[1] != self) {
-            *own_destinations.Append() = own_destinations[1];
-            own_destinations[1] = self;
+		} else if (own_destinations[0] != self) {
+			*own_destinations.Append() = own_destinations[0];
+			own_destinations[0] = self;
             own_origins.Include(self);
         }
 	}
@@ -163,7 +167,7 @@ CargoSourceSink CargoDestinations::AddLink(Tlist &own, Tmap &other, const CargoS
 	typename Tmap::iterator chosen = other.upper_bound(
 				CargoSourceSink(static_cast<SourceType>(RandomRange(ST_ANY)), RandomRange(last.id)));
 	uint num_candidates = other.size();
-	while (chosen->first == self && --num_candidates > 0) {
+	while ((chosen->first == self || chosen->second.Contains(self)) && --num_candidates > 0) {
 		if (++chosen == other.end()) chosen = other.begin();
 	}
 	if (num_candidates == 0) return CargoDestinations::_invalid_source_sink;
@@ -179,8 +183,8 @@ void CargoDestinations::AddSymmetric(const CargoSourceSink &orig, const CargoSou
 	if (reverse_dest == this->destinations.end()) return;
 	std::map<CargoSourceSink, OriginList>::iterator reverse_orig(this->origins.find(dest));
 	if (reverse_orig == this->origins.end()) return;
-	*reverse_dest->second.Append() = dest;
-	*reverse_orig->second.Append() = orig;
+	reverse_dest->second.Include(dest);
+	reverse_orig->second.Include(orig);
 }
 
 const DestinationList &CargoDestinations::GetDestinations(SourceType type, SourceID id) const

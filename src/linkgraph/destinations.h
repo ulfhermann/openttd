@@ -68,10 +68,6 @@ class CargoDestinations {
 public:
 
 	static void Initialize();
-	CargoDestinations() : cargo(INVALID_CARGO) {
-		MemSetT(this->origin_stations, 0, FILTER_LENGTH);
-		MemSetT(this->destination_stations, 0, FILTER_LENGTH);
-	}
 
 	void RemoveSource(SourceType type, SourceID id);
 	void RemoveSink(SourceType type, SourceID id);
