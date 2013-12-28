@@ -1413,7 +1413,8 @@ static void HandleStationRefit(Vehicle *v, CargoArray &consist_capleft, Station 
 	if (new_cid < NUM_CARGO && new_cid != v_start->cargo_type) {
 		StationID next_one = StationIDStack(next_station).Pop();
 		v_start->cargo.Return(UINT_MAX, &st->goods[v_start->cargo_type].cargo, next_one);
-		for (w = v_start; w->HasArticulatedPart(); w = w->GetNextArticulatedPart()) {
+		for (w = v_start; w->HasArticulatedPart();) {
+			w = w->GetNextArticulatedPart();
 			w->cargo.Return(UINT_MAX, &st->goods[w->cargo_type].cargo, next_one);
 		}
 		if (is_normal_aircraft) {
