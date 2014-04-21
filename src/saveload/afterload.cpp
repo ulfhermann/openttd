@@ -704,6 +704,20 @@ bool AfterLoadGame()
 		_settings_game.linkgraph.distribution_mail = DT_MANUAL;
 		_settings_game.linkgraph.distribution_armoured = DT_MANUAL;
 		_settings_game.linkgraph.distribution_default = DT_MANUAL;
+	} else if (IsSavegameVersionBefore(190)) {
+		/* Increment distribution types as DT_WAYBILL is introduced. */
+		if (_settings_game.linkgraph.distribution_pax != DT_MANUAL) {
+			_settings_game.linkgraph.distribution_pax++;
+		}
+		if (_settings_game.linkgraph.distribution_mail != DT_MANUAL) {
+			_settings_game.linkgraph.distribution_mail++;
+		}
+		if (_settings_game.linkgraph.distribution_armoured != DT_MANUAL) {
+			_settings_game.linkgraph.distribution_armoured++;
+		}
+		if (_settings_game.linkgraph.distribution_default != DT_MANUAL) {
+			_settings_game.linkgraph.distribution_default++;
+		}
 	}
 
 	/* Load the sprites */

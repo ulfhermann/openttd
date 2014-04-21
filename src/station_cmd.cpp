@@ -4314,17 +4314,20 @@ void FlowStat::ReleaseShare(StationID st)
 }
 
 /**
- * Scale all shares from link graph's runtime to monthly values.
+ * Scale all shares from link graph's runtime to monthly values and correct for possibly
+ * undelivered supply.
  * @param runtime Time the link graph has been running without compression.
- * @pre runtime must be greater than 0 as we don't want infinite flow values.
+ * @param delivered_supply Supply that was delivered by the MCF algorithm.
+ * @param total_supply Total supply available.
+ * @pre runtime and delivered_supply must be greater than 0 as we don't want infinite flow values.
  */
-void FlowStat::ScaleToMonthly(uint runtime)
+void FlowStat::Scale(uint runtime, uint delivered_supply, uint total_supply)
 {
-	assert(runtime > 0);
+	assert(runtime > 0 && delivered_supply > 0);
 	SharesMap new_shares;
 	uint share = 0;
 	for (SharesMap::iterator i = this->shares.begin(); i != this->shares.end(); ++i) {
-		share = max(share + 1, i->first * 30 / runtime);
+		share = max(share + 1, i->first * 30 * total_supply / runtime / delivered_supply);
 		new_shares[share] = i->second;
 		if (this->unrestricted == i->first) this->unrestricted = share;
 	}

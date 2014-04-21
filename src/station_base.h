@@ -79,7 +79,7 @@ public:
 
 	void ReleaseShare(StationID st);
 
-	void ScaleToMonthly(uint runtime);
+	void Scale(uint runtime, uint delivered_supply = 0, uint total_supply = 0);
 
 	/**
 	 * Get the actual shares as a const pointer so that they can be iterated

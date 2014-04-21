@@ -20,9 +20,15 @@
  */
 void FlowMapper::Run(LinkGraphJob &job) const
 {
+	/* Flows are only mapped on the very last flowmapper run for waybill dispatchment. */
+	if (!this->scale && job.Settings().GetDistributionType(job.Cargo()) == DT_WAYBILL) return;
+
+	std::map<StationID, NodeID> station_to_node;
+
 	for (NodeID node_id = 0; node_id < job.Size(); ++node_id) {
 		Node prev_node = job[node_id];
 		StationID prev = prev_node.Station();
+		station_to_node[prev] = node_id;
 		PathList &paths = prev_node.Paths();
 		for (PathList::iterator i = paths.begin(); i != paths.end(); ++i) {
 			Path *path = *i;
@@ -56,7 +62,12 @@ void FlowMapper::Run(LinkGraphJob &job) const
 			 * LinkGraph::Monthly(). */
 			uint runtime = job.JoinDate() - job.Settings().recalc_time - job.LastCompression() + 1;
 			for (FlowStatMap::iterator i = flows.begin(); i != flows.end(); ++i) {
-				i->second.ScaleToMonthly(runtime);
+				Node origin_node = job[station_to_node[i->first]];
+				/* Scale all flows to make up for the undelivered supply. This doesn't change
+				 * the relation between them but makes the visualization look better. */
+				i->second.Scale(runtime,
+						max(1u, origin_node.Supply() - origin_node.UndeliveredSupply()),
+						origin_node.Supply());
 			}
 		}
 		/* Clear paths. */

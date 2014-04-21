@@ -139,6 +139,17 @@ public:
 			assert(demand <= this->anno.unsatisfied_demand);
 			this->anno.unsatisfied_demand -= demand;
 		}
+
+		/**
+		 * Remove some unsatisfied demand.
+		 * @param demand Unsatisfied demand to be removed.
+		 */
+		void RemoveUnsatisfiedDemand(uint demand)
+		{
+			assert(demand <= this->anno.unsatisfied_demand);
+			this->anno.unsatisfied_demand -= demand;
+			this->anno.demand -= demand;
+		}
 	};
 
 	/**
@@ -259,6 +270,17 @@ public:
 		{
 			this->node_anno.undelivered_supply -= amount;
 			(*this)[to].AddDemand(amount);
+		}
+
+		/**
+		 * Convert the remaining unsatisfied demand into undelivered supply.
+		 * @param to Destination for unsatisfiable demand.
+		 * @param amount Amount of demand to be invalidated.
+		 */
+		void InvalidateDemand(NodeID to, uint amount)
+		{
+			(*this)[to].RemoveUnsatisfiedDemand(amount);
+			this->node_anno.undelivered_supply += amount;
 		}
 	};
 

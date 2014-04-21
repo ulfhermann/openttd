@@ -274,6 +274,7 @@ DemandCalculator::DemandCalculator(LinkGraphJob &job) :
 			this->CalcDemand<SymmetricScaler>(job, SymmetricScaler(settings.demand_size));
 			break;
 		case DT_ASYMMETRIC:
+		case DT_WAYBILL:
 			this->CalcDemand<AsymmetricScaler>(job, AsymmetricScaler());
 			break;
 		default:

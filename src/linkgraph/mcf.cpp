@@ -514,9 +514,23 @@ MCF1stPass::MCF1stPass(LinkGraphJob &job) : MultiCommodityFlow(job)
  */
 MCF2ndPass::MCF2ndPass(LinkGraphJob &job) : MultiCommodityFlow(job)
 {
+	uint size = job.Size();
+
+	/* There is no second pass for waybill dispatchment. Instead calculate the
+	 * undelivered supply, by adding up the unsatisfied demands of all outgoing
+	 * edges. */
+	if (job.Settings().GetDistributionType(job.Cargo()) == DT_WAYBILL) {
+		for (NodeID source = 0; source < size; ++source) {
+			Node source_node = job[source];
+			for (EdgeIterator i(source_node.Begin()); i != source_node.End(); ++i) {
+				source_node.InvalidateDemand(i->first, i->second.UnsatisfiedDemand());
+			}
+		}
+		return;
+	}
+
 	this->max_saturation = UINT_MAX; // disable artificial cap on saturation
 	PathVector paths;
-	uint size = job.Size();
 	uint accuracy = job.Settings().accuracy;
 	bool demand_left = true;
 	while (demand_left) {
