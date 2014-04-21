@@ -1608,6 +1608,9 @@ static SettingEntry _settings_linkgraph[] = {
 	SettingEntry("linkgraph.demand_distance"),
 	SettingEntry("linkgraph.demand_size"),
 	SettingEntry("linkgraph.short_path_saturation"),
+	SettingEntry("linkgraph.base_supply"),
+	SettingEntry("linkgraph.bonus_supply"),
+	SettingEntry("linkgraph.bonus_size"),
 };
 /** Linkgraph sub-page */
 static SettingsPage _settings_linkgraph_page = {_settings_linkgraph, lengthof(_settings_linkgraph)};

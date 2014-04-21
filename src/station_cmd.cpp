@@ -3650,15 +3650,6 @@ static uint UpdateStationWaiting(Station *st, CargoID type, uint amount, SourceT
 	if (!CargoPacket::CanAllocateItem()) return 0;
 
 	GoodsEntry &ge = st->goods[type];
-	amount += ge.amount_fract;
-	ge.amount_fract = GB(amount, 0, 8);
-
-	amount >>= 8;
-	/* No new "real" cargo item yet. */
-	if (amount == 0) return 0;
-
-	StationID next = ge.GetVia(st->index);
-	ge.cargo.Append(new CargoPacket(st->index, st->xy, amount, source_type, source_id), next);
 	LinkGraph *lg = NULL;
 	if (ge.link_graph == INVALID_LINK_GRAPH) {
 		if (LinkGraph::CanAllocateItem()) {
@@ -3672,6 +3663,21 @@ static uint UpdateStationWaiting(Station *st, CargoID type, uint amount, SourceT
 	} else {
 		lg = LinkGraph::Get(ge.link_graph);
 	}
+
+	amount = amount * Clamp(_settings_game.linkgraph.base_supply +
+			_settings_game.linkgraph.bonus_supply * (lg != NULL ? lg->Size() : 0) /
+			_settings_game.linkgraph.bonus_size, 0, 100) / 100;
+
+	amount += ge.amount_fract;
+	ge.amount_fract = GB(amount, 0, 8);
+
+	amount >>= 8;
+	/* No new "real" cargo item yet. */
+	if (amount == 0) return 0;
+
+	StationID next = ge.GetVia(st->index);
+	ge.cargo.Append(new CargoPacket(st->index, st->xy, amount, source_type, source_id), next);
+
 	if (lg != NULL) (*lg)[ge.node].UpdateSupply(amount);
 
 	if (!ge.HasRating()) {

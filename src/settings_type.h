@@ -499,6 +499,9 @@ struct LinkGraphSettings {
 	uint8 demand_size;                          ///< influence of supply ("station size") on the demand function
 	uint8 demand_distance;                      ///< influence of distance between stations on the demand function
 	uint8 short_path_saturation;                ///< percentage up to which short paths are saturated before saturating most capacious paths
+	uint8 base_supply;                          ///< percentage of cargo supplied independent of link graph size
+	int8 bonus_supply;                          ///< maximum bonus supply to be granted for large link graphs
+	uint16 bonus_size;                          ///< size of link graph necessary to gain maximum bonus.
 
 	inline DistributionType GetDistributionType(CargoID cargo) const {
 		if (IsCargoInClass(cargo, CC_PASSENGERS)) return this->distribution_pax;
